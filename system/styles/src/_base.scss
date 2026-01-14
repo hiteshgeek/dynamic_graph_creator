@@ -139,12 +139,13 @@ a {
 }
 
 .btn-outline {
-    background: transparent;
+    background: $bg-card;
     border: 1px solid $border-color;
     color: $text-primary;
 
     &:hover:not(:disabled) {
         background: $gray-100;
+        border-color: $gray-400;
     }
 }
 

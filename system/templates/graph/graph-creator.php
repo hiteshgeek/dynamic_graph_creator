@@ -187,22 +187,20 @@
             });
         });
 
-        // Collapsible panels
+        // Collapsible panels - clicking anywhere on header toggles
         document.querySelectorAll('.collapsible-header').forEach(function(header) {
             header.addEventListener('click', function(e) {
-                if (e.target.closest('.collapse-btn') || e.target === header) {
-                    var panel = this.closest('.collapsible-panel');
-                    var sidebar = this.closest('.graph-sidebar');
-                    panel.classList.toggle('collapsed');
-                    sidebar.classList.toggle('collapsed');
+                var panel = this.closest('.collapsible-panel');
+                var sidebar = this.closest('.graph-sidebar');
+                panel.classList.toggle('collapsed');
+                sidebar.classList.toggle('collapsed');
 
-                    // Trigger chart resize after animation
-                    setTimeout(function() {
-                        if (window.graphCreator && window.graphCreator.preview) {
-                            window.graphCreator.preview.resize();
-                        }
-                    }, 350);
-                }
+                // Trigger chart resize after animation
+                setTimeout(function() {
+                    if (window.graphCreator && window.graphCreator.preview) {
+                        window.graphCreator.preview.resize();
+                    }
+                }, 350);
             });
         });
 

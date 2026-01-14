@@ -18,7 +18,7 @@
 // Collapsible sidebars
 .graph-sidebar {
     transition: width $transition-normal;
-    overflow: hidden;
+    overflow: visible;
 
     &.graph-sidebar-left {
         width: 250px;
