@@ -143,8 +143,11 @@
                                     <span class="query-hint">Use <code>:placeholder</code> for filter values</span>
                                 </div>
                                 <div class="query-toolbar-right">
+                                    <button type="button" class="btn btn-sm btn-outline copy-query-btn" title="Copy SQL">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-outline format-query-btn" title="Format SQL">
-                                        <i class="fas fa-indent"></i> Format
+                                        <i class="fas fa-align-left"></i> Format SQL
                                     </button>
                                     <button type="button" class="btn btn-sm btn-primary test-query-btn">
                                         <i class="fas fa-play"></i> Test Query
@@ -163,7 +166,10 @@
 
                 <!-- Save Bar -->
                 <div class="graph-save-bar">
-                    <input type="text" class="form-control graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>">
+                    <div class="graph-name-wrapper">
+                        <label class="graph-name-label">Graph Name <span class="required">*</span></label>
+                        <input type="text" class="form-control graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
+                    </div>
                     <div class="save-buttons">
                         <a href="?urlq=graph" class="btn btn-secondary">Cancel</a>
                         <button type="button" class="btn btn-primary save-graph-btn">

@@ -16,6 +16,7 @@ class Filter implements DatabaseObject
     private $data_source;
     private $data_query;
     private $static_options;
+    private $filter_config;
     private $default_value;
     private $is_required;
     private $fsid;
@@ -104,6 +105,7 @@ class Filter implements DatabaseObject
             data_source,
             data_query,
             static_options,
+            filter_config,
             default_value,
             is_required
         ) VALUES (
@@ -113,6 +115,7 @@ class Filter implements DatabaseObject
             '::data_source',
             '::data_query',
             '::static_options',
+            '::filter_config',
             '::default_value',
             '::is_required'
         )";
@@ -124,6 +127,7 @@ class Filter implements DatabaseObject
             '::data_source' => $this->data_source ? $this->data_source : 'static',
             '::data_query' => $this->data_query ? $this->data_query : '',
             '::static_options' => $this->static_options ? $this->static_options : '',
+            '::filter_config' => $this->filter_config ? $this->filter_config : '',
             '::default_value' => $this->default_value ? $this->default_value : '',
             '::is_required' => $this->is_required ? 1 : 0
         );
@@ -155,6 +159,7 @@ class Filter implements DatabaseObject
             data_source = '::data_source',
             data_query = '::data_query',
             static_options = '::static_options',
+            filter_config = '::filter_config',
             default_value = '::default_value',
             is_required = '::is_required'
         WHERE fid = '::fid'";
@@ -166,6 +171,7 @@ class Filter implements DatabaseObject
             '::data_source' => $this->data_source ? $this->data_source : 'static',
             '::data_query' => $this->data_query ? $this->data_query : '',
             '::static_options' => $this->static_options ? $this->static_options : '',
+            '::filter_config' => $this->filter_config ? $this->filter_config : '',
             '::default_value' => $this->default_value ? $this->default_value : '',
             '::is_required' => $this->is_required ? 1 : 0,
             '::fid' => $this->fid
@@ -347,6 +353,7 @@ class Filter implements DatabaseObject
             'data_source' => $this->data_source,
             'data_query' => $this->data_query,
             'static_options' => $this->static_options,
+            'filter_config' => $this->filter_config,
             'default_value' => $this->default_value,
             'is_required' => $this->is_required,
             'options' => $this->getOptions()
@@ -372,6 +379,9 @@ class Filter implements DatabaseObject
 
     public function getStaticOptions() { return $this->static_options; }
     public function setStaticOptions($value) { $this->static_options = $value; }
+
+    public function getFilterConfig() { return $this->filter_config; }
+    public function setFilterConfig($value) { $this->filter_config = $value; }
 
     public function getDefaultValue() { return $this->default_value; }
     public function setDefaultValue($value) { $this->default_value = $value; }

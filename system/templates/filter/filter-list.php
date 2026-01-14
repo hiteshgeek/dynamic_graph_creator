@@ -72,9 +72,13 @@
                                 <td><?php echo htmlspecialchars($filter['filter_label']); ?></td>
                                 <td><code><?php echo htmlspecialchars($filter['filter_key']); ?></code></td>
                                 <td>
+                                    <?php if (!empty($filter['filter_type'])): ?>
                                     <span class="badge badge-<?php echo $filter['filter_type']; ?>">
                                         <?php echo ucfirst(str_replace('_', ' ', $filter['filter_type'])); ?>
                                     </span>
+                                    <?php else: ?>
+                                    <span class="text-muted">-</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($filter['data_source'] === 'query'): ?>
@@ -91,10 +95,10 @@
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <a href="?urlq=filters/edit/<?php echo $filter['fid']; ?>" class="btn btn-sm btn-outline" title="Edit">
+                                    <a href="?urlq=filters/edit/<?php echo $filter['fid']; ?>" class="btn btn-sm btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-outline delete-filter-btn" data-id="<?php echo $filter['fid']; ?>" data-label="<?php echo htmlspecialchars($filter['filter_label']); ?>" title="Delete">
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-filter-btn" data-id="<?php echo $filter['fid']; ?>" data-label="<?php echo htmlspecialchars($filter['filter_label']); ?>" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>

@@ -93,12 +93,22 @@
                         <?php
                         $isMultiSelect = $filter && $filter->getFilterType() === 'multi_select';
                         $showSelectConfig = $filter && in_array($filter->getFilterType(), array('select', 'multi_select'));
+                        $filterConfig = $filter ? json_decode($filter->getFilterConfig(), true) : array();
+                        $isInline = isset($filterConfig['inline']) && $filterConfig['inline'];
+                        $showCheckboxRadioConfig = $filter && in_array($filter->getFilterType(), array('checkbox', 'radio'));
                         ?>
                         <div id="select-config-section" class="form-group" style="<?php echo $showSelectConfig ? '' : 'display: none;'; ?>">
                             <label class="form-label">
                                 <input type="checkbox" id="filter-multiple" <?php echo $isMultiSelect ? 'checked' : ''; ?>> Allow multiple selection
                             </label>
                             <small class="form-hint d-block">Enable users to select more than one option</small>
+                        </div>
+
+                        <div id="checkbox-radio-config-section" class="form-group" style="<?php echo $showCheckboxRadioConfig ? '' : 'display: none;'; ?>">
+                            <label class="form-label">
+                                <input type="checkbox" id="filter-inline" <?php echo $isInline ? 'checked' : ''; ?>> Display inline
+                            </label>
+                            <small class="form-hint d-block">Show options horizontally instead of stacked vertically</small>
                         </div>
 
                         <div class="form-group">
@@ -167,9 +177,11 @@
                                         </div>
                                         <?php endif; ?>
                                     </div>
-                                    <button type="button" class="btn btn-sm btn-outline add-option-btn">
-                                        <i class="fas fa-plus"></i> Add Option
-                                    </button>
+                                    <div class="static-options-actions">
+                                        <button type="button" class="btn btn-sm btn-outline add-option-btn">
+                                            <i class="fas fa-plus"></i> Add Option
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -180,11 +192,22 @@
                                     <textarea id="data-query" class="form-control query-textarea" rows="4" placeholder="SELECT id as value, name as label FROM categories WHERE status = 1 ORDER BY name"><?php echo $filter ? htmlspecialchars($filter->getDataQuery()) : ''; ?></textarea>
                                     <small class="form-hint">Query must return <code>value</code> and <code>label</code> columns</small>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-primary" id="test-query-btn">
-                                    <i class="fas fa-play"></i> Test Query
-                                </button>
-                                <div id="query-result" style="display: none; margin-top: 10px;"></div>
+                                <div class="query-actions">
+                                    <button type="button" class="btn btn-sm btn-outline" id="copy-query-btn">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline" id="format-query-btn">
+                                        <i class="fas fa-align-left"></i> Format SQL
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-primary" id="test-query-btn">
+                                        <i class="fas fa-play"></i> Test Query
+                                    </button>
+                                </div>
+                                <div id="query-result" style="display: none;"></div>
                             </div>
+
+                            <!-- Filter Preview -->
+                            <div id="filter-preview-container" style="display: none;"></div>
                         </div>
                     </form>
                 </div>

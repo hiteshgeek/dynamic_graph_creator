@@ -469,7 +469,7 @@
 // Save bar
 .graph-save-bar {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     justify-content: space-between;
     padding: $spacing-md $spacing-lg;
     background: $bg-card;
@@ -477,12 +477,43 @@
     box-shadow: $shadow-1;
 }
 
-.graph-name-input {
+.graph-name-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
     flex: 1;
     max-width: 400px;
+}
+
+.graph-name-label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $text-secondary;
+
+    .required {
+        color: $error;
+    }
+}
+
+.graph-name-input {
+    width: 100%;
+    height: 38px; // Match button height
+
+    &.error {
+        border-color: $error;
+
+        &:focus {
+            border-color: $error;
+            box-shadow: 0 0 0 3px rgba($error, 0.1);
+        }
+    }
 }
 
 .save-buttons {
     display: flex;
     gap: $spacing-sm;
+
+    .btn {
+        height: 38px;
+    }
 }

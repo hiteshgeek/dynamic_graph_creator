@@ -108,8 +108,9 @@
     font-family: monospace;
 }
 
-.filter-item-type {
-    .badge {
+// Filter type badges - used in table and other contexts
+.badge {
+    &[class*="badge-"] {
         padding: 4px $spacing-sm;
         font-size: 11px;
         font-weight: $font-weight-medium;
@@ -118,29 +119,35 @@
         letter-spacing: 0.5px;
         background: $gray-200;
         color: $text-secondary;
+    }
 
-        &.badge-select,
-        &.badge-multi_select {
-            background: rgba($primary, 0.1);
-            color: $primary;
-        }
+    &.badge-text,
+    &.badge-number {
+        background: $gray-200;
+        color: $text-secondary;
+    }
 
-        &.badge-date,
-        &.badge-date_range {
-            background: rgba($success, 0.1);
-            color: $success-dark;
-        }
+    &.badge-select,
+    &.badge-multi_select {
+        background: rgba($primary, 0.1);
+        color: $primary;
+    }
 
-        &.badge-checkbox,
-        &.badge-radio {
-            background: rgba($warning, 0.1);
-            color: $warning-dark;
-        }
+    &.badge-date,
+    &.badge-date_range {
+        background: rgba($success, 0.1);
+        color: $success-dark;
+    }
 
-        &.badge-tokeninput {
-            background: rgba($info, 0.1);
-            color: $info-dark;
-        }
+    &.badge-checkbox,
+    &.badge-radio {
+        background: rgba($warning, 0.1);
+        color: $warning-dark;
+    }
+
+    &.badge-tokeninput {
+        background: rgba($info, 0.1);
+        color: $info-dark;
     }
 }
 
@@ -453,12 +460,15 @@
 
     .data-source-tab {
         flex: 1;
-        padding: $spacing-md $spacing-lg;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: $spacing-sm;
+        padding: $spacing-sm $spacing-md;
         border: 2px solid $border-color;
         border-radius: $border-radius;
         background: $bg-card;
         cursor: pointer;
-        text-align: center;
         transition: all $transition-fast;
 
         &:hover {
@@ -472,9 +482,7 @@
         }
 
         i {
-            display: block;
-            font-size: 24px;
-            margin-bottom: $spacing-xs;
+            font-size: 18px;
         }
     }
 
@@ -482,11 +490,12 @@
         font-family: monospace;
     }
 
-    // CodeMirror styling for filter form
+    // CodeMirror styling for filter form - auto-grow without scrolling
     .CodeMirror {
         border: 1px solid $border-color;
         border-radius: $border-radius;
-        height: 150px;
+        height: auto;
+        min-height: 100px;
         background: $gray-50;
         font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
         font-size: 13px;
@@ -494,7 +503,12 @@
     }
 
     .CodeMirror-scroll {
-        min-height: 150px;
+        min-height: 100px;
+        overflow: visible !important;
+    }
+
+    .CodeMirror-sizer {
+        min-height: 80px !important;
     }
 
     .CodeMirror-focused {
@@ -571,14 +585,278 @@
         }
     }
 
-    #query-result {
-        .table {
-            font-size: $font-size-sm;
-            margin-top: $spacing-sm;
+    .query-actions {
+        display: flex;
+        gap: $spacing-sm;
+        margin-top: $spacing-sm;
+    }
+
+    // Query test results (same as graph creator)
+    .query-test-result {
+        margin-top: $spacing-md;
+        padding: $spacing-md;
+        border-radius: $border-radius;
+        font-size: $font-size-sm;
+
+        &.success {
+            background: $success-bg;
+            border: 1px solid $success-border;
+            color: $success-dark;
+        }
+
+        &.error {
+            background: $error-bg;
+            border: 1px solid $error-border;
+            color: $error-dark;
+
+            i {
+                margin-right: $spacing-xs;
+            }
         }
     }
 
-    #test-query-btn {
+    .query-result-header {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+
+        i {
+            font-size: 16px;
+        }
+
+        .query-row-count {
+            margin-left: auto;
+            font-size: $font-size-sm;
+            opacity: 0.8;
+        }
+    }
+
+    .query-warnings {
         margin-top: $spacing-sm;
+        padding: $spacing-sm;
+        background: rgba(#f59e0b, 0.1);
+        border: 1px solid rgba(#f59e0b, 0.3);
+        border-radius: $border-radius;
+        color: #92400e;
+
+        ul {
+            margin: 0;
+            padding-left: $spacing-md;
+        }
+    }
+
+    .query-sample-data {
+        margin-top: $spacing-md;
+    }
+
+    .query-result-table-wrapper {
+        max-height: 250px;
+        overflow: auto;
+        border-radius: $border-radius;
+        border: 1px solid $success-border;
+    }
+
+    .query-result-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        background: $bg-card;
+
+        th, td {
+            padding: $spacing-xs $spacing-sm;
+            text-align: left;
+            border-bottom: 1px solid $border-color;
+            white-space: nowrap;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        th {
+            background: $gray-100;
+            font-weight: $font-weight-medium;
+            color: $text-primary;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        td {
+            color: $text-secondary;
+        }
+
+        tbody tr:hover {
+            background: $gray-50;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+    }
+
+    // Filter Preview
+    .filter-preview {
+        margin-top: $spacing-md;
+        padding: $spacing-md;
+        background: $gray-50;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+    }
+
+    .filter-preview-header {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        font-weight: $font-weight-medium;
+        color: $text-secondary;
+        margin-bottom: $spacing-md;
+        padding-bottom: $spacing-sm;
+        border-bottom: 1px solid $border-color;
+
+        i {
+            color: $primary;
+        }
+    }
+
+    .filter-preview-content {
+        background: $bg-card;
+        padding: $spacing-md;
+        border-radius: $border-radius;
+        border: 1px solid $border-color;
+    }
+
+    .filter-preview-label {
+        display: block;
+        font-weight: $font-weight-medium;
+        color: $text-primary;
+        margin-bottom: $spacing-sm;
+    }
+
+    .filter-preview-select {
+        max-width: 300px;
+    }
+
+    // Multi-select dropdown with checkboxes
+    .filter-multiselect-dropdown {
+        position: relative;
+        max-width: 300px;
+    }
+
+    .filter-multiselect-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: $spacing-sm $spacing-md;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        background: $bg-card;
+        cursor: pointer;
+        transition: border-color $transition-fast;
+
+        &:hover {
+            border-color: $gray-400;
+        }
+
+        i {
+            color: $text-hint;
+            font-size: 12px;
+        }
+    }
+
+    .filter-multiselect-placeholder {
+        color: $text-hint;
+    }
+
+    .filter-multiselect-options {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        margin-top: 4px;
+        padding: $spacing-xs 0;
+        background: $bg-card;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        box-shadow: $shadow-2;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 10;
+        display: none;
+
+        &.open {
+            display: block;
+        }
+    }
+
+    .filter-multiselect-option {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        padding: $spacing-xs $spacing-md;
+        cursor: pointer;
+        transition: background $transition-fast;
+        color: $text-secondary;
+
+        &:hover {
+            background: $gray-50;
+        }
+
+        input {
+            margin: 0;
+            cursor: pointer;
+        }
+    }
+
+    .filter-preview-checkboxes,
+    .filter-preview-radios {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-xs;
+
+        &.inline {
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: $spacing-md;
+        }
+    }
+
+    .filter-preview-checkbox,
+    .filter-preview-radio {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        color: $text-secondary;
+        cursor: pointer;
+        padding: $spacing-xs;
+        border-radius: $border-radius;
+        transition: background $transition-fast;
+
+        &:hover {
+            background: $gray-50;
+        }
+
+        input {
+            margin: 0;
+            cursor: pointer;
+        }
+    }
+
+    .filter-preview-tokeninput {
+        max-width: 300px;
+
+        select {
+            margin-bottom: $spacing-xs;
+            min-height: 100px;
+        }
+    }
+
+    .static-options-actions {
+        display: flex;
+        gap: $spacing-sm;
+        margin-top: $spacing-sm;
+    }
+
+    #filter-preview-container {
+        margin-top: $spacing-lg;
     }
 }

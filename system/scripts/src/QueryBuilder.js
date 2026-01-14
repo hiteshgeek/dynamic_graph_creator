@@ -24,6 +24,7 @@ export default class QueryBuilder {
         this.textarea = this.container.querySelector('.query-editor');
         this.testBtn = this.container.querySelector('.test-query-btn');
         this.formatBtn = this.container.querySelector('.format-query-btn');
+        this.copyBtn = this.container.querySelector('.copy-query-btn');
         this.resultContainer = this.container.querySelector('.query-test-result');
 
         if (this.testBtn) {
@@ -32,6 +33,10 @@ export default class QueryBuilder {
 
         if (this.formatBtn) {
             this.formatBtn.addEventListener('click', () => this.formatQuery());
+        }
+
+        if (this.copyBtn) {
+            this.copyBtn.addEventListener('click', () => this.copyQuery());
         }
 
         // Initialize CodeMirror if available
@@ -82,6 +87,49 @@ export default class QueryBuilder {
             Use <code>:placeholder_name</code> for filter values.
             Example: <code>WHERE date >= :date_from AND status IN (:status_ids)</code>
         `;
+    }
+
+    /**
+     * Copy query to clipboard
+     */
+    copyQuery() {
+        const query = this.getQuery();
+
+        if (!query.trim()) {
+            this.showCopyFeedback('Nothing to copy', false);
+            return;
+        }
+
+        navigator.clipboard.writeText(query).then(() => {
+            this.showCopyFeedback('Copied!', true);
+        }).catch(() => {
+            this.showCopyFeedback('Failed', false);
+        });
+    }
+
+    /**
+     * Show animated copy feedback near button
+     */
+    showCopyFeedback(message, success) {
+        if (!this.copyBtn) return;
+
+        // Remove existing feedback
+        const existing = this.copyBtn.querySelector('.copy-feedback');
+        if (existing) existing.remove();
+
+        // Create feedback element
+        const feedback = document.createElement('span');
+        feedback.className = `copy-feedback ${success ? 'success' : 'error'}`;
+        feedback.textContent = message;
+        this.copyBtn.style.position = 'relative';
+        this.copyBtn.appendChild(feedback);
+
+        // Animate and remove
+        setTimeout(() => feedback.classList.add('show'), 10);
+        setTimeout(() => {
+            feedback.classList.remove('show');
+            setTimeout(() => feedback.remove(), 200);
+        }, 1500);
     }
 
     /**

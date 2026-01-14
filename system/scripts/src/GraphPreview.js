@@ -127,11 +127,23 @@ export default class GraphPreview {
 
         // Add legend if configured
         if (this.config.showLegend !== false) {
-            baseOption.legend = {
-                show: true,
-                orient: 'horizontal',
-                top: this.config.legendPosition === 'bottom' ? 'bottom' : 'top'
+            const legendPosition = this.config.legendPosition || 'top';
+            const legendConfig = {
+                show: true
             };
+
+            // Set legend orientation and position
+            if (legendPosition === 'left' || legendPosition === 'right') {
+                legendConfig.orient = 'vertical';
+                legendConfig[legendPosition] = 10;
+                legendConfig.top = 'center';
+            } else {
+                legendConfig.orient = 'horizontal';
+                legendConfig[legendPosition] = legendPosition === 'bottom' ? 'bottom' : 10;
+                legendConfig.left = 'center';
+            }
+
+            baseOption.legend = legendConfig;
         }
 
         // Build type-specific option
@@ -183,6 +195,7 @@ export default class GraphPreview {
             yAxis: isHorizontal ? categoryAxis : valueAxis,
             series: [{
                 type: 'bar',
+                name: this.mapping.y_column || yAxisTitle || 'Value',
                 data: this.data.values || [],
                 barWidth: this.config.barWidth ? `${this.config.barWidth}%` : '60%',
                 showBackground: this.config.showBackground || false,
@@ -228,6 +241,7 @@ export default class GraphPreview {
             },
             series: [{
                 type: 'line',
+                name: this.mapping.y_column || yAxisTitle || 'Value',
                 data: this.data.values || [],
                 smooth: this.config.smooth || false,
                 showSymbol: this.config.showSymbol !== false,

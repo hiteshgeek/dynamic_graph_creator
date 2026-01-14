@@ -164,11 +164,23 @@ export default class GraphCreator {
         const saveBtn = this.container.querySelector('.save-graph-btn');
         const nameInput = this.container.querySelector('.graph-name-input');
 
+        console.log('initSaveHandler called, saveBtn:', saveBtn, 'nameInput:', nameInput);
+
         if (saveBtn) {
-            saveBtn.addEventListener('click', () => this.save());
+            saveBtn.addEventListener('click', (e) => {
+                console.log('Save button clicked');
+                e.preventDefault();
+                this.save();
+            });
+        } else {
+            console.error('Save button not found!');
         }
 
         if (nameInput) {
+            // Read initial value from input (for edit mode where value is pre-filled)
+            this.graphName = nameInput.value || '';
+            console.log('Initial graph name:', this.graphName);
+
             nameInput.addEventListener('input', (e) => {
                 this.graphName = e.target.value;
             });
@@ -405,9 +417,18 @@ export default class GraphCreator {
      * Save graph
      */
     async save() {
+        // Clear previous errors
+        this.clearErrors();
+
+        const nameInput = this.container.querySelector('.graph-name-input');
+
         // Validate
         if (!this.graphName.trim()) {
             Toast.error('Please enter a graph name');
+            if (nameInput) {
+                nameInput.classList.add('error');
+                nameInput.focus();
+            }
             return;
         }
 
@@ -423,6 +444,7 @@ export default class GraphCreator {
             return;
         }
 
+        console.log('All validations passed, saving...');
         Loading.show('Saving graph...');
 
         try {
@@ -465,6 +487,16 @@ export default class GraphCreator {
             return mapping.name_column && mapping.value_column;
         } else {
             return mapping.x_column && mapping.y_column;
+        }
+    }
+
+    /**
+     * Clear all error states
+     */
+    clearErrors() {
+        const nameInput = this.container.querySelector('.graph-name-input');
+        if (nameInput) {
+            nameInput.classList.remove('error');
         }
     }
 }

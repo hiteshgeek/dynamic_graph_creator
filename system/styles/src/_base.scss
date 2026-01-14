@@ -149,6 +149,39 @@ a {
     }
 }
 
+.btn-outline-primary {
+    background: transparent;
+    border: 1px solid $primary;
+    color: $primary;
+
+    &:hover:not(:disabled) {
+        background: $primary;
+        color: white;
+    }
+}
+
+.btn-outline-warning {
+    background: transparent;
+    border: 1px solid $warning;
+    color: $warning-dark;
+
+    &:hover:not(:disabled) {
+        background: $warning;
+        color: white;
+    }
+}
+
+.btn-outline-danger {
+    background: transparent;
+    border: 1px solid $error;
+    color: $error;
+
+    &:hover:not(:disabled) {
+        background: $error;
+        color: white;
+    }
+}
+
 .btn-sm {
     padding: $spacing-xs $spacing-sm;
     font-size: $font-size-sm;

@@ -18,7 +18,6 @@ export default class ConfigPanel {
     getDefaultConfig() {
         return {
             // Common
-            title: '',
             showLegend: true,
             legendPosition: 'top',
             showTooltip: true,
@@ -107,18 +106,7 @@ export default class ConfigPanel {
         return `
             <div class="config-section">
                 <div class="config-section-title">
-                    <i class="fas fa-font"></i> General
-                </div>
-
-                <div class="config-field">
-                    <label>Chart Title</label>
-                    <input
-                        type="text"
-                        class="form-control"
-                        data-config="title"
-                        value="${this.config.title || ''}"
-                        placeholder="Enter chart title"
-                    >
+                    <i class="fas fa-cog"></i> General
                 </div>
 
                 <div class="config-row">
@@ -376,15 +364,6 @@ export default class ConfigPanel {
                     }
                 }
 
-                this.onChange();
-            });
-        });
-
-        // Text inputs
-        this.container.querySelectorAll('input[type="text"][data-config]').forEach(input => {
-            input.addEventListener('change', (e) => {
-                const key = e.target.dataset.config;
-                this.config[key] = e.target.value;
                 this.onChange();
             });
         });

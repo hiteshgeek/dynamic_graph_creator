@@ -89,13 +89,13 @@
                                     <span class="graph-date"><?php echo date('M j, Y', strtotime($g->getUpdatedTs())); ?></span>
                                 </td>
                                 <td>
-                                    <a href="?urlq=graph/view/<?php echo $g->getId(); ?>" class="btn btn-sm btn-outline" title="View">
+                                    <a href="?urlq=graph/view/<?php echo $g->getId(); ?>" class="btn btn-sm btn-outline-primary" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="?urlq=graph/edit/<?php echo $g->getId(); ?>" class="btn btn-sm btn-outline" title="Edit">
+                                    <a href="?urlq=graph/edit/<?php echo $g->getId(); ?>" class="btn btn-sm btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-outline delete-graph-btn"
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-graph-btn"
                                             data-id="<?php echo $g->getId(); ?>"
                                             data-name="<?php echo htmlspecialchars($g->getName()); ?>"
                                             title="Delete">

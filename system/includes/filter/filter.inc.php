@@ -102,6 +102,7 @@ function saveFilter($data)
     $filter->setDataSource($dataSource);
     $filter->setDataQuery(isset($data['data_query']) ? $data['data_query'] : '');
     $filter->setStaticOptions(isset($data['static_options']) ? $data['static_options'] : '');
+    $filter->setFilterConfig(isset($data['filter_config']) ? $data['filter_config'] : '');
     $filter->setDefaultValue(isset($data['default_value']) ? $data['default_value'] : '');
     $filter->setIsRequired(isset($data['is_required']) ? intval($data['is_required']) : 0);
 

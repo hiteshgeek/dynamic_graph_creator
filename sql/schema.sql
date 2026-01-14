@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS filter (
     data_source ENUM('static', 'query') NOT NULL DEFAULT 'static' COMMENT 'How to get filter options',
     data_query TEXT COMMENT 'SQL query to fetch options (if data_source=query)',
     static_options TEXT COMMENT 'JSON array of static options [{value, label}]',
+    filter_config TEXT COMMENT 'JSON config options like {inline: true}',
     default_value VARCHAR(255) DEFAULT NULL,
     is_required TINYINT(1) NOT NULL DEFAULT 0,
     fsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=active, 3=deleted',
