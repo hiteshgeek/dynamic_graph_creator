@@ -182,7 +182,7 @@ function testQuery($data)
     $testQuery = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $testQuery);
     $testQuery .= ' LIMIT 10';
 
-    $db = GraphDatabase::getInstance();
+    $db = Rapidkart::getInstance()->getDB();
     $res = $db->query($testQuery);
 
     if (!$res) {
@@ -271,14 +271,14 @@ function previewGraph($data)
         // Apply filter values to query
         foreach ($filters as $key => $value) {
             if (is_array($value)) {
-                $db = GraphDatabase::getInstance();
+                $db = Rapidkart::getInstance()->getDB();
                 $escaped = array();
                 foreach ($value as $v) {
                     $escaped[] = "'" . $db->escapeString($v) . "'";
                 }
                 $query = str_replace($key, implode(',', $escaped), $query);
             } else {
-                $db = GraphDatabase::getInstance();
+                $db = Rapidkart::getInstance()->getDB();
                 $query = str_replace($key, "'" . $db->escapeString($value) . "'", $query);
             }
         }
@@ -286,7 +286,7 @@ function previewGraph($data)
         // Replace remaining placeholders with dummy values
         $query = preg_replace('/:([a-zA-Z_][a-zA-Z0-9_]*)/', "'test'", $query);
 
-        $db = GraphDatabase::getInstance();
+        $db = Rapidkart::getInstance()->getDB();
         $res = $db->query($query);
 
         if (!$res) {

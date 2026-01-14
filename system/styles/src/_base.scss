@@ -64,6 +64,16 @@ a {
     }
 }
 
+.card-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    h2, h3 {
+        margin: 0;
+    }
+}
+
 // Buttons
 .btn {
     display: inline-flex;

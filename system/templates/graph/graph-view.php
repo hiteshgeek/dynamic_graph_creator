@@ -24,12 +24,16 @@
 </head>
 <body>
     <div class="page-header">
-        <div class="breadcrumb">
-            <a href="?urlq=graph">Graphs</a>
-            <i class="fas fa-chevron-right"></i>
-            <span><?php echo htmlspecialchars($graph->getName()); ?></span>
+        <div class="page-header-left">
+            <h1>Dynamic Graph Creator</h1>
+            <div class="breadcrumb">
+                <i class="fas fa-chevron-right"></i>
+                <a href="?urlq=graph">Graphs</a>
+                <i class="fas fa-chevron-right"></i>
+                <span><?php echo htmlspecialchars($graph->getName()); ?></span>
+            </div>
         </div>
-        <div class="d-flex align-center gap-md">
+        <div class="page-header-right">
             <a href="?urlq=graph/edit/<?php echo $graph->getId(); ?>" class="btn btn-outline">
                 <i class="fas fa-edit"></i> Edit
             </a>
@@ -94,11 +98,16 @@
             <!-- Chart -->
             <div class="card">
                 <div class="card-header">
-                    <h2><?php echo htmlspecialchars($graph->getName()); ?></h2>
-                    <span class="text-muted">
-                        <i class="fas fa-chart-<?php echo $graph->getGraphType(); ?>"></i>
-                        <?php echo ucfirst($graph->getGraphType()); ?> Chart
-                    </span>
+                    <div class="card-header-left">
+                        <h2><?php echo htmlspecialchars($graph->getName()); ?></h2>
+                        <span class="text-muted">
+                            <i class="fas fa-chart-<?php echo $graph->getGraphType(); ?>"></i>
+                            <?php echo ucfirst($graph->getGraphType()); ?> Chart
+                        </span>
+                    </div>
+                    <button type="button" class="btn btn-outline" id="export-chart" title="Save chart as PNG image">
+                        <i class="fas fa-image"></i> Save Image
+                    </button>
                 </div>
                 <div class="graph-preview-container" style="height: 500px;"></div>
             </div>
@@ -123,6 +132,22 @@
         var preview = new GraphPreview(container);
         preview.setType('<?php echo $graph->getGraphType(); ?>');
         preview.setConfig(config);
+
+        // Initialize exporter
+        var exporter = new GraphExporter({
+            filename: '<?php echo addslashes($graph->getName()); ?>'
+        });
+
+        // Export button
+        var exportBtn = document.getElementById('export-chart');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function() {
+                if (preview.chart) {
+                    exporter.setChart(preview.chart);
+                    exporter.exportImage();
+                }
+            });
+        }
 
         // Load initial data
         loadGraphData();

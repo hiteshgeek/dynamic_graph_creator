@@ -251,6 +251,12 @@
     }
 }
 
+.graph-preview-actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+}
+
 .graph-preview-container {
     width: 100%;
     height: 350px;

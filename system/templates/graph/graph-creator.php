@@ -24,12 +24,15 @@
 </head>
 <body>
     <div class="page-header">
-        <div class="breadcrumb">
-            <a href="?urlq=graph">Graphs</a>
-            <i class="fas fa-chevron-right"></i>
-            <span><?php echo $graph ? 'Edit' : 'Create'; ?> Graph</span>
+        <div class="page-header-left">
+            <h1>Dynamic Graph Creator</h1>
+            <div class="breadcrumb">
+                <i class="fas fa-chevron-right"></i>
+                <a href="?urlq=graph">Graphs</a>
+                <i class="fas fa-chevron-right"></i>
+                <span><?php echo $graph ? 'Edit' : 'Create'; ?> Graph</span>
+            </div>
         </div>
-        <h1><?php echo $graph ? 'Edit Graph' : 'Create New Graph'; ?></h1>
     </div>
 
     <div class="container container-full">
@@ -69,9 +72,14 @@
                 <div class="graph-preview-card">
                     <div class="graph-preview-header">
                         <h3>Preview</h3>
-                        <button type="button" class="btn btn-sm btn-outline" id="refresh-preview">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
+                        <div class="graph-preview-actions">
+                            <button type="button" class="btn btn-sm btn-outline" id="export-chart" title="Save chart as PNG image">
+                                <i class="fas fa-image"></i> Save Image
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline" id="refresh-preview">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
                     </div>
                     <div class="graph-preview-container"></div>
                 </div>

@@ -4,6 +4,7 @@
  */
 
 import GraphPreview from './GraphPreview.js';
+import GraphExporter from './GraphExporter.js';
 import QueryBuilder from './QueryBuilder.js';
 import DataMapper from './DataMapper.js';
 import FilterManager from './FilterManager.js';
@@ -19,6 +20,7 @@ export default class GraphCreator {
 
         // Component instances
         this.preview = null;
+        this.exporter = null;
         this.queryBuilder = null;
         this.dataMapper = null;
         this.filterManager = null;
@@ -34,6 +36,7 @@ export default class GraphCreator {
      */
     init() {
         this.initPreview();
+        this.initExporter();
         this.initQueryBuilder();
         this.initDataMapper();
         this.initFilterManager();
@@ -57,6 +60,27 @@ export default class GraphCreator {
         const previewContainer = this.container.querySelector('.graph-preview-container');
         if (previewContainer) {
             this.preview = new GraphPreview(previewContainer);
+        }
+    }
+
+    /**
+     * Initialize graph exporter component
+     */
+    initExporter() {
+        this.exporter = new GraphExporter({
+            filename: 'chart-preview'
+        });
+
+        const exportBtn = this.container.querySelector('#export-chart');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                if (this.preview && this.preview.chart) {
+                    // Use graph name if available, otherwise default
+                    this.exporter.setFilename(this.graphName || 'chart-preview');
+                    this.exporter.setChart(this.preview.chart);
+                    this.exporter.exportImage();
+                }
+            });
         }
     }
 

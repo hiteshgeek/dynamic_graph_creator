@@ -11,8 +11,11 @@ ini_set('display_errors', 1);
 
 // Load configuration and classes
 require_once __DIR__ . '/system/config/GraphConfig.php';
+require_once __DIR__ . '/system/config/BaseConfig.php';
+require_once __DIR__ . '/system/utilities/SystemTables.php';
 require_once __DIR__ . '/system/interfaces/DatabaseObject.php';
-require_once __DIR__ . '/system/classes/GraphDatabase.php';
+require_once __DIR__ . '/system/classes/SQLiDatabase.php';
+require_once __DIR__ . '/system/classes/Rapidkart.php';
 require_once __DIR__ . '/system/classes/GraphUtility.php';
 require_once __DIR__ . '/system/classes/Filter.php';
 require_once __DIR__ . '/system/classes/FilterSet.php';

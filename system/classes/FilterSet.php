@@ -35,9 +35,9 @@ class FilterSet
             return array();
         }
 
-        $db = GraphDatabase::getInstance();
+        $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "SELECT * FROM filter
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_FILTER . "
                 WHERE entity_type = '::entity_type'
                 AND entity_id = '::entity_id'
                 AND fsid != 3
@@ -111,7 +111,7 @@ class FilterSet
             return false;
         }
 
-        $db = GraphDatabase::getInstance();
+        $db = Rapidkart::getInstance()->getDB();
 
         // Get existing filter IDs
         $existing_ids = array();
@@ -185,7 +185,7 @@ class FilterSet
      */
     public function applyToQuery($query, $filter_values)
     {
-        $db = GraphDatabase::getInstance();
+        $db = Rapidkart::getInstance()->getDB();
 
         foreach ($this->filters as $filter) {
             $key = $filter->getFilterKey();
@@ -222,7 +222,7 @@ class FilterSet
      *
      * @param mixed $value
      * @param string $type
-     * @param GraphDatabase $db
+     * @param object $db Database instance
      * @return string
      */
     private function formatValue($value, $type, $db)
@@ -290,9 +290,9 @@ class FilterSet
      */
     public static function deleteAllForEntity($entity_type, $entity_id)
     {
-        $db = GraphDatabase::getInstance();
+        $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "DELETE FROM filter
+        $sql = "DELETE FROM " . SystemTables::DB_TBL_FILTER . "
                 WHERE entity_type = '::entity_type'
                 AND entity_id = '::entity_id'";
 

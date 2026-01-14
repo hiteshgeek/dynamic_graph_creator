@@ -22,8 +22,6 @@ class Filter implements DatabaseObject
     private $created_ts;
     private $updated_ts;
 
-    const TABLE_NAME = 'filter';
-
     /**
      * Constructor
      *
@@ -45,8 +43,8 @@ class Filter implements DatabaseObject
      */
     public static function isExistent($id)
     {
-        $db = GraphDatabase::getInstance();
-        $sql = "SELECT fid FROM " . self::TABLE_NAME . " WHERE fid = '::fid' AND fsid != 3 LIMIT 1";
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "SELECT fid FROM " . SystemTables::DB_TBL_FILTER . " WHERE fid = '::fid' AND fsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::fid' => intval($id)));
         return $db->numRows($res) > 0;
     }
@@ -82,9 +80,9 @@ class Filter implements DatabaseObject
             return false;
         }
 
-        $db = GraphDatabase::getInstance();
+        $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "INSERT INTO " . self::TABLE_NAME . " (
+        $sql = "INSERT INTO " . SystemTables::DB_TBL_FILTER . " (
             entity_type,
             entity_id,
             filter_key,
@@ -136,9 +134,9 @@ class Filter implements DatabaseObject
             return false;
         }
 
-        $db = GraphDatabase::getInstance();
+        $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "UPDATE " . self::TABLE_NAME . " SET
+        $sql = "UPDATE " . SystemTables::DB_TBL_FILTER . " SET
             filter_key = '::filter_key',
             filter_label = '::filter_label',
             filter_type = '::filter_type',
@@ -170,8 +168,8 @@ class Filter implements DatabaseObject
      */
     public static function delete($id)
     {
-        $db = GraphDatabase::getInstance();
-        $sql = "UPDATE " . self::TABLE_NAME . " SET fsid = 3 WHERE fid = '::fid'";
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "UPDATE " . SystemTables::DB_TBL_FILTER . " SET fsid = 3 WHERE fid = '::fid'";
         return $db->query($sql, array('::fid' => intval($id))) ? true : false;
     }
 
@@ -183,8 +181,8 @@ class Filter implements DatabaseObject
      */
     public static function hardDelete($id)
     {
-        $db = GraphDatabase::getInstance();
-        $sql = "DELETE FROM " . self::TABLE_NAME . " WHERE fid = '::fid'";
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "DELETE FROM " . SystemTables::DB_TBL_FILTER . " WHERE fid = '::fid'";
         return $db->query($sql, array('::fid' => intval($id))) ? true : false;
     }
 
@@ -198,8 +196,8 @@ class Filter implements DatabaseObject
             return false;
         }
 
-        $db = GraphDatabase::getInstance();
-        $sql = "SELECT * FROM " . self::TABLE_NAME . " WHERE fid = '::fid' AND fsid != 3 LIMIT 1";
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_FILTER . " WHERE fid = '::fid' AND fsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::fid' => $this->fid));
 
         if (!$res || $db->numRows($res) < 1) {

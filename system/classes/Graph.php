@@ -20,8 +20,6 @@ class Graph implements DatabaseObject
     private $created_uid;
     private $updated_uid;
 
-    const TABLE_NAME = 'graph';
-
     public function __construct($id = null)
     {
         if ($id !== null) {
@@ -32,8 +30,8 @@ class Graph implements DatabaseObject
 
     public static function isExistent($id)
     {
-        $db = GraphDatabase::getInstance();
-        $sql = "SELECT gid FROM " . self::TABLE_NAME . " WHERE gid = '::gid' AND gsid != 3 LIMIT 1";
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "SELECT gid FROM " . SystemTables::DB_TBL_GRAPH . " WHERE gid = '::gid' AND gsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::gid' => intval($id)));
         return $db->numRows($res) > 0;
     }
@@ -49,8 +47,8 @@ class Graph implements DatabaseObject
     {
         if (!$this->hasMandatoryData()) return false;
 
-        $db = GraphDatabase::getInstance();
-        $sql = "INSERT INTO " . self::TABLE_NAME . " (
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "INSERT INTO " . SystemTables::DB_TBL_GRAPH . " (
             name, description, graph_type, config, query, data_mapping, created_uid
         ) VALUES (
             '::name', '::description', '::graph_type', '::config', '::query', '::data_mapping', '::created_uid'
@@ -77,8 +75,8 @@ class Graph implements DatabaseObject
     {
         if (!$this->gid) return false;
 
-        $db = GraphDatabase::getInstance();
-        $sql = "UPDATE " . self::TABLE_NAME . " SET
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "UPDATE " . SystemTables::DB_TBL_GRAPH . " SET
             name = '::name',
             description = '::description',
             graph_type = '::graph_type',
@@ -104,8 +102,8 @@ class Graph implements DatabaseObject
 
     public static function delete($id)
     {
-        $db = GraphDatabase::getInstance();
-        $sql = "UPDATE " . self::TABLE_NAME . " SET gsid = 3 WHERE gid = '::gid'";
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "UPDATE " . SystemTables::DB_TBL_GRAPH . " SET gsid = 3 WHERE gid = '::gid'";
         $result = $db->query($sql, array('::gid' => intval($id)));
 
         if ($result) {
@@ -118,8 +116,8 @@ class Graph implements DatabaseObject
     {
         if (!$this->gid) return false;
 
-        $db = GraphDatabase::getInstance();
-        $sql = "SELECT * FROM " . self::TABLE_NAME . " WHERE gid = '::gid' AND gsid != 3 LIMIT 1";
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_GRAPH . " WHERE gid = '::gid' AND gsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::gid' => $this->gid));
 
         if (!$res || $db->numRows($res) < 1) return false;
@@ -160,7 +158,7 @@ class Graph implements DatabaseObject
      */
     public function execute($filter_values = array())
     {
-        $db = GraphDatabase::getInstance();
+        $db = Rapidkart::getInstance()->getDB();
 
         $filterSet = new FilterSet('graph', $this->gid);
         $filterSet->loadFilters();
@@ -216,8 +214,8 @@ class Graph implements DatabaseObject
      */
     public static function getAll()
     {
-        $db = GraphDatabase::getInstance();
-        $sql = "SELECT * FROM " . self::TABLE_NAME . " WHERE gsid != 3 ORDER BY updated_ts DESC";
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_GRAPH . " WHERE gsid != 3 ORDER BY updated_ts DESC";
         $res = $db->query($sql);
 
         $graphs = array();

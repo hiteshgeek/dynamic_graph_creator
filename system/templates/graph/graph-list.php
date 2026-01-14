@@ -21,7 +21,9 @@
 </head>
 <body>
     <div class="page-header">
-        <h1>Dynamic Graph Creator</h1>
+        <div class="page-header-left">
+            <h1>Dynamic Graph Creator</h1>
+        </div>
     </div>
 
     <div class="container">

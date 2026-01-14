@@ -5,6 +5,7 @@
 
 import GraphCreator from './GraphCreator.js';
 import GraphPreview from './GraphPreview.js';
+import GraphExporter from './GraphExporter.js';
 import QueryBuilder from './QueryBuilder.js';
 import DataMapper from './DataMapper.js';
 import FilterManager from './FilterManager.js';
@@ -13,6 +14,7 @@ import ConfigPanel from './ConfigPanel.js';
 // Make classes available globally
 window.GraphCreator = GraphCreator;
 window.GraphPreview = GraphPreview;
+window.GraphExporter = GraphExporter;
 window.QueryBuilder = QueryBuilder;
 window.DataMapper = DataMapper;
 window.FilterManager = FilterManager;
