@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <?php if ($css = GraphUtility::getCss()): ?>
+    <?php if ($css = Utility::getCss()): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
@@ -135,7 +135,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom JS -->
-    <?php if ($js = GraphUtility::getJs()): ?>
+    <?php if ($js = Utility::getJs()): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 

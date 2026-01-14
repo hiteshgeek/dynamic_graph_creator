@@ -6,7 +6,7 @@
  *
  * @author Dynamic Graph Creator
  */
-class GraphUtility
+class Utility
 {
     /**
      * Send successful AJAX response

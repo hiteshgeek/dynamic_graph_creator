@@ -21,7 +21,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
 
     <!-- Custom CSS -->
-    <?php if ($css = GraphUtility::getCss()): ?>
+    <?php if ($css = Utility::getCss()): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
@@ -168,7 +168,7 @@
                                     <textarea id="data-query" class="form-control query-textarea" rows="4" placeholder="SELECT id as value, name as label FROM categories WHERE status = 1 ORDER BY name"><?php echo $filter ? htmlspecialchars($filter->getDataQuery()) : ''; ?></textarea>
                                     <small class="form-hint">Query must return <code>value</code> and <code>label</code> columns</small>
                                 </div>
-                                <button type="button" class="btn btn-sm btn-outline" id="test-query-btn">
+                                <button type="button" class="btn btn-sm btn-primary" id="test-query-btn">
                                     <i class="fas fa-play"></i> Test Query
                                 </button>
                                 <div id="query-result" style="display: none; margin-top: 10px;"></div>
@@ -193,7 +193,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom JS -->
-    <?php if ($js = GraphUtility::getJs()): ?>
+    <?php if ($js = Utility::getJs()): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 
@@ -202,12 +202,12 @@
         var typesWithOptions = ['select', 'multi_select', 'checkbox', 'radio', 'tokeninput'];
         var queryEditor = null;
 
-        // Initialize CodeMirror for query
+        // Initialize CodeMirror for query (matching graph creator styling)
         var queryTextarea = document.getElementById('data-query');
         if (queryTextarea) {
             queryEditor = CodeMirror.fromTextArea(queryTextarea, {
                 mode: 'text/x-sql',
-                theme: 'material',
+                theme: 'default',
                 lineNumbers: true,
                 lineWrapping: true
             });
@@ -428,14 +428,84 @@
     .query-textarea {
         font-family: monospace;
     }
+    /* Match graph creator CodeMirror styling */
     .CodeMirror {
         border: 1px solid #e0e0e0;
         border-radius: 8px;
-        height: auto;
-        min-height: 120px;
+        height: 150px;
+        background: #FAFAFA;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+    .CodeMirror-scroll {
+        min-height: 150px;
+    }
+    .CodeMirror-focused {
+        background: #fff;
+    }
+    .CodeMirror-gutters {
+        background: #f5f5f5;
+        border-right: 1px solid #e0e0e0;
+    }
+    .CodeMirror-linenumber {
+        color: #999;
+        padding: 0 8px;
+    }
+    /* SQL Syntax highlighting */
+    .cm-keyword {
+        color: #7c3aed;
+        font-weight: 500;
+    }
+    .cm-def,
+    .cm-variable-2 {
+        color: #0891b2;
+    }
+    .cm-string {
+        color: #059669;
+    }
+    .cm-number {
+        color: #d97706;
+    }
+    .cm-comment {
+        color: #999;
+        font-style: italic;
+    }
+    .cm-operator {
+        color: #333;
+    }
+    .cm-builtin {
+        color: #dc2626;
+    }
+    /* Filter options styling */
+    .filter-option-item {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .filter-option-item input {
+        flex: 1;
+    }
+    .filter-option-item .remove-option-btn {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #dc3545;
+        border-color: #dc3545;
+    }
+    .filter-option-item .remove-option-btn:hover {
+        background: rgba(220, 53, 69, 0.1);
     }
     #query-result .table {
         font-size: 13px;
+        margin-top: 10px;
+    }
+    #test-query-btn {
         margin-top: 10px;
     }
     </style>

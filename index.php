@@ -16,12 +16,12 @@ require_once __DIR__ . '/system/utilities/SystemTables.php';
 require_once __DIR__ . '/system/interfaces/DatabaseObject.php';
 require_once __DIR__ . '/system/classes/SQLiDatabase.php';
 require_once __DIR__ . '/system/classes/Rapidkart.php';
-require_once __DIR__ . '/system/classes/GraphUtility.php';
+require_once __DIR__ . '/system/classes/Utility.php';
 require_once __DIR__ . '/system/classes/Filter.php';
 require_once __DIR__ . '/system/classes/Graph.php';
 
 // Parse URL
-$url = GraphUtility::parseUrl();
+$url = Utility::parseUrl();
 $page = isset($url[0]) ? $url[0] : 'graph';
 
 // Route to controller

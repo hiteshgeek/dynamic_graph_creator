@@ -5,7 +5,7 @@
  * Handles all graph-related actions
  */
 
-$url = GraphUtility::parseUrl();
+$url = Utility::parseUrl();
 $action = isset($url[1]) ? $url[1] : 'list';
 
 // Handle POST actions
@@ -91,7 +91,7 @@ function showCreator($graphId = null)
     if ($graphId) {
         $graph = new Graph($graphId);
         if (!$graph->getId()) {
-            GraphUtility::redirect('graph');
+            Utility::redirect('graph');
             return;
         }
     }
@@ -109,7 +109,7 @@ function showView($graphId)
 {
     $graph = new Graph($graphId);
     if (!$graph->getId()) {
-        GraphUtility::redirect('graph');
+        Utility::redirect('graph');
         return;
     }
 
@@ -159,16 +159,16 @@ function saveGraph($data)
 
     if ($isUpdate) {
         if (!$graph->update()) {
-            GraphUtility::ajaxResponseFalse('Failed to update graph');
+            Utility::ajaxResponseFalse('Failed to update graph');
         }
     } else {
         if (!$graph->insert()) {
-            GraphUtility::ajaxResponseFalse('Failed to create graph');
+            Utility::ajaxResponseFalse('Failed to create graph');
         }
     }
 
     $message = $isUpdate ? 'Graph updated successfully' : 'Graph created successfully';
-    GraphUtility::ajaxResponseTrue($message, array('id' => $graph->getId()));
+    Utility::ajaxResponseTrue($message, array('id' => $graph->getId()));
 }
 
 /**
@@ -179,10 +179,10 @@ function deleteGraph($data)
     $graphId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$graphId || !Graph::delete($graphId)) {
-        GraphUtility::ajaxResponseFalse('Failed to delete graph');
+        Utility::ajaxResponseFalse('Failed to delete graph');
     }
 
-    GraphUtility::ajaxResponseTrue('Graph deleted successfully');
+    Utility::ajaxResponseTrue('Graph deleted successfully');
 }
 
 /**
@@ -193,7 +193,7 @@ function testQuery($data)
     $query = isset($data['query']) ? trim($data['query']) : '';
 
     if (empty($query)) {
-        GraphUtility::ajaxResponseFalse('Please enter a SQL query');
+        Utility::ajaxResponseFalse('Please enter a SQL query');
     }
 
     // Replace placeholders with dummy values for testing
@@ -207,7 +207,7 @@ function testQuery($data)
     $res = $db->query($testQuery);
 
     if (!$res) {
-        GraphUtility::ajaxResponseFalse('Query error: ' . $db->getError());
+        Utility::ajaxResponseFalse('Query error: ' . $db->getError());
     }
 
     // Fetch all sample rows
@@ -235,10 +235,10 @@ function testQuery($data)
     }
 
     if (empty($columns)) {
-        GraphUtility::ajaxResponseFalse('Query returned no columns. Please check your query.');
+        Utility::ajaxResponseFalse('Query returned no columns. Please check your query.');
     }
 
-    GraphUtility::ajaxResponseTrue('Query is valid', array(
+    Utility::ajaxResponseTrue('Query is valid', array(
         'columns' => $columns,
         'rows' => $rows,
         'row_count' => count($rows)
@@ -256,7 +256,7 @@ function previewGraph($data)
         // Load existing graph
         $graph = new Graph($graphId);
         if (!$graph->getId()) {
-            GraphUtility::ajaxResponseFalse('Graph not found');
+            Utility::ajaxResponseFalse('Graph not found');
         }
 
         $filters = isset($data['filters']) ? $data['filters'] : array();
@@ -267,7 +267,7 @@ function previewGraph($data)
         $chartData = $graph->execute($filters ? $filters : array());
         $config = json_decode($graph->getConfig(), true);
 
-        GraphUtility::ajaxResponseTrue('Graph data loaded', array(
+        Utility::ajaxResponseTrue('Graph data loaded', array(
             'chartData' => $chartData,
             'config' => $config
         ));
@@ -286,7 +286,7 @@ function previewGraph($data)
         }
 
         if (empty($query)) {
-            GraphUtility::ajaxResponseFalse('No query provided');
+            Utility::ajaxResponseFalse('No query provided');
         }
 
         // Apply filter values to query
@@ -311,13 +311,13 @@ function previewGraph($data)
         $res = $db->query($query);
 
         if (!$res) {
-            GraphUtility::ajaxResponseFalse('Query error: ' . $db->getError());
+            Utility::ajaxResponseFalse('Query error: ' . $db->getError());
         }
 
         $rows = $db->fetchAllAssoc($res);
         $chartData = formatPreviewData($rows, $mapping, $graphType);
 
-        GraphUtility::ajaxResponseTrue('Preview generated', array('chartData' => $chartData));
+        Utility::ajaxResponseTrue('Preview generated', array('chartData' => $chartData));
     }
 }
 
@@ -362,12 +362,12 @@ function loadGraph($data)
     $graphId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$graphId) {
-        GraphUtility::ajaxResponseFalse('Invalid graph ID');
+        Utility::ajaxResponseFalse('Invalid graph ID');
     }
 
     $graph = new Graph($graphId);
     if (!$graph->getId()) {
-        GraphUtility::ajaxResponseFalse('Graph not found');
+        Utility::ajaxResponseFalse('Graph not found');
     }
 
     // Extract placeholders and find matching filters
@@ -381,7 +381,7 @@ function loadGraph($data)
         $response['matched_filters'][$key] = $filter->toArray();
     }
 
-    GraphUtility::ajaxResponseTrue('Graph loaded', $response);
+    Utility::ajaxResponseTrue('Graph loaded', $response);
 }
 
 /**
@@ -403,7 +403,7 @@ function showFilterForm($graphId = null, $filterId = null)
     if ($filterId) {
         $filter = new Filter($filterId);
         if (!$filter->getId()) {
-            GraphUtility::redirect('graph/filters');
+            Utility::redirect('graph/filters');
             return;
         }
     }
@@ -425,11 +425,11 @@ function saveFilter($data)
     $dataSource = isset($data['data_source']) ? $data['data_source'] : 'static';
 
     if (empty($filterKey)) {
-        GraphUtility::ajaxResponseFalse('Filter key is required');
+        Utility::ajaxResponseFalse('Filter key is required');
     }
 
     if (empty($filterLabel)) {
-        GraphUtility::ajaxResponseFalse('Filter label is required');
+        Utility::ajaxResponseFalse('Filter label is required');
     }
 
     // Ensure filter key starts with :
@@ -450,15 +450,15 @@ function saveFilter($data)
 
     if ($filterId) {
         if (!$filter->update()) {
-            GraphUtility::ajaxResponseFalse('Failed to update filter');
+            Utility::ajaxResponseFalse('Failed to update filter');
         }
     } else {
         if (!$filter->insert()) {
-            GraphUtility::ajaxResponseFalse('Failed to create filter');
+            Utility::ajaxResponseFalse('Failed to create filter');
         }
     }
 
-    GraphUtility::ajaxResponseTrue('Filter saved successfully', array('id' => $filter->getId()));
+    Utility::ajaxResponseTrue('Filter saved successfully', array('id' => $filter->getId()));
 }
 
 /**
@@ -469,15 +469,15 @@ function getFilter($data)
     $filterId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$filterId) {
-        GraphUtility::ajaxResponseFalse('Invalid filter ID');
+        Utility::ajaxResponseFalse('Invalid filter ID');
     }
 
     $filter = new Filter($filterId);
     if (!$filter->getId()) {
-        GraphUtility::ajaxResponseFalse('Filter not found');
+        Utility::ajaxResponseFalse('Filter not found');
     }
 
-    GraphUtility::ajaxResponseTrue('Filter loaded', $filter->toArray());
+    Utility::ajaxResponseTrue('Filter loaded', $filter->toArray());
 }
 
 /**
@@ -488,10 +488,10 @@ function deleteFilter($data)
     $filterId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$filterId || !Filter::delete($filterId)) {
-        GraphUtility::ajaxResponseFalse('Failed to delete filter');
+        Utility::ajaxResponseFalse('Failed to delete filter');
     }
 
-    GraphUtility::ajaxResponseTrue('Filter deleted successfully');
+    Utility::ajaxResponseTrue('Filter deleted successfully');
 }
 
 /**
@@ -503,7 +503,7 @@ function testFilterQuery($data)
     $query = isset($data['query']) ? trim($data['query']) : '';
 
     if (empty($query)) {
-        GraphUtility::ajaxResponseFalse('Please enter a SQL query');
+        Utility::ajaxResponseFalse('Please enter a SQL query');
     }
 
     // Add LIMIT for safety
@@ -514,7 +514,7 @@ function testFilterQuery($data)
     $res = $db->query($testQuery);
 
     if (!$res) {
-        GraphUtility::ajaxResponseFalse('Query error: ' . $db->getError());
+        Utility::ajaxResponseFalse('Query error: ' . $db->getError());
     }
 
     $options = array();
@@ -531,7 +531,7 @@ function testFilterQuery($data)
     }
 
     if (empty($options)) {
-        GraphUtility::ajaxResponseFalse('Query returned no results');
+        Utility::ajaxResponseFalse('Query returned no results');
     }
 
     // Check if required columns exist
@@ -546,7 +546,7 @@ function testFilterQuery($data)
         $warnings[] = "No 'label' column found. Using 'value' for labels.";
     }
 
-    GraphUtility::ajaxResponseTrue('Query is valid', array(
+    Utility::ajaxResponseTrue('Query is valid', array(
         'columns' => $columns,
         'options' => $options,
         'count' => count($options),
