@@ -30,6 +30,63 @@
     }
 }
 
+// CodeMirror customizations
+.CodeMirror {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    height: auto;
+    min-height: 200px;
+    border: none;
+    background: #FAFAFA;
+
+    &-focused {
+        background: $bg-card;
+    }
+
+    .CodeMirror-gutters {
+        background: $gray-100;
+        border-right: 1px solid $border-color;
+    }
+
+    .CodeMirror-linenumber {
+        color: $text-hint;
+        padding: 0 8px;
+    }
+
+    // SQL Syntax highlighting
+    .cm-keyword {
+        color: #7c3aed;
+        font-weight: 500;
+    }
+
+    .cm-def,
+    .cm-variable-2 {
+        color: #0891b2;
+    }
+
+    .cm-string {
+        color: #059669;
+    }
+
+    .cm-number {
+        color: #d97706;
+    }
+
+    .cm-comment {
+        color: $text-hint;
+        font-style: italic;
+    }
+
+    .cm-operator {
+        color: $text-primary;
+    }
+
+    .cm-builtin {
+        color: #dc2626;
+    }
+}
+
 .query-toolbar {
     display: flex;
     flex-direction: column;

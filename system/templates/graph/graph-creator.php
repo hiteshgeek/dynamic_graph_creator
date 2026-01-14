@@ -17,6 +17,12 @@
     <!-- ECharts -->
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
+    <!-- CodeMirror for SQL highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+
     <!-- Custom CSS -->
     <?php if ($css = GraphUtility::getCss()): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
@@ -103,6 +109,9 @@
                                     <span class="query-hint">Use <code>:placeholder</code> for filter values</span>
                                 </div>
                                 <div class="query-toolbar-right">
+                                    <button type="button" class="btn btn-sm btn-outline format-query-btn" title="Format SQL">
+                                        <i class="fas fa-indent"></i> Format
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-primary test-query-btn">
                                         <i class="fas fa-play"></i> Test Query
                                     </button>
