@@ -15,7 +15,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
     <!-- Custom CSS -->
-    <?php if ($css = Utility::getCss()): ?>
+    <?php if ($css = Utility::getCss('common')): ?>
+    <link href="<?php echo $css; ?>" rel="stylesheet">
+    <?php endif; ?>
+    <?php if ($css = Utility::getCss('filter')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
@@ -23,18 +26,12 @@
     <div class="page-header">
         <div class="page-header-left">
             <h1>Dynamic Graph Creator</h1>
-            <div class="breadcrumb">
-                <i class="fas fa-chevron-right"></i>
-                <a href="?urlq=graph">Graphs</a>
-                <i class="fas fa-chevron-right"></i>
-                <span>Filters</span>
-            </div>
         </div>
         <div class="page-header-right">
             <a href="?urlq=graph" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Graphs
+                <i class="fas fa-chart-bar"></i> Graphs
             </a>
-            <a href="?urlq=graph/filters/add" class="btn btn-primary">
+            <a href="?urlq=filters/add" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add Filter
             </a>
         </div>
@@ -94,7 +91,7 @@
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <a href="?urlq=graph/filters/edit/<?php echo $filter['fid']; ?>" class="btn btn-sm btn-outline" title="Edit">
+                                    <a href="?urlq=filters/edit/<?php echo $filter['fid']; ?>" class="btn btn-sm btn-outline" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <button type="button" class="btn btn-sm btn-outline delete-filter-btn" data-id="<?php echo $filter['fid']; ?>" data-label="<?php echo htmlspecialchars($filter['filter_label']); ?>" title="Delete">
@@ -135,7 +132,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom JS -->
-    <?php if ($js = Utility::getJs()): ?>
+    <?php if ($js = Utility::getJs('common')): ?>
+    <script src="<?php echo $js; ?>"></script>
+    <?php endif; ?>
+    <?php if ($js = Utility::getJs('filter')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 

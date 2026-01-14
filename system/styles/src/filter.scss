@@ -1,0 +1,17 @@
+// Filter-specific styles (use with common.css)
+@use "variables" as *;
+@use "filters";
+
+@media (max-width: 992px) {
+  .filter-item {
+    grid-template-columns: 1fr 1fr;
+    .filter-remove-btn { grid-column: span 2; justify-self: end; margin-top: 0; }
+  }
+}
+
+@media (max-width: 576px) {
+  .filter-item {
+    grid-template-columns: 1fr;
+    .filter-remove-btn { grid-column: 1; }
+  }
+}

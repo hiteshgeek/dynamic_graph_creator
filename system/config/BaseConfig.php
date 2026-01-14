@@ -2,7 +2,7 @@
 
 /**
  * Base configuration class for database credentials
- * Reads from GraphConfig which loads from .env file
+ * Reads from SystemConfig which loads from .env file
  *
  * @author Dynamic Graph Creator
  */
@@ -14,7 +14,7 @@ class BaseConfig
        */
       public static function getDbServer()
       {
-            return GraphConfig::getDbHost();
+            return SystemConfig::getDbHost();
       }
 
       /**
@@ -23,7 +23,7 @@ class BaseConfig
        */
       public static function getDbUser()
       {
-            return GraphConfig::getDbUser();
+            return SystemConfig::getDbUser();
       }
 
       /**
@@ -32,7 +32,7 @@ class BaseConfig
        */
       public static function getDbPass()
       {
-            return GraphConfig::getDbPass();
+            return SystemConfig::getDbPass();
       }
 
       /**
@@ -41,7 +41,7 @@ class BaseConfig
        */
       public static function getDbName()
       {
-            return GraphConfig::getDbName();
+            return SystemConfig::getDbName();
       }
 }
 

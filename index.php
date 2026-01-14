@@ -10,7 +10,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Load configuration and classes
-require_once __DIR__ . '/system/config/GraphConfig.php';
+require_once __DIR__ . '/system/utilities/SystemConfig.php';
 require_once __DIR__ . '/system/config/BaseConfig.php';
 require_once __DIR__ . '/system/utilities/SystemTables.php';
 require_once __DIR__ . '/system/interfaces/DatabaseObject.php';
@@ -26,8 +26,11 @@ $page = isset($url[0]) ? $url[0] : 'graph';
 
 // Route to controller
 switch ($page) {
+    case 'filters':
+        require_once SystemConfig::includesPath() . 'filter/filter.inc.php';
+        break;
     case 'graph':
     default:
-        require_once GraphConfig::includesPath() . 'graph/graph.inc.php';
+        require_once SystemConfig::includesPath() . 'graph/graph.inc.php';
         break;
 }

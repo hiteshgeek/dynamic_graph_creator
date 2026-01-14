@@ -1,0 +1,276 @@
+// Common/Shared Styles
+// Used by both graph and filter modules
+
+@use "variables" as *;
+
+// Page header
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 $spacing-lg;
+  background: $bg-card;
+  box-shadow: $shadow-1;
+  height: 60px;
+  margin-bottom: $spacing-lg;
+
+  h1 {
+    margin: 0;
+    font-size: $font-size-h2;
+    line-height: 1;
+  }
+
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+  }
+
+  .page-header-right {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin: 0;
+    padding: 0;
+    background: none;
+    line-height: 1;
+
+    a {
+      color: $text-secondary;
+
+      &:hover {
+        color: $primary;
+      }
+    }
+
+    i {
+      font-size: 10px;
+      color: $text-hint;
+    }
+
+    span {
+      color: $text-primary;
+    }
+  }
+}
+
+// Loading overlay
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-modal;
+  opacity: 0;
+  visibility: hidden;
+  transition: all $transition-fast;
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-md;
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border-width: 3px;
+    }
+
+    span {
+      color: $text-secondary;
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+// Toast notifications
+.toast-container {
+  position: fixed;
+  top: $spacing-lg;
+  right: $spacing-lg;
+  z-index: $z-tooltip;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md $spacing-lg;
+  background: $bg-card;
+  border-radius: $border-radius;
+  box-shadow: $shadow-2;
+  min-width: 300px;
+  animation: slideIn 0.3s ease;
+
+  &.success {
+    border-left: 4px solid $success;
+
+    i {
+      color: $success;
+    }
+  }
+
+  &.error {
+    border-left: 4px solid $error;
+
+    i {
+      color: $error;
+    }
+  }
+
+  &.warning {
+    border-left: 4px solid $warning;
+
+    i {
+      color: $warning;
+    }
+  }
+
+  i {
+    font-size: 20px;
+  }
+
+  .toast-message {
+    flex: 1;
+  }
+
+  .toast-close {
+    background: transparent;
+    border: none;
+    color: $text-hint;
+    cursor: pointer;
+    padding: $spacing-xs;
+
+    &:hover {
+      color: $text-primary;
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// Modal overlay
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-modal;
+  opacity: 0;
+  visibility: hidden;
+  transition: all $transition-fast;
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.modal-container {
+  background: $bg-card;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-3;
+  max-width: 500px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: auto;
+
+  &.modal-sm {
+    max-width: 400px;
+  }
+
+  &.modal-lg {
+    max-width: 700px;
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg;
+  border-bottom: 1px solid $border-color;
+
+  h3 {
+    margin: 0;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  color: $text-hint;
+  cursor: pointer;
+  padding: $spacing-xs;
+  font-size: 18px;
+
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+.modal-body {
+  padding: $spacing-lg;
+
+  p {
+    margin: 0 0 $spacing-sm 0;
+    color: $text-secondary;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  padding: $spacing-lg;
+  border-top: 1px solid $border-color;
+}
+
+// Responsive container
+@media (max-width: 576px) {
+  .container {
+    padding: $spacing-md;
+  }
+}

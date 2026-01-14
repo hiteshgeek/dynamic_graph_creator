@@ -1,0 +1,31 @@
+// Graph-specific styles (use with common.css)
+@use "variables" as *;
+@use "query-builder";
+@use "config-panel";
+@use "graph-creator";
+@use "graph-list";
+
+@media (max-width: 1200px) {
+  .graph-creator { grid-template-columns: 200px 1fr 250px; }
+}
+
+@media (max-width: 992px) {
+  .graph-creator {
+    grid-template-columns: 1fr;
+    .graph-type-selector { order: 1; .graph-type-list { flex-direction: row; flex-wrap: wrap; } }
+    .graph-main { order: 2; }
+    .graph-config-panel { order: 3; }
+  }
+}
+
+@media (max-width: 576px) {
+  .graph-list-table {
+    display: block;
+    thead { display: none; }
+    tbody, tr, td { display: block; }
+    tr { padding: $spacing-md; border-bottom: 1px solid $border-color; }
+    td { padding: $spacing-xs 0; border: none;
+      &::before { content: attr(data-label); font-weight: $font-weight-medium; color: $text-secondary; margin-right: $spacing-sm; }
+    }
+  }
+}

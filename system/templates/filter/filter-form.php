@@ -21,7 +21,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
 
     <!-- Custom CSS -->
-    <?php if ($css = Utility::getCss()): ?>
+    <?php if ($css = Utility::getCss('common')): ?>
+    <link href="<?php echo $css; ?>" rel="stylesheet">
+    <?php endif; ?>
+    <?php if ($css = Utility::getCss('filter')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
@@ -31,9 +34,7 @@
             <h1>Dynamic Graph Creator</h1>
             <div class="breadcrumb">
                 <i class="fas fa-chevron-right"></i>
-                <a href="?urlq=graph">Graphs</a>
-                <i class="fas fa-chevron-right"></i>
-                <a href="?urlq=graph/filters">Filters</a>
+                <a href="?urlq=filters">Filters</a>
                 <i class="fas fa-chevron-right"></i>
                 <span><?php echo $filter ? 'Edit' : 'Add'; ?> Filter</span>
             </div>
@@ -178,7 +179,7 @@
                 </div>
 
                 <div class="card-footer">
-                    <a href="?urlq=graph/filters" class="btn btn-secondary">
+                    <a href="?urlq=filters" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Cancel
                     </a>
                     <button type="button" class="btn btn-primary save-filter-btn">
@@ -193,7 +194,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom JS -->
-    <?php if ($js = Utility::getJs()): ?>
+    <?php if ($js = Utility::getJs('common')): ?>
+    <script src="<?php echo $js; ?>"></script>
+    <?php endif; ?>
+    <?php if ($js = Utility::getJs('filter')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 
@@ -377,7 +381,7 @@
                 Loading.hide();
                 if (result.success) {
                     Toast.success('Filter saved successfully');
-                    window.location.href = '?urlq=graph/filters';
+                    window.location.href = '?urlq=filters';
                 } else {
                     Toast.error(result.message || 'Failed to save filter');
                 }

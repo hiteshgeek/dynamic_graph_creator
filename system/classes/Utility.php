@@ -49,42 +49,48 @@ class Utility
     /**
      * Get asset file with cache busting hash
      *
-     * @param string $type 'css' or 'js'
+     * @param string $module Module name ('graph' or 'filter')
+     * @param string $type Asset type ('css' or 'js')
      * @return string|null
      */
-    public static function getAsset($type)
+    public static function getAsset($module, $type)
     {
-        $manifestPath = GraphConfig::distPath() . 'manifest.json';
+        $manifestPath = SystemConfig::distPath() . 'manifest.json';
 
         if (!file_exists($manifestPath)) {
             return null;
         }
 
         $manifest = json_decode(file_get_contents($manifestPath), true);
+        $key = $module . '_' . $type;
 
-        if (isset($manifest[$type])) {
-            return GraphConfig::distUrl() . $manifest[$type];
+        if (isset($manifest[$key])) {
+            return SystemConfig::distUrl() . $manifest[$key];
         }
 
         return null;
     }
 
     /**
-     * Get CSS asset URL
+     * Get CSS asset URL for a module
+     *
+     * @param string $module Module name ('graph' or 'filter')
      * @return string|null
      */
-    public static function getCss()
+    public static function getCss($module = 'graph')
     {
-        return self::getAsset('css');
+        return self::getAsset($module, 'css');
     }
 
     /**
-     * Get JS asset URL
+     * Get JS asset URL for a module
+     *
+     * @param string $module Module name ('graph' or 'filter')
      * @return string|null
      */
-    public static function getJs()
+    public static function getJs($module = 'graph')
     {
-        return self::getAsset('js');
+        return self::getAsset($module, 'js');
     }
 
     /**
@@ -109,7 +115,7 @@ class Utility
      */
     public static function redirect($url)
     {
-        header('Location: ' . GraphConfig::baseUrl() . '?urlq=' . $url);
+        header('Location: ' . SystemConfig::baseUrl() . '?urlq=' . $url);
         exit();
     }
 

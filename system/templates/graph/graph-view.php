@@ -18,7 +18,10 @@
     <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 
     <!-- Custom CSS -->
-    <?php if ($css = Utility::getCss()): ?>
+    <?php if ($css = Utility::getCss('common')): ?>
+    <link href="<?php echo $css; ?>" rel="stylesheet">
+    <?php endif; ?>
+    <?php if ($css = Utility::getCss('graph')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
@@ -118,7 +121,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Custom JS -->
-    <?php if ($js = Utility::getJs()): ?>
+    <?php if ($js = Utility::getJs('common')): ?>
+    <script src="<?php echo $js; ?>"></script>
+    <?php endif; ?>
+    <?php if ($js = Utility::getJs('graph')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 </body>
