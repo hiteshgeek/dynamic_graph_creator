@@ -77,8 +77,7 @@
                                     <option value="number" <?php echo ($filter && $filter->getFilterType() === 'number') ? 'selected' : ''; ?>>Number Input</option>
                                     <option value="date" <?php echo ($filter && $filter->getFilterType() === 'date') ? 'selected' : ''; ?>>Date Picker</option>
                                     <option value="date_range" <?php echo ($filter && $filter->getFilterType() === 'date_range') ? 'selected' : ''; ?>>Date Range</option>
-                                    <option value="select" <?php echo ($filter && $filter->getFilterType() === 'select') ? 'selected' : ''; ?>>Select (Single)</option>
-                                    <option value="multi_select" <?php echo ($filter && $filter->getFilterType() === 'multi_select') ? 'selected' : ''; ?>>Select (Multiple)</option>
+                                    <option value="select" <?php echo ($filter && in_array($filter->getFilterType(), array('select', 'multi_select'))) ? 'selected' : ''; ?>>Select</option>
                                     <option value="checkbox" <?php echo ($filter && $filter->getFilterType() === 'checkbox') ? 'selected' : ''; ?>>Checkbox</option>
                                     <option value="radio" <?php echo ($filter && $filter->getFilterType() === 'radio') ? 'selected' : ''; ?>>Radio Buttons</option>
                                     <option value="tokeninput" <?php echo ($filter && $filter->getFilterType() === 'tokeninput') ? 'selected' : ''; ?>>Token Input</option>
@@ -91,6 +90,17 @@
                             </div>
                         </div>
 
+                        <?php
+                        $isMultiSelect = $filter && $filter->getFilterType() === 'multi_select';
+                        $showSelectConfig = $filter && in_array($filter->getFilterType(), array('select', 'multi_select'));
+                        ?>
+                        <div id="select-config-section" class="form-group" style="<?php echo $showSelectConfig ? '' : 'display: none;'; ?>">
+                            <label class="form-label">
+                                <input type="checkbox" id="filter-multiple" <?php echo $isMultiSelect ? 'checked' : ''; ?>> Allow multiple selection
+                            </label>
+                            <small class="form-hint d-block">Enable users to select more than one option</small>
+                        </div>
+
                         <div class="form-group">
                             <label class="form-label">
                                 <input type="checkbox" id="filter-required" <?php echo ($filter && $filter->getIsRequired()) ? 'checked' : ''; ?>> Required field
@@ -101,9 +111,10 @@
 
                         <?php
                         $dataSource = $filter ? $filter->getDataSource() : 'static';
-                        $typesWithOptions = array('select', 'multi_select', 'checkbox', 'radio', 'tokeninput');
+                        $typesWithOptions = array('select', 'checkbox', 'radio', 'tokeninput');
                         $currentType = $filter ? $filter->getFilterType() : 'text';
-                        $showDataSource = in_array($currentType, $typesWithOptions);
+                        // multi_select is stored in DB but shown as 'select' in UI
+                        $showDataSource = in_array($currentType, $typesWithOptions) || $currentType === 'multi_select';
                         ?>
 
                         <div id="data-source-section" style="<?php echo $showDataSource ? '' : 'display: none;'; ?>">
@@ -200,318 +211,5 @@
     <?php if ($js = Utility::getJs('filter')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var typesWithOptions = ['select', 'multi_select', 'checkbox', 'radio', 'tokeninput'];
-        var queryEditor = null;
-
-        // Initialize CodeMirror for query (matching graph creator styling)
-        var queryTextarea = document.getElementById('data-query');
-        if (queryTextarea) {
-            queryEditor = CodeMirror.fromTextArea(queryTextarea, {
-                mode: 'text/x-sql',
-                theme: 'default',
-                lineNumbers: true,
-                lineWrapping: true
-            });
-        }
-
-        // Show/hide data source section based on filter type
-        document.getElementById('filter-type').addEventListener('change', function() {
-            var dataSourceSection = document.getElementById('data-source-section');
-            dataSourceSection.style.display = typesWithOptions.includes(this.value) ? 'block' : 'none';
-        });
-
-        // Data source tab switching
-        document.querySelectorAll('.data-source-tab').forEach(function(tab) {
-            tab.addEventListener('click', function() {
-                var source = this.dataset.source;
-                document.getElementById('data-source').value = source;
-
-                document.querySelectorAll('.data-source-tab').forEach(function(t) {
-                    t.classList.remove('active');
-                });
-                this.classList.add('active');
-
-                document.getElementById('static-options-section').style.display = source === 'static' ? 'block' : 'none';
-                document.getElementById('query-options-section').style.display = source === 'query' ? 'block' : 'none';
-
-                if (source === 'query' && queryEditor) {
-                    queryEditor.refresh();
-                }
-            });
-        });
-
-        // Add option button
-        document.querySelector('.add-option-btn').addEventListener('click', function() {
-            addOptionRow();
-        });
-
-        // Remove option buttons (delegated)
-        document.querySelector('.filter-options-list').addEventListener('click', function(e) {
-            if (e.target.closest('.remove-option-btn')) {
-                var row = e.target.closest('.filter-option-item');
-                if (document.querySelectorAll('.filter-option-item').length > 1) {
-                    row.remove();
-                }
-            }
-        });
-
-        // Test query button
-        document.getElementById('test-query-btn').addEventListener('click', function() {
-            testQuery();
-        });
-
-        // Save filter
-        document.querySelector('.save-filter-btn').addEventListener('click', function() {
-            saveFilter();
-        });
-
-        function addOptionRow(value, label) {
-            var optionsList = document.querySelector('.filter-options-list');
-            var row = document.createElement('div');
-            row.className = 'filter-option-item';
-            row.innerHTML =
-                '<input type="text" class="form-control option-value" placeholder="Value" value="' + (value || '') + '">' +
-                '<input type="text" class="form-control option-label" placeholder="Label" value="' + (label || '') + '">' +
-                '<button type="button" class="btn btn-sm btn-outline remove-option-btn">' +
-                    '<i class="fas fa-times"></i>' +
-                '</button>';
-            optionsList.appendChild(row);
-        }
-
-        function testQuery() {
-            var query = queryEditor ? queryEditor.getValue() : document.getElementById('data-query').value;
-            if (!query.trim()) {
-                Toast.error('Please enter a query');
-                return;
-            }
-
-            Loading.show('Testing query...');
-            Ajax.post('test_filter_query', { query: query }).then(function(result) {
-                Loading.hide();
-                var resultDiv = document.getElementById('query-result');
-                if (result.success) {
-                    var options = result.data.options || [];
-                    var html = '<div class="alert alert-success"><strong>Query valid!</strong> Found ' + options.length + ' options.</div>';
-
-                    // Show warnings if any
-                    if (result.data.warnings && result.data.warnings.length > 0) {
-                        html += '<div class="alert alert-warning"><ul class="mb-0">';
-                        result.data.warnings.forEach(function(w) {
-                            html += '<li>' + w + '</li>';
-                        });
-                        html += '</ul></div>';
-                    }
-
-                    if (options.length > 0) {
-                        html += '<table class="table table-sm"><thead><tr><th>Value</th><th>Label</th></tr></thead><tbody>';
-                        options.slice(0, 10).forEach(function(opt) {
-                            html += '<tr><td>' + (opt.value || '-') + '</td><td>' + (opt.label || '-') + '</td></tr>';
-                        });
-                        if (options.length > 10) {
-                            html += '<tr><td colspan="2" class="text-muted">... and ' + (options.length - 10) + ' more</td></tr>';
-                        }
-                        html += '</tbody></table>';
-                    }
-                    resultDiv.innerHTML = html;
-                } else {
-                    resultDiv.innerHTML = '<div class="alert alert-danger">' + (result.message || 'Query failed') + '</div>';
-                }
-                resultDiv.style.display = 'block';
-            }).catch(function() {
-                Loading.hide();
-                Toast.error('Failed to test query');
-            });
-        }
-
-        function saveFilter() {
-            var filterKey = document.getElementById('filter-key').value.trim();
-            var filterLabel = document.getElementById('filter-label').value.trim();
-            var filterType = document.getElementById('filter-type').value;
-            var dataSource = document.getElementById('data-source').value;
-
-            if (!filterKey) {
-                Toast.error('Filter key is required');
-                return;
-            }
-
-            if (!filterLabel) {
-                Toast.error('Filter label is required');
-                return;
-            }
-
-            // Ensure filter key starts with :
-            if (filterKey.charAt(0) !== ':') {
-                filterKey = ':' + filterKey;
-            }
-
-            var data = {
-                filter_id: document.getElementById('filter-id').value,
-                filter_key: filterKey,
-                filter_label: filterLabel,
-                filter_type: filterType,
-                data_source: typesWithOptions.includes(filterType) ? dataSource : 'static',
-                data_query: '',
-                static_options: '',
-                default_value: document.getElementById('filter-default').value,
-                is_required: document.getElementById('filter-required').checked ? 1 : 0
-            };
-
-            // Get options based on data source
-            if (typesWithOptions.includes(filterType)) {
-                if (dataSource === 'query') {
-                    data.data_query = queryEditor ? queryEditor.getValue() : document.getElementById('data-query').value;
-                } else {
-                    var optionItems = [];
-                    document.querySelectorAll('.filter-option-item').forEach(function(row) {
-                        var value = row.querySelector('.option-value').value.trim();
-                        var label = row.querySelector('.option-label').value.trim();
-                        if (value || label) {
-                            optionItems.push({ value: value, label: label || value });
-                        }
-                    });
-                    data.static_options = JSON.stringify(optionItems);
-                }
-            }
-
-            Loading.show('Saving filter...');
-            Ajax.post('save_filter', data).then(function(result) {
-                Loading.hide();
-                if (result.success) {
-                    Toast.success('Filter saved successfully');
-                    window.location.href = '?urlq=filters';
-                } else {
-                    Toast.error(result.message || 'Failed to save filter');
-                }
-            }).catch(function() {
-                Loading.hide();
-                Toast.error('Failed to save filter');
-            });
-        }
-    });
-    </script>
-
-    <style>
-    .form-row {
-        display: flex;
-        gap: 20px;
-    }
-    .form-row .form-group {
-        flex: 1;
-    }
-    .data-source-tabs {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-    }
-    .data-source-tab {
-        flex: 1;
-        padding: 12px 20px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        background: #fff;
-        cursor: pointer;
-        text-align: center;
-        transition: all 0.2s;
-    }
-    .data-source-tab:hover {
-        border-color: #4285f4;
-    }
-    .data-source-tab.active {
-        border-color: #4285f4;
-        background: rgba(66, 133, 244, 0.05);
-        color: #4285f4;
-    }
-    .data-source-tab i {
-        display: block;
-        font-size: 24px;
-        margin-bottom: 5px;
-    }
-    .query-textarea {
-        font-family: monospace;
-    }
-    /* Match graph creator CodeMirror styling */
-    .CodeMirror {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        height: 150px;
-        background: #FAFAFA;
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-        font-size: 13px;
-        line-height: 1.6;
-    }
-    .CodeMirror-scroll {
-        min-height: 150px;
-    }
-    .CodeMirror-focused {
-        background: #fff;
-    }
-    .CodeMirror-gutters {
-        background: #f5f5f5;
-        border-right: 1px solid #e0e0e0;
-    }
-    .CodeMirror-linenumber {
-        color: #999;
-        padding: 0 8px;
-    }
-    /* SQL Syntax highlighting */
-    .cm-keyword {
-        color: #7c3aed;
-        font-weight: 500;
-    }
-    .cm-def,
-    .cm-variable-2 {
-        color: #0891b2;
-    }
-    .cm-string {
-        color: #059669;
-    }
-    .cm-number {
-        color: #d97706;
-    }
-    .cm-comment {
-        color: #999;
-        font-style: italic;
-    }
-    .cm-operator {
-        color: #333;
-    }
-    .cm-builtin {
-        color: #dc2626;
-    }
-    /* Filter options styling */
-    .filter-option-item {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-    .filter-option-item input {
-        flex: 1;
-    }
-    .filter-option-item .remove-option-btn {
-        width: 38px;
-        height: 38px;
-        min-width: 38px;
-        padding: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #dc3545;
-        border-color: #dc3545;
-    }
-    .filter-option-item .remove-option-btn:hover {
-        background: rgba(220, 53, 69, 0.1);
-    }
-    #query-result .table {
-        font-size: 13px;
-        margin-top: 10px;
-    }
-    #test-query-btn {
-        margin-top: 10px;
-    }
-    </style>
 </body>
 </html>

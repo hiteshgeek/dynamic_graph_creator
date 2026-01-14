@@ -138,55 +138,5 @@
     <?php if ($js = Utility::getJs('filter')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var deleteModal = document.getElementById('delete-modal');
-        var filterIdToDelete = null;
-
-        // Delete filter buttons
-        document.querySelectorAll('.delete-filter-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                filterIdToDelete = this.dataset.id;
-                deleteModal.querySelector('.filter-name').textContent = this.dataset.label;
-                openModal(deleteModal);
-            });
-        });
-
-        // Confirm delete
-        document.querySelector('.confirm-delete-btn').addEventListener('click', function() {
-            if (filterIdToDelete) {
-                Loading.show('Deleting filter...');
-                Ajax.post('delete_filter', { id: filterIdToDelete }).then(function(result) {
-                    Loading.hide();
-                    if (result.success) {
-                        Toast.success('Filter deleted');
-                        location.reload();
-                    } else {
-                        Toast.error(result.message || 'Failed to delete filter');
-                    }
-                }).catch(function() {
-                    Loading.hide();
-                    Toast.error('Failed to delete filter');
-                });
-            }
-        });
-
-        // Modal close buttons
-        document.querySelectorAll('.modal-close-btn, .modal-cancel-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                closeModal(this.closest('.modal-overlay'));
-            });
-        });
-
-        function openModal(modal) {
-            modal.classList.add('active');
-        }
-
-        function closeModal(modal) {
-            modal.classList.remove('active');
-        }
-    });
-    </script>
 </body>
 </html>

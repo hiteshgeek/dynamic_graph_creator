@@ -282,6 +282,13 @@
     .required {
         color: $error;
     }
+
+    // Checkbox labels - align checkbox with text
+    input[type="checkbox"] {
+        vertical-align: middle;
+        margin-right: $spacing-xs;
+        margin-top: -2px;
+    }
 }
 
 .form-hint {
@@ -425,4 +432,153 @@
 .filter-apply-btn {
     align-self: flex-end;
     margin-left: auto;
+}
+
+// Filter Form Page Styles
+.filter-form-page {
+    .form-row {
+        display: flex;
+        gap: 20px;
+
+        .form-group {
+            flex: 1;
+        }
+    }
+
+    .data-source-tabs {
+        display: flex;
+        gap: $spacing-sm;
+        margin-bottom: $spacing-md;
+    }
+
+    .data-source-tab {
+        flex: 1;
+        padding: $spacing-md $spacing-lg;
+        border: 2px solid $border-color;
+        border-radius: $border-radius;
+        background: $bg-card;
+        cursor: pointer;
+        text-align: center;
+        transition: all $transition-fast;
+
+        &:hover {
+            border-color: $primary;
+        }
+
+        &.active {
+            border-color: $primary;
+            background: rgba($primary, 0.05);
+            color: $primary;
+        }
+
+        i {
+            display: block;
+            font-size: 24px;
+            margin-bottom: $spacing-xs;
+        }
+    }
+
+    .query-textarea {
+        font-family: monospace;
+    }
+
+    // CodeMirror styling for filter form
+    .CodeMirror {
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        height: 150px;
+        background: $gray-50;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .CodeMirror-scroll {
+        min-height: 150px;
+    }
+
+    .CodeMirror-focused {
+        background: $bg-card;
+    }
+
+    .CodeMirror-gutters {
+        background: $gray-100;
+        border-right: 1px solid $border-color;
+    }
+
+    .CodeMirror-linenumber {
+        color: $text-hint;
+        padding: 0 $spacing-sm;
+    }
+
+    // SQL Syntax highlighting
+    .cm-keyword {
+        color: #7c3aed;
+        font-weight: 500;
+    }
+
+    .cm-def,
+    .cm-variable-2 {
+        color: #0891b2;
+    }
+
+    .cm-string {
+        color: #059669;
+    }
+
+    .cm-number {
+        color: #d97706;
+    }
+
+    .cm-comment {
+        color: $text-hint;
+        font-style: italic;
+    }
+
+    .cm-operator {
+        color: $text-primary;
+    }
+
+    .cm-builtin {
+        color: #dc2626;
+    }
+
+    // Filter options styling
+    .filter-option-item {
+        display: flex;
+        gap: $spacing-sm;
+        align-items: center;
+        margin-bottom: $spacing-sm;
+
+        input {
+            flex: 1;
+        }
+
+        .remove-option-btn {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: $error;
+            border-color: $error;
+
+            &:hover {
+                background: $error-bg;
+            }
+        }
+    }
+
+    #query-result {
+        .table {
+            font-size: $font-size-sm;
+            margin-top: $spacing-sm;
+        }
+    }
+
+    #test-query-btn {
+        margin-top: $spacing-sm;
+    }
 }
