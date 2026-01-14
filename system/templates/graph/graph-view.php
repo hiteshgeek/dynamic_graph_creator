@@ -41,7 +41,7 @@
     </div>
 
     <div class="container">
-        <div id="graph-view" data-graph-id="<?php echo $graph->getId(); ?>">
+        <div id="graph-view" data-graph-id="<?php echo $graph->getId(); ?>" data-graph-type="<?php echo $graph->getGraphType(); ?>" data-graph-name="<?php echo htmlspecialchars($graph->getName()); ?>" data-config="<?php echo htmlspecialchars($graph->getConfig()); ?>">
             <!-- Filters -->
             <?php if (!empty($filters)): ?>
             <div class="card">
@@ -121,81 +121,5 @@
     <?php if ($js = GraphUtility::getJs()): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var graphId = <?php echo $graph->getId(); ?>;
-        var container = document.querySelector('.graph-preview-container');
-        var config = <?php echo $graph->getConfig(); ?>;
-
-        // Initialize preview
-        var preview = new GraphPreview(container);
-        preview.setType('<?php echo $graph->getGraphType(); ?>');
-        preview.setConfig(config);
-
-        // Initialize exporter
-        var exporter = new GraphExporter({
-            filename: '<?php echo addslashes($graph->getName()); ?>'
-        });
-
-        // Export button
-        var exportBtn = document.getElementById('export-chart');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', function() {
-                if (preview.chart) {
-                    exporter.setChart(preview.chart);
-                    exporter.exportImage();
-                }
-            });
-        }
-
-        // Load initial data
-        loadGraphData();
-
-        // Apply filters button
-        var applyBtn = document.querySelector('.filter-apply-btn');
-        if (applyBtn) {
-            applyBtn.addEventListener('click', loadGraphData);
-        }
-
-        function loadGraphData() {
-            var filterValues = getFilterValues();
-
-            Loading.show('Loading graph...');
-
-            Ajax.post('preview_graph', {
-                id: graphId,
-                filters: filterValues
-            }).then(function(result) {
-                Loading.hide();
-                if (result.success && result.data) {
-                    preview.setData(result.data.chartData);
-                    preview.render();
-                } else {
-                    Toast.error(result.message || 'Failed to load graph');
-                }
-            }).catch(function(error) {
-                Loading.hide();
-                Toast.error('Failed to load graph');
-            });
-        }
-
-        function getFilterValues() {
-            var values = {};
-            document.querySelectorAll('[data-filter-key]').forEach(function(input) {
-                var key = input.dataset.filterKey;
-                if (input.type === 'checkbox') {
-                    if (!values[key]) values[key] = [];
-                    if (input.checked) values[key].push(input.value);
-                } else if (input.multiple) {
-                    values[key] = Array.from(input.selectedOptions).map(function(o) { return o.value; });
-                } else {
-                    values[key] = input.value;
-                }
-            });
-            return values;
-        }
-    });
-    </script>
 </body>
 </html>

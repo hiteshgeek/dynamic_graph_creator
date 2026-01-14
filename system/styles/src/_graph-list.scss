@@ -12,16 +12,35 @@
     justify-content: space-between;
     margin-bottom: $spacing-lg;
 
-    h1 {
+    h1, h2 {
         margin: 0;
     }
 }
 
-.graph-list-card {
-    background: $bg-card;
-    border-radius: $border-radius-lg;
-    box-shadow: $shadow-1;
-    overflow: hidden;
+.graph-list-page {
+    .table {
+        margin-bottom: 0;
+
+        th {
+            font-weight: $font-weight-medium;
+            color: $text-secondary;
+            font-size: $font-size-sm;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: $spacing-md;
+            border-bottom: 2px solid $border-color;
+        }
+
+        td {
+            padding: $spacing-md;
+            vertical-align: middle;
+            border-bottom: 1px solid $border-color;
+        }
+
+        tbody tr:hover {
+            background: $gray-50;
+        }
+    }
 }
 
 .graph-list-table {
@@ -148,36 +167,26 @@
 }
 
 // Empty state
-.graph-list-empty {
+.graph-empty-state {
     padding: $spacing-xl * 2;
     text-align: center;
+    color: $text-hint;
 
-    > i {
-        font-size: 64px;
-        color: $gray-300;
-        margin-bottom: $spacing-lg;
-        display: block;
-    }
-
-    h3 {
-        color: $text-secondary;
-        margin-bottom: $spacing-sm;
+    i {
+        font-size: 48px;
+        margin-bottom: $spacing-md;
+        opacity: 0.5;
     }
 
     p {
-        color: $text-hint;
-        margin-bottom: $spacing-lg;
+        font-size: $font-size-lg;
+        font-weight: $font-weight-medium;
+        color: $text-secondary;
+        margin-bottom: $spacing-xs;
     }
 
-    .btn {
-        padding: $spacing-md $spacing-lg;
-        font-size: $font-size-base;
-        text-transform: none;
-        letter-spacing: normal;
-
-        i {
-            font-size: 16px;
-        }
+    span {
+        font-size: $font-size-sm;
     }
 }
 

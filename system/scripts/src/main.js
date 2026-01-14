@@ -10,6 +10,8 @@ import QueryBuilder from './QueryBuilder.js';
 import DataMapper from './DataMapper.js';
 import FilterManager from './FilterManager.js';
 import ConfigPanel from './ConfigPanel.js';
+import GraphView from './GraphView.js';
+import FilterManagerPage from './FilterManagerPage.js';
 
 // Make classes available globally
 window.GraphCreator = GraphCreator;
@@ -19,6 +21,8 @@ window.QueryBuilder = QueryBuilder;
 window.DataMapper = DataMapper;
 window.FilterManager = FilterManager;
 window.ConfigPanel = ConfigPanel;
+window.GraphView = GraphView;
+window.FilterManagerPage = FilterManagerPage;
 
 // Toast notification helper
 window.Toast = {
@@ -142,7 +146,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // Auto-init graph view page
     const viewContainer = document.getElementById('graph-view');
     if (viewContainer) {
-        initGraphView(viewContainer);
+        const graphId = viewContainer.dataset.graphId;
+        const graphType = viewContainer.dataset.graphType || 'bar';
+        const graphName = viewContainer.dataset.graphName || 'Chart';
+        const config = viewContainer.dataset.config ? JSON.parse(viewContainer.dataset.config) : {};
+        window.graphView = new GraphView(viewContainer, { graphId, graphType, graphName, config });
+    }
+
+    // Auto-init filter manager page
+    const filterManagerContainer = document.querySelector('.filter-manager-page');
+    if (filterManagerContainer) {
+        const graphId = filterManagerContainer.dataset.graphId;
+        window.filterManagerPage = new FilterManagerPage(filterManagerContainer, { graphId });
     }
 });
 

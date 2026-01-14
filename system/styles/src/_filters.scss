@@ -1,25 +1,58 @@
 // Generic Filter Styles (Reusable)
 @use 'variables' as *;
 
-.filter-manager {
-    background: $bg-card;
-    border: 1px solid $border-color;
-    border-radius: $border-radius;
-    padding: $spacing-md;
+// Filter List Page
+.filter-list-page {
+    max-width: 1000px;
+    margin: 0 auto;
+
+    .table {
+        margin-bottom: 0;
+
+        th {
+            font-weight: $font-weight-medium;
+            color: $text-secondary;
+            font-size: $font-size-sm;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: $spacing-md;
+            border-bottom: 2px solid $border-color;
+        }
+
+        td {
+            padding: $spacing-md;
+            vertical-align: middle;
+            border-bottom: 1px solid $border-color;
+
+            code {
+                background: $gray-100;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-size: $font-size-sm;
+            }
+        }
+
+        tbody tr:hover {
+            background: $gray-50;
+        }
+    }
 }
 
-.filter-manager-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: $spacing-md;
-    padding-bottom: $spacing-sm;
-    border-bottom: 1px solid $border-color;
+// Filter Form Page
+.filter-form-page {
+    max-width: 600px;
+    margin: 0 auto;
 
-    h4 {
-        margin: 0;
-        font-size: $font-size-base;
-        font-weight: $font-weight-medium;
+    .card-body {
+        padding: $spacing-lg;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        padding: $spacing-md $spacing-lg;
+        background: $gray-50;
+        border-top: 1px solid $border-color;
     }
 }
 
@@ -30,89 +63,314 @@
 }
 
 .filter-item {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr auto;
-    gap: $spacing-sm;
-    align-items: start;
-    padding: $spacing-sm;
-    background: $gray-50;
-    border-radius: $border-radius;
+    background: $bg-card;
     border: 1px solid $border-color;
+    border-radius: $border-radius;
+    transition: all $transition-fast;
 
     &:hover {
         border-color: $gray-400;
+        box-shadow: $shadow-1;
     }
 }
 
-.filter-item-field {
+.filter-item-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-md;
+}
+
+.filter-item-drag {
+    color: $text-hint;
+    cursor: grab;
+
+    &:active {
+        cursor: grabbing;
+    }
+}
+
+.filter-item-info {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: $spacing-xs;
+    gap: 2px;
+}
 
-    label {
-        font-size: $font-size-sm;
-        color: $text-secondary;
+.filter-item-label {
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+}
+
+.filter-item-key {
+    font-size: $font-size-sm;
+    color: $text-hint;
+    font-family: monospace;
+}
+
+.filter-item-type {
+    .badge {
+        padding: 4px $spacing-sm;
+        font-size: 11px;
         font-weight: $font-weight-medium;
-    }
+        border-radius: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        background: $gray-200;
+        color: $text-secondary;
 
-    input, select {
-        padding: $spacing-xs $spacing-sm;
-        font-size: $font-size-sm;
-        border: 1px solid $border-color;
-        border-radius: $border-radius;
-        background: $bg-card;
+        &.badge-select,
+        &.badge-multi_select {
+            background: rgba($primary, 0.1);
+            color: $primary;
+        }
 
-        &:focus {
-            outline: none;
-            border-color: $primary;
+        &.badge-date,
+        &.badge-date_range {
+            background: rgba($success, 0.1);
+            color: $success-dark;
+        }
+
+        &.badge-checkbox,
+        &.badge-radio {
+            background: rgba($warning, 0.1);
+            color: $warning-dark;
+        }
+
+        &.badge-tokeninput {
+            background: rgba($info, 0.1);
+            color: $info-dark;
         }
     }
 }
 
-.filter-remove-btn {
+.filter-item-actions {
+    display: flex;
+    gap: $spacing-xs;
+}
+
+.filter-empty-state {
+    padding: $spacing-xl * 2;
+    text-align: center;
+    color: $text-hint;
+
+    i {
+        font-size: 48px;
+        margin-bottom: $spacing-md;
+        opacity: 0.5;
+    }
+
+    p {
+        font-size: $font-size-lg;
+        font-weight: $font-weight-medium;
+        color: $text-secondary;
+        margin-bottom: $spacing-xs;
+    }
+
+    span {
+        font-size: $font-size-sm;
+    }
+}
+
+.filter-actions-bar {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: $spacing-lg;
+}
+
+// Filter Modal
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
-    margin-top: 20px;
-    background: transparent;
-    border: 1px solid $border-color;
-    border-radius: $border-radius;
-    color: $error;
-    cursor: pointer;
+    z-index: $z-modal;
+    opacity: 0;
+    visibility: hidden;
     transition: all $transition-fast;
 
-    &:hover {
-        background: $error-bg;
-        border-color: $error;
+    &.active {
+        opacity: 1;
+        visibility: visible;
     }
 }
 
-.filter-add-btn {
-    display: inline-flex;
+.modal-container {
+    background: $bg-card;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-3;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.95);
+    transition: transform $transition-fast;
+
+    .active & {
+        transform: scale(1);
+    }
+
+    &.modal-sm {
+        max-width: 400px;
+    }
+}
+
+.modal-header {
+    display: flex;
     align-items: center;
-    gap: $spacing-xs;
-    padding: $spacing-xs $spacing-sm;
-    font-size: $font-size-sm;
-    color: $primary;
-    background: transparent;
-    border: 1px dashed $primary;
-    border-radius: $border-radius;
-    cursor: pointer;
-    transition: all $transition-fast;
-    margin-top: $spacing-sm;
+    justify-content: space-between;
+    padding: $spacing-md $spacing-lg;
+    border-bottom: 1px solid $border-color;
 
-    &:hover {
-        background: rgba($primary, 0.05);
+    h3 {
+        margin: 0;
+        font-size: $font-size-lg;
     }
 }
 
-.filter-empty {
+.modal-close-btn {
+    background: transparent;
+    border: none;
+    color: $text-hint;
+    cursor: pointer;
+    padding: $spacing-xs;
+    font-size: $font-size-lg;
+
+    &:hover {
+        color: $text-primary;
+    }
+}
+
+.modal-body {
     padding: $spacing-lg;
-    text-align: center;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-sm;
+    padding: $spacing-md $spacing-lg;
+    border-top: 1px solid $border-color;
+    background: $gray-50;
+}
+
+// Form elements in modal
+.form-group {
+    margin-bottom: $spacing-md;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.form-label {
+    display: block;
+    margin-bottom: $spacing-xs;
+    font-weight: $font-weight-medium;
     color: $text-secondary;
     font-size: $font-size-sm;
+
+    .required {
+        color: $error;
+    }
+}
+
+.form-hint {
+    display: block;
+    margin-top: $spacing-xs;
+    font-size: 12px;
+    color: $text-hint;
+}
+
+// Filter options list in modal
+.filter-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-sm;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.filter-option-item {
+    display: flex;
+    gap: $spacing-xs;
+    align-items: center;
+
+    input {
+        flex: 1;
+    }
+
+    .remove-option-btn {
+        padding: $spacing-xs;
+        color: $error;
+
+        &:hover {
+            background: $error-bg;
+        }
+    }
+}
+
+.add-option-btn {
+    margin-top: $spacing-xs;
+}
+
+// Filters Panel in Graph Creator Sidebar
+.filters-panel {
+    margin-top: $spacing-md;
+}
+
+.filters-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+}
+
+.filter-display-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-sm;
+    background: $gray-50;
+    border-radius: $border-radius;
+    border: 1px solid $border-color;
+}
+
+.filter-display-label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+}
+
+.filter-display-type {
+    font-size: 11px;
+    color: $text-hint;
+    text-transform: uppercase;
+}
+
+.filters-empty {
+    padding: $spacing-md;
+    text-align: center;
+
+    p {
+        margin: 0;
+        font-size: $font-size-sm;
+        color: $text-hint;
+    }
+}
+
+.filters-manage-btn {
+    width: 100%;
+    margin-top: $spacing-sm;
 }
 
 // Filter inputs for viewing/applying filters
@@ -167,51 +425,4 @@
 .filter-apply-btn {
     align-self: flex-end;
     margin-left: auto;
-}
-
-// Select options editor
-.filter-options-editor {
-    margin-top: $spacing-sm;
-    padding: $spacing-sm;
-    background: $bg-card;
-    border: 1px solid $border-color;
-    border-radius: $border-radius;
-}
-
-.filter-options-list {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-xs;
-    max-height: 150px;
-    overflow-y: auto;
-    margin-bottom: $spacing-sm;
-}
-
-.filter-option-item {
-    display: flex;
-    gap: $spacing-xs;
-    align-items: center;
-
-    input {
-        flex: 1;
-        padding: $spacing-xs;
-        font-size: $font-size-sm;
-    }
-
-    button {
-        padding: $spacing-xs;
-        background: transparent;
-        border: none;
-        color: $error;
-        cursor: pointer;
-    }
-}
-
-.filter-option-add {
-    display: flex;
-    gap: $spacing-xs;
-
-    input {
-        flex: 1;
-    }
 }

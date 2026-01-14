@@ -1,23 +1,23 @@
 <?php
 
 /**
- * Filter model - Generic filter for any entity
- * Can be used for graphs, reports, dashboards, etc.
+ * Filter model - Independent/Reusable filter definition
+ * Filters define how to get data (static options or SQL query)
+ * and can be linked to multiple graphs
  *
  * @author Dynamic Graph Creator
  */
 class Filter implements DatabaseObject
 {
     private $fid;
-    private $entity_type;
-    private $entity_id;
     private $filter_key;
     private $filter_label;
     private $filter_type;
-    private $filter_options;
+    private $data_source;
+    private $data_query;
+    private $static_options;
     private $default_value;
     private $is_required;
-    private $sequence;
     private $fsid;
     private $created_ts;
     private $updated_ts;
@@ -50,6 +50,24 @@ class Filter implements DatabaseObject
     }
 
     /**
+     * Get all active filters
+     *
+     * @return array
+     */
+    public static function getAll()
+    {
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_FILTER . " WHERE fsid != 3 ORDER BY filter_label";
+        $res = $db->query($sql);
+
+        $filters = array();
+        while ($row = $db->fetchAssoc($res)) {
+            $filters[] = $row;
+        }
+        return $filters;
+    }
+
+    /**
      * Get filter ID
      * @return int
      */
@@ -64,10 +82,7 @@ class Filter implements DatabaseObject
      */
     public function hasMandatoryData()
     {
-        return !empty($this->entity_type) &&
-               !empty($this->entity_id) &&
-               !empty($this->filter_key) &&
-               !empty($this->filter_label);
+        return !empty($this->filter_key) && !empty($this->filter_label);
     }
 
     /**
@@ -83,37 +98,34 @@ class Filter implements DatabaseObject
         $db = Rapidkart::getInstance()->getDB();
 
         $sql = "INSERT INTO " . SystemTables::DB_TBL_FILTER . " (
-            entity_type,
-            entity_id,
             filter_key,
             filter_label,
             filter_type,
-            filter_options,
+            data_source,
+            data_query,
+            static_options,
             default_value,
-            is_required,
-            sequence
+            is_required
         ) VALUES (
-            '::entity_type',
-            '::entity_id',
             '::filter_key',
             '::filter_label',
             '::filter_type',
-            '::filter_options',
+            '::data_source',
+            '::data_query',
+            '::static_options',
             '::default_value',
-            '::is_required',
-            '::sequence'
+            '::is_required'
         )";
 
         $args = array(
-            '::entity_type' => $this->entity_type,
-            '::entity_id' => $this->entity_id,
             '::filter_key' => $this->filter_key,
             '::filter_label' => $this->filter_label,
             '::filter_type' => $this->filter_type ? $this->filter_type : 'text',
-            '::filter_options' => $this->filter_options ? $this->filter_options : '',
+            '::data_source' => $this->data_source ? $this->data_source : 'static',
+            '::data_query' => $this->data_query ? $this->data_query : '',
+            '::static_options' => $this->static_options ? $this->static_options : '',
             '::default_value' => $this->default_value ? $this->default_value : '',
-            '::is_required' => $this->is_required ? 1 : 0,
-            '::sequence' => $this->sequence ? $this->sequence : 0
+            '::is_required' => $this->is_required ? 1 : 0
         );
 
         $res = $db->query($sql, $args);
@@ -140,20 +152,22 @@ class Filter implements DatabaseObject
             filter_key = '::filter_key',
             filter_label = '::filter_label',
             filter_type = '::filter_type',
-            filter_options = '::filter_options',
+            data_source = '::data_source',
+            data_query = '::data_query',
+            static_options = '::static_options',
             default_value = '::default_value',
-            is_required = '::is_required',
-            sequence = '::sequence'
+            is_required = '::is_required'
         WHERE fid = '::fid'";
 
         $args = array(
             '::filter_key' => $this->filter_key,
             '::filter_label' => $this->filter_label,
             '::filter_type' => $this->filter_type,
-            '::filter_options' => $this->filter_options ? $this->filter_options : '',
+            '::data_source' => $this->data_source ? $this->data_source : 'static',
+            '::data_query' => $this->data_query ? $this->data_query : '',
+            '::static_options' => $this->static_options ? $this->static_options : '',
             '::default_value' => $this->default_value ? $this->default_value : '',
             '::is_required' => $this->is_required ? 1 : 0,
-            '::sequence' => $this->sequence ? $this->sequence : 0,
             '::fid' => $this->fid
         );
 
@@ -184,6 +198,57 @@ class Filter implements DatabaseObject
         $db = Rapidkart::getInstance()->getDB();
         $sql = "DELETE FROM " . SystemTables::DB_TBL_FILTER . " WHERE fid = '::fid'";
         return $db->query($sql, array('::fid' => intval($id))) ? true : false;
+    }
+
+    /**
+     * Get filters by their keys (for matching placeholders in queries)
+     *
+     * @param array $keys Array of filter keys like [':year', ':date_from']
+     * @return array Array of Filter objects indexed by filter_key
+     */
+    public static function getByKeys($keys)
+    {
+        if (empty($keys)) {
+            return array();
+        }
+
+        $db = Rapidkart::getInstance()->getDB();
+
+        // Build placeholders for IN clause
+        $placeholders = array();
+        $args = array();
+        foreach ($keys as $i => $key) {
+            $placeholders[] = "'::key{$i}'";
+            $args["::key{$i}"] = $key;
+        }
+
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_FILTER . "
+                WHERE filter_key IN (" . implode(',', $placeholders) . ") AND fsid != 3";
+        $res = $db->query($sql, $args);
+
+        $filters = array();
+        while ($row = $db->fetchAssoc($res)) {
+            $filter = new Filter();
+            $filter->parse((object)$row);
+            $filters[$row['filter_key']] = $filter;
+        }
+        return $filters;
+    }
+
+    /**
+     * Extract placeholders from a SQL query
+     * Looks for :word patterns that match filter syntax
+     *
+     * @param string $query SQL query string
+     * @return array Array of placeholder keys found
+     */
+    public static function extractPlaceholders($query)
+    {
+        $placeholders = array();
+        if (preg_match_all('/:[a-zA-Z_][a-zA-Z0-9_]*/', $query, $matches)) {
+            $placeholders = array_unique($matches[0]);
+        }
+        return $placeholders;
     }
 
     /**
@@ -229,6 +294,37 @@ class Filter implements DatabaseObject
     }
 
     /**
+     * Get filter options (executes query if data_source is 'query')
+     *
+     * @return array
+     */
+    public function getOptions()
+    {
+        if ($this->data_source === 'query' && !empty($this->data_query)) {
+            // Execute query to get options
+            $db = Rapidkart::getInstance()->getDB();
+            $res = $db->query($this->data_query);
+            $options = array();
+            if ($res) {
+                while ($row = $db->fetchAssoc($res)) {
+                    $options[] = array(
+                        'value' => isset($row['value']) ? $row['value'] : '',
+                        'label' => isset($row['label']) ? $row['label'] : (isset($row['value']) ? $row['value'] : '')
+                    );
+                }
+            }
+            return $options;
+        } else {
+            // Return static options
+            if (!empty($this->static_options)) {
+                $options = json_decode($this->static_options, true);
+                return is_array($options) ? $options : array();
+            }
+            return array();
+        }
+    }
+
+    /**
      * Convert to string
      * @return string
      */
@@ -245,25 +341,19 @@ class Filter implements DatabaseObject
     {
         return array(
             'fid' => $this->fid,
-            'entity_type' => $this->entity_type,
-            'entity_id' => $this->entity_id,
             'filter_key' => $this->filter_key,
             'filter_label' => $this->filter_label,
             'filter_type' => $this->filter_type,
-            'filter_options' => $this->filter_options,
+            'data_source' => $this->data_source,
+            'data_query' => $this->data_query,
+            'static_options' => $this->static_options,
             'default_value' => $this->default_value,
             'is_required' => $this->is_required,
-            'sequence' => $this->sequence
+            'options' => $this->getOptions()
         );
     }
 
     // Getters and Setters
-
-    public function getEntityType() { return $this->entity_type; }
-    public function setEntityType($value) { $this->entity_type = $value; }
-
-    public function getEntityId() { return $this->entity_id; }
-    public function setEntityId($value) { $this->entity_id = intval($value); }
 
     public function getFilterKey() { return $this->filter_key; }
     public function setFilterKey($value) { $this->filter_key = $value; }
@@ -274,17 +364,20 @@ class Filter implements DatabaseObject
     public function getFilterType() { return $this->filter_type; }
     public function setFilterType($value) { $this->filter_type = $value; }
 
-    public function getFilterOptions() { return $this->filter_options; }
-    public function setFilterOptions($value) { $this->filter_options = $value; }
+    public function getDataSource() { return $this->data_source; }
+    public function setDataSource($value) { $this->data_source = $value; }
+
+    public function getDataQuery() { return $this->data_query; }
+    public function setDataQuery($value) { $this->data_query = $value; }
+
+    public function getStaticOptions() { return $this->static_options; }
+    public function setStaticOptions($value) { $this->static_options = $value; }
 
     public function getDefaultValue() { return $this->default_value; }
     public function setDefaultValue($value) { $this->default_value = $value; }
 
     public function getIsRequired() { return $this->is_required; }
     public function setIsRequired($value) { $this->is_required = $value ? 1 : 0; }
-
-    public function getSequence() { return $this->sequence; }
-    public function setSequence($value) { $this->sequence = intval($value); }
 
     public function getCreatedTs() { return $this->created_ts; }
     public function getUpdatedTs() { return $this->updated_ts; }

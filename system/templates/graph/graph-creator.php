@@ -44,8 +44,9 @@
     <div class="container container-full">
         <div id="graph-creator" class="graph-creator" data-graph-id="<?php echo $graph ? $graph->getId() : ''; ?>">
 
-            <!-- Left: Graph Type Selector (Collapsible) -->
+            <!-- Left Sidebar -->
             <div class="graph-sidebar graph-sidebar-left">
+                <!-- Chart Type Selector -->
                 <div class="graph-type-selector collapsible-panel">
                     <div class="collapsible-header" data-toggle="collapse" data-target="type-panel">
                         <h3><i class="fas fa-chart-bar"></i> Chart Type</h3>
@@ -70,6 +71,37 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Filters Panel (only show if graph exists) -->
+                <?php if ($graph): ?>
+                <div class="filters-panel collapsible-panel">
+                    <div class="collapsible-header" data-toggle="collapse" data-target="filters-panel">
+                        <h3><i class="fas fa-filter"></i> Filters</h3>
+                        <button type="button" class="collapse-btn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                    </div>
+                    <div class="collapsible-content" id="filters-panel">
+                        <?php if (!empty($filters)): ?>
+                        <div class="filters-list">
+                            <?php foreach ($filters as $filter): ?>
+                            <div class="filter-display-item">
+                                <span class="filter-display-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
+                                <span class="filter-display-type"><?php echo ucfirst(str_replace('_', ' ', $filter['filter_type'])); ?></span>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php else: ?>
+                        <div class="filters-empty">
+                            <p>No filters defined</p>
+                        </div>
+                        <?php endif; ?>
+                        <a href="?urlq=graph/filters/add/<?php echo $graph->getId(); ?>" class="btn btn-sm btn-outline filters-manage-btn">
+                            <i class="fas fa-plus"></i> Add Filter
+                        </a>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
 
             <!-- Center: Preview and Query -->
@@ -94,7 +126,6 @@
                 <div class="graph-query-section">
                     <div class="query-tabs">
                         <button class="query-tab active" data-tab="query">SQL Query</button>
-                        <button class="query-tab" data-tab="filters">Filters</button>
                         <button class="query-tab" data-tab="mapping">Data Mapping</button>
                     </div>
 
@@ -119,11 +150,6 @@
                             </div>
                             <div class="query-test-result" style="display: none;"></div>
                         </div>
-                    </div>
-
-                    <!-- Filters Tab -->
-                    <div class="query-tab-content" id="tab-filters">
-                        <div class="filter-manager"></div>
                     </div>
 
                     <!-- Mapping Tab -->
@@ -169,59 +195,17 @@
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 
-    <!-- Initialize with existing data -->
+    <?php if ($graph): ?>
+    <!-- Set existing config if editing -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Tab switching
-        document.querySelectorAll('.query-tab').forEach(function(tab) {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.query-tab').forEach(function(t) {
-                    t.classList.remove('active');
-                });
-                document.querySelectorAll('.query-tab-content').forEach(function(c) {
-                    c.classList.remove('active');
-                });
-
-                this.classList.add('active');
-                document.getElementById('tab-' + this.dataset.tab).classList.add('active');
-            });
-        });
-
-        // Collapsible panels - clicking anywhere on header toggles
-        document.querySelectorAll('.collapsible-header').forEach(function(header) {
-            header.addEventListener('click', function(e) {
-                var panel = this.closest('.collapsible-panel');
-                var sidebar = this.closest('.graph-sidebar');
-                panel.classList.toggle('collapsed');
-                sidebar.classList.toggle('collapsed');
-
-                // Trigger chart resize after animation
-                setTimeout(function() {
-                    if (window.graphCreator && window.graphCreator.preview) {
-                        window.graphCreator.preview.resize();
-                    }
-                }, 350);
-            });
-        });
-
-        // Set existing filters if editing
-        <?php if ($graph && !empty($filters)): ?>
-        setTimeout(function() {
-            if (window.graphCreator && window.graphCreator.filterManager) {
-                window.graphCreator.filterManager.setFilters(<?php echo json_encode($filters); ?>);
-            }
-        }, 100);
-        <?php endif; ?>
-
-        // Set existing config if editing
-        <?php if ($graph): ?>
         setTimeout(function() {
             if (window.graphCreator && window.graphCreator.configPanel) {
                 window.graphCreator.configPanel.setConfig(<?php echo $graph->getConfig(); ?>);
             }
         }, 100);
-        <?php endif; ?>
     });
     </script>
+    <?php endif; ?>
 </body>
 </html>

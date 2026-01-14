@@ -43,6 +43,8 @@ export default class GraphCreator {
         this.initConfigPanel();
         this.initGraphTypeSelector();
         this.initSaveHandler();
+        this.initTabs();
+        this.initCollapsiblePanels();
 
         // Load existing graph if editing
         if (this.graphId) {
@@ -171,6 +173,61 @@ export default class GraphCreator {
                 this.graphName = e.target.value;
             });
         }
+    }
+
+    /**
+     * Initialize query/mapping tabs
+     */
+    initTabs() {
+        const tabs = this.container.querySelectorAll('.query-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active from all tabs
+                tabs.forEach(t => t.classList.remove('active'));
+
+                // Remove active from all tab contents
+                this.container.querySelectorAll('.query-tab-content').forEach(c => {
+                    c.classList.remove('active');
+                });
+
+                // Set active on clicked tab
+                tab.classList.add('active');
+
+                // Show corresponding content
+                const targetId = 'tab-' + tab.dataset.tab;
+                const targetContent = document.getElementById(targetId);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            });
+        });
+    }
+
+    /**
+     * Initialize collapsible panels
+     */
+    initCollapsiblePanels() {
+        const headers = this.container.querySelectorAll('.collapsible-header');
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const panel = header.closest('.collapsible-panel');
+                const sidebar = header.closest('.graph-sidebar');
+
+                if (panel) {
+                    panel.classList.toggle('collapsed');
+                }
+                if (sidebar) {
+                    sidebar.classList.toggle('collapsed');
+                }
+
+                // Trigger chart resize after animation
+                setTimeout(() => {
+                    if (this.preview) {
+                        this.preview.resize();
+                    }
+                }, 350);
+            });
+        });
     }
 
     /**

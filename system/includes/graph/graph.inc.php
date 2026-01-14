@@ -26,6 +26,18 @@ if (isset($_POST['submit'])) {
         case 'load_graph':
             loadGraph($_POST);
             break;
+        case 'save_filter':
+            saveFilter($_POST);
+            break;
+        case 'get_filter':
+            getFilter($_POST);
+            break;
+        case 'delete_filter':
+            deleteFilter($_POST);
+            break;
+        case 'test_filter_query':
+            testFilterQuery($_POST);
+            break;
     }
 }
 
@@ -41,6 +53,18 @@ switch ($action) {
     case 'view':
         $graphId = isset($url[2]) ? intval($url[2]) : 0;
         showView($graphId);
+        break;
+    case 'filters':
+        $subAction = isset($url[2]) ? $url[2] : 'list';
+        if ($subAction === 'add') {
+            $graphId = isset($url[3]) ? intval($url[3]) : 0;
+            showFilterForm($graphId);
+        } elseif ($subAction === 'edit') {
+            $filterId = isset($url[3]) ? intval($url[3]) : 0;
+            showFilterForm(null, $filterId);
+        } else {
+            showFilterList();
+        }
         break;
     case 'list':
     default:
@@ -63,7 +87,6 @@ function showList()
 function showCreator($graphId = null)
 {
     $graph = null;
-    $filters = array();
 
     if ($graphId) {
         $graph = new Graph($graphId);
@@ -71,11 +94,10 @@ function showCreator($graphId = null)
             GraphUtility::redirect('graph');
             return;
         }
-
-        $filterSet = new FilterSet('graph', $graphId);
-        $filterSet->loadFilters();
-        $filters = $filterSet->toArray();
     }
+
+    // Get all available filters for selection
+    $allFilters = Filter::getAll();
 
     require_once GraphConfig::templatesPath() . 'graph/graph-creator.php';
 }
@@ -91,15 +113,23 @@ function showView($graphId)
         return;
     }
 
-    $filterSet = new FilterSet('graph', $graphId);
-    $filterSet->loadFilters();
-    $filters = $filterSet->toArray();
+    // Extract placeholders from the graph query and find matching filters
+    $placeholders = Filter::extractPlaceholders($graph->getQuery());
+    $matchedFilters = Filter::getByKeys($placeholders);
+
+    // Convert to array format for template
+    $filters = array();
+    foreach ($matchedFilters as $key => $filter) {
+        $filters[] = $filter->toArray();
+    }
 
     require_once GraphConfig::templatesPath() . 'graph/graph-view.php';
 }
 
 /**
  * Save graph (create or update)
+ * Note: Filters are independent - no need to save filter associations
+ * The system matches placeholders in the query to filter keys at runtime
  */
 function saveGraph($data)
 {
@@ -136,15 +166,6 @@ function saveGraph($data)
             GraphUtility::ajaxResponseFalse('Failed to create graph');
         }
     }
-
-    // Save filters
-    $filters = isset($data['filters']) ? $data['filters'] : array();
-    if (is_string($filters)) {
-        $filters = json_decode($filters, true);
-    }
-
-    $filterSet = new FilterSet('graph', $graph->getId());
-    $filterSet->saveFilters($filters ? $filters : array());
 
     $message = $isUpdate ? 'Graph updated successfully' : 'Graph created successfully';
     GraphUtility::ajaxResponseTrue($message, array('id' => $graph->getId()));
@@ -349,11 +370,186 @@ function loadGraph($data)
         GraphUtility::ajaxResponseFalse('Graph not found');
     }
 
-    $filterSet = new FilterSet('graph', $graphId);
-    $filterSet->loadFilters();
+    // Extract placeholders and find matching filters
+    $placeholders = Filter::extractPlaceholders($graph->getQuery());
+    $matchedFilters = Filter::getByKeys($placeholders);
 
     $response = $graph->toArray();
-    $response['filters'] = $filterSet->toArray();
+    $response['placeholders'] = $placeholders;
+    $response['matched_filters'] = array();
+    foreach ($matchedFilters as $key => $filter) {
+        $response['matched_filters'][$key] = $filter->toArray();
+    }
 
     GraphUtility::ajaxResponseTrue('Graph loaded', $response);
+}
+
+/**
+ * Show filter list page (all independent filters)
+ */
+function showFilterList()
+{
+    $filters = Filter::getAll();
+    require_once GraphConfig::templatesPath() . 'graph/filter-list.php';
+}
+
+/**
+ * Show filter add/edit form
+ */
+function showFilterForm($graphId = null, $filterId = null)
+{
+    $filter = null;
+
+    if ($filterId) {
+        $filter = new Filter($filterId);
+        if (!$filter->getId()) {
+            GraphUtility::redirect('graph/filters');
+            return;
+        }
+    }
+
+    require_once GraphConfig::templatesPath() . 'graph/filter-form.php';
+}
+
+/**
+ * Save filter (create or update)
+ * Filters are independent - not tied to any graph
+ */
+function saveFilter($data)
+{
+    $filterId = isset($data['filter_id']) ? intval($data['filter_id']) : 0;
+
+    $filterKey = isset($data['filter_key']) ? trim($data['filter_key']) : '';
+    $filterLabel = isset($data['filter_label']) ? trim($data['filter_label']) : '';
+    $filterType = isset($data['filter_type']) ? $data['filter_type'] : 'text';
+    $dataSource = isset($data['data_source']) ? $data['data_source'] : 'static';
+
+    if (empty($filterKey)) {
+        GraphUtility::ajaxResponseFalse('Filter key is required');
+    }
+
+    if (empty($filterLabel)) {
+        GraphUtility::ajaxResponseFalse('Filter label is required');
+    }
+
+    // Ensure filter key starts with :
+    if (strpos($filterKey, ':') !== 0) {
+        $filterKey = ':' . $filterKey;
+    }
+
+    $filter = $filterId ? new Filter($filterId) : new Filter();
+
+    $filter->setFilterKey($filterKey);
+    $filter->setFilterLabel($filterLabel);
+    $filter->setFilterType($filterType);
+    $filter->setDataSource($dataSource);
+    $filter->setDataQuery(isset($data['data_query']) ? $data['data_query'] : '');
+    $filter->setStaticOptions(isset($data['static_options']) ? $data['static_options'] : '');
+    $filter->setDefaultValue(isset($data['default_value']) ? $data['default_value'] : '');
+    $filter->setIsRequired(isset($data['is_required']) ? intval($data['is_required']) : 0);
+
+    if ($filterId) {
+        if (!$filter->update()) {
+            GraphUtility::ajaxResponseFalse('Failed to update filter');
+        }
+    } else {
+        if (!$filter->insert()) {
+            GraphUtility::ajaxResponseFalse('Failed to create filter');
+        }
+    }
+
+    GraphUtility::ajaxResponseTrue('Filter saved successfully', array('id' => $filter->getId()));
+}
+
+/**
+ * Get single filter for editing
+ */
+function getFilter($data)
+{
+    $filterId = isset($data['id']) ? intval($data['id']) : 0;
+
+    if (!$filterId) {
+        GraphUtility::ajaxResponseFalse('Invalid filter ID');
+    }
+
+    $filter = new Filter($filterId);
+    if (!$filter->getId()) {
+        GraphUtility::ajaxResponseFalse('Filter not found');
+    }
+
+    GraphUtility::ajaxResponseTrue('Filter loaded', $filter->toArray());
+}
+
+/**
+ * Delete filter
+ */
+function deleteFilter($data)
+{
+    $filterId = isset($data['id']) ? intval($data['id']) : 0;
+
+    if (!$filterId || !Filter::delete($filterId)) {
+        GraphUtility::ajaxResponseFalse('Failed to delete filter');
+    }
+
+    GraphUtility::ajaxResponseTrue('Filter deleted successfully');
+}
+
+/**
+ * Test filter query (for query-based filter options)
+ * Query should return 'value' and 'label' columns
+ */
+function testFilterQuery($data)
+{
+    $query = isset($data['query']) ? trim($data['query']) : '';
+
+    if (empty($query)) {
+        GraphUtility::ajaxResponseFalse('Please enter a SQL query');
+    }
+
+    // Add LIMIT for safety
+    $testQuery = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $query);
+    $testQuery .= ' LIMIT 20';
+
+    $db = Rapidkart::getInstance()->getDB();
+    $res = $db->query($testQuery);
+
+    if (!$res) {
+        GraphUtility::ajaxResponseFalse('Query error: ' . $db->getError());
+    }
+
+    $options = array();
+    $columns = array();
+
+    while ($row = $db->fetchAssoc($res)) {
+        if (empty($columns)) {
+            $columns = array_keys($row);
+        }
+        $options[] = array(
+            'value' => isset($row['value']) ? $row['value'] : '',
+            'label' => isset($row['label']) ? $row['label'] : (isset($row['value']) ? $row['value'] : '')
+        );
+    }
+
+    if (empty($options)) {
+        GraphUtility::ajaxResponseFalse('Query returned no results');
+    }
+
+    // Check if required columns exist
+    $hasValue = in_array('value', $columns);
+    $hasLabel = in_array('label', $columns);
+    $warnings = array();
+
+    if (!$hasValue) {
+        $warnings[] = "No 'value' column found. Using first column.";
+    }
+    if (!$hasLabel) {
+        $warnings[] = "No 'label' column found. Using 'value' for labels.";
+    }
+
+    GraphUtility::ajaxResponseTrue('Query is valid', array(
+        'columns' => $columns,
+        'options' => $options,
+        'count' => count($options),
+        'warnings' => $warnings
+    ));
 }

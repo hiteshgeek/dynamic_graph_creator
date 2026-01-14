@@ -18,7 +18,6 @@ require_once __DIR__ . '/system/classes/SQLiDatabase.php';
 require_once __DIR__ . '/system/classes/Rapidkart.php';
 require_once __DIR__ . '/system/classes/GraphUtility.php';
 require_once __DIR__ . '/system/classes/Filter.php';
-require_once __DIR__ . '/system/classes/FilterSet.php';
 require_once __DIR__ . '/system/classes/Graph.php';
 
 // Parse URL
