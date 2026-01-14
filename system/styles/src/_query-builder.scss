@@ -1,0 +1,223 @@
+// Query Builder Styles
+@use 'variables' as *;
+
+.query-builder {
+    position: relative;
+}
+
+.query-editor-wrapper {
+    position: relative;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    overflow: hidden;
+}
+
+.query-editor {
+    width: 100%;
+    min-height: 150px;
+    padding: $spacing-md;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    border: none;
+    resize: vertical;
+    background: #FAFAFA;
+    color: $text-primary;
+
+    &:focus {
+        outline: none;
+        background: $bg-card;
+    }
+}
+
+.query-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    padding: $spacing-md;
+    background: $gray-100;
+    border-top: 1px solid $border-color;
+}
+
+.query-toolbar-left {
+    font-size: $font-size-sm;
+    color: $text-hint;
+    line-height: 1.5;
+
+    code {
+        background: $gray-200;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+        color: $primary;
+    }
+}
+
+.query-toolbar-right {
+    display: flex;
+    gap: $spacing-sm;
+
+    .btn {
+        white-space: nowrap;
+    }
+}
+
+.query-hint {
+    font-size: $font-size-sm;
+    color: $text-hint;
+    margin-top: $spacing-sm;
+
+    code {
+        background: $gray-200;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+    }
+}
+
+// Query test results
+.query-test-result {
+    margin-top: $spacing-md;
+    padding: $spacing-md;
+    border-radius: $border-radius;
+    font-size: $font-size-sm;
+
+    &.success {
+        background: $success-bg;
+        border: 1px solid $success-border;
+        color: $success-dark;
+    }
+
+    &.error {
+        background: $error-bg;
+        border: 1px solid $error-border;
+        color: $error-dark;
+    }
+}
+
+.query-result-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    i {
+        font-size: 16px;
+    }
+
+    .query-row-count {
+        margin-left: auto;
+        font-size: $font-size-sm;
+        opacity: 0.8;
+    }
+}
+
+.query-sample-data {
+    margin-top: $spacing-md;
+
+    strong {
+        display: block;
+        margin-bottom: $spacing-sm;
+        color: $success-dark;
+    }
+}
+
+.query-result-table-wrapper {
+    max-height: 250px;
+    overflow: auto;
+    border-radius: $border-radius;
+    border: 1px solid $success-border;
+}
+
+.query-result-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: $bg-card;
+
+    th, td {
+        padding: $spacing-xs $spacing-sm;
+        text-align: left;
+        border-bottom: 1px solid $border-color;
+        white-space: nowrap;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    th {
+        background: $gray-100;
+        font-weight: $font-weight-medium;
+        color: $text-primary;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    td {
+        color: $text-secondary;
+    }
+
+    tbody tr:hover {
+        background: $gray-50;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+}
+
+.query-columns-result {
+    margin-top: $spacing-sm;
+
+    strong {
+        display: block;
+        margin-bottom: $spacing-xs;
+    }
+
+    .column-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-xs;
+    }
+
+    .column-item {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px $spacing-sm;
+        background: $primary;
+        color: white;
+        border-radius: 12px;
+        font-size: $font-size-sm;
+
+        i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+    }
+}
+
+// Syntax highlighting placeholders
+.query-placeholder {
+    color: $primary;
+    font-weight: $font-weight-medium;
+}
+
+// Query preview
+.query-preview {
+    margin-top: $spacing-md;
+    padding: $spacing-md;
+    background: $gray-100;
+    border-radius: $border-radius;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+
+    .placeholder {
+        background: rgba($primary, 0.2);
+        padding: 2px 4px;
+        border-radius: 2px;
+        color: $primary;
+    }
+}

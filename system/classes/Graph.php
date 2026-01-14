@@ -1,0 +1,256 @@
+<?php
+
+/**
+ * Graph model - Stores graph definitions
+ *
+ * @author Dynamic Graph Creator
+ */
+class Graph implements DatabaseObject
+{
+    private $gid;
+    private $name;
+    private $description;
+    private $graph_type;
+    private $config;
+    private $query;
+    private $data_mapping;
+    private $gsid;
+    private $created_ts;
+    private $updated_ts;
+    private $created_uid;
+    private $updated_uid;
+
+    const TABLE_NAME = 'graph';
+
+    public function __construct($id = null)
+    {
+        if ($id !== null) {
+            $this->gid = intval($id);
+            $this->load();
+        }
+    }
+
+    public static function isExistent($id)
+    {
+        $db = GraphDatabase::getInstance();
+        $sql = "SELECT gid FROM " . self::TABLE_NAME . " WHERE gid = '::gid' AND gsid != 3 LIMIT 1";
+        $res = $db->query($sql, array('::gid' => intval($id)));
+        return $db->numRows($res) > 0;
+    }
+
+    public function getId() { return $this->gid; }
+
+    public function hasMandatoryData()
+    {
+        return !empty($this->name) && !empty($this->query) && !empty($this->graph_type);
+    }
+
+    public function insert()
+    {
+        if (!$this->hasMandatoryData()) return false;
+
+        $db = GraphDatabase::getInstance();
+        $sql = "INSERT INTO " . self::TABLE_NAME . " (
+            name, description, graph_type, config, query, data_mapping, created_uid
+        ) VALUES (
+            '::name', '::description', '::graph_type', '::config', '::query', '::data_mapping', '::created_uid'
+        )";
+
+        $args = array(
+            '::name' => $this->name,
+            '::description' => $this->description ? $this->description : '',
+            '::graph_type' => $this->graph_type,
+            '::config' => $this->config ? $this->config : '{}',
+            '::query' => $this->query,
+            '::data_mapping' => $this->data_mapping ? $this->data_mapping : '{}',
+            '::created_uid' => $this->created_uid ? $this->created_uid : 0
+        );
+
+        if ($db->query($sql, $args)) {
+            $this->gid = $db->lastInsertId();
+            return true;
+        }
+        return false;
+    }
+
+    public function update()
+    {
+        if (!$this->gid) return false;
+
+        $db = GraphDatabase::getInstance();
+        $sql = "UPDATE " . self::TABLE_NAME . " SET
+            name = '::name',
+            description = '::description',
+            graph_type = '::graph_type',
+            config = '::config',
+            query = '::query',
+            data_mapping = '::data_mapping',
+            updated_uid = '::updated_uid'
+        WHERE gid = '::gid'";
+
+        $args = array(
+            '::name' => $this->name,
+            '::description' => $this->description ? $this->description : '',
+            '::graph_type' => $this->graph_type,
+            '::config' => $this->config ? $this->config : '{}',
+            '::query' => $this->query,
+            '::data_mapping' => $this->data_mapping ? $this->data_mapping : '{}',
+            '::updated_uid' => $this->updated_uid ? $this->updated_uid : 0,
+            '::gid' => $this->gid
+        );
+
+        return $db->query($sql, $args) ? true : false;
+    }
+
+    public static function delete($id)
+    {
+        $db = GraphDatabase::getInstance();
+        $sql = "UPDATE " . self::TABLE_NAME . " SET gsid = 3 WHERE gid = '::gid'";
+        $result = $db->query($sql, array('::gid' => intval($id)));
+
+        if ($result) {
+            FilterSet::deleteAllForEntity('graph', $id);
+        }
+        return $result ? true : false;
+    }
+
+    public function load()
+    {
+        if (!$this->gid) return false;
+
+        $db = GraphDatabase::getInstance();
+        $sql = "SELECT * FROM " . self::TABLE_NAME . " WHERE gid = '::gid' AND gsid != 3 LIMIT 1";
+        $res = $db->query($sql, array('::gid' => $this->gid));
+
+        if (!$res || $db->numRows($res) < 1) return false;
+
+        return $this->parse($db->fetchObject($res));
+    }
+
+    public function parse($obj)
+    {
+        if (!$obj) return false;
+        foreach ($obj as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->$key = $value;
+            }
+        }
+        return true;
+    }
+
+    public function __toString() { return $this->name ? $this->name : ''; }
+
+    public function toArray()
+    {
+        return array(
+            'gid' => $this->gid,
+            'name' => $this->name,
+            'description' => $this->description,
+            'graph_type' => $this->graph_type,
+            'config' => $this->config,
+            'query' => $this->query,
+            'data_mapping' => $this->data_mapping,
+            'created_ts' => $this->created_ts,
+            'updated_ts' => $this->updated_ts
+        );
+    }
+
+    /**
+     * Execute query and return chart data
+     */
+    public function execute($filter_values = array())
+    {
+        $db = GraphDatabase::getInstance();
+
+        $filterSet = new FilterSet('graph', $this->gid);
+        $filterSet->loadFilters();
+
+        $query = $filterSet->applyToQuery($this->query, $filter_values);
+        $res = $db->query($query);
+
+        if (!$res) {
+            return array('error' => $db->getError());
+        }
+
+        $mapping = json_decode($this->data_mapping, true);
+        $rows = $db->fetchAllAssoc($res);
+
+        return $this->formatChartData($rows, $mapping);
+    }
+
+    /**
+     * Format query results into chart data
+     */
+    private function formatChartData($rows, $mapping)
+    {
+        if ($this->graph_type === 'pie') {
+            $nameCol = isset($mapping['name_column']) ? $mapping['name_column'] : '';
+            $valueCol = isset($mapping['value_column']) ? $mapping['value_column'] : '';
+
+            $items = array();
+            foreach ($rows as $row) {
+                $items[] = array(
+                    'name' => isset($row[$nameCol]) ? $row[$nameCol] : '',
+                    'value' => isset($row[$valueCol]) ? floatval($row[$valueCol]) : 0
+                );
+            }
+            return array('items' => $items);
+        } else {
+            $xCol = isset($mapping['x_column']) ? $mapping['x_column'] : '';
+            $yCol = isset($mapping['y_column']) ? $mapping['y_column'] : '';
+
+            $categories = array();
+            $values = array();
+
+            foreach ($rows as $row) {
+                $categories[] = isset($row[$xCol]) ? $row[$xCol] : '';
+                $values[] = isset($row[$yCol]) ? floatval($row[$yCol]) : 0;
+            }
+
+            return array('categories' => $categories, 'values' => $values);
+        }
+    }
+
+    /**
+     * Get all graphs
+     */
+    public static function getAll()
+    {
+        $db = GraphDatabase::getInstance();
+        $sql = "SELECT * FROM " . self::TABLE_NAME . " WHERE gsid != 3 ORDER BY updated_ts DESC";
+        $res = $db->query($sql);
+
+        $graphs = array();
+        while ($row = $db->fetchObject($res)) {
+            $graph = new Graph();
+            $graph->parse($row);
+            $graphs[] = $graph;
+        }
+        return $graphs;
+    }
+
+    // Getters and Setters
+    public function getName() { return $this->name; }
+    public function setName($value) { $this->name = $value; }
+
+    public function getDescription() { return $this->description; }
+    public function setDescription($value) { $this->description = $value; }
+
+    public function getGraphType() { return $this->graph_type; }
+    public function setGraphType($value) { $this->graph_type = $value; }
+
+    public function getConfig() { return $this->config; }
+    public function setConfig($value) { $this->config = is_string($value) ? $value : json_encode($value); }
+
+    public function getQuery() { return $this->query; }
+    public function setQuery($value) { $this->query = $value; }
+
+    public function getDataMapping() { return $this->data_mapping; }
+    public function setDataMapping($value) { $this->data_mapping = is_string($value) ? $value : json_encode($value); }
+
+    public function getCreatedTs() { return $this->created_ts; }
+    public function getUpdatedTs() { return $this->updated_ts; }
+
+    public function setCreatedUid($value) { $this->created_uid = intval($value); }
+    public function setUpdatedUid($value) { $this->updated_uid = intval($value); }
+}

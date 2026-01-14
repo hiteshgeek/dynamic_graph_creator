@@ -1,0 +1,247 @@
+// Main SCSS Entry Point
+// Dynamic Graph Creator Library
+
+// Use modern @use syntax instead of @import
+@use 'variables' as *;
+@use 'base';
+@use 'filters';
+@use 'query-builder';
+@use 'config-panel';
+@use 'graph-creator';
+@use 'graph-list';
+
+// Page header
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md $spacing-lg;
+    background: $bg-card;
+    box-shadow: $shadow-1;
+    margin-bottom: $spacing-lg;
+    min-height: 60px;
+
+    h1 {
+        margin: 0;
+        font-size: $font-size-h2;
+        line-height: 1.2;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        font-size: $font-size-sm;
+        color: $text-secondary;
+        margin: 0;
+        padding: 0;
+        background: none;
+
+        a {
+            color: $text-secondary;
+
+            &:hover {
+                color: $primary;
+            }
+        }
+
+        i {
+            font-size: 10px;
+        }
+    }
+}
+
+// Loading overlay
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: $z-modal;
+    opacity: 0;
+    visibility: hidden;
+    transition: all $transition-fast;
+
+    &.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .loading-spinner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: $spacing-md;
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border-width: 3px;
+        }
+
+        span {
+            color: $text-secondary;
+            font-size: $font-size-sm;
+        }
+    }
+}
+
+// Toast notifications
+.toast-container {
+    position: fixed;
+    top: $spacing-lg;
+    right: $spacing-lg;
+    z-index: $z-tooltip;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-md $spacing-lg;
+    background: $bg-card;
+    border-radius: $border-radius;
+    box-shadow: $shadow-2;
+    min-width: 300px;
+    animation: slideIn 0.3s ease;
+
+    &.success {
+        border-left: 4px solid $success;
+
+        i { color: $success; }
+    }
+
+    &.error {
+        border-left: 4px solid $error;
+
+        i { color: $error; }
+    }
+
+    &.warning {
+        border-left: 4px solid $warning;
+
+        i { color: $warning; }
+    }
+
+    i {
+        font-size: 20px;
+    }
+
+    .toast-message {
+        flex: 1;
+    }
+
+    .toast-close {
+        background: transparent;
+        border: none;
+        color: $text-hint;
+        cursor: pointer;
+        padding: $spacing-xs;
+
+        &:hover {
+            color: $text-primary;
+        }
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+// Responsive adjustments
+@media (max-width: 1200px) {
+    .graph-creator {
+        grid-template-columns: 200px 1fr 250px;
+    }
+}
+
+@media (max-width: 992px) {
+    .graph-creator {
+        grid-template-columns: 1fr;
+
+        .graph-type-selector {
+            order: 1;
+
+            .graph-type-list {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+        }
+
+        .graph-main {
+            order: 2;
+        }
+
+        .graph-config-panel {
+            order: 3;
+        }
+    }
+
+    .filter-item {
+        grid-template-columns: 1fr 1fr;
+
+        .filter-remove-btn {
+            grid-column: span 2;
+            justify-self: end;
+            margin-top: 0;
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: $spacing-md;
+    }
+
+    .filter-item {
+        grid-template-columns: 1fr;
+
+        .filter-remove-btn {
+            grid-column: 1;
+        }
+    }
+
+    .graph-list-table {
+        display: block;
+
+        thead {
+            display: none;
+        }
+
+        tbody, tr, td {
+            display: block;
+        }
+
+        tr {
+            padding: $spacing-md;
+            border-bottom: 1px solid $border-color;
+        }
+
+        td {
+            padding: $spacing-xs 0;
+            border: none;
+
+            &::before {
+                content: attr(data-label);
+                font-weight: $font-weight-medium;
+                color: $text-secondary;
+                margin-right: $spacing-sm;
+            }
+        }
+    }
+}

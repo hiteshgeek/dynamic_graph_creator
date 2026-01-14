@@ -1,0 +1,482 @@
+// Graph Creator Page Styles
+@use 'variables' as *;
+
+// Full width container
+.container-full {
+    max-width: 100%;
+    padding: 0 $spacing-lg $spacing-xl;
+}
+
+.graph-creator {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: $spacing-lg;
+    min-height: calc(100vh - 100px);
+    padding-bottom: $spacing-xl;
+}
+
+// Collapsible sidebars
+.graph-sidebar {
+    transition: width $transition-normal;
+    overflow: hidden;
+
+    &.graph-sidebar-left {
+        width: 250px;
+
+        &.collapsed {
+            width: 48px;
+        }
+    }
+
+    &.graph-sidebar-right {
+        width: 300px;
+
+        &.collapsed {
+            width: 48px;
+        }
+    }
+}
+
+// Collapsible panel
+.collapsible-panel {
+    background: $bg-card;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-1;
+    height: fit-content;
+    overflow: hidden;
+    transition: all $transition-normal;
+
+    &.collapsed {
+        .collapsible-content {
+            display: none;
+        }
+
+        .collapsible-header {
+            flex-direction: column;
+            padding: $spacing-sm;
+            border-bottom: none;
+            min-height: 200px;
+
+            h3 {
+                writing-mode: vertical-rl;
+                text-orientation: mixed;
+                gap: $spacing-sm;
+                order: 1;
+
+                i {
+                    transform: rotate(90deg);
+                }
+            }
+
+            .collapse-btn {
+                order: 2;
+                margin-top: $spacing-md;
+            }
+        }
+
+        .graph-sidebar-left & {
+            .collapsible-header {
+                h3 {
+                    transform: rotate(180deg);
+                    flex-direction: row-reverse;
+                }
+
+                .collapse-btn i {
+                    // Point right to indicate expand
+                    transform: rotate(180deg);
+                }
+            }
+        }
+
+        .graph-sidebar-right & {
+            .collapsible-header {
+                h3 {
+                    flex-direction: row;
+                }
+
+                .collapse-btn i {
+                    // Point left to indicate expand
+                    transform: rotate(180deg) !important;
+                }
+            }
+        }
+    }
+}
+
+.collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid $border-color;
+    transition: all $transition-normal;
+
+    &:hover {
+        background: $gray-50;
+    }
+
+    h3 {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        font-size: $font-size-base;
+        margin: 0;
+        color: $text-secondary;
+        white-space: nowrap;
+
+        i {
+            font-size: 14px;
+            color: $primary;
+        }
+    }
+
+    .graph-sidebar-right & {
+        flex-direction: row;
+
+        h3 {
+            order: 2;
+        }
+
+        .collapse-btn {
+            order: 1;
+        }
+    }
+}
+
+.collapse-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $gray-100;
+    border: none;
+    border-radius: 50%;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: all $transition-fast;
+    flex-shrink: 0;
+
+    &:hover {
+        background: $primary;
+        color: white;
+    }
+
+    i {
+        font-size: 12px;
+        transition: opacity $transition-fast;
+    }
+}
+
+.collapsible-content {
+    padding: $spacing-md;
+}
+
+// Left sidebar - Graph type selector
+.graph-type-selector {
+    .collapsible-content {
+        padding: $spacing-sm;
+    }
+}
+
+.graph-type-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+}
+
+.graph-type-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-md;
+    border: 2px solid $border-color;
+    border-radius: $border-radius;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover {
+        border-color: $primary-light;
+        background: rgba($primary, 0.02);
+    }
+
+    &.active {
+        border-color: $primary;
+        background: rgba($primary, 0.05);
+
+        .graph-type-icon {
+            color: $primary;
+        }
+    }
+}
+
+.graph-type-icon {
+    font-size: 24px;
+    color: $text-secondary;
+    width: 32px;
+    text-align: center;
+}
+
+.graph-type-label {
+    font-weight: $font-weight-medium;
+}
+
+// Center - Preview and Query
+.graph-main {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+    min-width: 0; // Prevent overflow
+}
+
+.graph-preview-card {
+    background: $bg-card;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-1;
+    padding: $spacing-lg;
+    flex: 1;
+    min-height: 400px;
+}
+
+.graph-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-md;
+
+    h3 {
+        margin: 0;
+    }
+}
+
+.graph-preview-container {
+    width: 100%;
+    height: 350px;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    background: $gray-50;
+}
+
+// Query section
+.graph-query-section {
+    background: $bg-card;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-1;
+    padding: $spacing-lg;
+}
+
+.query-tabs {
+    display: flex;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+    border-bottom: 1px solid $border-color;
+    padding-bottom: $spacing-sm;
+}
+
+.query-tab {
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $text-secondary;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -$spacing-sm - 1px;
+    transition: all $transition-fast;
+
+    &:hover {
+        color: $text-primary;
+    }
+
+    &.active {
+        color: $primary;
+        border-bottom-color: $primary;
+    }
+}
+
+.query-tab-content {
+    display: none;
+
+    &.active {
+        display: block;
+    }
+}
+
+// Right sidebar - Config panel
+.graph-config-panel {
+    h3 {
+        font-size: $font-size-base;
+        margin-bottom: $spacing-md;
+        color: $text-secondary;
+    }
+}
+
+.config-section {
+    margin-bottom: $spacing-lg;
+    padding-bottom: $spacing-md;
+    border-bottom: 1px solid $border-color;
+
+    &:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    h4 {
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        color: $text-secondary;
+        margin-bottom: $spacing-sm;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+}
+
+.config-field {
+    margin-bottom: $spacing-sm;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: $font-size-sm;
+        margin-bottom: $spacing-xs;
+    }
+}
+
+.config-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-xs 0;
+
+    span {
+        font-size: $font-size-sm;
+    }
+}
+
+// Toggle switch
+.toggle-switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    background: $gray-300;
+    border-radius: 11px;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &.active {
+        background: $primary;
+
+        &::after {
+            transform: translateX(18px);
+        }
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 18px;
+        height: 18px;
+        background: white;
+        border-radius: 50%;
+        transition: transform $transition-fast;
+        box-shadow: $shadow-1;
+    }
+}
+
+// Data mapper
+.data-mapper {
+    background: $bg-card;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    padding: $spacing-md;
+}
+
+.data-mapper-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-md;
+
+    h4 {
+        margin: 0;
+        font-size: $font-size-base;
+    }
+}
+
+.data-mapper-fields {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+}
+
+.data-mapper-field {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    label {
+        flex: 0 0 100px;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+    }
+
+    select, input {
+        flex: 1;
+    }
+
+}
+
+.columns-preview {
+    margin-top: $spacing-md;
+    padding: $spacing-sm;
+    background: $gray-50;
+    border-radius: $border-radius;
+    font-size: $font-size-sm;
+
+    strong {
+        display: block;
+        margin-bottom: $spacing-xs;
+        color: $text-secondary;
+    }
+
+    .column-tag {
+        display: inline-block;
+        padding: 2px $spacing-sm;
+        margin: 2px;
+        background: $primary;
+        color: white;
+        border-radius: 12px;
+        font-size: $font-size-sm;
+    }
+}
+
+// Save bar
+.graph-save-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md $spacing-lg;
+    background: $bg-card;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-1;
+}
+
+.graph-name-input {
+    flex: 1;
+    max-width: 400px;
+}
+
+.save-buttons {
+    display: flex;
+    gap: $spacing-sm;
+}

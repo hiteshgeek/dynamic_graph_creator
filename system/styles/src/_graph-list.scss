@@ -1,0 +1,228 @@
+// Graph List Page Styles
+@use 'variables' as *;
+
+.graph-list-page {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.graph-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-lg;
+
+    h1 {
+        margin: 0;
+    }
+}
+
+.graph-list-card {
+    background: $bg-card;
+    border-radius: $border-radius-lg;
+    box-shadow: $shadow-1;
+    overflow: hidden;
+}
+
+.graph-list-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+        background: $gray-50;
+        padding: $spacing-md;
+        text-align: left;
+        font-weight: $font-weight-medium;
+        color: $text-secondary;
+        font-size: $font-size-sm;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid $border-color;
+    }
+
+    td {
+        padding: $spacing-md;
+        border-bottom: 1px solid $border-color;
+        vertical-align: middle;
+    }
+
+    tbody tr {
+        transition: background $transition-fast;
+
+        &:hover {
+            background: $gray-50;
+        }
+
+        &:last-child td {
+            border-bottom: none;
+        }
+    }
+}
+
+.graph-name-cell {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+}
+
+.graph-type-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: $border-radius;
+    font-size: 18px;
+
+    &.bar {
+        background: rgba(#1976D2, 0.1);
+        color: #1976D2;
+    }
+
+    &.line {
+        background: rgba(#4CAF50, 0.1);
+        color: #4CAF50;
+    }
+
+    &.pie {
+        background: rgba(#FF9800, 0.1);
+        color: #FF9800;
+    }
+}
+
+.graph-name {
+    font-weight: $font-weight-medium;
+}
+
+.graph-description {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    margin-top: 2px;
+}
+
+.graph-date {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+}
+
+.graph-actions {
+    display: flex;
+    gap: $spacing-xs;
+}
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: $border-radius;
+    border: 1px solid $border-color;
+    background: transparent;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover {
+        background: $gray-100;
+        color: $text-primary;
+    }
+
+    &.view-btn:hover {
+        background: rgba($info, 0.1);
+        border-color: $info;
+        color: $info;
+    }
+
+    &.edit-btn:hover {
+        background: rgba($primary, 0.1);
+        border-color: $primary;
+        color: $primary;
+    }
+
+    &.delete-btn:hover {
+        background: rgba($error, 0.1);
+        border-color: $error;
+        color: $error;
+    }
+}
+
+// Empty state
+.graph-list-empty {
+    padding: $spacing-xl * 2;
+    text-align: center;
+
+    > i {
+        font-size: 64px;
+        color: $gray-300;
+        margin-bottom: $spacing-lg;
+        display: block;
+    }
+
+    h3 {
+        color: $text-secondary;
+        margin-bottom: $spacing-sm;
+    }
+
+    p {
+        color: $text-hint;
+        margin-bottom: $spacing-lg;
+    }
+
+    .btn {
+        padding: $spacing-md $spacing-lg;
+        font-size: $font-size-base;
+        text-transform: none;
+        letter-spacing: normal;
+
+        i {
+            font-size: 16px;
+        }
+    }
+}
+
+// Delete confirmation modal
+.delete-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: $z-modal;
+    opacity: 0;
+    visibility: hidden;
+    transition: all $transition-fast;
+
+    &.active {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+.delete-modal-content {
+    background: $bg-card;
+    border-radius: $border-radius-lg;
+    padding: $spacing-lg;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: $shadow-3;
+
+    h3 {
+        margin-bottom: $spacing-md;
+    }
+
+    p {
+        color: $text-secondary;
+    }
+}
+
+.delete-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-sm;
+    margin-top: $spacing-lg;
+}

@@ -1,0 +1,217 @@
+// Generic Filter Styles (Reusable)
+@use 'variables' as *;
+
+.filter-manager {
+    background: $bg-card;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    padding: $spacing-md;
+}
+
+.filter-manager-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $border-color;
+
+    h4 {
+        margin: 0;
+        font-size: $font-size-base;
+        font-weight: $font-weight-medium;
+    }
+}
+
+.filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+}
+
+.filter-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    gap: $spacing-sm;
+    align-items: start;
+    padding: $spacing-sm;
+    background: $gray-50;
+    border-radius: $border-radius;
+    border: 1px solid $border-color;
+
+    &:hover {
+        border-color: $gray-400;
+    }
+}
+
+.filter-item-field {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    label {
+        font-size: $font-size-sm;
+        color: $text-secondary;
+        font-weight: $font-weight-medium;
+    }
+
+    input, select {
+        padding: $spacing-xs $spacing-sm;
+        font-size: $font-size-sm;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        background: $bg-card;
+
+        &:focus {
+            outline: none;
+            border-color: $primary;
+        }
+    }
+}
+
+.filter-remove-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin-top: 20px;
+    background: transparent;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    color: $error;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover {
+        background: $error-bg;
+        border-color: $error;
+    }
+}
+
+.filter-add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
+    color: $primary;
+    background: transparent;
+    border: 1px dashed $primary;
+    border-radius: $border-radius;
+    cursor: pointer;
+    transition: all $transition-fast;
+    margin-top: $spacing-sm;
+
+    &:hover {
+        background: rgba($primary, 0.05);
+    }
+}
+
+.filter-empty {
+    padding: $spacing-lg;
+    text-align: center;
+    color: $text-secondary;
+    font-size: $font-size-sm;
+}
+
+// Filter inputs for viewing/applying filters
+.filter-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+    padding: $spacing-md;
+    background: $gray-50;
+    border-radius: $border-radius;
+    margin-bottom: $spacing-lg;
+}
+
+.filter-input-group {
+    flex: 1 1 200px;
+    min-width: 150px;
+    max-width: 300px;
+
+    label {
+        display: block;
+        margin-bottom: $spacing-xs;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        color: $text-secondary;
+    }
+
+    input, select {
+        width: 100%;
+        padding: $spacing-sm;
+        border: 1px solid $border-color;
+        border-radius: $border-radius;
+        font-size: $font-size-base;
+        background: $bg-card;
+
+        &:focus {
+            outline: none;
+            border-color: $primary;
+            box-shadow: 0 0 0 3px rgba($primary, 0.1);
+        }
+    }
+}
+
+.filter-input-group-date-range {
+    display: flex;
+    gap: $spacing-sm;
+
+    input {
+        flex: 1;
+    }
+}
+
+.filter-apply-btn {
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+// Select options editor
+.filter-options-editor {
+    margin-top: $spacing-sm;
+    padding: $spacing-sm;
+    background: $bg-card;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+}
+
+.filter-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    max-height: 150px;
+    overflow-y: auto;
+    margin-bottom: $spacing-sm;
+}
+
+.filter-option-item {
+    display: flex;
+    gap: $spacing-xs;
+    align-items: center;
+
+    input {
+        flex: 1;
+        padding: $spacing-xs;
+        font-size: $font-size-sm;
+    }
+
+    button {
+        padding: $spacing-xs;
+        background: transparent;
+        border: none;
+        color: $error;
+        cursor: pointer;
+    }
+}
+
+.filter-option-add {
+    display: flex;
+    gap: $spacing-xs;
+
+    input {
+        flex: 1;
+    }
+}
