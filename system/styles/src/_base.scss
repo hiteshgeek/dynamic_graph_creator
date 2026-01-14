@@ -115,7 +115,8 @@ a {
     color: $text-primary;
 
     &:hover:not(:disabled) {
-        background: $gray-300;
+        background: $gray-400;
+        color: $gray-900;
     }
 }
 
