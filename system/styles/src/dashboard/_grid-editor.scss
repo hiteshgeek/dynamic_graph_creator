@@ -9,10 +9,9 @@ $grid-gap: $spacing-md;
 .template-preview-page {
   background: white;
 
-  // Container-fluid uses horizontal padding only; top spacing from body > .container-fluid
+  // Container-fluid: remove all default padding, dashboard-preview handles spacing
   .container-fluid {
-    padding-left: 0;
-    padding-right: 0;
+    padding: 0;
   }
 
   .dashboard-preview {
@@ -21,11 +20,15 @@ $grid-gap: $spacing-md;
   }
 }
 
-// Builder pages - keep default spacing
+// Builder pages - handle their own spacing
 .dashboard-builder-page,
 .template-builder-page {
   background: white;
-  // Top spacing handled by body > .dashboard-builder rule in _common.scss
+
+  // Override body > .dashboard-builder padding, builder-main handles spacing
+  .dashboard-builder {
+    padding-top: 0;
+  }
 }
 
 .dashboard-sections {
