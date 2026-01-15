@@ -163,22 +163,22 @@ class DashboardBuilder {
     const modal = document.getElementById("template-modal");
     const body = modal.querySelector(".modal-body");
 
-    const categories = {
-      columns: "Column Dashboards",
-      rows: "Row Dashboards",
-      mixed: "Mixed Dashboards",
-      advanced: "Advanced Dashboards",
-    };
-
     let html = "";
 
-    for (const [category, label] of Object.entries(categories)) {
-      if (templates[category] && templates[category].length > 0) {
+    // Iterate through each category group
+    for (const [categorySlug, categoryData] of Object.entries(templates)) {
+      if (categoryData.templates && categoryData.templates.length > 0) {
+        const categoryName = categoryData.category.name || categorySlug;
+        const categoryDescription = categoryData.category.description || "";
+
         html += `<div class="template-category">
-                    <h3>${label}</h3>
+                    <div class="template-category-header">
+                        <h3>${categoryName.toUpperCase()}</h3>
+                        ${categoryDescription ? `<p>${categoryDescription}</p>` : ''}
+                    </div>
                     <div class="template-grid">`;
 
-        templates[category].forEach((template) => {
+        categoryData.templates.forEach((template) => {
           html += `<div class="template-card" data-template-id="${
             template.dtid
           }">
@@ -727,10 +727,20 @@ class DashboardBuilder {
 
     // Template modal close
     const modalClose = document.querySelector(
-      ".template-modal .modal-close"
+      "#template-modal .modal-close"
     );
     if (modalClose) {
       modalClose.addEventListener("click", () => {
+        document.getElementById("template-modal").style.display = "none";
+      });
+    }
+
+    // Template modal overlay close
+    const modalOverlay = document.querySelector(
+      "#template-modal .modal-overlay"
+    );
+    if (modalOverlay) {
+      modalOverlay.addEventListener("click", () => {
         document.getElementById("template-modal").style.display = "none";
       });
     }

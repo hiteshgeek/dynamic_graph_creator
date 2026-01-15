@@ -72,17 +72,35 @@
       padding: $spacing-md;
 
       .template-category {
-        margin-bottom: $spacing-md;
+        margin-bottom: $spacing-lg;
+        padding-bottom: $spacing-lg;
+        border-bottom: 2px solid #e0e0e0;
 
         &:last-child {
           margin-bottom: 0;
+          padding-bottom: 0;
+          border-bottom: none;
         }
 
-        h3 {
-          font-size: 1rem;
-          font-weight: 600;
-          color: #212529;
+        .template-category-header {
           margin-bottom: $spacing-md;
+          padding-left: $spacing-md;
+          border-left: 4px solid $primary;
+
+          h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #495057;
+            margin: 0 0 0.25rem 0;
+          }
+
+          p {
+            font-size: 0.813rem;
+            color: #6c757d;
+            margin: 0;
+            line-height: 1.4;
+          }
         }
 
         .template-grid {
@@ -104,7 +122,7 @@
   transition: border-color 0.3s;
 
   &:hover {
-    border-color: #007bff;
+    border-color: $primary;
   }
 
   .template-preview {

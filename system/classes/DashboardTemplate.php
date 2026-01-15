@@ -204,7 +204,7 @@ class DashboardTemplate implements DatabaseObject
                     ltc.display_order as category_order
                 FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " lt
                 LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " ltc ON lt.dtcid = ltc.dtcid
-                WHERE lt.dtsid != 3 AND (ltc.ltcsid != 3 OR lt.dtcid IS NULL)
+                WHERE lt.dtsid != 3 AND (ltc.dtcsid != 3 OR lt.dtcid IS NULL)
                 ORDER BY ltc.display_order ASC, ltc.name ASC, lt.display_order ASC, lt.name ASC";
         $res = $db->query($sql);
 

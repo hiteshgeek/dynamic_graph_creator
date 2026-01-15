@@ -179,9 +179,9 @@
             }
 
             &.active {
-                background: #007bff;
+                background: $primary;
                 color: white;
-                border-color: #007bff;
+                border-color: $primary;
             }
         }
     }

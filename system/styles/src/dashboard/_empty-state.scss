@@ -25,11 +25,11 @@
 
     &:hover {
         .empty-state-icon {
-            color: #007bff;
+            color: $primary;
         }
 
         .empty-state-message {
-            color: #007bff;
+            color: $primary;
         }
     }
 }

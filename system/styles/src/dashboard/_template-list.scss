@@ -24,7 +24,7 @@
       letter-spacing: 0.5px;
       padding: 0.5rem 1rem;
       background: white;
-      border-left: 4px solid #007bff;
+      border-left: 4px solid $primary;
       border-radius: 0 4px 4px 0;
       display: inline-block;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
@@ -50,7 +50,7 @@
     height: 100%;
 
     &:hover {
-      border-color: #007bff;
+      border-color: $primary;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
@@ -143,11 +143,11 @@
         flex-shrink: 0;
 
         &.btn-primary {
-          border-color: #007bff;
-          color: #007bff;
+          border-color: $primary;
+          color: $primary;
 
           &:hover {
-            background: #007bff;
+            background: $primary;
             color: white;
           }
         }

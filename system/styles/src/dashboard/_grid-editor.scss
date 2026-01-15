@@ -45,7 +45,7 @@
     transition: all 0.3s;
 
     &:hover {
-        border-color: #007bff;
+        border-color: $primary;
         box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
 
         .section-controls {
@@ -131,7 +131,7 @@
 
     &:hover {
         background: white;
-        border-color: #007bff;
+        border-color: $primary;
         box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
     }
 
@@ -172,7 +172,7 @@
 
     &:hover {
         background: white;
-        border-color: #28a745;
-        box-shadow: 0 2px 6px rgba(40, 167, 69, 0.1);
+        border-color: $primary;
+        box-shadow: 0 2px 6px rgba(0, 123, 255, 0.1);
     }
 }

@@ -1,4 +1,5 @@
 // Dashboard List Page Styles
+@use "../variables" as *;
 
 .dashboard-list-page {
   .dashboard-empty-state {
@@ -40,7 +41,7 @@
     padding: 1rem;
 
     &:hover {
-      border-color: #007bff;
+      border-color: $primary;
     }
 
     .dashboard-card-content {
@@ -90,11 +91,11 @@
         font-size: 0.875rem;
 
         &.btn-primary {
-          border-color: #007bff;
-          color: #007bff;
+          border-color: $primary;
+          color: $primary;
 
           &:hover {
-            background: #007bff;
+            background: $primary;
             color: white;
           }
         }
