@@ -47,13 +47,13 @@
                 <div class="card-header">
                     <div class="card-header-left">
                         <h2>My Dashboards</h2>
-                        <span class="text-muted"><?php echo count($layouts); ?> dashboard<?php echo count($layouts) !== 1 ? 's' : ''; ?></span>
+                        <span class="text-muted"><?php echo count($dashboards); ?> dashboard<?php echo count($dashboards) !== 1 ? 's' : ''; ?></span>
                     </div>
                 </div>
             </div>
             -->
 
-            <?php if (empty($layouts)): ?>
+            <?php if (empty($dashboards)): ?>
             <div class="dashboard-empty-state">
                 <i class="fas fa-th-large"></i>
                 <p>No dashboards created yet</p>
@@ -61,24 +61,24 @@
             </div>
             <?php else: ?>
             <div class="dashboard-grid">
-                <?php foreach ($layouts as $layout): ?>
-                <div class="dashboard-card" data-layout-id="<?php echo $layout->getId(); ?>">
+                <?php foreach ($dashboards as $dashboard): ?>
+                <div class="dashboard-card" data-dashboard-id="<?php echo $dashboard->getId(); ?>">
                     <div class="dashboard-card-content">
-                        <h3><?php echo htmlspecialchars($layout->getName()); ?></h3>
+                        <h3><?php echo htmlspecialchars($dashboard->getName()); ?></h3>
                         <div class="dashboard-meta">
                             <span class="meta-item">
                                 <i class="fas fa-clock"></i>
-                                <?php echo date('M d, Y', strtotime($layout->getUpdatedTs())); ?>
+                                <?php echo date('M d, Y', strtotime($dashboard->getUpdatedTs())); ?>
                             </span>
                         </div>
                     </div>
                     <div class="dashboard-card-actions">
-                        <a href="?urlq=dashboard/preview/<?php echo $layout->getId(); ?>"
+                        <a href="?urlq=dashboard/preview/<?php echo $dashboard->getId(); ?>"
                            class="btn-icon btn-primary"
                            title="View Dashboard">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a href="?urlq=dashboard/builder/<?php echo $layout->getId(); ?>"
+                        <a href="?urlq=dashboard/builder/<?php echo $dashboard->getId(); ?>"
                            class="btn-icon btn-warning"
                            title="Edit Dashboard">
                             <i class="fas fa-pencil"></i>
@@ -103,7 +103,7 @@
     <?php endif; ?>
 
     <script>
-        // Layout list page - no additional functionality needed
+        // Dashboard list page - no additional functionality needed
     </script>
 </body>
 </html>

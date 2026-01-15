@@ -20,7 +20,7 @@ $theme->addScript(SystemConfig::scriptsUrl() . "error_handling/debug_control.js"
 $theme->addScript(SystemConfig::scriptsUrl() . "error_handling/error_handling.js");
 $theme->addCss(SystemConfig::stylesUrl() . "error_handling/error_handling.css");
 
-$theme->addCss(SystemConfig::stylesUrl() . "dashboard/layout_builder.css");
+$theme->addCss(SystemConfig::stylesUrl() . "dashboard/dashboard_builder.css");
 
 $url[1] = isset($url[1]) ? $url[1] : 'main_dashboard'; //sales
 //    ini_set('display_errors', true);
@@ -46,8 +46,8 @@ if (isset($_POST['submit'])) {
             case "save_dashboard_permissions":
                   saveDashboardPermissions($_POST);
                   break;
-            case "save_layout":
-                  saveLayout($_POST);
+            case "save_dashboard":
+                  saveDashboard($_POST);
                   break;
             case "dashboard-render":
                   dashboard_render($_POST);
@@ -158,12 +158,12 @@ switch ($url[1]) {
                   if (count($url) > 2) {
                         switch ($url[2]) {
                               case "load":
-                                    getDashboardLayout($url[1]);
+                                    getDashboardDashboard($url[1]);
                                     break;
                         }
                   }
 
-                  //layout builder files
+                  //dashboard builder files
 
                   $theme->setContent("full_main", new_dashboard());
                   break;
@@ -468,7 +468,7 @@ function new_dashboard()
       $theme->addCss(SystemConfig::stylesUrl() . "dashboard/dashboard_permission.css");
       $theme->addCss(SystemConfig::stylesUrl() . "dashboard/counter.css");
 
-      $theme->addScript(SystemConfig::scriptsUrl() . "dashboard/layout_builder.js");
+      $theme->addScript(SystemConfig::scriptsUrl() . "dashboard/dashboard_builder.js");
 
       $tpl = new Template(SystemConfig::templatesPath() . "dashboard/new-dashboard");
 
@@ -597,46 +597,46 @@ function dashboard_sales_submit($data)
       Utility::ajaxResponseTrue("Dashboard Sales Settings Updated Successfully");
 }
 
-function getDashboardLayout($id)
+function getDashboardDashboard($id)
 {
-      $dashboard_layout = new DashboardLayout($id);
-      if (!$dashboard_layout->getId()) {
-            Utility::ajaxResponseFalse("Layout not found");
+      $dashboard_dashboard = new DashboardDashboard($id);
+      if (!$dashboard_dashboard->getId()) {
+            Utility::ajaxResponseFalse("Dashboard not found");
       }
 
-      Utility::ajaxResponseTrue("Layout loaded successfully", $dashboard_layout->toArray());
+      Utility::ajaxResponseTrue("Dashboard loaded successfully", $dashboard_dashboard->toArray());
 }
 
 function editNewDashboard($data)
 {
       $id = $data['id'];
       $user = SystemConfig::getUser();
-      $dashboard_layout = new DashboardLayout($id);
+      $dashboard_dashboard = new DashboardDashboard($id);
 
-      if (!$dashboard_layout->getId()) {
+      if (!$dashboard_dashboard->getId()) {
             Utility::ajaxResponseFalse("Dashboard not found");
       }
 
-      $dashboard_layout->setName($data['name']);
+      $dashboard_dashboard->setName($data['name']);
 
-      if (!$dashboard_layout->update()) {
+      if (!$dashboard_dashboard->update()) {
             Utility::ajaxResponseFalse("Failed to update new dashboard");
       } else {
-            Utility::ajaxResponseTrue("Dashboard updated successfully", ["name" => $dashboard_layout->getName()]);
+            Utility::ajaxResponseTrue("Dashboard updated successfully", ["name" => $dashboard_dashboard->getName()]);
       }
 }
 
 function createNewDashboard($data)
 {
-      $default_layout = [
+      $default_dashboard = [
             [
                   "columnWrappers" => [
                         [
-                              "layoutCol" => 2,
+                              "dashboardCol" => 2,
                               "columns" => [[]]
                         ],
                         [
-                              "layoutCol" => 2,
+                              "dashboardCol" => 2,
                               "columns" => [[]]
                         ]
                   ],
@@ -645,16 +645,16 @@ function createNewDashboard($data)
       ];
 
       $user = SystemConfig::getUser();
-      $dashboard_layout = new DashboardLayout();
-      $dashboard_layout->setName($data['name']);
-      $dashboard_layout->setDescription('');
-      $dashboard_layout->setData(json_encode($default_layout));
-      $dashboard_layout->setCompanyId($user->getCompanyId());
+      $dashboard_dashboard = new DashboardDashboard();
+      $dashboard_dashboard->setName($data['name']);
+      $dashboard_dashboard->setDescription('');
+      $dashboard_dashboard->setData(json_encode($default_dashboard));
+      $dashboard_dashboard->setCompanyId($user->getCompanyId());
 
-      if (!$dashboard_layout->insert()) {
+      if (!$dashboard_dashboard->insert()) {
             Utility::ajaxResponseFalse("Failed to create new dashboard");
       } else {
-            Utility::ajaxResponseTrue("Dashboard created successfully", ["new_dashboard_id" => $dashboard_layout->getId()]);
+            Utility::ajaxResponseTrue("Dashboard created successfully", ["new_dashboard_id" => $dashboard_dashboard->getId()]);
       }
 }
 
@@ -671,7 +671,7 @@ function deleteDashboard($data)
 {
       $dlid = isset($data['id']) ? intval($data['id']) : 0;
 
-      DashboardLayout::delete($dlid);
+      DashboardDashboard::delete($dlid);
 
       Utility::ajaxResponseTrue("Dashboard deleted successfully");
 }
@@ -772,32 +772,32 @@ function saveDashboardPermissions($data)
       }
 }
 
-function saveLayout($data)
+function saveDashboard($data)
 {
       $is_edit = false;
       if (isset($data['id']) && !empty($data['id'])) {
             $is_edit = true;
-            $dashboard_layout = new DashboardLayout($data['id']);
+            $dashboard_dashboard = new DashboardDashboard($data['id']);
       } else {
-            $dashboard_layout = new DashboardLayout();
+            $dashboard_dashboard = new DashboardDashboard();
       }
 
-      $dashboard_layout->setName($data['name']);
-      $dashboard_layout->setDescription('');
-      $dashboard_layout->setData($data['data']);
-      $dashboard_layout->setCompanyId(BaseConfig::$company_id);
+      $dashboard_dashboard->setName($data['name']);
+      $dashboard_dashboard->setDescription('');
+      $dashboard_dashboard->setData($data['data']);
+      $dashboard_dashboard->setCompanyId(BaseConfig::$company_id);
 
       if ($is_edit) {
-            if (!$dashboard_layout->update()) {
-                  Utility::ajaxResponseFalse("Failed to save layout");
+            if (!$dashboard_dashboard->update()) {
+                  Utility::ajaxResponseFalse("Failed to save dashboard");
             }
       } else {
-            if (!$dashboard_layout->insert()) {
-                  Utility::ajaxResponseFalse("Failed to save layout");
+            if (!$dashboard_dashboard->insert()) {
+                  Utility::ajaxResponseFalse("Failed to save dashboard");
             }
       }
 
-      Utility::ajaxResponseTrue("Layout saved successfully", ["id" => $dashboard_layout->getId()]);
+      Utility::ajaxResponseTrue("Dashboard saved successfully", ["id" => $dashboard_dashboard->getId()]);
 }
 
 // function move_links()

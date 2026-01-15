@@ -1,7 +1,7 @@
 <?php
 
 /**
- * LayoutBuilder - Helper utilities for layout manipulation
+ * DashboardBuilder - Helper utilities for dashboard manipulation
  *
  * @author Dynamic Graph Creator
  */
@@ -27,7 +27,7 @@ class DashboardBuilder
     }
 
     /**
-     * Validate layout structure
+     * Validate dashboard structure
      */
     public static function validateStructure($structure)
     {
@@ -107,13 +107,13 @@ class DashboardBuilder
 
         // Mobile breakpoint
         $css[] = "@media (max-width: {$mobile}px) {";
-        $css[] = "  .layout-section { grid-template-columns: 1fr !important; }";
-        $css[] = "  .layout-area { grid-column: span 1 !important; }";
+        $css[] = "  .dashboard-section { grid-template-columns: 1fr !important; }";
+        $css[] = "  .dashboard-area { grid-column: span 1 !important; }";
         $css[] = "}";
 
         // Tablet breakpoint
         $css[] = "@media (min-width: " . ($mobile + 1) . "px) and (max-width: {$tablet}px) {";
-        $css[] = "  .layout-section[data-columns='3'], .layout-section[data-columns='4'] {";
+        $css[] = "  .dashboard-section[data-columns='3'], .dashboard-section[data-columns='4'] {";
         $css[] = "    grid-template-columns: repeat(2, 1fr) !important;";
         $css[] = "  }";
         $css[] = "}";
@@ -203,7 +203,7 @@ class DashboardBuilder
     }
 
     /**
-     * Count total areas in layout
+     * Count total areas in dashboard
      */
     public static function countAreas($structure)
     {

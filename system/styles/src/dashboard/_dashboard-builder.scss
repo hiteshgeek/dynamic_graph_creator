@@ -1,4 +1,4 @@
-// Layout Builder Styles
+// Dashboard Builder Styles
 @use '../variables' as *;
 
 .dashboard-builder {
@@ -23,7 +23,7 @@
 
     // Choose Template Card now uses shared .dashboard-empty-sections styles from _empty-state.scss
 
-    // Layout sections - no vertical centering
+    // Dashboard sections - no vertical centering
     .dashboard-sections {
         position: relative;
     }
@@ -187,7 +187,7 @@
     }
 }
 
-// Layout Name Editor
+// Dashboard Name Editor
 .dashboard-name-editor {
     display: flex;
     align-items: center;

@@ -98,7 +98,7 @@ export class TemplateManager {
         } else {
           // Not on template list page (e.g., preview page), redirect to template list
           setTimeout(() => {
-            window.location.href = "?urlq=layout/templates";
+            window.location.href = "?urlq=dashboard/templates";
           }, 500);
         }
       } else {

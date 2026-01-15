@@ -1,5 +1,5 @@
 /**
- * Layout Module Entry Point
+ * Dashboard Module Entry Point
  * Simplified version for initial implementation
  */
 
@@ -13,16 +13,16 @@ const Ajax = window.Ajax;
 const ConfirmDialog = window.ConfirmDialog;
 
 /**
- * Layout Builder - Main orchestrator
+ * Dashboard Builder - Main orchestrator
  */
 class DashboardBuilder {
   constructor(container, options = {}) {
     this.container = container;
-    this.mode = options.mode || "dashboard"; // 'layout' or 'template'
-    this.layoutId = options.layoutId || null;
+    this.mode = options.mode || "dashboard"; // 'dashboard' or 'template'
+    this.dashboardId = options.dashboardId || null;
     this.templateId = options.templateId || null;
     this.isReadOnly = options.isReadOnly || false;
-    this.currentLayout = null;
+    this.currentDashboard = null;
     this.isDirty = false;
     this.isSaving = false;
     this.sortableInstance = null;
@@ -34,8 +34,8 @@ class DashboardBuilder {
   init() {
     if (this.mode === "template" && this.templateId) {
       this.loadTemplate();
-    } else if (this.layoutId) {
-      this.loadLayout();
+    } else if (this.dashboardId) {
+      this.loadDashboard();
     } else {
       this.showTemplateSelector();
     }
@@ -55,15 +55,15 @@ class DashboardBuilder {
       const result = await Ajax.post("get_template", { id: this.templateId });
 
       if (result.success && result.data) {
-        // Convert template to layout-like structure for rendering
-        this.currentLayout = {
-          liid: null, // No layout instance ID
+        // Convert template to dashboard-like structure for rendering
+        this.currentDashboard = {
+          liid: null, // No dashboard instance ID
           ltid: result.data.ltid,
           name: result.data.name,
           structure: result.data.structure,
           is_system: result.data.is_system,
         };
-        this.renderLayout();
+        this.renderDashboard();
       } else {
         Toast.error(result.message || "Failed to load template");
       }
@@ -75,8 +75,8 @@ class DashboardBuilder {
     }
   }
 
-  async loadLayout() {
-    if (!this.layoutId) {
+  async loadDashboard() {
+    if (!this.dashboardId) {
       console.error("No dashboard ID specified");
       return;
     }
@@ -84,11 +84,11 @@ class DashboardBuilder {
     Loading.show("Loading dashboard...");
 
     try {
-      const result = await Ajax.post("get_dashboard", { id: this.layoutId });
+      const result = await Ajax.post("get_dashboard", { id: this.dashboardId });
 
       if (result.success) {
-        this.currentLayout = result.data;
-        this.renderLayout();
+        this.currentDashboard = result.data;
+        this.renderDashboard();
       } else {
         Toast.error(result.message);
       }
@@ -164,10 +164,10 @@ class DashboardBuilder {
     const body = modal.querySelector(".modal-body");
 
     const categories = {
-      columns: "Column Layouts",
-      rows: "Row Layouts",
-      mixed: "Mixed Layouts",
-      advanced: "Advanced Layouts",
+      columns: "Column Dashboards",
+      rows: "Row Dashboards",
+      mixed: "Mixed Dashboards",
+      advanced: "Advanced Dashboards",
     };
 
     let html = "";
@@ -217,41 +217,41 @@ class DashboardBuilder {
     try {
       const result = await Ajax.post("create_from_template", {
         template_id: templateId,
-        name: "New Dashboard Layout",
+        name: "New Dashboard",
       });
 
       if (result.success) {
-        this.layoutId = result.data.id;
+        this.dashboardId = result.data.id;
 
-        // Update URL to include layout ID (for refresh persistence)
-        const newUrl = `?urlq=dashboard/builder/${this.layoutId}`;
-        window.history.pushState({ layoutId: this.layoutId }, "", newUrl);
+        // Update URL to include dashboard ID (for refresh persistence)
+        const newUrl = `?urlq=dashboard/builder/${this.dashboardId}`;
+        window.history.pushState({ dashboardId: this.dashboardId }, "", newUrl);
 
         // Update container data attribute
-        this.container.dataset.layoutId = this.layoutId;
+        this.container.dataset.dashboardId = this.dashboardId;
 
         // Update page title
-        document.title = "Edit Layout - Dynamic Graph Creator";
+        document.title = "Edit Dashboard - Dynamic Graph Creator";
 
         // Update header title
         const headerTitle = document.querySelector(".page-header-left h1");
         if (headerTitle) {
-          headerTitle.textContent = "Edit Layout";
+          headerTitle.textContent = "Edit Dashboard";
         }
 
-        // Show save indicator and View Layout button
+        // Show save indicator and View Dashboard button
         this.updateHeaderAfterCreation();
 
         // Update sidebar to show "Add Section" button instead of "Choose Template"
         this.updateSidebarAfterCreation();
 
-        // Load the layout
-        await this.loadLayout();
+        // Load the dashboard
+        await this.loadDashboard();
 
         // Close modal
         document.getElementById("template-modal").style.display = "none";
 
-        Toast.success("Layout created successfully");
+        Toast.success("Dashboard created successfully");
       } else {
         Toast.error(result.message);
       }
@@ -267,13 +267,13 @@ class DashboardBuilder {
 
     try {
       const result = await Ajax.post("add_section_from_template", {
-        layout_id: this.layoutId,
+        dashboard_id: this.dashboardId,
         template_id: templateId,
         position: this.pendingAddPosition,
       });
 
       if (result.success) {
-        await this.loadLayout();
+        await this.loadDashboard();
 
         // Close modal
         document.getElementById("template-modal").style.display = "none";
@@ -304,25 +304,25 @@ class DashboardBuilder {
       if (text) text.textContent = "Saved";
     }
 
-    // Add View Layout button if it doesn't exist
+    // Add View Dashboard button if it doesn't exist
     const headerRight = document.querySelector(".page-header-right");
-    if (headerRight && this.layoutId) {
+    if (headerRight && this.dashboardId) {
       const existingViewBtn = headerRight.querySelector(
         'a[href*="dashboard/preview"]'
       );
       if (!existingViewBtn) {
         const viewBtn = document.createElement("a");
-        viewBtn.href = `?urlq=dashboard/preview/${this.layoutId}`;
+        viewBtn.href = `?urlq=dashboard/preview/${this.dashboardId}`;
         viewBtn.className = "btn btn-primary";
-        viewBtn.title = "View Layout";
-        viewBtn.innerHTML = '<i class="fas fa-eye"></i> View Layout';
+        viewBtn.title = "View Dashboard";
+        viewBtn.innerHTML = '<i class="fas fa-eye"></i> View Dashboard';
         headerRight.appendChild(viewBtn);
       }
     }
   }
 
   updateSidebarAfterCreation() {
-    // Replace the choose-template-card with the layout sections container
+    // Replace the choose-template-card with the dashboard sections container
     const gridEditor = document.querySelector(".grid-editor");
     if (!gridEditor) return;
 
@@ -336,11 +336,11 @@ class DashboardBuilder {
         `;
   }
 
-  renderLayout() {
+  renderDashboard() {
     const sectionsContainer = this.container.querySelector(".dashboard-sections");
     if (!sectionsContainer) return;
 
-    const structure = JSON.parse(this.currentLayout.structure);
+    const structure = JSON.parse(this.currentDashboard.structure);
 
     let html = "";
 
@@ -390,7 +390,7 @@ class DashboardBuilder {
             );
             modal.show();
           } else {
-            // In layout mode, show template selector
+            // In dashboard mode, show template selector
             this.templateSelectorMode = "add-section";
             await this.showTemplateSelector();
           }
@@ -415,7 +415,7 @@ class DashboardBuilder {
             );
             modal.show();
           } else {
-            // In layout mode, show template selector
+            // In dashboard mode, show template selector
             this.templateSelectorMode = "add-section";
             await this.showTemplateSelector();
           }
@@ -428,7 +428,7 @@ class DashboardBuilder {
     let areasHtml = "";
 
     section.areas.forEach((area) => {
-      // Check if this area has sub-rows (nested layout)
+      // Check if this area has sub-rows (nested structure)
       if (area.hasSubRows && area.subRows && area.subRows.length > 0) {
         areasHtml += this.renderAreaWithSubRows(area);
       } else {
@@ -554,7 +554,7 @@ class DashboardBuilder {
     try {
       if (this.mode === "template") {
         // In template mode, directly modify the structure
-        const structure = JSON.parse(this.currentLayout.structure);
+        const structure = JSON.parse(this.currentDashboard.structure);
 
         // Create a map of sections by ID
         const sectionMap = {};
@@ -567,15 +567,15 @@ class DashboardBuilder {
           .map((sid) => sectionMap[sid])
           .filter((s) => s);
 
-        // Update current layout structure
-        this.currentLayout.structure = JSON.stringify(structure);
+        // Update current dashboard structure
+        this.currentDashboard.structure = JSON.stringify(structure);
 
         // Auto-save
-        await this.saveLayout(false);
+        await this.saveDashboard(false);
       } else {
-        // In layout mode, use API call
+        // In dashboard mode, use API call
         const result = await Ajax.post("reorder_sections", {
-          layout_id: this.layoutId,
+          dashboard_id: this.dashboardId,
           order: order,
         });
 
@@ -591,8 +591,8 @@ class DashboardBuilder {
     }
   }
 
-  async saveLayout(showToast = false) {
-    if (!this.currentLayout || this.isSaving) return;
+  async saveDashboard(showToast = false) {
+    if (!this.currentDashboard || this.isSaving) return;
 
     // Don't save if read-only (system templates)
     if (this.isReadOnly) {
@@ -610,13 +610,13 @@ class DashboardBuilder {
         this.mode === "template"
           ? {
               id: this.templateId,
-              structure: this.currentLayout.structure,
+              structure: this.currentDashboard.structure,
             }
           : {
-              layout_id: this.layoutId,
-              name: this.currentLayout.name,
-              structure: this.currentLayout.structure,
-              config: this.currentLayout.config || "{}",
+              dashboard_id: this.dashboardId,
+              name: this.currentDashboard.name,
+              structure: this.currentDashboard.structure,
+              config: this.currentDashboard.config || "{}",
             };
 
       const result = await Ajax.post(endpoint, data);
@@ -660,7 +660,7 @@ class DashboardBuilder {
       clearTimeout(this.autoSaveTimeout);
     }
     this.autoSaveTimeout = setTimeout(() => {
-      this.saveLayout(false);
+      this.saveDashboard(false);
     }, 2000);
   }
 
@@ -711,7 +711,7 @@ class DashboardBuilder {
       }
     });
 
-    // Choose template button (when no layout exists)
+    // Choose template button (when no dashboard exists)
     const chooseTemplateBtn = document.querySelector(".choose-template-btn");
     if (chooseTemplateBtn) {
       chooseTemplateBtn.addEventListener("click", () => {
@@ -781,7 +781,7 @@ class DashboardBuilder {
     try {
       if (this.mode === "template") {
         // In template mode, directly modify the structure
-        const structure = JSON.parse(this.currentLayout.structure);
+        const structure = JSON.parse(this.currentDashboard.structure);
 
         // Generate new section ID
         const newSectionId = "s" + Date.now();
@@ -813,26 +813,26 @@ class DashboardBuilder {
         // Insert section at position
         structure.sections.splice(position, 0, newSection);
 
-        // Update current layout structure
-        this.currentLayout.structure = JSON.stringify(structure);
+        // Update current dashboard structure
+        this.currentDashboard.structure = JSON.stringify(structure);
 
         // Re-render
-        this.renderLayout();
+        this.renderDashboard();
 
         // Auto-save
-        await this.saveLayout(false);
+        await this.saveDashboard(false);
 
         Toast.success("Section added");
       } else {
-        // In layout mode, use API call
+        // In dashboard mode, use API call
         const result = await Ajax.post("add_section", {
-          layout_id: this.layoutId,
+          dashboard_id: this.dashboardId,
           columns: columns,
           position: position,
         });
 
         if (result.success) {
-          await this.loadLayout();
+          await this.loadDashboard();
           Toast.success("Section added");
         } else {
           Toast.error(result.message);
@@ -857,12 +857,12 @@ class DashboardBuilder {
 
     try {
       const result = await Ajax.post("remove_section", {
-        layout_id: this.layoutId,
+        dashboard_id: this.dashboardId,
         section_id: sectionId,
       });
 
       if (result.success) {
-        await this.loadLayout();
+        await this.loadDashboard();
         Toast.success("Section removed");
       } else {
         Toast.error(result.message);

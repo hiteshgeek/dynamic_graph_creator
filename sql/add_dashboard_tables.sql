@@ -26,7 +26,7 @@ CREATE TABLE dashboard_template_category (
     INDEX idx_slug (slug),
     INDEX idx_display_order (display_order),
     INDEX idx_ltcsid (ltcsid)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Layout template categories';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Dashboard template categories';
 
 -- Dashboard Template Table (System templates and user-created templates)
 CREATE TABLE dashboard_template (
@@ -35,7 +35,7 @@ CREATE TABLE dashboard_template (
     description TEXT COMMENT 'Template description',
     ltcid INT(11) DEFAULT NULL COMMENT 'Category ID (foreign key to dashboard_template_category)',
     thumbnail VARCHAR(255) DEFAULT NULL COMMENT 'Preview image path',
-    structure TEXT NOT NULL COMMENT 'JSON layout structure',
+    structure TEXT NOT NULL COMMENT 'JSON dashboard structure',
     is_system TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=system template (protected), 0=user template',
     ltsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
     created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -48,16 +48,16 @@ CREATE TABLE dashboard_template (
     FOREIGN KEY (ltcid) REFERENCES dashboard_template_category(ltcid) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Dashboard dashboard templates';
 
--- Dashboard Instance Table (User layouts created from templates)
+-- Dashboard Instance Table (User dashboards created from templates)
 CREATE TABLE dashboard_instance (
     liid INT(11) AUTO_INCREMENT PRIMARY KEY,
     ltid INT(11) DEFAULT NULL COMMENT 'Source template ID (nullable)',
-    name VARCHAR(255) NOT NULL COMMENT 'Layout instance name',
-    description TEXT COMMENT 'Layout description',
-    structure TEXT NOT NULL COMMENT 'JSON layout structure with content',
+    name VARCHAR(255) NOT NULL COMMENT 'Dashboard instance name',
+    description TEXT COMMENT 'Dashboard description',
+    structure TEXT NOT NULL COMMENT 'JSON dashboard structure with content',
     config TEXT COMMENT 'JSON configuration (responsive breakpoints, etc)',
     company_id INT(11) DEFAULT NULL COMMENT 'Company association for multi-tenant',
-    user_id INT(11) DEFAULT NULL COMMENT 'User who owns this layout',
+    user_id INT(11) DEFAULT NULL COMMENT 'User who owns this dashboard',
     lisid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
     created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -68,20 +68,20 @@ CREATE TABLE dashboard_instance (
     INDEX idx_user_id (user_id),
     INDEX idx_lisid (lisid),
     FOREIGN KEY (ltid) REFERENCES dashboard_template(ltid) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User layout instances';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User dashboard instances';
 
 -- ============================================================================
 -- SYSTEM TEMPLATE CATEGORIES (4 total)
 -- ============================================================================
 
 INSERT INTO dashboard_template_category (slug, name, description, icon, color, display_order, is_system, ltcsid) VALUES
-('columns', 'Columns', 'Simple column-based layouts with equal or varied widths', 'fa-columns', '#007bff', 10, 1, 1),
-('mixed', 'Mixed', 'Mixed layouts with sidebars and unequal column ratios', 'fa-table-columns', '#6610f2', 20, 1, 1),
-('advanced', 'Advanced', 'Complex multi-section layouts with nested areas', 'fa-th', '#6f42c1', 30, 1, 1),
-('rows', 'Rows', 'Row-based layouts with stacked sections', 'fa-bars', '#d63384', 40, 1, 1);
+('columns', 'Columns', 'Simple column-based dashboards with equal or varied widths', 'fa-columns', '#007bff', 10, 1, 1),
+('mixed', 'Mixed', 'Mixed dashboards with sidebars and unequal column ratios', 'fa-table-columns', '#6610f2', 20, 1, 1),
+('advanced', 'Advanced', 'Complex multi-section dashboards with nested areas', 'fa-th', '#6f42c1', 30, 1, 1),
+('rows', 'Rows', 'Row-based dashboards with stacked sections', 'fa-bars', '#d63384', 40, 1, 1);
 
 -- ============================================================================
--- SYSTEM LAYOUT TEMPLATES (13 total)
+-- SYSTEM DASHBOARD TEMPLATES (13 total)
 -- CSS styling is handled entirely in SCSS, JSON only contains structure
 -- ============================================================================
 
@@ -89,7 +89,7 @@ INSERT INTO dashboard_template_category (slug, name, description, icon, color, d
 INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Single Column',
-    'Simple single column layout',
+    'Simple single column dashboard',
     (SELECT ltcid FROM dashboard_template_category WHERE slug = 'columns'),
     '{
         "sections": [
@@ -293,7 +293,7 @@ VALUES (
 INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Holy Grail',
-    'Classic three-column layout with navigation, content, and tools',
+    'Classic three-column dashboard with navigation, content, and tools',
     (SELECT ltcid FROM dashboard_template_category WHERE slug = 'mixed'),
     '{
         "sections": [

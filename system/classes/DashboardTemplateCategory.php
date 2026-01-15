@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Layout Template Category Class
+ * Dashboard Template Category Class
  * Manages template categories with ordering, icons, and colors
  */
 

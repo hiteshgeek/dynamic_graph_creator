@@ -161,7 +161,7 @@
             const templateId = parseInt(container.dataset.templateId);
             const isSystem = container.dataset.isSystem === '1';
 
-            // Initialize layout builder in template mode
+            // Initialize dashboard builder in template mode
             if (typeof DashboardBuilder !== 'undefined') {
                 window.dashboardBuilderInstance = new DashboardBuilder(container, {
                     mode: 'template',

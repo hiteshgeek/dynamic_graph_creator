@@ -1,7 +1,7 @@
 <?php
 
 /**
- * LayoutTemplate - Pre-defined layout templates
+ * DashboardTemplate - Pre-defined dashboard templates
  *
  * @author Dynamic Graph Creator
  */
@@ -10,7 +10,7 @@ class DashboardTemplate implements DatabaseObject
     private $ltid;
     private $name;
     private $description;
-    private $ltcid; // Foreign key to layout_template_category
+    private $ltcid; // Foreign key to dashboard_template_category
     private $thumbnail;
     private $structure; // JSON
     private $display_order;
@@ -252,7 +252,7 @@ class DashboardTemplate implements DatabaseObject
      */
     public function createInstance($userId, $name = null)
     {
-        $instance = new LayoutInstance();
+        $instance = new DashboardInstance();
         $instance->setLtid($this->ltid);
         $instance->setName($name ? $name : $this->name . ' (Copy)');
         $instance->setStructure($this->structure);

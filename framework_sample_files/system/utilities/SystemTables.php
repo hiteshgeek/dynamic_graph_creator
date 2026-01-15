@@ -2703,9 +2703,9 @@ class SystemTables
       const DB_TBL_DASHBOARD_GRAPH_TYPE = "dashboard_graph_type";
 
       /**
-       * dashboard layout tables
+       * dashboard dashboard tables
        */
-      const DB_TBL_DASHBOARD_LAYOUT = "dashboard_layout";
+      const DB_TBL_DASHBOARD_LAYOUT = "dashboard_dashboard";
       const DB_TBL_DASHBOARD_ELEMENT = "dashboard_element";
       const DB_TBL_DASHBOARD_COUNTER_OPTIONS = "dashboard_counter_options";
       const DB_TBL_DASHBOARD_LINK_OPTIONS = "dashboard_link_options";

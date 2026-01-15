@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $layout ? 'Edit Dashboard' : 'Create Dashboard'; ?> - Dynamic Graph Creator</title>
+    <title><?php echo $dashboard ? 'Edit Dashboard' : 'Create Dashboard'; ?> - Dynamic Graph Creator</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -30,13 +30,13 @@
             <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <?php if ($layout && $layout->getId()): ?>
+            <?php if ($dashboard && $dashboard->getId()): ?>
                 <div class="dashboard-name-editor">
-                    <h1 id="dashboard-name-display"><?php echo htmlspecialchars($layout->getName()); ?></h1>
+                    <h1 id="dashboard-name-display"><?php echo htmlspecialchars($dashboard->getName()); ?></h1>
                     <input type="text"
                         id="dashboard-name-input"
-                        class="form-control layout-name-input"
-                        value="<?php echo htmlspecialchars($layout->getName()); ?>"
+                        class="form-control dashboard-name-input"
+                        value="<?php echo htmlspecialchars($dashboard->getName()); ?>"
                         placeholder="Dashboard Name"
                         style="display: none;">
                     <button id="edit-name-btn" class="btn-icon btn-warning" title="Edit Name">
@@ -54,12 +54,12 @@
             <?php endif; ?>
         </div>
         <div class="page-header-right">
-            <?php if ($layout && $layout->getId()): ?>
+            <?php if ($dashboard && $dashboard->getId()): ?>
                 <div class="save-indicator saved" style="display: flex;">
                     <i class="fas fa-check-circle"></i>
                     <span>Saved</span>
                 </div>
-                <a href="?urlq=dashboard/preview/<?php echo $layout->getId(); ?>"
+                <a href="?urlq=dashboard/preview/<?php echo $dashboard->getId(); ?>"
                     class="btn btn-primary">
                     <i class="fas fa-eye"></i> View Dashboard
                 </a>
@@ -74,13 +74,13 @@
 
     <div id="dashboard-builder"
         class="dashboard-builder"
-        data-layout-id="<?php echo $layout ? $layout->getId() : ''; ?>"
+        data-dashboard-id="<?php echo $dashboard ? $dashboard->getId() : ''; ?>"
         data-breakpoint="desktop">
 
         <div class="builder-body">
             <div class="builder-main">
                 <div class="grid-editor">
-                    <?php if ($layout && $layout->getId()): ?>
+                    <?php if ($dashboard && $dashboard->getId()): ?>
                         <div class="dashboard-sections"></div>
                     <?php else: ?>
                         <div class="dashboard-empty-sections">
@@ -157,15 +157,15 @@
     <?php endif; ?>
 
     <script>
-        // Initialize layout builder when DOM is ready
+        // Initialize dashboard builder when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('dashboard-builder');
-            const layoutId = container.dataset.layoutId || null;
+            const dashboardId = container.dataset.dashboardId || null;
 
-            // Initialize layout builder
+            // Initialize dashboard builder
             if (typeof DashboardBuilder !== 'undefined') {
                 window.dashboardBuilderInstance = new DashboardBuilder(container, {
-                    layoutId: layoutId ? parseInt(layoutId) : null,
+                    dashboardId: dashboardId ? parseInt(dashboardId) : null,
                     mode: 'edit'
                 });
                 window.dashboardBuilderInstance.init();
@@ -173,14 +173,14 @@
                 console.error('DashboardBuilder not loaded. Make sure dashboard.js is included.');
             }
 
-            // Handle layout name editing
-            const nameDisplay = document.getElementById('layout-name-display');
-            const nameInput = document.getElementById('layout-name-input');
+            // Handle dashboard name editing
+            const nameDisplay = document.getElementById('dashboard-name-display');
+            const nameInput = document.getElementById('dashboard-name-input');
             const editBtn = document.getElementById('edit-name-btn');
             const saveBtn = document.getElementById('save-name-btn');
             const cancelBtn = document.getElementById('cancel-name-btn');
 
-            if (nameDisplay && nameInput && editBtn && saveBtn && cancelBtn && layoutId) {
+            if (nameDisplay && nameInput && editBtn && saveBtn && cancelBtn && dashboardId) {
                 // Edit button - show input, hide display
                 editBtn.addEventListener('click', function() {
                     nameDisplay.style.display = 'none';
@@ -206,7 +206,7 @@
                 saveBtn.addEventListener('click', function() {
                     const newName = nameInput.value.trim();
                     if (!newName) {
-                        Toast.error('Layout name cannot be empty');
+                        Toast.error('Dashboard name cannot be empty');
                         return;
                     }
 
@@ -215,13 +215,13 @@
                     cancelBtn.disabled = true;
                     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-                    Ajax.post('update_layout_name', {
-                            id: layoutId,
+                    Ajax.post('update_dashboard_name', {
+                            id: dashboardId,
                             name: newName
                         })
                         .then(result => {
                             if (result.success) {
-                                Toast.success('Layout name updated');
+                                Toast.success('Dashboard name updated');
                                 // Update display text and default value
                                 nameDisplay.textContent = newName;
                                 nameInput.defaultValue = newName;

@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Layout Controller
- * Handles layout builder actions
+ * Dashboard Controller
+ * Handles dashboard builder actions
  */
 
 $url = Utility::parseUrl();
@@ -18,16 +18,16 @@ if (isset($_POST['submit'])) {
             createFromTemplate($_POST);
             break;
         case 'save_dashboard':
-            saveLayout($_POST);
+            saveDashboard($_POST);
             break;
         case 'get_dashboard':
-            getLayout($_POST);
+            getDashboard($_POST);
             break;
         case 'delete_dashboard':
-            deleteLayout($_POST);
+            deleteDashboard($_POST);
             break;
-        case 'update_layout_name':
-            updateLayoutName($_POST);
+        case 'update_dashboard_name':
+            updateDashboardName($_POST);
             break;
         case 'update_area_content':
             updateAreaContent($_POST);
@@ -69,12 +69,12 @@ if (isset($_POST['submit'])) {
 // Handle GET actions
 switch ($action) {
     case 'builder':
-        $layoutId = isset($url[2]) ? intval($url[2]) : 0;
-        showBuilder($layoutId);
+        $dashboardId = isset($url[2]) ? intval($url[2]) : 0;
+        showBuilder($dashboardId);
         break;
     case 'preview':
-        $layoutId = isset($url[2]) ? intval($url[2]) : 0;
-        showPreview($layoutId);
+        $dashboardId = isset($url[2]) ? intval($url[2]) : 0;
+        showPreview($dashboardId);
         break;
     case 'templates':
         showTemplateList();
@@ -98,7 +98,7 @@ switch ($action) {
                 showTemplatePreview($templateId);
                 break;
             default:
-                Utility::redirect('layout/templates');
+                Utility::redirect('dashboard/templates');
                 break;
         }
         break;
@@ -109,28 +109,28 @@ switch ($action) {
 }
 
 /**
- * Show layout list
+ * Show dashboard list
  */
 function showList()
 {
-    // Get user's layouts - TODO: Replace with actual user ID from session
+    // Get user's dashboards - TODO: Replace with actual user ID from session
     $userId = 1;
-    $layouts = DashboardInstance::getUserLayouts($userId);
+    $dashboards = DashboardInstance::getUserDashboards($userId);
     require_once SystemConfig::templatesPath() . 'dashboard/dashboard-list.php';
 }
 
 /**
- * Show layout builder
+ * Show dashboard builder
  */
-function showBuilder($layoutId = 0)
+function showBuilder($dashboardId = 0)
 {
-    $layout = null;
+    $dashboard = null;
     $templates = DashboardTemplate::getAllGrouped();
 
-    if ($layoutId) {
-        $layout = new DashboardInstance($layoutId);
-        if (!$layout->getId()) {
-            Utility::redirect('layout');
+    if ($dashboardId) {
+        $dashboard = new DashboardInstance($dashboardId);
+        if (!$dashboard->getId()) {
+            Utility::redirect('dashboard');
             return;
         }
     }
@@ -139,13 +139,13 @@ function showBuilder($layoutId = 0)
 }
 
 /**
- * Show layout preview
+ * Show dashboard preview
  */
-function showPreview($layoutId)
+function showPreview($dashboardId)
 {
-    $layout = new DashboardInstance($layoutId);
-    if (!$layout->getId()) {
-        Utility::redirect('layout');
+    $dashboard = new DashboardInstance($dashboardId);
+    if (!$dashboard->getId()) {
+        Utility::redirect('dashboard');
         return;
     }
 
@@ -162,12 +162,12 @@ function getTemplates($data)
 }
 
 /**
- * Create new layout from template
+ * Create new dashboard from template
  */
 function createFromTemplate($data)
 {
     $templateId = isset($data['template_id']) ? intval($data['template_id']) : 0;
-    $name = isset($data['name']) ? $data['name'] : 'New Layout';
+    $name = isset($data['name']) ? $data['name'] : 'New Dashboard';
     // TODO: Get actual user ID from session
     $userId = 1;
 
@@ -182,21 +182,21 @@ function createFromTemplate($data)
 
     $instance = $template->createInstance($userId, $name);
     if (!$instance->insert()) {
-        Utility::ajaxResponseFalse('Failed to create layout');
+        Utility::ajaxResponseFalse('Failed to create dashboard');
     }
 
-    Utility::ajaxResponseTrue('Layout created', array(
+    Utility::ajaxResponseTrue('Dashboard created', array(
         'id' => $instance->getId(),
         'name' => $instance->getName()
     ));
 }
 
 /**
- * Save layout (create or update)
+ * Save dashboard (create or update)
  */
-function saveLayout($data)
+function saveDashboard($data)
 {
-    $layoutId = isset($data['layout_id']) ? intval($data['layout_id']) : 0;
+    $dashboardId = isset($data['dashboard_id']) ? intval($data['dashboard_id']) : 0;
     $name = isset($data['name']) ? $data['name'] : '';
     $structure = isset($data['structure']) ? $data['structure'] : '';
     $config = isset($data['config']) ? $data['config'] : '{}';
@@ -204,11 +204,11 @@ function saveLayout($data)
     $userId = 1;
 
     if (empty($name)) {
-        Utility::ajaxResponseFalse('Layout name is required');
+        Utility::ajaxResponseFalse('Dashboard name is required');
     }
 
     if (empty($structure)) {
-        Utility::ajaxResponseFalse('Layout structure is required');
+        Utility::ajaxResponseFalse('Dashboard structure is required');
     }
 
     // Validate structure
@@ -218,116 +218,116 @@ function saveLayout($data)
     }
 
     if (!DashboardBuilder::validateStructure($structureArray)) {
-        Utility::ajaxResponseFalse('Invalid layout structure');
+        Utility::ajaxResponseFalse('Invalid dashboard structure');
     }
 
-    $layout = $layoutId ? new DashboardInstance($layoutId) : new DashboardInstance();
+    $dashboard = $dashboardId ? new DashboardInstance($dashboardId) : new DashboardInstance();
 
-    // Check if user owns this layout (if editing)
-    if ($layoutId && $layout->getUserId() != $userId) {
+    // Check if user owns this dashboard (if editing)
+    if ($dashboardId && $dashboard->getUserId() != $userId) {
         Utility::ajaxResponseFalse('Unauthorized');
     }
 
-    $layout->setName($name);
-    $layout->setDescription(isset($data['description']) ? $data['description'] : '');
-    $layout->setStructure($structure);
-    $layout->setConfig($config);
-    $layout->setUserId($userId);
+    $dashboard->setName($name);
+    $dashboard->setDescription(isset($data['description']) ? $data['description'] : '');
+    $dashboard->setStructure($structure);
+    $dashboard->setConfig($config);
+    $dashboard->setUserId($userId);
 
-    if ($layoutId) {
-        $layout->setUpdatedUid($userId);
-        $success = $layout->update();
+    if ($dashboardId) {
+        $dashboard->setUpdatedUid($userId);
+        $success = $dashboard->update();
     } else {
-        $layout->setCreatedUid($userId);
-        $success = $layout->insert();
+        $dashboard->setCreatedUid($userId);
+        $success = $dashboard->insert();
     }
 
     if (!$success) {
-        Utility::ajaxResponseFalse('Failed to save layout');
+        Utility::ajaxResponseFalse('Failed to save dashboard');
     }
 
     Utility::ajaxResponseTrue('Dashboard saved successfully', array(
-        'id' => $layout->getId(),
-        'name' => $layout->getName()
+        'id' => $dashboard->getId(),
+        'name' => $dashboard->getName()
     ));
 }
 
 /**
- * Get layout by ID
+ * Get dashboard by ID
  */
-function getLayout($data)
+function getDashboard($data)
 {
-    $layoutId = isset($data['id']) ? intval($data['id']) : 0;
+    $dashboardId = isset($data['id']) ? intval($data['id']) : 0;
 
-    if (!$layoutId) {
-        Utility::ajaxResponseFalse('Invalid layout ID');
+    if (!$dashboardId) {
+        Utility::ajaxResponseFalse('Invalid dashboard ID');
     }
 
-    $layout = new DashboardInstance($layoutId);
-    if (!$layout->getId()) {
-        Utility::ajaxResponseFalse('Layout not found');
+    $dashboard = new DashboardInstance($dashboardId);
+    if (!$dashboard->getId()) {
+        Utility::ajaxResponseFalse('Dashboard not found');
     }
 
-    Utility::ajaxResponseTrue('Layout loaded', $layout->toArray());
+    Utility::ajaxResponseTrue('Dashboard loaded', $dashboard->toArray());
 }
 
 /**
- * Delete layout
+ * Delete dashboard
  */
-function deleteLayout($data)
+function deleteDashboard($data)
 {
-    $layoutId = isset($data['id']) ? intval($data['id']) : 0;
+    $dashboardId = isset($data['id']) ? intval($data['id']) : 0;
 
-    if (!$layoutId) {
-        Utility::ajaxResponseFalse('Invalid layout ID');
+    if (!$dashboardId) {
+        Utility::ajaxResponseFalse('Invalid dashboard ID');
     }
 
-    // TODO: Verify user owns this layout
-    if (!DashboardInstance::delete($layoutId)) {
-        Utility::ajaxResponseFalse('Failed to delete layout');
+    // TODO: Verify user owns this dashboard
+    if (!DashboardInstance::delete($dashboardId)) {
+        Utility::ajaxResponseFalse('Failed to delete dashboard');
     }
 
     Utility::ajaxResponseTrue('Dashboard deleted successfully');
 }
 
 /**
- * Update layout name
+ * Update dashboard name
  */
-function updateLayoutName($data)
+function updateDashboardName($data)
 {
-    $layoutId = isset($data['id']) ? intval($data['id']) : 0;
+    $dashboardId = isset($data['id']) ? intval($data['id']) : 0;
     $name = isset($data['name']) ? trim($data['name']) : '';
     // TODO: Get actual user ID from session
     $userId = 1;
 
-    if (!$layoutId) {
-        Utility::ajaxResponseFalse('Invalid layout ID');
+    if (!$dashboardId) {
+        Utility::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     if (empty($name)) {
-        Utility::ajaxResponseFalse('Layout name cannot be empty');
+        Utility::ajaxResponseFalse('Dashboard name cannot be empty');
     }
 
-    $layout = new DashboardInstance($layoutId);
-    if (!$layout->getId()) {
-        Utility::ajaxResponseFalse('Layout not found');
+    $dashboard = new DashboardInstance($dashboardId);
+    if (!$dashboard->getId()) {
+        Utility::ajaxResponseFalse('Dashboard not found');
     }
 
-    // Check if user owns this layout
-    if ($layout->getUserId() != $userId) {
+    // Check if user owns this dashboard
+    if ($dashboard->getUserId() != $userId) {
         Utility::ajaxResponseFalse('Unauthorized');
     }
 
-    $layout->setName($name);
-    $layout->setUpdatedUid($userId);
+    $dashboard->setName($name);
+    $dashboard->setUpdatedUid($userId);
 
-    if (!$layout->update()) {
-        Utility::ajaxResponseFalse('Failed to update layout name');
+    if (!$dashboard->update()) {
+        Utility::ajaxResponseFalse('Failed to update dashboard name');
     }
 
-    Utility::ajaxResponseTrue('Layout name updated', array(
-        'id' => $layout->getId(),
-        'name' => $layout->getName()
+    Utility::ajaxResponseTrue('Dashboard name updated', array(
+        'id' => $dashboard->getId(),
+        'name' => $dashboard->getName()
     ));
 }
 
@@ -336,23 +336,23 @@ function updateLayoutName($data)
  */
 function updateAreaContent($data)
 {
-    $layoutId = isset($data['layout_id']) ? intval($data['layout_id']) : 0;
+    $dashboardId = isset($data['dashboard_id']) ? intval($data['dashboard_id']) : 0;
     $sectionId = isset($data['section_id']) ? $data['section_id'] : '';
     $areaId = isset($data['area_id']) ? $data['area_id'] : '';
     $content = isset($data['content']) ? $data['content'] : array();
 
-    if (!$layoutId) {
-        Utility::ajaxResponseFalse('Invalid layout ID');
+    if (!$dashboardId) {
+        Utility::ajaxResponseFalse('Invalid dashboard ID');
     }
 
-    $layout = new DashboardInstance($layoutId);
-    if (!$layout->getId()) {
-        Utility::ajaxResponseFalse('Layout not found');
+    $dashboard = new DashboardInstance($dashboardId);
+    if (!$dashboard->getId()) {
+        Utility::ajaxResponseFalse('Dashboard not found');
     }
 
-    // TODO: Verify user owns this layout
+    // TODO: Verify user owns this dashboard
 
-    if (!$layout->updateAreaContent($sectionId, $areaId, $content)) {
+    if (!$dashboard->updateAreaContent($sectionId, $areaId, $content)) {
         Utility::ajaxResponseFalse('Failed to update content');
     }
 
@@ -364,25 +364,25 @@ function updateAreaContent($data)
  */
 function addSection($data)
 {
-    $layoutId = isset($data['layout_id']) ? intval($data['layout_id']) : 0;
+    $dashboardId = isset($data['dashboard_id']) ? intval($data['dashboard_id']) : 0;
     $position = isset($data['position']) ? $data['position'] : 'bottom'; // top or bottom
     $columns = isset($data['columns']) ? intval($data['columns']) : 1;
 
-    if (!$layoutId) {
-        Utility::ajaxResponseFalse('Invalid layout ID');
+    if (!$dashboardId) {
+        Utility::ajaxResponseFalse('Invalid dashboard ID');
     }
 
-    $layout = new DashboardInstance($layoutId);
-    if (!$layout->getId()) {
-        Utility::ajaxResponseFalse('Layout not found');
+    $dashboard = new DashboardInstance($dashboardId);
+    if (!$dashboard->getId()) {
+        Utility::ajaxResponseFalse('Dashboard not found');
     }
 
-    // TODO: Verify user owns this layout
+    // TODO: Verify user owns this dashboard
 
     // Create empty section
     $sectionData = DashboardBuilder::createEmptySection($columns);
 
-    if (!$layout->addSection($sectionData, $position)) {
+    if (!$dashboard->addSection($sectionData, $position)) {
         Utility::ajaxResponseFalse('Failed to add section');
     }
 
@@ -396,21 +396,21 @@ function addSection($data)
  */
 function addSectionFromTemplate($data)
 {
-    $layoutId = isset($data['layout_id']) ? intval($data['layout_id']) : 0;
+    $dashboardId = isset($data['dashboard_id']) ? intval($data['dashboard_id']) : 0;
     $templateId = isset($data['template_id']) ? intval($data['template_id']) : 0;
     $position = isset($data['position']) ? $data['position'] : 'bottom';
 
-    if (!$layoutId) {
-        Utility::ajaxResponseFalse('Invalid layout ID');
+    if (!$dashboardId) {
+        Utility::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     if (!$templateId) {
         Utility::ajaxResponseFalse('Invalid template ID');
     }
 
-    $layout = new DashboardInstance($layoutId);
-    if (!$layout->getId()) {
-        Utility::ajaxResponseFalse('Layout not found');
+    $dashboard = new DashboardInstance($dashboardId);
+    if (!$dashboard->getId()) {
+        Utility::ajaxResponseFalse('Dashboard not found');
     }
 
     // Get template
@@ -432,7 +432,7 @@ function addSectionFromTemplate($data)
         $sectionData['sid'] = 's' . time() . rand(1000, 9999);
 
         // Add section at the specified position
-        if (!$layout->addSection($sectionData, $position)) {
+        if (!$dashboard->addSection($sectionData, $position)) {
             Utility::ajaxResponseFalse('Failed to add section');
         }
 
@@ -454,25 +454,25 @@ function addSectionFromTemplate($data)
  */
 function removeSection($data)
 {
-    $layoutId = isset($data['layout_id']) ? intval($data['layout_id']) : 0;
+    $dashboardId = isset($data['dashboard_id']) ? intval($data['dashboard_id']) : 0;
     $sectionId = isset($data['section_id']) ? $data['section_id'] : '';
 
-    if (!$layoutId) {
-        Utility::ajaxResponseFalse('Invalid layout ID');
+    if (!$dashboardId) {
+        Utility::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     if (empty($sectionId)) {
         Utility::ajaxResponseFalse('Section ID is required');
     }
 
-    $layout = new DashboardInstance($layoutId);
-    if (!$layout->getId()) {
-        Utility::ajaxResponseFalse('Layout not found');
+    $dashboard = new DashboardInstance($dashboardId);
+    if (!$dashboard->getId()) {
+        Utility::ajaxResponseFalse('Dashboard not found');
     }
 
-    // TODO: Verify user owns this layout
+    // TODO: Verify user owns this dashboard
 
-    if (!$layout->removeSection($sectionId)) {
+    if (!$dashboard->removeSection($sectionId)) {
         Utility::ajaxResponseFalse('Failed to remove section');
     }
 
@@ -484,7 +484,7 @@ function removeSection($data)
  */
 function reorderSections($data)
 {
-    $layoutId = isset($data['layout_id']) ? intval($data['layout_id']) : 0;
+    $dashboardId = isset($data['dashboard_id']) ? intval($data['dashboard_id']) : 0;
     $order = isset($data['order']) ? $data['order'] : array(); // Array of section IDs in new order
 
     // Decode if it's a JSON string
@@ -492,22 +492,22 @@ function reorderSections($data)
         $order = json_decode($order, true);
     }
 
-    if (!$layoutId) {
-        Utility::ajaxResponseFalse('Invalid layout ID');
+    if (!$dashboardId) {
+        Utility::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     if (empty($order) || !is_array($order)) {
         Utility::ajaxResponseFalse('Order array is required');
     }
 
-    $layout = new DashboardInstance($layoutId);
-    if (!$layout->getId()) {
-        Utility::ajaxResponseFalse('Layout not found');
+    $dashboard = new DashboardInstance($dashboardId);
+    if (!$dashboard->getId()) {
+        Utility::ajaxResponseFalse('Dashboard not found');
     }
 
-    // TODO: Verify user owns this layout
+    // TODO: Verify user owns this dashboard
 
-    if (!$layout->reorderSections($order)) {
+    if (!$dashboard->reorderSections($order)) {
         Utility::ajaxResponseFalse('Failed to reorder sections');
     }
 
@@ -544,13 +544,13 @@ function showTemplateCreator()
 function showTemplateEditor($templateId)
 {
     if (!$templateId) {
-        Utility::redirect('layout/templates');
+        Utility::redirect('dashboard/templates');
         return;
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
-        Utility::redirect('layout/templates');
+        Utility::redirect('dashboard/templates');
         return;
     }
 
@@ -565,13 +565,13 @@ function showTemplateEditor($templateId)
 function showTemplateBuilder($templateId)
 {
     if (!$templateId) {
-        Utility::redirect('layout/templates');
+        Utility::redirect('dashboard/templates');
         return;
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId() || !$template->getName()) {
-        Utility::redirect('layout/templates');
+        Utility::redirect('dashboard/templates');
         return;
     }
 
@@ -585,13 +585,13 @@ function showTemplateBuilder($templateId)
 function showTemplatePreview($templateId)
 {
     if (!$templateId) {
-        Utility::redirect('layout/templates');
+        Utility::redirect('dashboard/templates');
         return;
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId() || !$template->getName()) {
-        Utility::redirect('layout/templates');
+        Utility::redirect('dashboard/templates');
         return;
     }
 
@@ -713,7 +713,7 @@ function deleteTemplate($data)
         Utility::ajaxResponseFalse('Template not found');
     }
 
-    // Check if template is in use by any layouts
+    // Check if template is in use by any dashboards
     $db = Rapidkart::getInstance()->getDB();
     $sql = "SELECT COUNT(*) as count FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . "
             WHERE ltid = '::ltid' AND lisid != 3";
@@ -723,7 +723,7 @@ function deleteTemplate($data)
         $row = $db->fetchAssoc($result);
         if ($row && $row['count'] > 0) {
             Utility::ajaxResponseFalse(
-                'Cannot delete template. It is being used by ' . $row['count'] . ' layout(s)'
+                'Cannot delete template. It is being used by ' . $row['count'] . ' dashboard(s)'
             );
         }
     }

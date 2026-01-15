@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($layout->getName()); ?> - Preview</title>
+    <title><?php echo htmlspecialchars($dashboard->getName()); ?> - Preview</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -30,25 +30,25 @@
             <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <h1><?php echo htmlspecialchars($layout->getName()); ?></h1>
+            <h1><?php echo htmlspecialchars($dashboard->getName()); ?></h1>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=dashboard/builder/<?php echo $layout->getId(); ?>" class="btn btn-warning">
+            <a href="?urlq=dashboard/builder/<?php echo $dashboard->getId(); ?>" class="btn btn-warning">
                 <i class="fas fa-pencil"></i> Edit Dashboard
             </a>
-            <button class="btn btn-danger delete-layout-btn" data-layout-id="<?php echo $layout->getId(); ?>">
+            <button class="btn btn-danger delete-dashboard-btn" data-dashboard-id="<?php echo $dashboard->getId(); ?>">
                 <i class="fas fa-trash"></i> Delete Dashboard
             </button>
         </div>
     </div>
 
     <div class="container-fluid">
-        <div id="dashboard-preview" class="dashboard-preview" data-layout-id="<?php echo $layout->getId(); ?>">
+        <div id="dashboard-preview" class="dashboard-preview" data-dashboard-id="<?php echo $dashboard->getId(); ?>">
             <div class="dashboard-sections">
                 <?php
-                $structure = $layout->getStructureArray();
+                $structure = $dashboard->getStructureArray();
                 // Debug: Check structure
-                // error_log('Layout structure: ' . print_r($structure, true));
+                // error_log('Dashboard structure: ' . print_r($structure, true));
                 if (isset($structure['sections']) && count($structure['sections']) > 0):
                     foreach ($structure['sections'] as $section):
                 ?>
@@ -149,9 +149,9 @@
     <?php endif; ?>
 
     <script>
-        // Handle delete layout
-        document.querySelector('.delete-layout-btn')?.addEventListener('click', async function() {
-            const layoutId = this.dataset.layoutId;
+        // Handle delete dashboard
+        document.querySelector('.delete-dashboard-btn')?.addEventListener('click', async function() {
+            const dashboardId = this.dataset.dashboardId;
 
             const confirmed = await ConfirmDialog.delete('Are you sure you want to delete this dashboard?', 'Confirm Delete');
             if (!confirmed) return;
@@ -161,13 +161,13 @@
             deleteBtn.disabled = true;
             deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
 
-            Ajax.post('delete_layout', {
-                    id: layoutId
+            Ajax.post('delete_dashboard', {
+                    id: dashboardId
                 })
                 .then(result => {
                     if (result.success) {
                         Toast.success('Dashboard deleted successfully');
-                        // Redirect to layout list after a short delay
+                        // Redirect to dashboard list after a short delay
                         setTimeout(() => {
                             window.location.href = '?urlq=dashboard';
                         }, 500);

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * LayoutInstance - User-created layout instances
+ * DashboardInstance - User-created dashboard instances
  *
  * @author Dynamic Graph Creator
  */
@@ -223,7 +223,7 @@ class DashboardInstance implements DatabaseObject
     /**
      * Get all instances for a user
      */
-    public static function getUserLayouts($userId)
+    public static function getUserDashboards($userId)
     {
         $db = Rapidkart::getInstance()->getDB();
         $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . "
@@ -231,13 +231,13 @@ class DashboardInstance implements DatabaseObject
                 ORDER BY updated_ts DESC";
         $res = $db->query($sql, array('::user_id' => intval($userId)));
 
-        $layouts = array();
+        $dashboards = array();
         while ($row = $db->fetchObject($res)) {
-            $layout = new DashboardInstance();
-            $layout->parse($row);
-            $layouts[] = $layout;
+            $dashboard = new DashboardInstance();
+            $dashboard->parse($row);
+            $dashboards[] = $dashboard;
         }
-        return $layouts;
+        return $dashboards;
     }
 
     /**
@@ -279,7 +279,7 @@ class DashboardInstance implements DatabaseObject
     }
 
     /**
-     * Add a section to the layout
+     * Add a section to the dashboard
      */
     public function addSection($sectionData, $position = 'bottom')
     {
@@ -301,7 +301,7 @@ class DashboardInstance implements DatabaseObject
     }
 
     /**
-     * Remove a section from the layout
+     * Remove a section from the dashboard
      */
     public function removeSection($sectionId)
     {
