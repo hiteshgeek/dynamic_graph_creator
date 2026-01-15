@@ -32,6 +32,9 @@ if (isset($_POST['submit'])) {
         case 'add_section':
             addSection($_POST);
             break;
+        case 'add_section_from_template':
+            addSectionFromTemplate($_POST);
+            break;
         case 'remove_section':
             removeSection($_POST);
             break;
@@ -289,6 +292,55 @@ function addSection($data)
 
     // Create empty section
     $sectionData = LayoutBuilder::createEmptySection($columns);
+
+    if (!$layout->addSection($sectionData, $position)) {
+        Utility::ajaxResponseFalse('Failed to add section');
+    }
+
+    Utility::ajaxResponseTrue('Section added successfully', array(
+        'section' => $sectionData
+    ));
+}
+
+/**
+ * Add section from template
+ */
+function addSectionFromTemplate($data)
+{
+    $layoutId = isset($data['layout_id']) ? intval($data['layout_id']) : 0;
+    $templateId = isset($data['template_id']) ? intval($data['template_id']) : 0;
+    $position = isset($data['position']) ? $data['position'] : 'bottom';
+
+    if (!$layoutId) {
+        Utility::ajaxResponseFalse('Invalid layout ID');
+    }
+
+    if (!$templateId) {
+        Utility::ajaxResponseFalse('Invalid template ID');
+    }
+
+    $layout = new LayoutInstance($layoutId);
+    if (!$layout->getId()) {
+        Utility::ajaxResponseFalse('Layout not found');
+    }
+
+    // Get template
+    $template = new LayoutTemplate($templateId);
+    if (!$template->getId()) {
+        Utility::ajaxResponseFalse('Template not found');
+    }
+
+    // Get first section from template structure
+    $templateStructure = $template->getStructureArray();
+    if (!isset($templateStructure['sections']) || empty($templateStructure['sections'])) {
+        Utility::ajaxResponseFalse('Template has no sections');
+    }
+
+    // Use the first section from the template
+    $sectionData = $templateStructure['sections'][0];
+
+    // Generate new section ID to avoid conflicts
+    $sectionData['sid'] = 's' . time() . rand(1000, 9999);
 
     if (!$layout->addSection($sectionData, $position)) {
         Utility::ajaxResponseFalse('Failed to add section');

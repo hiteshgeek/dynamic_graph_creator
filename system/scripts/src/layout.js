@@ -25,6 +25,7 @@ class LayoutBuilder {
         this.sortableInstance = null;
         this.eventHandlersInitialized = false;
         this.autoSaveTimeout = null;
+        this.templateSelectorMode = 'create-layout'; // or 'add-section'
     }
 
     init() {
@@ -159,7 +160,11 @@ class LayoutBuilder {
         body.querySelectorAll('.template-card').forEach(card => {
             card.addEventListener('click', () => {
                 const templateId = parseInt(card.dataset.templateId);
-                this.createFromTemplate(templateId);
+                if (this.templateSelectorMode === 'add-section') {
+                    this.addSectionFromTemplate(templateId);
+                } else {
+                    this.createFromTemplate(templateId);
+                }
             });
         });
     }
@@ -212,25 +217,49 @@ class LayoutBuilder {
         }
     }
 
-    updateSidebarAfterCreation() {
-        const sidebar = document.querySelector('.builder-sidebar');
-        if (!sidebar) return;
+    async addSectionFromTemplate(templateId) {
+        Loading.show('Adding section...');
 
-        sidebar.innerHTML = `
-            <div class="sidebar-section">
-                <h3>Sections</h3>
-                <button class="add-section-btn">
-                    <i class="fas fa-plus"></i> Add Section
-                </button>
+        try {
+            const result = await Ajax.post('add_section_from_template', {
+                layout_id: this.layoutId,
+                template_id: templateId,
+                position: this.pendingAddPosition
+            });
+
+            if (result.success) {
+                await this.loadLayout();
+
+                // Close modal
+                document.getElementById('template-modal').style.display = 'none';
+
+                // Reset mode
+                this.templateSelectorMode = 'create-layout';
+
+                Toast.success('Section added successfully');
+            } else {
+                Toast.error(result.message);
+            }
+        } catch (error) {
+            Toast.error('Failed to add section');
+        } finally {
+            Loading.hide();
+        }
+    }
+
+    updateSidebarAfterCreation() {
+        // Replace the choose-template-card with the layout sections container
+        const gridEditor = document.querySelector('.grid-editor');
+        if (!gridEditor) return;
+
+        gridEditor.innerHTML = `
+            <div class="layout-sections">
+                <div class="loading-message">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading layout...</p>
+                </div>
             </div>
         `;
-
-        // Re-attach event listener for add section button
-        const addSectionBtn = sidebar.querySelector('.add-section-btn');
-        if (addSectionBtn) {
-            const modal = new bootstrap.Modal(document.getElementById('add-section-modal'));
-            addSectionBtn.addEventListener('click', () => modal.show());
-        }
     }
 
     renderLayout() {
@@ -242,8 +271,9 @@ class LayoutBuilder {
         let html = '';
 
         if (structure.sections) {
-            structure.sections.forEach(section => {
-                html += this.renderSection(section, structure.sections.length);
+            structure.sections.forEach((section, index) => {
+                // Render the section with add button on top border
+                html += this.renderSection(section, structure.sections.length, index);
             });
         }
 
@@ -251,9 +281,29 @@ class LayoutBuilder {
 
         // Enable drag-drop
         this.initDragDrop();
+
+        // Attach event listeners to border buttons
+        this.initAddSectionBorderButtons();
     }
 
-    renderSection(section, totalSections = 1) {
+    initAddSectionBorderButtons() {
+        const borderBtns = document.querySelectorAll('.add-section-border-btn');
+        if (borderBtns.length > 0) {
+            borderBtns.forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const position = parseInt(btn.dataset.position);
+                    // Store the position for the add section handler
+                    this.pendingAddPosition = position;
+                    // Set mode to 'add-section' so template selection adds a section instead of creating layout
+                    this.templateSelectorMode = 'add-section';
+                    // Show template selector to choose section template
+                    await this.showTemplateSelector();
+                });
+            });
+        }
+    }
+
+    renderSection(section, totalSections = 1, index = 0) {
         let areasHtml = '';
 
         section.areas.forEach(area => {
@@ -275,14 +325,34 @@ class LayoutBuilder {
             </button>
         ` : '';
 
-        return `<div class="layout-section" data-section-id="${section.sid}" style="display: grid; grid-template-columns: ${section.gridTemplate}; gap: ${section.gap || '16px'}; min-height: ${section.minHeight || '200px'};">
-            ${areasHtml}
-            <div class="section-controls">
-                ${dragHandleHtml}
-                <button class="section-control-btn remove-btn" data-section-id="${section.sid}" title="Remove">
-                    <i class="fas fa-trash"></i>
-                </button>
+        // Add button on top border (for all sections)
+        const topBorderButton = `
+            <button class="add-section-border-btn add-section-top-btn" data-position="${index}" title="Add section above">
+                <i class="fas fa-plus"></i>
+                <span>Add Section</span>
+            </button>
+        `;
+
+        // Add button on bottom border (for all sections)
+        const bottomBorderButton = `
+            <button class="add-section-border-btn add-section-bottom-btn" data-position="${index + 1}" title="Add section below">
+                <i class="fas fa-plus"></i>
+                <span>Add Section</span>
+            </button>
+        `;
+
+        return `<div class="layout-section-wrapper">
+            ${topBorderButton}
+            <div class="layout-section" data-section-id="${section.sid}" style="display: grid; grid-template-columns: ${section.gridTemplate}; gap: ${section.gap || '16px'}; min-height: ${section.minHeight || '200px'};">
+                ${areasHtml}
+                <div class="section-controls">
+                    ${dragHandleHtml}
+                    <button class="section-control-btn remove-btn" data-section-id="${section.sid}" title="Remove">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </div>
+            ${bottomBorderButton}
         </div>`;
     }
 
@@ -452,13 +522,6 @@ class LayoutBuilder {
             }
         });
 
-        // Add section button
-        const addSectionBtn = document.querySelector('.add-section-btn');
-        if (addSectionBtn) {
-            const modal = new bootstrap.Modal(document.getElementById('add-section-modal'));
-            addSectionBtn.addEventListener('click', () => modal.show());
-        }
-
         // Choose template button (when no layout exists)
         const chooseTemplateBtn = document.querySelector('.choose-template-btn');
         if (chooseTemplateBtn) {
@@ -493,7 +556,8 @@ class LayoutBuilder {
 
     async handleAddSection() {
         const columns = document.getElementById('section-columns').value;
-        const position = document.getElementById('section-position').value;
+        // Use the stored position from the button click
+        const position = this.pendingAddPosition !== undefined ? this.pendingAddPosition : 0;
         const modalElement = document.getElementById('add-section-modal');
         const modalInstance = bootstrap.Modal.getInstance(modalElement);
 

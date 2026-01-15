@@ -45,40 +45,27 @@
          data-breakpoint="desktop">
 
         <div class="builder-body">
-            <div class="builder-sidebar">
-                <?php if ($layout && $layout->getId()): ?>
-                <div class="sidebar-section">
-                    <h3>Sections</h3>
-                    <button class="add-section-btn">
-                        <i class="fas fa-plus"></i> Add Section
-                    </button>
-                </div>
-                <?php else: ?>
-                <div class="sidebar-section">
-                    <h3>Get Started</h3>
-                    <button class="choose-template-btn">
-                        <i class="fas fa-th-large"></i> Choose Template
-                    </button>
-                </div>
-                <?php endif; ?>
-            </div>
-
             <div class="builder-main">
                 <div class="grid-editor">
+                    <?php if ($layout && $layout->getId()): ?>
                     <div class="layout-sections">
-                        <?php if ($layout): ?>
                         <div class="loading-message">
                             <i class="fas fa-spinner fa-spin"></i>
                             <p>Loading layout...</p>
                         </div>
-                        <?php else: ?>
-                        <div class="welcome-message">
-                            <i class="fas fa-th-large"></i>
-                            <h2>Welcome to Layout Builder</h2>
-                            <p>Select a template to start building your dashboard</p>
-                        </div>
-                        <?php endif; ?>
                     </div>
+                    <?php else: ?>
+                    <div class="choose-template-card">
+                        <div class="choose-template-content">
+                            <i class="fas fa-th-large"></i>
+                            <h2>Create Your Dashboard</h2>
+                            <p>Choose from our pre-designed templates to get started</p>
+                            <button class="choose-template-btn">
+                                <i class="fas fa-th-large"></i> Choose Template
+                            </button>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -119,13 +106,6 @@
                             <option value="2" selected>2 Columns</option>
                             <option value="3">3 Columns</option>
                             <option value="4">4 Columns</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Position</label>
-                        <select class="form-select" id="section-position">
-                            <option value="bottom" selected>Bottom</option>
-                            <option value="top">Top</option>
                         </select>
                     </div>
                 </div>

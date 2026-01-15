@@ -285,7 +285,12 @@ class LayoutInstance implements DatabaseObject
     {
         $structure = $this->getStructureArray();
 
-        if ($position === 'top') {
+        // Support numeric index position
+        if (is_numeric($position)) {
+            $index = intval($position);
+            // Insert at specific index
+            array_splice($structure['sections'], $index, 0, [$sectionData]);
+        } elseif ($position === 'top') {
             array_unshift($structure['sections'], $sectionData);
         } else {
             $structure['sections'][] = $sectionData;
