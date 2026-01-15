@@ -32,9 +32,10 @@
         </div>
         <div class="page-header-right">
             <div class="responsive-toggle"></div>
-            <button class="btn btn-primary save-layout-btn" disabled>
-                <i class="fas fa-save"></i> Save Layout
-            </button>
+            <div class="save-indicator saved">
+                <i class="fas fa-check-circle"></i>
+                <span>Saved</span>
+            </div>
         </div>
     </div>
 
@@ -45,17 +46,19 @@
 
         <div class="builder-body">
             <div class="builder-sidebar">
+                <?php if ($layout && $layout->getId()): ?>
                 <div class="sidebar-section">
                     <h3>Sections</h3>
                     <button class="add-section-btn">
                         <i class="fas fa-plus"></i> Add Section
                     </button>
                 </div>
-
-                <?php if (!$layout): ?>
+                <?php else: ?>
                 <div class="sidebar-section">
-                    <h3>Templates</h3>
-                    <p class="text-muted">Choose a template to get started</p>
+                    <h3>Get Started</h3>
+                    <button class="choose-template-btn">
+                        <i class="fas fa-th-large"></i> Choose Template
+                    </button>
                 </div>
                 <?php endif; ?>
             </div>

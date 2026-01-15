@@ -21,8 +21,10 @@ class LayoutBuilder {
         this.mode = options.mode || 'edit';
         this.currentLayout = null;
         this.isDirty = false;
+        this.isSaving = false;
         this.sortableInstance = null;
         this.eventHandlersInitialized = false;
+        this.autoSaveTimeout = null;
     }
 
     init() {
@@ -173,8 +175,32 @@ class LayoutBuilder {
 
             if (result.success) {
                 this.layoutId = result.data.id;
+
+                // Update URL to include layout ID (for refresh persistence)
+                const newUrl = `?urlq=layout/builder/${this.layoutId}`;
+                window.history.pushState({ layoutId: this.layoutId }, '', newUrl);
+
+                // Update container data attribute
+                this.container.dataset.layoutId = this.layoutId;
+
+                // Update page title
+                document.title = 'Edit Layout - Dynamic Graph Creator';
+
+                // Update header title
+                const headerTitle = document.querySelector('.page-header-left h1');
+                if (headerTitle) {
+                    headerTitle.textContent = 'Edit Layout';
+                }
+
+                // Update sidebar to show "Add Section" button instead of "Choose Template"
+                this.updateSidebarAfterCreation();
+
+                // Load the layout
                 await this.loadLayout();
+
+                // Close modal
                 document.getElementById('template-modal').style.display = 'none';
+
                 Toast.success('Layout created successfully');
             } else {
                 Toast.error(result.message);
@@ -183,6 +209,27 @@ class LayoutBuilder {
             Toast.error('Failed to create layout');
         } finally {
             Loading.hide();
+        }
+    }
+
+    updateSidebarAfterCreation() {
+        const sidebar = document.querySelector('.builder-sidebar');
+        if (!sidebar) return;
+
+        sidebar.innerHTML = `
+            <div class="sidebar-section">
+                <h3>Sections</h3>
+                <button class="add-section-btn">
+                    <i class="fas fa-plus"></i> Add Section
+                </button>
+            </div>
+        `;
+
+        // Re-attach event listener for add section button
+        const addSectionBtn = sidebar.querySelector('.add-section-btn');
+        if (addSectionBtn) {
+            const modal = new bootstrap.Modal(document.getElementById('add-section-modal'));
+            addSectionBtn.addEventListener('click', () => modal.show());
         }
     }
 
@@ -196,7 +243,7 @@ class LayoutBuilder {
 
         if (structure.sections) {
             structure.sections.forEach(section => {
-                html += this.renderSection(section);
+                html += this.renderSection(section, structure.sections.length);
             });
         }
 
@@ -206,7 +253,7 @@ class LayoutBuilder {
         this.initDragDrop();
     }
 
-    renderSection(section) {
+    renderSection(section, totalSections = 1) {
         let areasHtml = '';
 
         section.areas.forEach(area => {
@@ -221,12 +268,17 @@ class LayoutBuilder {
             }
         });
 
+        // Only show drag handle if there are multiple sections
+        const dragHandleHtml = totalSections > 1 ? `
+            <button class="section-control-btn drag-handle" title="Drag to reorder">
+                <i class="fas fa-grip-vertical"></i>
+            </button>
+        ` : '';
+
         return `<div class="layout-section" data-section-id="${section.sid}" style="display: grid; grid-template-columns: ${section.gridTemplate}; gap: ${section.gap || '16px'}; min-height: ${section.minHeight || '200px'};">
             ${areasHtml}
             <div class="section-controls">
-                <button class="section-control-btn drag-handle" title="Drag to reorder">
-                    <i class="fas fa-grip-vertical"></i>
-                </button>
+                ${dragHandleHtml}
                 <button class="section-control-btn remove-btn" data-section-id="${section.sid}" title="Remove">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -308,10 +360,11 @@ class LayoutBuilder {
         }
     }
 
-    async saveLayout() {
-        if (!this.currentLayout) return;
+    async saveLayout(showToast = false) {
+        if (!this.currentLayout || this.isSaving) return;
 
-        Loading.show('Saving layout...');
+        this.isSaving = true;
+        this.updateSaveIndicator('saving');
 
         try {
             const result = await Ajax.post('save_layout', {
@@ -323,27 +376,63 @@ class LayoutBuilder {
 
             if (result.success) {
                 this.isDirty = false;
-                this.updateSaveButton();
-                Toast.success('Layout saved successfully');
+                this.updateSaveIndicator('saved');
+                if (showToast) {
+                    Toast.success('Layout saved successfully');
+                }
             } else {
+                this.updateSaveIndicator('error');
                 Toast.error(result.message);
             }
         } catch (error) {
+            this.updateSaveIndicator('error');
             Toast.error('Failed to save layout');
         } finally {
-            Loading.hide();
+            this.isSaving = false;
         }
     }
 
     markDirty() {
         this.isDirty = true;
-        this.updateSaveButton();
+        this.updateSaveIndicator('unsaved');
+
+        // Auto-save after 2 seconds of inactivity
+        if (this.autoSaveTimeout) {
+            clearTimeout(this.autoSaveTimeout);
+        }
+        this.autoSaveTimeout = setTimeout(() => {
+            this.saveLayout(false);
+        }, 2000);
     }
 
-    updateSaveButton() {
-        const saveBtn = document.querySelector('.save-layout-btn');
-        if (saveBtn) {
-            saveBtn.disabled = !this.isDirty;
+    updateSaveIndicator(state) {
+        const indicator = document.querySelector('.save-indicator');
+        if (!indicator) return;
+
+        const icon = indicator.querySelector('i');
+        const text = indicator.querySelector('span');
+
+        switch (state) {
+            case 'saving':
+                indicator.className = 'save-indicator saving';
+                icon.className = 'fas fa-spinner fa-spin';
+                text.textContent = 'Saving...';
+                break;
+            case 'saved':
+                indicator.className = 'save-indicator saved';
+                icon.className = 'fas fa-check-circle';
+                text.textContent = 'Saved';
+                break;
+            case 'unsaved':
+                indicator.className = 'save-indicator unsaved';
+                icon.className = 'fas fa-circle';
+                text.textContent = 'Unsaved changes';
+                break;
+            case 'error':
+                indicator.className = 'save-indicator error';
+                icon.className = 'fas fa-exclamation-circle';
+                text.textContent = 'Save failed';
+                break;
         }
     }
 
@@ -354,17 +443,28 @@ class LayoutBuilder {
         }
         this.eventHandlersInitialized = true;
 
-        // Save button
-        const saveBtn = document.querySelector('.save-layout-btn');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => this.saveLayout());
-        }
+        // Warn before leaving page with unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (this.isDirty) {
+                e.preventDefault();
+                e.returnValue = ''; // Required for Chrome
+                return '';
+            }
+        });
 
         // Add section button
         const addSectionBtn = document.querySelector('.add-section-btn');
         if (addSectionBtn) {
             const modal = new bootstrap.Modal(document.getElementById('add-section-modal'));
             addSectionBtn.addEventListener('click', () => modal.show());
+        }
+
+        // Choose template button (when no layout exists)
+        const chooseTemplateBtn = document.querySelector('.choose-template-btn');
+        if (chooseTemplateBtn) {
+            chooseTemplateBtn.addEventListener('click', () => {
+                this.showTemplateSelector();
+            });
         }
 
         // Confirm add section

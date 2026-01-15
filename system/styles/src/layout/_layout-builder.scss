@@ -4,6 +4,7 @@
 .layout-builder {
     min-height: calc(100vh - 80px);
     background: #f5f7fa;
+    margin-top: 2px; // Small margin to allow header box-shadow to be visible
 
     .builder-body {
         display: flex;
@@ -27,7 +28,8 @@
                     margin-bottom: 1rem;
                 }
 
-                .add-section-btn {
+                .add-section-btn,
+                .choose-template-btn {
                     width: 100%;
                     padding: 0.75rem;
                     background: $primary;
@@ -107,6 +109,58 @@
                 color: white;
                 border-color: #007bff;
             }
+        }
+    }
+}
+
+// Save Indicator
+.save-indicator {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s;
+
+    i {
+        font-size: 1rem;
+    }
+
+    &.saved {
+        color: $success;
+        background: $success-bg;
+
+        i {
+            color: $success;
+        }
+    }
+
+    &.saving {
+        color: $info;
+        background: $info-bg;
+
+        i {
+            color: $info;
+        }
+    }
+
+    &.unsaved {
+        color: $warning;
+        background: $warning-bg;
+
+        i {
+            color: $warning;
+        }
+    }
+
+    &.error {
+        color: $error;
+        background: $error-bg;
+
+        i {
+            color: $error;
         }
     }
 }
