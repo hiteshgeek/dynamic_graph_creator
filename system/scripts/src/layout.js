@@ -84,11 +84,25 @@ class LayoutBuilder {
 
             if (structure.sections && structure.sections.length > 0) {
                 structure.sections.forEach(section => {
-                    const areasCount = section.areas ? section.areas.length : 0;
                     previewHtml += `<div class="preview-section" style="display: grid; grid-template-columns: ${section.gridTemplate}; gap: 2px;">`;
 
-                    for (let i = 0; i < areasCount; i++) {
-                        previewHtml += '<div class="preview-area"></div>';
+                    if (section.areas) {
+                        section.areas.forEach(area => {
+                            // Check if area has sub-rows
+                            if (area.hasSubRows && area.subRows && area.subRows.length > 0) {
+                                const rowHeights = area.subRows.map(row => row.height || '1fr').join(' ');
+                                previewHtml += `<div class="preview-area-nested" style="display: grid; grid-template-rows: ${rowHeights}; gap: 2px;">`;
+
+                                area.subRows.forEach(() => {
+                                    previewHtml += '<div class="preview-sub-row"></div>';
+                                });
+
+                                previewHtml += '</div>';
+                            } else {
+                                // Regular area
+                                previewHtml += '<div class="preview-area"></div>';
+                            }
+                        });
                     }
 
                     previewHtml += '</div>';
@@ -196,9 +210,15 @@ class LayoutBuilder {
         let areasHtml = '';
 
         section.areas.forEach(area => {
-            areasHtml += `<div class="layout-area" data-area-id="${area.aid}">
-                ${area.content && area.content.type === 'empty' ? this.renderEmptyState(area.emptyState) : this.renderContent(area.content)}
-            </div>`;
+            // Check if this area has sub-rows (nested layout)
+            if (area.hasSubRows && area.subRows && area.subRows.length > 0) {
+                areasHtml += this.renderAreaWithSubRows(area);
+            } else {
+                // Regular single area
+                areasHtml += `<div class="layout-area" data-area-id="${area.aid}">
+                    ${area.content && area.content.type === 'empty' ? this.renderEmptyState(area.emptyState) : this.renderContent(area.content)}
+                </div>`;
+            }
         });
 
         return `<div class="layout-section" data-section-id="${section.sid}" style="display: grid; grid-template-columns: ${section.gridTemplate}; gap: ${section.gap || '16px'}; min-height: ${section.minHeight || '200px'};">
@@ -211,6 +231,22 @@ class LayoutBuilder {
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
+        </div>`;
+    }
+
+    renderAreaWithSubRows(area) {
+        // Build grid-template-rows from sub-row heights
+        const rowHeights = area.subRows.map(row => row.height || '1fr').join(' ');
+
+        let subRowsHtml = '';
+        area.subRows.forEach(subRow => {
+            subRowsHtml += `<div class="layout-sub-row" data-row-id="${subRow.rowId}">
+                ${subRow.content && subRow.content.type === 'empty' ? this.renderEmptyState(subRow.emptyState) : this.renderContent(subRow.content)}
+            </div>`;
+        });
+
+        return `<div class="layout-area layout-area-nested" data-area-id="${area.aid}" style="display: grid; grid-template-rows: ${rowHeights}; gap: ${area.gap || '8px'};">
+            ${subRowsHtml}
         </div>`;
     }
 

@@ -25,51 +25,34 @@
 
   .layout-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
     padding: 1.5rem;
   }
 
   .layout-card {
     background: white;
     border: 2px solid #e0e0e0;
-    border-radius: 12px;
+    border-radius: 8px;
     overflow: hidden;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    transition: border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
 
     &:hover {
       border-color: #007bff;
-      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
-      transform: translateY(-2px);
-    }
-
-    .layout-card-preview {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 3rem;
-      text-align: center;
-      color: white;
-
-      i {
-        font-size: 3rem;
-        opacity: 0.9;
-      }
     }
 
     .layout-card-content {
-      padding: 1.25rem;
+      flex: 1;
+      margin-bottom: 1rem;
 
       h3 {
-        font-size: 1.1rem;
+        font-size: 1rem;
         font-weight: 600;
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.25rem;
         color: #212529;
-      }
-
-      .layout-description {
-        font-size: 0.875rem;
-        color: #6c757d;
-        margin-bottom: 0.75rem;
       }
 
       .layout-meta {
@@ -89,12 +72,38 @@
     .layout-card-actions {
       display: flex;
       gap: 0.5rem;
-      padding: 0.75rem 1.25rem;
+      justify-content: center;
+      padding-top: 0.75rem;
       border-top: 1px solid #e0e0e0;
-      background: #f8f9fa;
 
-      .btn {
-        flex: 1;
+      .btn-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #dee2e6;
+        background: white;
+        color: #6c757d;
+        cursor: pointer;
+        transition: border-color 0.2s;
+        font-size: 0.875rem;
+
+        &.btn-primary {
+          border-color: #007bff;
+          color: #007bff;
+        }
+
+        &.btn-warning {
+          border-color: #ffc107;
+          color: #ffc107;
+        }
+
+        &.btn-danger {
+          border-color: #dc3545;
+          color: #dc3545;
+        }
       }
     }
   }

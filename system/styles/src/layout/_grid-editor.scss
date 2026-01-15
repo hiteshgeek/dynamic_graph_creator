@@ -1,4 +1,9 @@
 // Grid Editor Styles
+@use '../variables' as *;
+
+.layout-preview {
+    margin-top: $spacing-lg;
+}
 
 .layout-sections {
     display: flex;
@@ -87,6 +92,15 @@
         box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
     }
 
+    // Nested area with sub-rows
+    &.layout-area-nested {
+        padding: 0;
+        align-items: stretch;
+        justify-content: stretch;
+        background: transparent;
+        border: none;
+    }
+
     .area-content {
         width: 100%;
 
@@ -95,5 +109,25 @@
             font-size: 0.875rem;
             margin: 0;
         }
+    }
+}
+
+// Sub-rows within nested areas
+.layout-sub-row {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 6px;
+    padding: 1rem;
+    min-height: 100px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        background: white;
+        border-color: #28a745;
+        box-shadow: 0 2px 6px rgba(40, 167, 69, 0.1);
     }
 }

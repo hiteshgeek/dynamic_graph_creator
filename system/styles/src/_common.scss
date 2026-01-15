@@ -256,7 +256,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: $spacing-lg;
+  padding: $spacing-md;
   border-bottom: 1px solid $border-color;
 
   h3 {
@@ -280,7 +280,7 @@
 }
 
 .modal-body {
-  padding: $spacing-lg;
+  padding: $spacing-md;
 
   p {
     margin: 0 0 $spacing-sm 0;
@@ -296,24 +296,11 @@
   display: flex;
   justify-content: flex-end;
   gap: $spacing-sm;
-  padding: $spacing-lg;
+  padding: $spacing-md;
   border-top: 1px solid $border-color;
 }
 
-// Bootstrap Modal Overrides - Reduce padding for confirm dialogs
-#confirmModal {
-  .modal-header {
-    padding: 1rem 1.25rem;
-  }
-
-  .modal-body {
-    padding: 1rem 1.25rem;
-  }
-
-  .modal-footer {
-    padding: 1rem 1.25rem;
-  }
-}
+// Bootstrap Modal Overrides - No longer needed, using global padding
 
 // Responsive container
 @media (max-width: 576px) {

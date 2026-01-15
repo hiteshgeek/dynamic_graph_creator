@@ -1,4 +1,5 @@
 // Template Selector Modal Styles
+@use '../variables' as *;
 
 .layout-template-modal {
     position: fixed;
@@ -35,7 +36,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem 2rem;
+            padding: $spacing-md;
             border-bottom: 1px solid #e0e0e0;
 
             h2 {
@@ -67,10 +68,10 @@
         .modal-body {
             flex: 1;
             overflow-y: auto;
-            padding: 2rem;
+            padding: $spacing-md;
 
             .template-category {
-                margin-bottom: 2rem;
+                margin-bottom: $spacing-md;
 
                 &:last-child {
                     margin-bottom: 0;
@@ -80,13 +81,13 @@
                     font-size: 1rem;
                     font-weight: 600;
                     color: #212529;
-                    margin-bottom: 1rem;
+                    margin-bottom: $spacing-md;
                 }
 
                 .template-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                    gap: 1.5rem;
+                    gap: $spacing-md;
                 }
             }
         }
@@ -97,7 +98,7 @@
     background: white;
     border: 2px solid #e0e0e0;
     border-radius: 12px;
-    padding: 1rem;
+    padding: $spacing-md;
     cursor: pointer;
     transition: border-color 0.3s;
 
@@ -109,11 +110,11 @@
         height: 150px;
         background: #f8f9fa;
         border-radius: 8px;
-        margin-bottom: 1rem;
+        margin-bottom: $spacing-md;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 1rem;
+        padding: $spacing-sm;
         overflow: hidden;
 
         .template-preview-grid {
@@ -121,18 +122,40 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 2px;
 
             .preview-section {
                 flex: 1;
                 background: white;
                 border-radius: 4px;
-                padding: 4px;
+                padding: 0 2px;
+
+                &:first-child {
+                    padding-top: 2px;
+                }
+
+                &:last-child {
+                    padding-bottom: 2px;
+                }
 
                 .preview-area {
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    background: linear-gradient(135deg, $gradient-start 0%, $gradient-end 100%);
                     border-radius: 2px;
                     min-height: 20px;
+                }
+
+                .preview-area-nested {
+                    display: grid;
+                    gap: 2px;
+                    padding: 0;
+                    background: transparent;
+                    border-radius: 2px;
+
+                    .preview-sub-row {
+                        background: linear-gradient(135deg, $gradient-start 0%, $gradient-end 100%);
+                        border-radius: 2px;
+                        min-height: 15px;
+                    }
                 }
             }
         }
@@ -143,7 +166,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, $gradient-start 0%, $gradient-end 100%);
             border-radius: 8px;
             color: white;
 

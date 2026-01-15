@@ -60,14 +60,8 @@
                 <div class="layout-grid">
                     <?php foreach ($layouts as $layout): ?>
                     <div class="layout-card" data-layout-id="<?php echo $layout->getId(); ?>">
-                        <div class="layout-card-preview">
-                            <i class="fas fa-th-large"></i>
-                        </div>
                         <div class="layout-card-content">
                             <h3><?php echo htmlspecialchars($layout->getName()); ?></h3>
-                            <?php if ($layout->getDescription()): ?>
-                            <p class="layout-description"><?php echo htmlspecialchars($layout->getDescription()); ?></p>
-                            <?php endif; ?>
                             <div class="layout-meta">
                                 <span class="meta-item">
                                     <i class="fas fa-clock"></i>
@@ -77,16 +71,16 @@
                         </div>
                         <div class="layout-card-actions">
                             <a href="?urlq=layout/preview/<?php echo $layout->getId(); ?>"
-                               class="btn btn-sm btn-outline-primary"
+                               class="btn-icon btn-primary"
                                title="Preview">
                                 <i class="fas fa-eye"></i>
                             </a>
                             <a href="?urlq=layout/builder/<?php echo $layout->getId(); ?>"
-                               class="btn btn-sm btn-outline-warning"
+                               class="btn-icon btn-warning"
                                title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <button class="btn btn-sm btn-outline-danger delete-layout-btn"
+                            <button class="btn-icon btn-danger delete-layout-btn"
                                     data-layout-id="<?php echo $layout->getId(); ?>"
                                     title="Delete">
                                 <i class="fas fa-trash"></i>
