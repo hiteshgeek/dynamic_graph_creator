@@ -34,13 +34,9 @@
                 <i class="fas fa-arrow-left"></i> Back
             </a>
             <h1>Graphs</h1>
-            <div class="breadcrumb">
-                <i class="fas fa-chevron-right"></i>
-                <span><?php echo htmlspecialchars($graph->getName()); ?></span>
-            </div>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=graph/edit/<?php echo $graph->getId(); ?>" class="btn btn-outline">
+            <a href="?urlq=graph/edit/<?php echo $graph->getId(); ?>" class="btn btn-warning">
                 <i class="fas fa-pencil"></i> Edit
             </a>
         </div>

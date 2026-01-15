@@ -39,11 +39,7 @@
             <a href="?urlq=graph" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <h1>Graphs</h1>
-            <div class="breadcrumb">
-                <i class="fas fa-chevron-right"></i>
-                <span><?php echo $graph ? htmlspecialchars($graph->getName()) : 'Create Graph'; ?></span>
-            </div>
+            <h1><?php echo $graph ? 'Edit: ' . htmlspecialchars($graph->getName()) : 'Create Graph'; ?></h1>
         </div>
     </div>
 
@@ -52,42 +48,37 @@
 
             <!-- Left Sidebar -->
             <div class="graph-sidebar graph-sidebar-left">
-                <!-- Chart Type Selector -->
-                <div class="graph-type-selector collapsible-panel">
-                    <div class="collapsible-header" data-toggle="collapse" data-target="type-panel">
-                        <h3><i class="fas fa-chart-bar"></i> Chart Type</h3>
+                <div class="collapsible-panel">
+                    <div class="collapsible-header" data-toggle="collapse" data-target="left-panel">
+                        <h3><i class="fas fa-cog"></i> Options</h3>
                         <button type="button" class="collapse-btn">
                             <i class="fas fa-chevron-left"></i>
                         </button>
                     </div>
-                    <div class="collapsible-content" id="type-panel">
-                        <div class="graph-type-list">
-                            <div class="graph-type-item <?php echo (!$graph || $graph->getGraphType() === 'bar') ? 'active' : ''; ?>" data-type="bar">
-                                <span class="graph-type-icon"><i class="fas fa-chart-bar"></i></span>
-                                <span class="graph-type-label">Bar Chart</span>
-                            </div>
-                            <div class="graph-type-item <?php echo ($graph && $graph->getGraphType() === 'line') ? 'active' : ''; ?>" data-type="line">
-                                <span class="graph-type-icon"><i class="fas fa-chart-line"></i></span>
-                                <span class="graph-type-label">Line Chart</span>
-                            </div>
-                            <div class="graph-type-item <?php echo ($graph && $graph->getGraphType() === 'pie') ? 'active' : ''; ?>" data-type="pie">
-                                <span class="graph-type-icon"><i class="fas fa-chart-pie"></i></span>
-                                <span class="graph-type-label">Pie Chart</span>
+                    <div class="collapsible-content" id="left-panel">
+                        <!-- Chart Type Section -->
+                        <div class="sidebar-section graph-type-selector">
+                            <h4><i class="fas fa-chart-bar"></i> Chart Type</h4>
+                            <div class="graph-type-list">
+                                <div class="graph-type-item <?php echo (!$graph || $graph->getGraphType() === 'bar') ? 'active' : ''; ?>" data-type="bar">
+                                    <span class="graph-type-icon"><i class="fas fa-chart-bar"></i></span>
+                                    <span class="graph-type-label">Bar Chart</span>
+                                </div>
+                                <div class="graph-type-item <?php echo ($graph && $graph->getGraphType() === 'line') ? 'active' : ''; ?>" data-type="line">
+                                    <span class="graph-type-icon"><i class="fas fa-chart-line"></i></span>
+                                    <span class="graph-type-label">Line Chart</span>
+                                </div>
+                                <div class="graph-type-item <?php echo ($graph && $graph->getGraphType() === 'pie') ? 'active' : ''; ?>" data-type="pie">
+                                    <span class="graph-type-icon"><i class="fas fa-chart-pie"></i></span>
+                                    <span class="graph-type-label">Pie Chart</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- Filters Panel (only show if graph exists) -->
-                <?php if ($graph): ?>
-                    <div class="filters-panel collapsible-panel">
-                        <div class="collapsible-header" data-toggle="collapse" data-target="filters-panel">
-                            <h3><i class="fas fa-filter"></i> Filters</h3>
-                            <button type="button" class="collapse-btn">
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                        </div>
-                        <div class="collapsible-content" id="filters-panel">
+                        <!-- Filters Section (only show if graph exists) -->
+                        <?php if ($graph): ?>
+                        <div class="sidebar-section filters-panel">
+                            <h4><i class="fas fa-filter"></i> Filters</h4>
                             <?php if (!empty($filters)): ?>
                                 <div class="filters-list">
                                     <?php foreach ($filters as $filter): ?>
@@ -102,12 +93,13 @@
                                     <p>No filters defined</p>
                                 </div>
                             <?php endif; ?>
-                            <a href="?urlq=graph/filters/add/<?php echo $graph->getId(); ?>" class="btn btn-sm btn-outline filters-manage-btn">
+                            <a href="?urlq=filters/add" class="btn btn-sm btn-outline filters-manage-btn">
                                 <i class="fas fa-plus"></i> Add Filter
                             </a>
                         </div>
+                        <?php endif; ?>
                     </div>
-                <?php endif; ?>
+                </div>
             </div>
 
             <!-- Center: Preview and Query -->

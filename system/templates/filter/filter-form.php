@@ -33,26 +33,16 @@
 <body>
     <div class="page-header">
         <div class="page-header-left">
-            <h1>Graphs</h1>
-            <div class="breadcrumb">
-                <i class="fas fa-chevron-right"></i>
-                <a href="?urlq=filters">Filters</a>
-                <i class="fas fa-chevron-right"></i>
-                <span><?php echo $filter ? 'Edit' : 'Add'; ?> Filter</span>
-            </div>
+            <a href="?urlq=filters" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <h1><?php echo $filter ? 'Edit' : 'Add'; ?> Filter</h1>
         </div>
     </div>
 
     <div class="container">
         <div class="filter-form-page" data-filter-id="<?php echo $filter ? $filter->getId() : ''; ?>">
             <div class="card">
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <h2><?php echo $filter ? 'Edit' : 'Add'; ?> Filter</h2>
-                        <span class="text-muted">Define a reusable filter for graphs</span>
-                    </div>
-                </div>
-
                 <div class="card-body">
                     <form id="filter-form">
                         <input type="hidden" id="filter-id" value="<?php echo $filter ? $filter->getId() : ''; ?>">
