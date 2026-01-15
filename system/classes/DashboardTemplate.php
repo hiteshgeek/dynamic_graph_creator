@@ -172,7 +172,7 @@ class DashboardTemplate implements DatabaseObject
             'dtid' => $this->dtid,
             'name' => $this->name,
             'description' => $this->description,
-            'category' => $this->category,
+            'dtcid' => $this->dtcid,
             'thumbnail' => $this->thumbnail,
             'structure' => $this->structure,
             'is_system' => $this->is_system,
@@ -187,10 +187,10 @@ class DashboardTemplate implements DatabaseObject
     public static function getAll()
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT lt.* FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " lt
-                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " ltc ON lt.dtcid = ltc.dtcid
-                WHERE lt.dtsid != 3
-                ORDER BY ltc.display_order ASC, lt.name ASC";
+        $sql = "SELECT dt.* FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " dt
+                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " dtc ON dt.dtcid = dtc.dtcid
+                WHERE dt.dtsid != 3
+                ORDER BY dtc.display_order ASC, dt.name ASC";
         $res = $db->query($sql);
 
         $templates = array();
@@ -209,17 +209,17 @@ class DashboardTemplate implements DatabaseObject
     {
         $db = Rapidkart::getInstance()->getDB();
         $sql = "SELECT
-                    lt.*,
-                    ltc.slug as category_slug,
-                    ltc.name as category_name,
-                    ltc.description as category_description,
-                    ltc.icon as category_icon,
-                    ltc.color as category_color,
-                    ltc.display_order as category_order
-                FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " lt
-                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " ltc ON lt.dtcid = ltc.dtcid
-                WHERE lt.dtsid != 3 AND (ltc.dtcsid != 3 OR lt.dtcid IS NULL)
-                ORDER BY ltc.display_order ASC, ltc.name ASC, lt.display_order ASC, lt.name ASC";
+                    dt.*,
+                    dtc.slug as category_slug,
+                    dtc.name as category_name,
+                    dtc.description as category_description,
+                    dtc.icon as category_icon,
+                    dtc.color as category_color,
+                    dtc.display_order as category_order
+                FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " dt
+                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " dtc ON dt.dtcid = dtc.dtcid
+                WHERE dt.dtsid != 3 AND (dtc.dtcsid != 3 OR dt.dtcid IS NULL)
+                ORDER BY dtc.display_order ASC, dtc.name ASC, dt.display_order ASC, dt.name ASC";
         $res = $db->query($sql);
 
         $grouped = array();
@@ -280,11 +280,11 @@ class DashboardTemplate implements DatabaseObject
         }
 
         // Now fetch all templates and assign to their categories
-        $sql = "SELECT lt.*, ltc.slug as category_slug
-                FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " lt
-                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " ltc ON lt.dtcid = ltc.dtcid
-                WHERE lt.dtsid != 3 AND (ltc.dtcsid != 3 OR lt.dtcid IS NULL OR lt.dtcid = 0)
-                ORDER BY lt.display_order ASC, lt.name ASC";
+        $sql = "SELECT dt.*, dtc.slug as category_slug
+                FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " dt
+                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " dtc ON dt.dtcid = dtc.dtcid
+                WHERE dt.dtsid != 3 AND (dtc.dtcsid != 3 OR dt.dtcid IS NULL OR dt.dtcid = 0)
+                ORDER BY dt.display_order ASC, dt.name ASC";
         $res = $db->query($sql);
 
         while ($row = $db->fetchAssoc($res)) {
