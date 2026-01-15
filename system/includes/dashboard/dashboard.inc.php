@@ -523,7 +523,7 @@ function reorderSections($data)
  */
 function showTemplateList()
 {
-    $templates = DashboardTemplate::getAllGrouped();
+    $templates = DashboardTemplate::getAllCategoriesWithTemplates();
     require_once SystemConfig::templatesPath() . 'dashboard/template-list.php';
 }
 

@@ -237,6 +237,76 @@ class DashboardTemplate implements DatabaseObject
     }
 
     /**
+     * Get all categories with their templates (including empty categories)
+     */
+    public static function getAllCategoriesWithTemplates()
+    {
+        $db = Rapidkart::getInstance()->getDB();
+
+        // First, get all active categories
+        $categories = DashboardTemplateCategory::getAll();
+
+        // Build the result with all categories
+        $result = array();
+
+        foreach ($categories as $category) {
+            $catKey = $category->getSlug();
+            $result[$catKey] = array(
+                'category' => array(
+                    'dtcid' => $category->getId(),
+                    'slug' => $category->getSlug(),
+                    'name' => $category->getName(),
+                    'description' => $category->getDescription(),
+                    'icon' => $category->getIcon() ? $category->getIcon() : 'fa-folder',
+                    'color' => $category->getColor() ? $category->getColor() : '#6c757d',
+                    'display_order' => $category->getDisplayOrder()
+                ),
+                'templates' => array()
+            );
+        }
+
+        // Now fetch all templates and assign to their categories
+        $sql = "SELECT lt.*, ltc.slug as category_slug
+                FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " lt
+                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " ltc ON lt.dtcid = ltc.dtcid
+                WHERE lt.dtsid != 3 AND (ltc.dtcsid != 3 OR lt.dtcid IS NULL OR lt.dtcid = 0)
+                ORDER BY lt.display_order ASC, lt.name ASC";
+        $res = $db->query($sql);
+
+        while ($row = $db->fetchAssoc($res)) {
+            $catKey = $row['category_slug'] ? $row['category_slug'] : 'uncategorized';
+
+            // If template has no category or category doesn't exist, put in uncategorized
+            if (!isset($result[$catKey])) {
+                if (!isset($result['uncategorized'])) {
+                    $result['uncategorized'] = array(
+                        'category' => array(
+                            'dtcid' => null,
+                            'slug' => 'uncategorized',
+                            'name' => 'Uncategorized',
+                            'description' => 'Templates without a category',
+                            'icon' => 'fa-folder-open',
+                            'color' => '#6c757d',
+                            'display_order' => 999
+                        ),
+                        'templates' => array()
+                    );
+                }
+                $catKey = 'uncategorized';
+            }
+
+            $result[$catKey]['templates'][] = $row;
+        }
+
+        // Sort by display_order
+        uasort($result, function($a, $b) {
+            return $a['category']['display_order'] - $b['category']['display_order'];
+        });
+
+        return $result;
+    }
+
+    /**
      * Get template structure as array
      */
     public function getStructureArray()

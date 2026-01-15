@@ -66,6 +66,21 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                     <p class="category-description"><?php echo htmlspecialchars($categoryData['category']['description']); ?></p>
                     <?php endif; ?>
                     <div class="template-grid">
+                        <?php if (empty($categoryData['templates'])): ?>
+                        <!-- Empty Category State -->
+                        <div class="template-card template-card-empty">
+                            <div class="empty-category-content">
+                                <div class="empty-category-icon">
+                                    <i class="fas fa-folder-open"></i>
+                                </div>
+                                <h4>No Templates Yet</h4>
+                                <p>This category is empty. Create your first template to get started.</p>
+                                <a href="?urlq=dashboard/template/create" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus"></i> Create Template
+                                </a>
+                            </div>
+                        </div>
+                        <?php else: ?>
                         <?php foreach ($categoryData['templates'] as $template): ?>
                         <div class="template-card" data-template-id="<?php echo $template['dtid']; ?>">
                             <div class="template-preview">
@@ -111,6 +126,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                             </div>
                         </div>
                         <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endforeach; ?>
