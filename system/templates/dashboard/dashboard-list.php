@@ -25,11 +25,11 @@
 <body>
     <div class="page-header">
         <div class="page-header-left">
-            <h1>My Dashboards</h1>
+            <h1>Dashboards</h1>
         </div>
         <div class="page-header-right">
             <a href="?urlq=dashboard/templates" class="btn btn-secondary">
-                <i class="fas fa-th-large"></i> Templates
+                <i class="fas fa-clone"></i> Templates
             </a>
             <a href="?urlq=graph" class="btn btn-secondary">
                 <i class="fas fa-chart-line"></i> Graphs

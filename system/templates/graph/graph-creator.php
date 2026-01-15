@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $graph ? 'Edit' : 'Create'; ?> Graph - Dynamic Graph Creator</title>
+    <title>Graphs - <?php echo $graph ? 'Edit' : 'Create'; ?> Graph - Dynamic Graph Creator</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -25,21 +26,23 @@
 
     <!-- Custom CSS -->
     <?php if ($css = Utility::getCss('common')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
+        <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
     <?php if ($css = Utility::getCss('graph')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
+        <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
+
 <body>
     <div class="page-header">
         <div class="page-header-left">
-            <h1>Dynamic Graph Creator</h1>
+            <a href="?urlq=graph" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+            <h1>Graphs</h1>
             <div class="breadcrumb">
                 <i class="fas fa-chevron-right"></i>
-                <a href="?urlq=graph">Graphs</a>
-                <i class="fas fa-chevron-right"></i>
-                <span><?php echo $graph ? 'Edit' : 'Create'; ?> Graph</span>
+                <span><?php echo $graph ? htmlspecialchars($graph->getName()) : 'Create Graph'; ?></span>
             </div>
         </div>
     </div>
@@ -77,33 +80,33 @@
 
                 <!-- Filters Panel (only show if graph exists) -->
                 <?php if ($graph): ?>
-                <div class="filters-panel collapsible-panel">
-                    <div class="collapsible-header" data-toggle="collapse" data-target="filters-panel">
-                        <h3><i class="fas fa-filter"></i> Filters</h3>
-                        <button type="button" class="collapse-btn">
-                            <i class="fas fa-chevron-left"></i>
-                        </button>
-                    </div>
-                    <div class="collapsible-content" id="filters-panel">
-                        <?php if (!empty($filters)): ?>
-                        <div class="filters-list">
-                            <?php foreach ($filters as $filter): ?>
-                            <div class="filter-display-item">
-                                <span class="filter-display-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
-                                <span class="filter-display-type"><?php echo ucfirst(str_replace('_', ' ', $filter['filter_type'])); ?></span>
-                            </div>
-                            <?php endforeach; ?>
+                    <div class="filters-panel collapsible-panel">
+                        <div class="collapsible-header" data-toggle="collapse" data-target="filters-panel">
+                            <h3><i class="fas fa-filter"></i> Filters</h3>
+                            <button type="button" class="collapse-btn">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
                         </div>
-                        <?php else: ?>
-                        <div class="filters-empty">
-                            <p>No filters defined</p>
+                        <div class="collapsible-content" id="filters-panel">
+                            <?php if (!empty($filters)): ?>
+                                <div class="filters-list">
+                                    <?php foreach ($filters as $filter): ?>
+                                        <div class="filter-display-item">
+                                            <span class="filter-display-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
+                                            <span class="filter-display-type"><?php echo ucfirst(str_replace('_', ' ', $filter['filter_type'])); ?></span>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            <?php else: ?>
+                                <div class="filters-empty">
+                                    <p>No filters defined</p>
+                                </div>
+                            <?php endif; ?>
+                            <a href="?urlq=graph/filters/add/<?php echo $graph->getId(); ?>" class="btn btn-sm btn-outline filters-manage-btn">
+                                <i class="fas fa-plus"></i> Add Filter
+                            </a>
                         </div>
-                        <?php endif; ?>
-                        <a href="?urlq=graph/filters/add/<?php echo $graph->getId(); ?>" class="btn btn-sm btn-outline filters-manage-btn">
-                            <i class="fas fa-plus"></i> Add Filter
-                        </a>
                     </div>
-                </div>
                 <?php endif; ?>
             </div>
 
@@ -201,23 +204,24 @@
 
     <!-- Custom JS -->
     <?php if ($js = Utility::getJs('common')): ?>
-    <script src="<?php echo $js; ?>"></script>
+        <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
     <?php if ($js = Utility::getJs('graph')): ?>
-    <script src="<?php echo $js; ?>"></script>
+        <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 
     <?php if ($graph): ?>
-    <!-- Set existing config if editing -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            if (window.graphCreator && window.graphCreator.configPanel) {
-                window.graphCreator.configPanel.setConfig(<?php echo $graph->getConfig(); ?>);
-            }
-        }, 100);
-    });
-    </script>
+        <!-- Set existing config if editing -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    if (window.graphCreator && window.graphCreator.configPanel) {
+                        window.graphCreator.configPanel.setConfig(<?php echo $graph->getConfig(); ?>);
+                    }
+                }, 100);
+            });
+        </script>
     <?php endif; ?>
 </body>
+
 </html>

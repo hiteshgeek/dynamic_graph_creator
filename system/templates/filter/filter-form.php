@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -22,16 +23,17 @@
 
     <!-- Custom CSS -->
     <?php if ($css = Utility::getCss('common')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
+        <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
     <?php if ($css = Utility::getCss('filter')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
+        <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
+
 <body>
     <div class="page-header">
         <div class="page-header-left">
-            <h1>Dynamic Graph Creator</h1>
+            <h1>Graphs</h1>
             <div class="breadcrumb">
                 <i class="fas fa-chevron-right"></i>
                 <a href="?urlq=filters">Filters</a>
@@ -157,24 +159,24 @@
                                         if (!empty($staticOptions)):
                                             foreach ($staticOptions as $opt):
                                         ?>
-                                        <div class="filter-option-item">
-                                            <input type="text" class="form-control option-value" placeholder="Value" value="<?php echo htmlspecialchars($opt['value']); ?>">
-                                            <input type="text" class="form-control option-label" placeholder="Label" value="<?php echo htmlspecialchars($opt['label']); ?>">
-                                            <button type="button" class="btn btn-sm btn-outline remove-option-btn">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </div>
-                                        <?php
+                                                <div class="filter-option-item">
+                                                    <input type="text" class="form-control option-value" placeholder="Value" value="<?php echo htmlspecialchars($opt['value']); ?>">
+                                                    <input type="text" class="form-control option-label" placeholder="Label" value="<?php echo htmlspecialchars($opt['label']); ?>">
+                                                    <button type="button" class="btn btn-sm btn-outline remove-option-btn">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            <?php
                                             endforeach;
                                         else:
-                                        ?>
-                                        <div class="filter-option-item">
-                                            <input type="text" class="form-control option-value" placeholder="Value">
-                                            <input type="text" class="form-control option-label" placeholder="Label">
-                                            <button type="button" class="btn btn-sm btn-outline remove-option-btn">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </div>
+                                            ?>
+                                            <div class="filter-option-item">
+                                                <input type="text" class="form-control option-value" placeholder="Value">
+                                                <input type="text" class="form-control option-label" placeholder="Label">
+                                                <button type="button" class="btn btn-sm btn-outline remove-option-btn">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="static-options-actions">
@@ -229,10 +231,11 @@
 
     <!-- Custom JS -->
     <?php if ($js = Utility::getJs('common')): ?>
-    <script src="<?php echo $js; ?>"></script>
+        <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
     <?php if ($js = Utility::getJs('filter')): ?>
-    <script src="<?php echo $js; ?>"></script>
+        <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 </body>
+
 </html>

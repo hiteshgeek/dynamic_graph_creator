@@ -1,1037 +1,1047 @@
 // Generic Filter Styles (Reusable)
-@use 'variables' as *;
+@use "variables" as *;
 
 // Filter List Page
 .filter-list-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1rem 0;
+  // max-width: 1200px;
+  // margin: 0 auto;
+  padding: 1rem 0;
 }
 
 // Filter grid layout
 .filter-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
 }
 
 // Filter card style (matching graph/dashboard cards)
 .filter-card {
-    background: white;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: border-color 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
 
-    &:hover {
-        border-color: $primary;
+  &:hover {
+    border-color: $primary;
+  }
+
+  .filter-card-content {
+    flex: 1;
+    margin-bottom: 1rem;
+
+    .filter-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
     }
 
-    .filter-card-content {
-        flex: 1;
-        margin-bottom: 1rem;
-
-        .filter-card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 0.75rem;
-        }
-
-        h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: #212529;
-        }
-
-        .filter-key {
-            margin-bottom: 0.5rem;
-
-            code {
-                background: $gray-100;
-                padding: 2px 8px;
-                border-radius: 4px;
-                font-size: 0.8rem;
-                color: $text-secondary;
-            }
-        }
-
-        .filter-meta {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.8rem;
-            color: #6c757d;
-            margin-top: 0.5rem;
-
-            .meta-item {
-                display: flex;
-                align-items: center;
-                gap: 0.25rem;
-
-                &.required {
-                    color: $error;
-                }
-            }
-        }
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #212529;
     }
 
-    .filter-card-actions {
+    .filter-key {
+      margin-bottom: 0.5rem;
+
+      code {
+        background: $gray-100;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        color: $text-secondary;
+      }
+    }
+
+    .filter-meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: #6c757d;
+      margin-top: 0.5rem;
+
+      .meta-item {
         display: flex;
-        gap: 0.5rem;
-        justify-content: center;
-        padding-top: 0.75rem;
-        border-top: 1px solid #e0e0e0;
+        align-items: center;
+        gap: 0.25rem;
 
-        .btn-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #dee2e6;
-            background: white;
-            color: #6c757d;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.875rem;
-            text-decoration: none;
-
-            &.btn-warning {
-                border-color: #ffc107;
-                color: #ffc107;
-
-                &:hover {
-                    background: #ffc107;
-                    color: white;
-                }
-            }
-
-            &.btn-danger {
-                border-color: #dc3545;
-                color: #dc3545;
-
-                &:hover {
-                    background: #dc3545;
-                    color: white;
-                }
-            }
+        &.required {
+          color: $error;
         }
+      }
     }
+  }
+
+  .filter-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e0e0e0;
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #dee2e6;
+      background: white;
+      color: #6c757d;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+      text-decoration: none;
+
+      &.btn-warning {
+        border-color: #ffc107;
+        color: #ffc107;
+
+        &:hover {
+          background: #ffc107;
+          color: white;
+        }
+      }
+
+      &.btn-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+
+        &:hover {
+          background: #dc3545;
+          color: white;
+        }
+      }
+    }
+  }
 }
 
 // Filter type icon (larger icon in card header)
 .filter-type-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: $border-radius;
-    font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: $border-radius;
+  font-size: 18px;
 
-    &.text, &.number {
-        background: rgba($gray-600, 0.1);
-        color: $gray-600;
-    }
+  &.text,
+  &.number {
+    background: rgba($gray-600, 0.1);
+    color: $gray-600;
+  }
 
-    &.select, &.multi_select {
-        background: rgba($primary, 0.1);
-        color: $primary;
-    }
+  &.select,
+  &.multi_select {
+    background: rgba($primary, 0.1);
+    color: $primary;
+  }
 
-    &.date, &.date_range {
-        background: rgba($success, 0.1);
-        color: $success;
-    }
+  &.date,
+  &.date_range {
+    background: rgba($success, 0.1);
+    color: $success;
+  }
 
-    &.checkbox, &.radio {
-        background: rgba($warning, 0.1);
-        color: $warning-dark;
-    }
+  &.checkbox,
+  &.radio {
+    background: rgba($warning, 0.1);
+    color: $warning-dark;
+  }
 
-    &.tokeninput {
-        background: rgba($info, 0.1);
-        color: $info-dark;
-    }
+  &.tokeninput {
+    background: rgba($info, 0.1);
+    color: $info-dark;
+  }
 }
 
 // Filter type badge (small badge)
 .filter-type-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
 
-    &.text, &.number {
-        background: rgba($gray-600, 0.1);
-        color: $gray-600;
-    }
+  &.text,
+  &.number {
+    background: rgba($gray-600, 0.1);
+    color: $gray-600;
+  }
 
-    &.select, &.multi_select {
-        background: rgba($primary, 0.1);
-        color: $primary;
-    }
+  &.select,
+  &.multi_select {
+    background: rgba($primary, 0.1);
+    color: $primary;
+  }
 
-    &.date, &.date_range {
-        background: rgba($success, 0.1);
-        color: $success;
-    }
+  &.date,
+  &.date_range {
+    background: rgba($success, 0.1);
+    color: $success;
+  }
 
-    &.checkbox, &.radio {
-        background: rgba($warning, 0.1);
-        color: $warning-dark;
-    }
+  &.checkbox,
+  &.radio {
+    background: rgba($warning, 0.1);
+    color: $warning-dark;
+  }
 
-    &.tokeninput {
-        background: rgba($info, 0.1);
-        color: $info-dark;
-    }
+  &.tokeninput {
+    background: rgba($info, 0.1);
+    color: $info-dark;
+  }
 }
 
 // Filter Form Page
 .filter-form-page {
-    max-width: 600px;
-    margin: 0 auto;
+  max-width: 600px;
+  margin: 0 auto;
 
-    .card-body {
-        padding: $spacing-lg;
-    }
+  .card-body {
+    padding: $spacing-lg;
+  }
 
-    .card-footer {
-        display: flex;
-        justify-content: space-between;
-        padding: $spacing-md $spacing-lg;
-        background: $gray-50;
-        border-top: 1px solid $border-color;
-    }
+  .card-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: $spacing-md $spacing-lg;
+    background: $gray-50;
+    border-top: 1px solid $border-color;
+  }
 }
 
 .filter-list {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-sm;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
 }
 
 .filter-item {
-    background: $bg-card;
-    border: 1px solid $border-color;
-    border-radius: $border-radius;
-    transition: all $transition-fast;
+  background: $bg-card;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  transition: all $transition-fast;
 
-    &:hover {
-        border-color: $gray-400;
-        box-shadow: $shadow-1;
-    }
+  &:hover {
+    border-color: $gray-400;
+    box-shadow: $shadow-1;
+  }
 }
 
 .filter-item-header {
-    display: flex;
-    align-items: center;
-    gap: $spacing-md;
-    padding: $spacing-md;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
 }
 
 .filter-item-drag {
-    color: $text-hint;
-    cursor: grab;
+  color: $text-hint;
+  cursor: grab;
 
-    &:active {
-        cursor: grabbing;
-    }
+  &:active {
+    cursor: grabbing;
+  }
 }
 
 .filter-item-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .filter-item-label {
-    font-weight: $font-weight-medium;
-    color: $text-primary;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
 }
 
 .filter-item-key {
-    font-size: $font-size-sm;
-    color: $text-hint;
-    font-family: monospace;
+  font-size: $font-size-sm;
+  color: $text-hint;
+  font-family: monospace;
 }
 
 // Filter type badges - used in table and other contexts
 .badge {
-    &[class*="badge-"] {
-        padding: 4px $spacing-sm;
-        font-size: 11px;
-        font-weight: $font-weight-medium;
-        border-radius: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        background: $gray-200;
-        color: $text-secondary;
-    }
+  &[class*="badge-"] {
+    padding: 4px $spacing-sm;
+    font-size: 11px;
+    font-weight: $font-weight-medium;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: $gray-200;
+    color: $text-secondary;
+  }
 
-    &.badge-text,
-    &.badge-number {
-        background: $gray-200;
-        color: $text-secondary;
-    }
+  &.badge-text,
+  &.badge-number {
+    background: $gray-200;
+    color: $text-secondary;
+  }
 
-    &.badge-select,
-    &.badge-multi_select {
-        background: rgba($primary, 0.1);
-        color: $primary;
-    }
+  &.badge-select,
+  &.badge-multi_select {
+    background: rgba($primary, 0.1);
+    color: $primary;
+  }
 
-    &.badge-date,
-    &.badge-date_range {
-        background: rgba($success, 0.1);
-        color: $success-dark;
-    }
+  &.badge-date,
+  &.badge-date_range {
+    background: rgba($success, 0.1);
+    color: $success-dark;
+  }
 
-    &.badge-checkbox,
-    &.badge-radio {
-        background: rgba($warning, 0.1);
-        color: $warning-dark;
-    }
+  &.badge-checkbox,
+  &.badge-radio {
+    background: rgba($warning, 0.1);
+    color: $warning-dark;
+  }
 
-    &.badge-tokeninput {
-        background: rgba($info, 0.1);
-        color: $info-dark;
-    }
+  &.badge-tokeninput {
+    background: rgba($info, 0.1);
+    color: $info-dark;
+  }
 }
 
 .filter-item-actions {
-    display: flex;
-    gap: $spacing-xs;
+  display: flex;
+  gap: $spacing-xs;
 }
 
 // Empty state (matching graph/dashboard empty state)
 .filter-empty-state {
-    padding: 4rem 2rem;
-    text-align: center;
+  padding: 4rem 2rem;
+  text-align: center;
 
-    .empty-state-content {
-        max-width: 400px;
-        margin: 0 auto;
+  .empty-state-content {
+    max-width: 400px;
+    margin: 0 auto;
 
-        .empty-state-icon {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
+    .empty-state-icon {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
 
-            i {
-                font-size: 2.5rem;
-                color: #4caf50;
-            }
-        }
-
-        h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #495057;
-            margin: 0 0 0.5rem 0;
-        }
-
-        p {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin: 0 0 1.5rem 0;
-            line-height: 1.5;
-        }
+      i {
+        font-size: 2.5rem;
+        color: #4caf50;
+      }
     }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #495057;
+      margin: 0 0 0.5rem 0;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin: 0 0 1.5rem 0;
+      line-height: 1.5;
+    }
+  }
 }
 
 .filter-actions-bar {
-    display: flex;
-    justify-content: flex-start;
-    margin-top: $spacing-lg;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: $spacing-lg;
 }
 
 // Filter Modal
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: $z-modal;
-    opacity: 0;
-    visibility: hidden;
-    transition: all $transition-fast;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-modal;
+  opacity: 0;
+  visibility: hidden;
+  transition: all $transition-fast;
 
-    &.active {
-        opacity: 1;
-        visibility: visible;
-    }
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 
 .modal-container {
-    background: $bg-card;
-    border-radius: $border-radius-lg;
-    box-shadow: $shadow-3;
-    width: 100%;
-    max-width: 500px;
-    max-height: 90vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    transform: scale(0.95);
-    transition: transform $transition-fast;
+  background: $bg-card;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-3;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.95);
+  transition: transform $transition-fast;
 
-    .active & {
-        transform: scale(1);
-    }
+  .active & {
+    transform: scale(1);
+  }
 
-    &.modal-sm {
-        max-width: 400px;
-    }
+  &.modal-sm {
+    max-width: 400px;
+  }
 }
 
 .modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: $spacing-md $spacing-lg;
-    border-bottom: 1px solid $border-color;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md $spacing-lg;
+  border-bottom: 1px solid $border-color;
 
-    h3 {
-        margin: 0;
-        font-size: $font-size-lg;
-    }
+  h3 {
+    margin: 0;
+    font-size: $font-size-lg;
+  }
 }
 
 .modal-close-btn {
-    background: transparent;
-    border: none;
-    color: $text-hint;
-    cursor: pointer;
-    padding: $spacing-xs;
-    font-size: $font-size-lg;
+  background: transparent;
+  border: none;
+  color: $text-hint;
+  cursor: pointer;
+  padding: $spacing-xs;
+  font-size: $font-size-lg;
 
-    &:hover {
-        color: $text-primary;
-    }
+  &:hover {
+    color: $text-primary;
+  }
 }
 
 .modal-body {
-    padding: $spacing-lg;
-    overflow-y: auto;
-    flex: 1;
+  padding: $spacing-lg;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: $spacing-sm;
-    padding: $spacing-md $spacing-lg;
-    border-top: 1px solid $border-color;
-    background: $gray-50;
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-lg;
+  border-top: 1px solid $border-color;
+  background: $gray-50;
 }
 
 // Form elements in modal
 .form-group {
-    margin-bottom: $spacing-md;
+  margin-bottom: $spacing-md;
 
-    &:last-child {
-        margin-bottom: 0;
-    }
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .form-label {
-    display: block;
-    margin-bottom: $spacing-xs;
-    font-weight: $font-weight-medium;
-    color: $text-secondary;
-    font-size: $font-size-sm;
+  display: block;
+  margin-bottom: $spacing-xs;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+  font-size: $font-size-sm;
 
-    .required {
-        color: $error;
-    }
+  .required {
+    color: $error;
+  }
 
-    // Checkbox labels - align checkbox with text
-    input[type="checkbox"] {
-        vertical-align: middle;
-        margin-right: $spacing-xs;
-        margin-top: -2px;
-    }
+  // Checkbox labels - align checkbox with text
+  input[type="checkbox"] {
+    vertical-align: middle;
+    margin-right: $spacing-xs;
+    margin-top: -2px;
+  }
 }
 
 .form-hint {
-    display: block;
-    margin-top: $spacing-xs;
-    font-size: 12px;
-    color: $text-hint;
+  display: block;
+  margin-top: $spacing-xs;
+  font-size: 12px;
+  color: $text-hint;
 }
 
 // Filter options list in modal
 .filter-options-list {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-xs;
-    margin-bottom: $spacing-sm;
-    max-height: 200px;
-    overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-sm;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .filter-option-item {
-    display: flex;
-    gap: $spacing-xs;
-    align-items: center;
+  display: flex;
+  gap: $spacing-xs;
+  align-items: center;
 
-    input {
-        flex: 1;
+  input {
+    flex: 1;
+  }
+
+  .remove-option-btn {
+    padding: $spacing-xs;
+    color: $error;
+
+    &:hover {
+      background: $error-bg;
     }
-
-    .remove-option-btn {
-        padding: $spacing-xs;
-        color: $error;
-
-        &:hover {
-            background: $error-bg;
-        }
-    }
+  }
 }
 
 .add-option-btn {
-    margin-top: $spacing-xs;
+  margin-top: $spacing-xs;
 }
 
 // Filters Panel in Graph Creator Sidebar
 .filters-panel {
-    margin-top: $spacing-md;
+  margin-top: $spacing-md;
 }
 
 .filters-list {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-xs;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
 }
 
 .filter-display-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: $spacing-sm;
-    background: $gray-50;
-    border-radius: $border-radius;
-    border: 1px solid $border-color;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-sm;
+  background: $gray-50;
+  border-radius: $border-radius;
+  border: 1px solid $border-color;
 }
 
 .filter-display-label {
-    font-size: $font-size-sm;
-    font-weight: $font-weight-medium;
-    color: $text-primary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
 }
 
 .filter-display-type {
-    font-size: 11px;
-    color: $text-hint;
-    text-transform: uppercase;
+  font-size: 11px;
+  color: $text-hint;
+  text-transform: uppercase;
 }
 
 .filters-empty {
-    padding: $spacing-md;
-    text-align: center;
+  padding: $spacing-md;
+  text-align: center;
 
-    p {
-        margin: 0;
-        font-size: $font-size-sm;
-        color: $text-hint;
-    }
+  p {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $text-hint;
+  }
 }
 
 .filters-manage-btn {
-    width: 100%;
-    margin-top: $spacing-sm;
+  width: 100%;
+  margin-top: $spacing-sm;
 }
 
 // Filter inputs for viewing/applying filters
 .filter-inputs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: $spacing-md;
-    padding: $spacing-md;
-    background: $gray-50;
-    border-radius: $border-radius;
-    margin-bottom: $spacing-lg;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $gray-50;
+  border-radius: $border-radius;
+  margin-bottom: $spacing-lg;
 }
 
 .filter-input-group {
-    flex: 1 1 200px;
-    min-width: 150px;
-    max-width: 300px;
+  flex: 1 1 200px;
+  min-width: 150px;
+  max-width: 300px;
 
-    label {
-        display: block;
-        margin-bottom: $spacing-xs;
-        font-size: $font-size-sm;
-        font-weight: $font-weight-medium;
-        color: $text-secondary;
+  label {
+    display: block;
+    margin-bottom: $spacing-xs;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $text-secondary;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: $spacing-sm;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    font-size: $font-size-base;
+    background: $bg-card;
+
+    &:focus {
+      outline: none;
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba($primary, 0.1);
     }
-
-    input, select {
-        width: 100%;
-        padding: $spacing-sm;
-        border: 1px solid $border-color;
-        border-radius: $border-radius;
-        font-size: $font-size-base;
-        background: $bg-card;
-
-        &:focus {
-            outline: none;
-            border-color: $primary;
-            box-shadow: 0 0 0 3px rgba($primary, 0.1);
-        }
-    }
+  }
 }
 
 .filter-input-group-date-range {
-    display: flex;
-    gap: $spacing-sm;
+  display: flex;
+  gap: $spacing-sm;
 
-    input {
-        flex: 1;
-    }
+  input {
+    flex: 1;
+  }
 }
 
 .filter-apply-btn {
-    align-self: flex-end;
-    margin-left: auto;
+  align-self: flex-end;
+  margin-left: auto;
 }
 
 // Filter Form Page Styles
 .filter-form-page {
-    .form-row {
-        display: flex;
-        gap: 20px;
+  .form-row {
+    display: flex;
+    gap: 20px;
 
-        .form-group {
-            flex: 1;
-        }
+    .form-group {
+      flex: 1;
+    }
+  }
+
+  .data-source-tabs {
+    display: flex;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-md;
+  }
+
+  .data-source-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    border: 2px solid $border-color;
+    border-radius: $border-radius;
+    background: $bg-card;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover {
+      border-color: $primary;
     }
 
-    .data-source-tabs {
-        display: flex;
-        gap: $spacing-sm;
-        margin-bottom: $spacing-md;
+    &.active {
+      border-color: $primary;
+      background: rgba($primary, 0.05);
+      color: $primary;
     }
 
-    .data-source-tab {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: $spacing-sm;
-        padding: $spacing-sm $spacing-md;
-        border: 2px solid $border-color;
-        border-radius: $border-radius;
-        background: $bg-card;
-        cursor: pointer;
-        transition: all $transition-fast;
+    i {
+      font-size: 18px;
+    }
+  }
 
-        &:hover {
-            border-color: $primary;
-        }
+  .query-textarea {
+    font-family: monospace;
+  }
 
-        &.active {
-            border-color: $primary;
-            background: rgba($primary, 0.05);
-            color: $primary;
-        }
+  // CodeMirror styling for filter form - auto-grow without scrolling
+  .CodeMirror {
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    height: auto;
+    min-height: 100px;
+    background: $gray-50;
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
+    font-size: 13px;
+    line-height: 1.6;
+  }
 
-        i {
-            font-size: 18px;
-        }
+  .CodeMirror-scroll {
+    min-height: 100px;
+    overflow: visible !important;
+  }
+
+  .CodeMirror-sizer {
+    min-height: 80px !important;
+  }
+
+  .CodeMirror-focused {
+    background: $bg-card;
+  }
+
+  .CodeMirror-gutters {
+    background: $gray-100;
+    border-right: 1px solid $border-color;
+  }
+
+  .CodeMirror-linenumber {
+    color: $text-hint;
+    padding: 0 $spacing-sm;
+  }
+
+  // SQL Syntax highlighting
+  .cm-keyword {
+    color: #7c3aed;
+    font-weight: 500;
+  }
+
+  .cm-def,
+  .cm-variable-2 {
+    color: #0891b2;
+  }
+
+  .cm-string {
+    color: #059669;
+  }
+
+  .cm-number {
+    color: #d97706;
+  }
+
+  .cm-comment {
+    color: $text-hint;
+    font-style: italic;
+  }
+
+  .cm-operator {
+    color: $text-primary;
+  }
+
+  .cm-builtin {
+    color: #dc2626;
+  }
+
+  // Filter options styling
+  .filter-option-item {
+    display: flex;
+    gap: $spacing-sm;
+    align-items: center;
+    margin-bottom: $spacing-sm;
+
+    input {
+      flex: 1;
     }
 
-    .query-textarea {
-        font-family: monospace;
+    .remove-option-btn {
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: $error;
+      border-color: $error;
+
+      &:hover {
+        background: $error-bg;
+      }
+    }
+  }
+
+  .query-actions {
+    display: flex;
+    gap: $spacing-sm;
+    margin-top: $spacing-sm;
+  }
+
+  // Query test results (same as graph creator)
+  .query-test-result {
+    margin-top: $spacing-md;
+    padding: $spacing-md;
+    border-radius: $border-radius;
+    font-size: $font-size-sm;
+
+    &.success {
+      background: $success-bg;
+      border: 1px solid $success-border;
+      color: $success-dark;
     }
 
-    // CodeMirror styling for filter form - auto-grow without scrolling
-    .CodeMirror {
-        border: 1px solid $border-color;
-        border-radius: $border-radius;
-        height: auto;
-        min-height: 100px;
-        background: $gray-50;
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-        font-size: 13px;
-        line-height: 1.6;
+    &.error {
+      background: $error-bg;
+      border: 1px solid $error-border;
+      color: $error-dark;
+
+      i {
+        margin-right: $spacing-xs;
+      }
+    }
+  }
+
+  .query-result-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    i {
+      font-size: 16px;
     }
 
-    .CodeMirror-scroll {
-        min-height: 100px;
-        overflow: visible !important;
+    .query-row-count {
+      margin-left: auto;
+      font-size: $font-size-sm;
+      opacity: 0.8;
+    }
+  }
+
+  .query-warnings {
+    margin-top: $spacing-sm;
+    padding: $spacing-sm;
+    background: rgba(#f59e0b, 0.1);
+    border: 1px solid rgba(#f59e0b, 0.3);
+    border-radius: $border-radius;
+    color: #92400e;
+
+    ul {
+      margin: 0;
+      padding-left: $spacing-md;
+    }
+  }
+
+  .query-sample-data {
+    margin-top: $spacing-md;
+  }
+
+  .query-result-table-wrapper {
+    max-height: 250px;
+    overflow: auto;
+    border-radius: $border-radius;
+    border: 1px solid $success-border;
+  }
+
+  .query-result-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: $bg-card;
+
+    th,
+    td {
+      padding: $spacing-xs $spacing-sm;
+      text-align: left;
+      border-bottom: 1px solid $border-color;
+      white-space: nowrap;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .CodeMirror-sizer {
-        min-height: 80px !important;
+    th {
+      background: $gray-100;
+      font-weight: $font-weight-medium;
+      color: $text-primary;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
 
-    .CodeMirror-focused {
-        background: $bg-card;
+    td {
+      color: $text-secondary;
     }
 
-    .CodeMirror-gutters {
-        background: $gray-100;
-        border-right: 1px solid $border-color;
+    tbody tr:hover {
+      background: $gray-50;
     }
 
-    .CodeMirror-linenumber {
-        color: $text-hint;
-        padding: 0 $spacing-sm;
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  // Filter Preview
+  .filter-preview {
+    margin-top: $spacing-md;
+    padding: $spacing-md;
+    background: $gray-50;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+  }
+
+  .filter-preview-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-weight: $font-weight-medium;
+    color: $text-secondary;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $border-color;
+
+    i {
+      color: $primary;
+    }
+  }
+
+  .filter-preview-content {
+    background: $bg-card;
+    padding: $spacing-md;
+    border-radius: $border-radius;
+    border: 1px solid $border-color;
+  }
+
+  .filter-preview-label {
+    display: block;
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  .filter-preview-select {
+    max-width: 300px;
+  }
+
+  // Multi-select dropdown with checkboxes
+  .filter-multiselect-dropdown {
+    position: relative;
+    max-width: 300px;
+  }
+
+  .filter-multiselect-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    background: $bg-card;
+    cursor: pointer;
+    transition: border-color $transition-fast;
+
+    &:hover {
+      border-color: $gray-400;
     }
 
-    // SQL Syntax highlighting
-    .cm-keyword {
-        color: #7c3aed;
-        font-weight: 500;
+    i {
+      color: $text-hint;
+      font-size: 12px;
+    }
+  }
+
+  .filter-multiselect-placeholder {
+    color: $text-hint;
+  }
+
+  .filter-multiselect-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    padding: $spacing-xs 0;
+    background: $bg-card;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    box-shadow: $shadow-2;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 10;
+    display: none;
+
+    &.open {
+      display: block;
+    }
+  }
+
+  .filter-multiselect-option {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-xs $spacing-md;
+    cursor: pointer;
+    transition: background $transition-fast;
+    color: $text-secondary;
+
+    &:hover {
+      background: $gray-50;
     }
 
-    .cm-def,
-    .cm-variable-2 {
-        color: #0891b2;
+    input {
+      margin: 0;
+      cursor: pointer;
+    }
+  }
+
+  .filter-preview-checkboxes,
+  .filter-preview-radios {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    &.inline {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: $spacing-md;
+    }
+  }
+
+  .filter-preview-checkbox,
+  .filter-preview-radio {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    color: $text-secondary;
+    cursor: pointer;
+    padding: $spacing-xs;
+    border-radius: $border-radius;
+    transition: background $transition-fast;
+
+    &:hover {
+      background: $gray-50;
     }
 
-    .cm-string {
-        color: #059669;
+    input {
+      margin: 0;
+      cursor: pointer;
     }
+  }
 
-    .cm-number {
-        color: #d97706;
+  .filter-preview-tokeninput {
+    max-width: 300px;
+
+    select {
+      margin-bottom: $spacing-xs;
+      min-height: 100px;
     }
+  }
 
-    .cm-comment {
-        color: $text-hint;
-        font-style: italic;
-    }
+  .static-options-actions {
+    display: flex;
+    gap: $spacing-sm;
+    margin-top: $spacing-sm;
+  }
 
-    .cm-operator {
-        color: $text-primary;
-    }
-
-    .cm-builtin {
-        color: #dc2626;
-    }
-
-    // Filter options styling
-    .filter-option-item {
-        display: flex;
-        gap: $spacing-sm;
-        align-items: center;
-        margin-bottom: $spacing-sm;
-
-        input {
-            flex: 1;
-        }
-
-        .remove-option-btn {
-            width: 38px;
-            height: 38px;
-            min-width: 38px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: $error;
-            border-color: $error;
-
-            &:hover {
-                background: $error-bg;
-            }
-        }
-    }
-
-    .query-actions {
-        display: flex;
-        gap: $spacing-sm;
-        margin-top: $spacing-sm;
-    }
-
-    // Query test results (same as graph creator)
-    .query-test-result {
-        margin-top: $spacing-md;
-        padding: $spacing-md;
-        border-radius: $border-radius;
-        font-size: $font-size-sm;
-
-        &.success {
-            background: $success-bg;
-            border: 1px solid $success-border;
-            color: $success-dark;
-        }
-
-        &.error {
-            background: $error-bg;
-            border: 1px solid $error-border;
-            color: $error-dark;
-
-            i {
-                margin-right: $spacing-xs;
-            }
-        }
-    }
-
-    .query-result-header {
-        display: flex;
-        align-items: center;
-        gap: $spacing-sm;
-
-        i {
-            font-size: 16px;
-        }
-
-        .query-row-count {
-            margin-left: auto;
-            font-size: $font-size-sm;
-            opacity: 0.8;
-        }
-    }
-
-    .query-warnings {
-        margin-top: $spacing-sm;
-        padding: $spacing-sm;
-        background: rgba(#f59e0b, 0.1);
-        border: 1px solid rgba(#f59e0b, 0.3);
-        border-radius: $border-radius;
-        color: #92400e;
-
-        ul {
-            margin: 0;
-            padding-left: $spacing-md;
-        }
-    }
-
-    .query-sample-data {
-        margin-top: $spacing-md;
-    }
-
-    .query-result-table-wrapper {
-        max-height: 250px;
-        overflow: auto;
-        border-radius: $border-radius;
-        border: 1px solid $success-border;
-    }
-
-    .query-result-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 12px;
-        background: $bg-card;
-
-        th, td {
-            padding: $spacing-xs $spacing-sm;
-            text-align: left;
-            border-bottom: 1px solid $border-color;
-            white-space: nowrap;
-            max-width: 200px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        th {
-            background: $gray-100;
-            font-weight: $font-weight-medium;
-            color: $text-primary;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-
-        td {
-            color: $text-secondary;
-        }
-
-        tbody tr:hover {
-            background: $gray-50;
-        }
-
-        tbody tr:last-child td {
-            border-bottom: none;
-        }
-    }
-
-    // Filter Preview
-    .filter-preview {
-        margin-top: $spacing-md;
-        padding: $spacing-md;
-        background: $gray-50;
-        border: 1px solid $border-color;
-        border-radius: $border-radius;
-    }
-
-    .filter-preview-header {
-        display: flex;
-        align-items: center;
-        gap: $spacing-xs;
-        font-weight: $font-weight-medium;
-        color: $text-secondary;
-        margin-bottom: $spacing-md;
-        padding-bottom: $spacing-sm;
-        border-bottom: 1px solid $border-color;
-
-        i {
-            color: $primary;
-        }
-    }
-
-    .filter-preview-content {
-        background: $bg-card;
-        padding: $spacing-md;
-        border-radius: $border-radius;
-        border: 1px solid $border-color;
-    }
-
-    .filter-preview-label {
-        display: block;
-        font-weight: $font-weight-medium;
-        color: $text-primary;
-        margin-bottom: $spacing-sm;
-    }
-
-    .filter-preview-select {
-        max-width: 300px;
-    }
-
-    // Multi-select dropdown with checkboxes
-    .filter-multiselect-dropdown {
-        position: relative;
-        max-width: 300px;
-    }
-
-    .filter-multiselect-trigger {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: $spacing-sm $spacing-md;
-        border: 1px solid $border-color;
-        border-radius: $border-radius;
-        background: $bg-card;
-        cursor: pointer;
-        transition: border-color $transition-fast;
-
-        &:hover {
-            border-color: $gray-400;
-        }
-
-        i {
-            color: $text-hint;
-            font-size: 12px;
-        }
-    }
-
-    .filter-multiselect-placeholder {
-        color: $text-hint;
-    }
-
-    .filter-multiselect-options {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        margin-top: 4px;
-        padding: $spacing-xs 0;
-        background: $bg-card;
-        border: 1px solid $border-color;
-        border-radius: $border-radius;
-        box-shadow: $shadow-2;
-        max-height: 200px;
-        overflow-y: auto;
-        z-index: 10;
-        display: none;
-
-        &.open {
-            display: block;
-        }
-    }
-
-    .filter-multiselect-option {
-        display: flex;
-        align-items: center;
-        gap: $spacing-sm;
-        padding: $spacing-xs $spacing-md;
-        cursor: pointer;
-        transition: background $transition-fast;
-        color: $text-secondary;
-
-        &:hover {
-            background: $gray-50;
-        }
-
-        input {
-            margin: 0;
-            cursor: pointer;
-        }
-    }
-
-    .filter-preview-checkboxes,
-    .filter-preview-radios {
-        display: flex;
-        flex-direction: column;
-        gap: $spacing-xs;
-
-        &.inline {
-            flex-direction: row;
-            flex-wrap: wrap;
-            gap: $spacing-md;
-        }
-    }
-
-    .filter-preview-checkbox,
-    .filter-preview-radio {
-        display: flex;
-        align-items: center;
-        gap: $spacing-sm;
-        color: $text-secondary;
-        cursor: pointer;
-        padding: $spacing-xs;
-        border-radius: $border-radius;
-        transition: background $transition-fast;
-
-        &:hover {
-            background: $gray-50;
-        }
-
-        input {
-            margin: 0;
-            cursor: pointer;
-        }
-    }
-
-    .filter-preview-tokeninput {
-        max-width: 300px;
-
-        select {
-            margin-bottom: $spacing-xs;
-            min-height: 100px;
-        }
-    }
-
-    .static-options-actions {
-        display: flex;
-        gap: $spacing-sm;
-        margin-top: $spacing-sm;
-    }
-
-    #filter-preview-container {
-        margin-top: $spacing-lg;
-    }
+  #filter-preview-container {
+    margin-top: $spacing-lg;
+  }
 }

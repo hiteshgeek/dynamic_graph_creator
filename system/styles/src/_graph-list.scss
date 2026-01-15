@@ -1,267 +1,267 @@
 // Graph List Page Styles
-@use 'variables' as *;
+@use "variables" as *;
 
 .graph-list-page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1rem 0;
+  // max-width: 1200px;
+  // margin: 0 auto;
+  padding: 1rem 0;
 }
 
 // Graph grid layout
 .graph-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
 }
 
 // Graph card style (matching dashboard cards)
 .graph-card {
-    background: white;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    overflow: hidden;
-    transition: border-color 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
 
-    &:hover {
-        border-color: $primary;
+  &:hover {
+    border-color: $primary;
+  }
+
+  .graph-card-content {
+    flex: 1;
+    margin-bottom: 1rem;
+
+    .graph-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
     }
 
-    .graph-card-content {
-        flex: 1;
-        margin-bottom: 1rem;
-
-        .graph-card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 0.75rem;
-        }
-
-        h3 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-            color: #212529;
-        }
-
-        .graph-description {
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin-bottom: 0.5rem;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .graph-meta {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.8rem;
-            color: #6c757d;
-            margin-top: 0.5rem;
-
-            .meta-item {
-                display: flex;
-                align-items: center;
-                gap: 0.25rem;
-            }
-        }
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: #212529;
     }
 
-    .graph-card-actions {
+    .graph-description {
+      font-size: 0.85rem;
+      color: #6c757d;
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .graph-meta {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: #6c757d;
+      margin-top: 0.5rem;
+
+      .meta-item {
         display: flex;
-        gap: 0.5rem;
-        justify-content: center;
-        padding-top: 0.75rem;
-        border-top: 1px solid #e0e0e0;
-
-        .btn-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #dee2e6;
-            background: white;
-            color: #6c757d;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 0.875rem;
-            text-decoration: none;
-
-            &.btn-primary {
-                border-color: $primary;
-                color: $primary;
-
-                &:hover {
-                    background: $primary;
-                    color: white;
-                }
-            }
-
-            &.btn-warning {
-                border-color: #ffc107;
-                color: #ffc107;
-
-                &:hover {
-                    background: #ffc107;
-                    color: white;
-                }
-            }
-
-            &.btn-danger {
-                border-color: #dc3545;
-                color: #dc3545;
-
-                &:hover {
-                    background: #dc3545;
-                    color: white;
-                }
-            }
-        }
+        align-items: center;
+        gap: 0.25rem;
+      }
     }
+  }
+
+  .graph-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e0e0e0;
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #dee2e6;
+      background: white;
+      color: #6c757d;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+      text-decoration: none;
+
+      &.btn-primary {
+        border-color: $primary;
+        color: $primary;
+
+        &:hover {
+          background: $primary;
+          color: white;
+        }
+      }
+
+      &.btn-warning {
+        border-color: #ffc107;
+        color: #ffc107;
+
+        &:hover {
+          background: #ffc107;
+          color: white;
+        }
+      }
+
+      &.btn-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+
+        &:hover {
+          background: #dc3545;
+          color: white;
+        }
+      }
+    }
+  }
 }
 
 // Graph type icon (larger icon in card header)
 .graph-type-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: $border-radius;
-    font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: $border-radius;
+  font-size: 18px;
 
-    &.bar {
-        background: rgba(#1976D2, 0.1);
-        color: #1976D2;
-    }
+  &.bar {
+    background: rgba(#1976d2, 0.1);
+    color: #1976d2;
+  }
 
-    &.line {
-        background: rgba(#4CAF50, 0.1);
-        color: #4CAF50;
-    }
+  &.line {
+    background: rgba(#4caf50, 0.1);
+    color: #4caf50;
+  }
 
-    &.pie {
-        background: rgba(#FF9800, 0.1);
-        color: #FF9800;
-    }
+  &.pie {
+    background: rgba(#ff9800, 0.1);
+    color: #ff9800;
+  }
 }
 
 // Graph type badge (small badge)
 .graph-type-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
 
-    &.bar {
-        background: rgba(#1976D2, 0.1);
-        color: #1976D2;
-    }
+  &.bar {
+    background: rgba(#1976d2, 0.1);
+    color: #1976d2;
+  }
 
-    &.line {
-        background: rgba(#4CAF50, 0.1);
-        color: #4CAF50;
-    }
+  &.line {
+    background: rgba(#4caf50, 0.1);
+    color: #4caf50;
+  }
 
-    &.pie {
-        background: rgba(#FF9800, 0.1);
-        color: #FF9800;
-    }
+  &.pie {
+    background: rgba(#ff9800, 0.1);
+    color: #ff9800;
+  }
 }
 
 // Empty state (matching dashboard empty state)
 .graph-empty-state {
-    padding: 4rem 2rem;
-    text-align: center;
+  padding: 4rem 2rem;
+  text-align: center;
 
-    .empty-state-content {
-        max-width: 400px;
-        margin: 0 auto;
+  .empty-state-content {
+    max-width: 400px;
+    margin: 0 auto;
 
-        .empty-state-icon {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
+    .empty-state-icon {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
 
-            i {
-                font-size: 2.5rem;
-                color: $primary;
-            }
-        }
-
-        h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: #495057;
-            margin: 0 0 0.5rem 0;
-        }
-
-        p {
-            font-size: 0.9rem;
-            color: #6c757d;
-            margin: 0 0 1.5rem 0;
-            line-height: 1.5;
-        }
+      i {
+        font-size: 2.5rem;
+        color: $primary;
+      }
     }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #495057;
+      margin: 0 0 0.5rem 0;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin: 0 0 1.5rem 0;
+      line-height: 1.5;
+    }
+  }
 }
 
 // Delete confirmation modal
 .delete-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: $z-modal;
-    opacity: 0;
-    visibility: hidden;
-    transition: all $transition-fast;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: $z-modal;
+  opacity: 0;
+  visibility: hidden;
+  transition: all $transition-fast;
 
-    &.active {
-        opacity: 1;
-        visibility: visible;
-    }
+  &.active {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 
 .delete-modal-content {
-    background: $bg-card;
-    border-radius: $border-radius-lg;
-    padding: $spacing-lg;
-    max-width: 400px;
-    width: 90%;
-    box-shadow: $shadow-3;
+  background: $bg-card;
+  border-radius: $border-radius-lg;
+  padding: $spacing-lg;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: $shadow-3;
 
-    h3 {
-        margin-bottom: $spacing-md;
-    }
+  h3 {
+    margin-bottom: $spacing-md;
+  }
 
-    p {
-        color: $text-secondary;
-    }
+  p {
+    color: $text-secondary;
+  }
 }
 
 .delete-modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: $spacing-sm;
-    margin-top: $spacing-lg;
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  margin-top: $spacing-lg;
 }

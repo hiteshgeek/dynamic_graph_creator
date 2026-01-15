@@ -32,7 +32,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
         </div>
         <div class="page-header-right">
             <a href="?urlq=dashboard" class="btn btn-secondary">
-                <i class="fas fa-layer-group"></i> My Dashboards
+                <i class="fas fa-th-large"></i> Dashboards
             </a>
             <a href="?urlq=graph" class="btn btn-secondary">
                 <i class="fas fa-chart-line"></i> Graphs

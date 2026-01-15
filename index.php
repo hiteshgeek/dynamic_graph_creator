@@ -18,6 +18,7 @@ require_once __DIR__ . '/system/classes/SQLiDatabase.php';
 require_once __DIR__ . '/system/classes/Rapidkart.php';
 require_once __DIR__ . '/system/classes/Utility.php';
 require_once __DIR__ . '/system/classes/Filter.php';
+require_once __DIR__ . '/system/classes/FilterSet.php';
 require_once __DIR__ . '/system/classes/Graph.php';
 require_once __DIR__ . '/system/classes/DashboardTemplateCategory.php';
 require_once __DIR__ . '/system/classes/DashboardTemplate.php';
