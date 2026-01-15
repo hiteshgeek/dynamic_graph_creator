@@ -481,8 +481,16 @@ class DashboardBuilder {
       const canAddColLeft = canAddCol;
       const canAddColRight = canAddCol;
 
+      // Column drag handle - only show when more than one column
+      const columnDragHandle = numColumns > 1
+        ? `<button class="column-drag-handle" title="Drag to reorder column">
+                    <i class="fas fa-grip-vertical"></i>
+                </button>`
+        : '';
+
       // Area controls - edge buttons and center resize/delete
       const areaControls = `<div class="area-controls-overlay">
+                ${columnDragHandle}
                 <!-- Top: Add Row Above (splits column into rows) -->
                 <button class="edge-btn edge-top add-row-top-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add row above">
                     Add Row Above
@@ -525,7 +533,8 @@ class DashboardBuilder {
           canAddColLeft,
           canAddColRight,
           canResizeLeft,
-          canResizeRight
+          canResizeRight,
+          numColumns
         );
       } else {
         // Regular single area with controls inside
@@ -612,7 +621,8 @@ class DashboardBuilder {
     canAddColLeft = false,
     canAddColRight = false,
     canResizeLeft = false,
-    canResizeRight = false
+    canResizeRight = false,
+    numColumns = 1
   ) {
     // Build grid-template-rows from sub-row heights
     const rowHeights = area.subRows.map((row) => row.height || "1fr").join(" ");
@@ -632,6 +642,13 @@ class DashboardBuilder {
     const anyRowCanGive = heights.some((h) => h > GRID_CONFIG.MIN_FR_UNITS);
     const canAddRow = hasRoomToGrowRows || anyRowCanGive;
 
+    // Column drag handle - only show when more than one column (shown in first row only)
+    const columnDragHandle = numColumns > 1
+      ? `<button class="column-drag-handle" title="Drag to reorder column">
+                <i class="fas fa-grip-vertical"></i>
+            </button>`
+      : '';
+
     let subRowsHtml = "";
 
     area.subRows.forEach((subRow, rowIndex) => {
@@ -647,9 +664,19 @@ class DashboardBuilder {
         heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS &&
         (hasRoomToGrowRows || heights[rowIndex + 1] > GRID_CONFIG.MIN_FR_UNITS);
 
+      // Row drag handle - only show when more than one row
+      const rowDragHandle = numRows > 1
+        ? `<button class="row-drag-handle" title="Drag to reorder row">
+                    <i class="fas fa-grip-horizontal"></i>
+                </button>`
+        : '';
+
       // All controls inside each sub-row - both column and row actions
       // Each row shows Add Row Above (inserts above this row) and Add Row Below (inserts below this row)
+      // Column drag handle only shown in first row
       const controls = `<div class="area-controls-overlay">
+                ${isFirstRow ? columnDragHandle : ''}
+                ${rowDragHandle}
                 <!-- Column actions: Add Column Left/Right -->
                 <button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColLeft ? 'disabled' : ''}>
                     Add Column Left
@@ -730,16 +757,66 @@ class DashboardBuilder {
   initDragDrop() {
     const sectionsContainer = this.container.querySelector(".dashboard-sections");
 
+    // Destroy existing sortable instances
     if (this.sortableInstance) {
       this.sortableInstance.destroy();
     }
+    if (this.columnSortables) {
+      this.columnSortables.forEach(s => s.destroy());
+    }
+    if (this.rowSortables) {
+      this.rowSortables.forEach(s => s.destroy());
+    }
+    this.columnSortables = [];
+    this.rowSortables = [];
 
+    // Section sortable (existing)
     this.sortableInstance = Sortable.create(sectionsContainer, {
       animation: 150,
       handle: ".drag-handle",
       draggable: ".dashboard-section-wrapper",
       ghostClass: "section-ghost",
       onEnd: () => this.onSectionsReorder(),
+    });
+
+    // Column sortables - one for each section
+    const sections = this.container.querySelectorAll(".dashboard-section");
+    sections.forEach((section) => {
+      const sectionId = section.dataset.sectionId;
+      const columnCount = section.querySelectorAll(":scope > .dashboard-area").length;
+
+      // Only enable column sorting if more than one column
+      if (columnCount > 1) {
+        const sortable = Sortable.create(section, {
+          animation: 150,
+          handle: ".column-drag-handle",
+          draggable: ".dashboard-area",
+          ghostClass: "column-ghost",
+          onEnd: (evt) => this.onColumnsReorder(sectionId, evt),
+        });
+        this.columnSortables.push(sortable);
+      }
+    });
+
+    // Row sortables - one for each nested area with sub-rows
+    const nestedAreas = this.container.querySelectorAll(".dashboard-area-nested");
+    nestedAreas.forEach((nestedArea) => {
+      const areaId = nestedArea.dataset.areaId;
+      const sectionWrapper = nestedArea.closest(".dashboard-section-wrapper");
+      const sectionId = sectionWrapper?.dataset.sectionId;
+      const rowCount = nestedArea.querySelectorAll(".dashboard-sub-row").length;
+
+      // Only enable row sorting if more than one row
+      if (rowCount > 1 && sectionId) {
+        const sortable = Sortable.create(nestedArea, {
+          animation: 150,
+          handle: ".row-drag-handle",
+          draggable: ".dashboard-sub-row",
+          ghostClass: "row-ghost",
+          onEnd: (evt) => this.onRowsReorder(sectionId, areaId, evt),
+        });
+        this.rowSortables.push(sortable);
+      }
     });
   }
 
@@ -786,6 +863,125 @@ class DashboardBuilder {
     } catch (error) {
       console.error("Reorder error:", error);
       Toast.error("Failed to reorder sections");
+    } finally {
+      Loading.hide();
+    }
+  }
+
+  async onColumnsReorder(sectionId, evt) {
+    // Get new order of columns from DOM
+    const section = this.container.querySelector(
+      `.dashboard-section[data-section-id="${sectionId}"]`
+    );
+    const columns = section.querySelectorAll(":scope > .dashboard-area");
+    const newOrder = Array.from(columns).map((col) => col.dataset.areaId);
+
+    Loading.show("Reordering columns...");
+
+    try {
+      const structure = JSON.parse(this.currentDashboard.structure);
+
+      // Find the section
+      const sectionData = structure.sections.find((s) => s.sid === sectionId);
+      if (!sectionData) {
+        Toast.error("Section not found");
+        return;
+      }
+
+      // Create a map of areas by ID
+      const areaMap = {};
+      sectionData.areas.forEach((area) => {
+        areaMap[area.aid] = area;
+      });
+
+      // Also get column widths and reorder them
+      const oldWidths = sectionData.gridTemplate.split(" ");
+      const oldAreaIds = sectionData.areas.map((a) => a.aid);
+
+      // Reorder areas based on new order
+      const newAreas = [];
+      const newWidths = [];
+      newOrder.forEach((aid) => {
+        const oldIndex = oldAreaIds.indexOf(aid);
+        if (oldIndex !== -1 && areaMap[aid]) {
+          newAreas.push(areaMap[aid]);
+          newWidths.push(oldWidths[oldIndex]);
+        }
+      });
+
+      sectionData.areas = newAreas;
+      sectionData.gridTemplate = newWidths.join(" ");
+
+      // Update current dashboard structure
+      this.currentDashboard.structure = JSON.stringify(structure);
+
+      // Auto-save
+      await this.saveDashboard(false);
+
+      // Re-render to update UI (area indices, etc.)
+      this.renderDashboard();
+    } catch (error) {
+      console.error("Column reorder error:", error);
+      Toast.error("Failed to reorder columns");
+      // Re-render to restore original order
+      this.renderDashboard();
+    } finally {
+      Loading.hide();
+    }
+  }
+
+  async onRowsReorder(sectionId, areaId, evt) {
+    // Get new order of rows from DOM
+    const nestedArea = this.container.querySelector(
+      `.dashboard-area-nested[data-area-id="${areaId}"]`
+    );
+    const rows = nestedArea.querySelectorAll(".dashboard-sub-row");
+    const newOrder = Array.from(rows).map((row) => row.dataset.rowId);
+
+    Loading.show("Reordering rows...");
+
+    try {
+      const structure = JSON.parse(this.currentDashboard.structure);
+
+      // Find the section and area
+      const sectionData = structure.sections.find((s) => s.sid === sectionId);
+      if (!sectionData) {
+        Toast.error("Section not found");
+        return;
+      }
+
+      const areaData = sectionData.areas.find((a) => a.aid === areaId);
+      if (!areaData || !areaData.subRows) {
+        Toast.error("Area not found");
+        return;
+      }
+
+      // Create a map of rows by ID
+      const rowMap = {};
+      areaData.subRows.forEach((row) => {
+        rowMap[row.rowId] = row;
+      });
+
+      // Reorder rows based on new order
+      const newRows = newOrder
+        .map((rowId) => rowMap[rowId])
+        .filter((r) => r);
+
+      areaData.subRows = newRows;
+
+      // Update current dashboard structure
+      this.currentDashboard.structure = JSON.stringify(structure);
+
+      // Auto-save
+      await this.saveDashboard(false);
+
+      // Re-render to update UI (row indices, etc.)
+      this.renderDashboard();
+    } catch (error) {
+      console.error("Row reorder error:", error);
+      Toast.error("Failed to reorder rows");
+      // Re-render to restore original order
+      this.renderDashboard();
     } finally {
       Loading.hide();
     }

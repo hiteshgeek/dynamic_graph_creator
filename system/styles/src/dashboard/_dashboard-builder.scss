@@ -158,6 +158,112 @@
     }
   }
 
+  // Column drag handle - positioned at top left of column
+  .column-drag-handle {
+    position: absolute;
+    top: -16px;
+    left: -16px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 2px solid $primary;
+    border-radius: 50%;
+    color: $primary;
+    cursor: grab;
+    transition: all 0.2s;
+    z-index: 15;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    i {
+      font-size: 0.875rem;
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &:hover {
+      background: $primary;
+      color: white;
+      box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
+    }
+  }
+
+  // Row drag handle - positioned at top right of row
+  .row-drag-handle {
+    position: absolute;
+    top: -16px;
+    right: -16px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 2px solid #28a745;
+    border-radius: 50%;
+    color: #28a745;
+    cursor: grab;
+    transition: all 0.2s;
+    z-index: 15;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    i {
+      font-size: 0.875rem;
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &:hover {
+      background: #28a745;
+      color: white;
+      box-shadow: 0 3px 8px rgba(40, 167, 69, 0.3);
+    }
+  }
+
+  // Show drag handles on hover (desktop)
+  @media (min-width: 1024px) {
+    .dashboard-area:hover > .area-controls-overlay .column-drag-handle,
+    .dashboard-sub-row:hover > .area-controls-overlay .column-drag-handle,
+    .dashboard-sub-row:hover > .area-controls-overlay .row-drag-handle {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  // Tablet and mobile: always visible
+  @media (max-width: 1023px) {
+    .column-drag-handle,
+    .row-drag-handle {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  // Ghost classes for drag-drop visual feedback
+  .column-ghost {
+    opacity: 0.4;
+    background: rgba($primary, 0.15);
+    border: 2px dashed $primary;
+    border-radius: 8px;
+  }
+
+  .row-ghost {
+    opacity: 0.4;
+    background: rgba(#28a745, 0.15);
+    border: 2px dashed #28a745;
+    border-radius: 6px;
+  }
+
   // Loader styles moved to common _loader.scss
 
   .responsive-toggle {
