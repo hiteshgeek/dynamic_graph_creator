@@ -27,6 +27,7 @@ class SystemTables
       /**
        * Layout Builder Tables
        */
+      const DB_TBL_LAYOUT_TEMPLATE_CATEGORY = "layout_template_category";
       const DB_TBL_LAYOUT_TEMPLATE = "layout_template";
       const DB_TBL_LAYOUT_INSTANCE = "layout_instance";
 

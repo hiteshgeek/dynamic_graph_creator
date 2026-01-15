@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Template: <?php echo htmlspecialchars($template->getName()); ?> - Dynamic Graph Creator</title>
+    <title>Edit Template: <?php echo htmlspecialchars($template->getName() ?? 'Template'); ?> - Dynamic Graph Creator</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -30,7 +30,7 @@
             <a href="?urlq=layout/templates" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <h1><?php echo htmlspecialchars($template->getName()); ?></h1>
+            <h1><?php echo htmlspecialchars($template->getName() ?? 'Template'); ?></h1>
             <?php if ($template->getIsSystem()): ?>
                 <span class="badge badge-system">
                     <i class="fas fa-lock"></i> System Template (Read-Only)
@@ -113,31 +113,26 @@
                         <input type="text"
                             class="form-control"
                             id="edit-template-name"
-                            value="<?php echo htmlspecialchars($template->getName()); ?>"
+                            value="<?php echo htmlspecialchars($template->getName() ?? ''); ?>"
                             required>
                     </div>
                     <div class="mb-3">
                         <label for="edit-template-description" class="form-label">Description</label>
                         <textarea class="form-control"
                             id="edit-template-description"
-                            rows="3"><?php echo htmlspecialchars($template->getDescription()); ?></textarea>
+                            rows="3"><?php echo htmlspecialchars($template->getDescription() ?? ''); ?></textarea>
                     </div>
                     <div class="mb-3">
-                        <label for="edit-template-category" class="form-label">Category *</label>
-                        <select class="form-select" id="edit-template-category" required>
-                            <option value="columns" <?php echo $template->getCategory() === 'columns' ? 'selected' : ''; ?>>Columns</option>
-                            <option value="mixed" <?php echo $template->getCategory() === 'mixed' ? 'selected' : ''; ?>>Mixed</option>
-                            <option value="advanced" <?php echo $template->getCategory() === 'advanced' ? 'selected' : ''; ?>>Advanced</option>
-                            <option value="custom" <?php echo $template->getCategory() === 'custom' ? 'selected' : ''; ?>>Custom</option>
-                            <option value="_new_">+ Add New Category</option>
+                        <label for="edit-template-category" class="form-label">Category</label>
+                        <select class="form-select" id="edit-template-category">
+                            <option value="">None (Uncategorized)</option>
+                            <?php foreach ($categories as $category): ?>
+                            <option value="<?php echo $category->getId(); ?>"
+                                    <?php echo ($template->getLtcid() == $category->getId()) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($category->getName()); ?>
+                            </option>
+                            <?php endforeach; ?>
                         </select>
-                    </div>
-                    <div class="mb-3" id="new-category-input-group" style="display: none;">
-                        <label for="edit-template-new-category" class="form-label">New Category Name *</label>
-                        <input type="text"
-                            class="form-control"
-                            id="edit-template-new-category"
-                            placeholder="Enter new category name">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -187,43 +182,13 @@
                 });
             }
 
-            // Handle category selection change
-            const categorySelect = document.getElementById('edit-template-category');
-            const newCategoryGroup = document.getElementById('new-category-input-group');
-            const newCategoryInput = document.getElementById('edit-template-new-category');
-
-            if (categorySelect) {
-                categorySelect.addEventListener('change', function() {
-                    if (this.value === '_new_') {
-                        newCategoryGroup.style.display = 'block';
-                        newCategoryInput.required = true;
-                        newCategoryInput.focus();
-                    } else {
-                        newCategoryGroup.style.display = 'none';
-                        newCategoryInput.required = false;
-                        newCategoryInput.value = '';
-                    }
-                });
-            }
-
             // Save template details
             const saveDetailsBtn = document.getElementById('save-template-details-btn');
             if (saveDetailsBtn) {
                 saveDetailsBtn.addEventListener('click', async function() {
                     const name = document.getElementById('edit-template-name').value.trim();
                     const description = document.getElementById('edit-template-description').value.trim();
-                    let category = document.getElementById('edit-template-category').value;
-
-                    // Check if creating new category
-                    if (category === '_new_') {
-                        const newCategory = newCategoryInput.value.trim();
-                        if (!newCategory) {
-                            Toast.error('Please enter a category name');
-                            newCategoryInput.focus();
-                            return;
-                        }
-                        category = newCategory.toLowerCase().replace(/\s+/g, '-');
-                    }
+                    const ltcid = document.getElementById('edit-template-category').value;
 
                     if (!name) {
                         Toast.error('Template name is required');
@@ -239,7 +204,7 @@
                             id: templateId,
                             name: name,
                             description: description,
-                            category: category
+                            ltcid: ltcid
                         });
 
                         if (result.success) {

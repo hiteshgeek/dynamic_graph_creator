@@ -57,11 +57,16 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
                 </div>
             </div>
             <?php else: ?>
-                <?php foreach ($templates as $category => $categoryTemplates): ?>
+                <?php foreach ($templates as $categorySlug => $categoryData): ?>
                 <div class="template-category-section">
-                    <h2><?php echo ucfirst($category); ?></h2>
+                    <h2>
+                        <?php echo htmlspecialchars($categoryData['category']['name']); ?>
+                    </h2>
+                    <?php if (!empty($categoryData['category']['description'])): ?>
+                    <p class="category-description"><?php echo htmlspecialchars($categoryData['category']['description']); ?></p>
+                    <?php endif; ?>
                     <div class="template-grid">
-                        <?php foreach ($categoryTemplates as $template): ?>
+                        <?php foreach ($categoryData['templates'] as $template): ?>
                         <div class="template-card" data-template-id="<?php echo $template['ltid']; ?>">
                             <div class="template-preview">
                                 <?php
@@ -73,6 +78,13 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
                                 <h4><?php echo htmlspecialchars($template['name']); ?></h4>
                                 <?php if (!empty($template['description'])): ?>
                                 <p><?php echo htmlspecialchars($template['description']); ?></p>
+                                <?php endif; ?>
+                                <?php if ($template['is_system']): ?>
+                                <span class="badge badge-system">
+                                    <i class="fas fa-lock"></i> System
+                                </span>
+                                <?php else: ?>
+                                <span class="badge badge-custom">Custom</span>
                                 <?php endif; ?>
                             </div>
                             <div class="template-card-actions">

@@ -60,6 +60,9 @@ if (isset($_POST['submit'])) {
         case 'save_template_structure':
             saveTemplateStructure($_POST);
             break;
+        case 'get_template':
+            getTemplate($_POST);
+            break;
     }
 }
 
@@ -531,6 +534,7 @@ function showTemplateCreator()
 {
     $pageTitle = 'Create Template';
     $template = null;
+    $categories = LayoutTemplateCategory::getAll();
     require_once SystemConfig::templatesPath() . 'layout/template-editor.php';
 }
 
@@ -551,6 +555,7 @@ function showTemplateEditor($templateId)
     }
 
     $pageTitle = 'Edit Template';
+    $categories = LayoutTemplateCategory::getAll();
     require_once SystemConfig::templatesPath() . 'layout/template-editor.php';
 }
 
@@ -565,11 +570,12 @@ function showTemplateBuilder($templateId)
     }
 
     $template = new LayoutTemplate($templateId);
-    if (!$template->getId()) {
+    if (!$template->getId() || !$template->getName()) {
         Utility::redirect('layout/templates');
         return;
     }
 
+    $categories = LayoutTemplateCategory::getAll();
     require_once SystemConfig::templatesPath() . 'layout/template-builder.php';
 }
 
@@ -584,7 +590,7 @@ function showTemplatePreview($templateId)
     }
 
     $template = new LayoutTemplate($templateId);
-    if (!$template->getId()) {
+    if (!$template->getId() || !$template->getName()) {
         Utility::redirect('layout/templates');
         return;
     }
@@ -599,7 +605,7 @@ function createTemplate($data)
 {
     $name = isset($data['name']) ? trim($data['name']) : '';
     $description = isset($data['description']) ? trim($data['description']) : '';
-    $category = isset($data['category']) ? trim($data['category']) : 'custom';
+    $ltcid = isset($data['ltcid']) ? intval($data['ltcid']) : null;
     // TODO: Get actual user ID from session
     $userId = 1;
 
@@ -631,7 +637,7 @@ function createTemplate($data)
     $template = new LayoutTemplate();
     $template->setName($name);
     $template->setDescription($description);
-    $template->setCategory($category);
+    $template->setLtcid($ltcid);
     $template->setStructure($structure);
     $template->setIsSystem(0); // User template
     $template->setCreatedUid($userId);
@@ -654,7 +660,7 @@ function updateTemplate($data)
     $templateId = isset($data['id']) ? intval($data['id']) : 0;
     $name = isset($data['name']) ? trim($data['name']) : '';
     $description = isset($data['description']) ? trim($data['description']) : '';
-    $category = isset($data['category']) ? trim($data['category']) : '';
+    $ltcid = isset($data['ltcid']) && $data['ltcid'] !== '' ? intval($data['ltcid']) : null;
     // TODO: Get actual user ID from session
     $userId = 1;
 
@@ -678,9 +684,7 @@ function updateTemplate($data)
 
     $template->setName($name);
     $template->setDescription($description);
-    if (!empty($category)) {
-        $template->setCategory($category);
-    }
+    $template->setLtcid($ltcid);
     $template->setUpdatedUid($userId);
 
     if (!$template->update()) {
@@ -753,7 +757,7 @@ function duplicateTemplate($data)
     $newTemplate = new LayoutTemplate();
     $newTemplate->setName($sourceTemplate->getName() . ' (Copy)');
     $newTemplate->setDescription($sourceTemplate->getDescription());
-    $newTemplate->setCategory($sourceTemplate->getCategory());
+    $newTemplate->setLtcid($sourceTemplate->getLtcid());
     $newTemplate->setThumbnail($sourceTemplate->getThumbnail());
     $newTemplate->setStructure($sourceTemplate->getStructure());
     $newTemplate->setIsSystem(0); // Always user template
@@ -816,5 +820,31 @@ function saveTemplateStructure($data)
 
     Utility::ajaxResponseTrue('Template saved successfully', array(
         'ltid' => $template->getId()
+    ));
+}
+
+/**
+ * Get single template data
+ */
+function getTemplate($data)
+{
+    $templateId = isset($data['id']) ? intval($data['id']) : 0;
+
+    if (!$templateId) {
+        Utility::ajaxResponseFalse('Invalid template ID');
+    }
+
+    $template = new LayoutTemplate($templateId);
+    if (!$template->getId()) {
+        Utility::ajaxResponseFalse('Template not found');
+    }
+
+    Utility::ajaxResponseTrue('Template loaded successfully', array(
+        'ltid' => $template->getId(),
+        'name' => $template->getName(),
+        'description' => $template->getDescription(),
+        'ltcid' => $template->getLtcid(),
+        'structure' => $template->getStructure(),
+        'is_system' => $template->getIsSystem()
     ));
 }

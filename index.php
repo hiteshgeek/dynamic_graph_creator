@@ -19,6 +19,7 @@ require_once __DIR__ . '/system/classes/Rapidkart.php';
 require_once __DIR__ . '/system/classes/Utility.php';
 require_once __DIR__ . '/system/classes/Filter.php';
 require_once __DIR__ . '/system/classes/Graph.php';
+require_once __DIR__ . '/system/classes/LayoutTemplateCategory.php';
 require_once __DIR__ . '/system/classes/LayoutTemplate.php';
 require_once __DIR__ . '/system/classes/LayoutInstance.php';
 require_once __DIR__ . '/system/classes/LayoutBuilder.php';

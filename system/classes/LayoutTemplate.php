@@ -10,7 +10,7 @@ class LayoutTemplate implements DatabaseObject
     private $ltid;
     private $name;
     private $description;
-    private $category; // columns, rows, mixed, advanced
+    private $ltcid; // Foreign key to layout_template_category
     private $thumbnail;
     private $structure; // JSON
     private $is_system;
@@ -50,12 +50,12 @@ class LayoutTemplate implements DatabaseObject
         $db = Rapidkart::getInstance()->getDB();
 
         // Build dynamic SQL to handle NULL values properly
-        $fields = array('name', 'description', 'category', 'structure', 'is_system');
-        $values = array('::name', '::description', '::category', '::structure', '::is_system');
+        $fields = array('name', 'description', 'ltcid', 'structure', 'is_system');
+        $values = array('::name', '::description', '::ltcid', '::structure', '::is_system');
         $args = array(
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
-            '::category' => $this->category ? $this->category : 'columns',
+            '::ltcid' => $this->ltcid ? $this->ltcid : null,
             '::structure' => $this->structure,
             '::is_system' => $this->is_system ? 1 : 0
         );
@@ -93,7 +93,7 @@ class LayoutTemplate implements DatabaseObject
         $sql = "UPDATE " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " SET
             name = '::name',
             description = '::description',
-            category = '::category',
+            ltcid = '::ltcid',
             thumbnail = '::thumbnail',
             structure = '::structure',
             is_system = '::is_system',
@@ -103,7 +103,7 @@ class LayoutTemplate implements DatabaseObject
         $args = array(
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
-            '::category' => $this->category ? $this->category : 'columns',
+            '::ltcid' => $this->ltcid ? $this->ltcid : null,
             '::thumbnail' => $this->thumbnail ? $this->thumbnail : '',
             '::structure' => $this->structure,
             '::is_system' => $this->is_system ? 1 : 0,
@@ -169,7 +169,10 @@ class LayoutTemplate implements DatabaseObject
     public static function getAll()
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " WHERE ltsid != 3 ORDER BY category, name";
+        $sql = "SELECT lt.* FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " lt
+                LEFT JOIN " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . " ltc ON lt.ltcid = ltc.ltcid
+                WHERE lt.ltsid != 3
+                ORDER BY ltc.display_order ASC, lt.name ASC";
         $res = $db->query($sql);
 
         $templates = array();
@@ -182,27 +185,50 @@ class LayoutTemplate implements DatabaseObject
     }
 
     /**
-     * Get all templates grouped by category
+     * Get all templates grouped by category with category metadata
      */
     public static function getAllGrouped()
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " WHERE ltsid != 3 ORDER BY category, name";
+        $sql = "SELECT
+                    lt.*,
+                    ltc.slug as category_slug,
+                    ltc.name as category_name,
+                    ltc.description as category_description,
+                    ltc.icon as category_icon,
+                    ltc.color as category_color,
+                    ltc.display_order as category_order
+                FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " lt
+                LEFT JOIN " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . " ltc ON lt.ltcid = ltc.ltcid
+                WHERE lt.ltsid != 3 AND (ltc.ltcsid != 3 OR lt.ltcid IS NULL)
+                ORDER BY ltc.display_order ASC, ltc.name ASC, lt.name ASC";
         $res = $db->query($sql);
 
         $grouped = array();
 
         while ($row = $db->fetchAssoc($res)) {
-            $cat = $row['category'];
-            if (!isset($grouped[$cat])) {
-                $grouped[$cat] = array();
+            // Use category slug as key, or 'uncategorized' for NULL categories
+            $catKey = $row['category_slug'] ? $row['category_slug'] : 'uncategorized';
+
+            if (!isset($grouped[$catKey])) {
+                $grouped[$catKey] = array(
+                    'category' => array(
+                        'slug' => $row['category_slug'],
+                        'name' => $row['category_name'] ? $row['category_name'] : 'Uncategorized',
+                        'description' => $row['category_description'],
+                        'icon' => $row['category_icon'] ? $row['category_icon'] : 'fa-folder',
+                        'color' => $row['category_color'] ? $row['category_color'] : '#6c757d',
+                        'display_order' => $row['category_order'] ? $row['category_order'] : 999
+                    ),
+                    'templates' => array()
+                );
             }
-            $grouped[$cat][] = $row;
+            $grouped[$catKey]['templates'][] = $row;
         }
 
         // Filter out empty categories and return only categories with templates
-        return array_filter($grouped, function($templates) {
-            return !empty($templates);
+        return array_filter($grouped, function($categoryData) {
+            return !empty($categoryData['templates']);
         });
     }
 
@@ -211,7 +237,10 @@ class LayoutTemplate implements DatabaseObject
      */
     public function getStructureArray()
     {
-        return json_decode($this->structure, true);
+        if (empty($this->structure)) {
+            return ['sections' => []];
+        }
+        return json_decode($this->structure, true) ?? ['sections' => []];
     }
 
     /**
@@ -235,8 +264,17 @@ class LayoutTemplate implements DatabaseObject
     public function getDescription() { return $this->description; }
     public function setDescription($value) { $this->description = $value; }
 
-    public function getCategory() { return $this->category; }
-    public function setCategory($value) { $this->category = $value; }
+    public function getLtcid() { return $this->ltcid; }
+    public function setLtcid($value) { $this->ltcid = intval($value); }
+
+    // Helper method to get category object
+    public function getCategory()
+    {
+        if ($this->ltcid) {
+            return new LayoutTemplateCategory($this->ltcid);
+        }
+        return null;
+    }
 
     public function getThumbnail() { return $this->thumbnail; }
     public function setThumbnail($value) { $this->thumbnail = $value; }

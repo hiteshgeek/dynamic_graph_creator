@@ -51,32 +51,21 @@ class LayoutBuilder {
     Loading.show("Loading template...");
 
     try {
-      // Load template data (we'll use a dedicated endpoint or adapt get_layout)
-      const result = await Ajax.post("get_templates", {});
+      // Load single template data
+      const result = await Ajax.post("get_template", { id: this.templateId });
 
       if (result.success && result.data) {
-        // Find the template from the grouped data
-        let template = null;
-        for (const category in result.data) {
-          template = result.data[category].find(
-            (t) => parseInt(t.ltid) === this.templateId
-          );
-          if (template) break;
-        }
-
-        if (template) {
-          // Convert template to layout-like structure for rendering
-          this.currentLayout = {
-            liid: null, // No layout instance ID
-            name: template.name,
-            structure: template.structure,
-          };
-          this.renderLayout();
-        } else {
-          Toast.error("Template not found");
-        }
+        // Convert template to layout-like structure for rendering
+        this.currentLayout = {
+          liid: null, // No layout instance ID
+          ltid: result.data.ltid,
+          name: result.data.name,
+          structure: result.data.structure,
+          is_system: result.data.is_system,
+        };
+        this.renderLayout();
       } else {
-        Toast.error("Failed to load template");
+        Toast.error(result.message || "Failed to load template");
       }
     } catch (error) {
       console.error("Template load error:", error);

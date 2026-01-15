@@ -5,27 +5,47 @@
 -- Includes all 13 system layout templates (CSS handled in SCSS)
 -- ============================================================================
 
--- Drop existing tables if they exist
+-- Drop existing tables if they exist (in correct order due to foreign keys)
 DROP TABLE IF EXISTS layout_instance;
 DROP TABLE IF EXISTS layout_template;
+DROP TABLE IF EXISTS layout_template_category;
+
+-- Layout Template Category Table
+CREATE TABLE layout_template_category (
+    ltcid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    slug VARCHAR(50) NOT NULL UNIQUE COMMENT 'URL-friendly identifier (e.g., "columns", "advanced")',
+    name VARCHAR(100) NOT NULL COMMENT 'Display name (e.g., "Columns", "Advanced")',
+    description TEXT COMMENT 'Category description',
+    icon VARCHAR(50) DEFAULT NULL COMMENT 'Font Awesome icon class (e.g., "fa-columns")',
+    color VARCHAR(20) DEFAULT NULL COMMENT 'Category color for UI (e.g., "#007bff")',
+    display_order INT(11) DEFAULT 0 COMMENT 'Display order (lower numbers first)',
+    is_system TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=system category (protected), 0=custom category',
+    ltcsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
+    created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_slug (slug),
+    INDEX idx_display_order (display_order),
+    INDEX idx_ltcsid (ltcsid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Layout template categories';
 
 -- Layout Template Table (System templates and user-created templates)
 CREATE TABLE layout_template (
     ltid INT(11) AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL COMMENT 'Template name',
     description TEXT COMMENT 'Template description',
-    category VARCHAR(50) DEFAULT 'basic' COMMENT 'basic, advanced, custom',
+    ltcid INT(11) DEFAULT NULL COMMENT 'Category ID (foreign key to layout_template_category)',
     thumbnail VARCHAR(255) DEFAULT NULL COMMENT 'Preview image path',
     structure TEXT NOT NULL COMMENT 'JSON layout structure',
-    is_system TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=system template (cannot be deleted), 0=user template',
+    is_system TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=system template (protected), 0=user template',
     ltsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
     created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_uid INT(11) DEFAULT NULL COMMENT 'User who created',
     updated_uid INT(11) DEFAULT NULL COMMENT 'User who last updated',
-    INDEX idx_category (category),
+    INDEX idx_ltcid (ltcid),
     INDEX idx_ltsid (ltsid),
-    INDEX idx_is_system (is_system)
+    INDEX idx_is_system (is_system),
+    FOREIGN KEY (ltcid) REFERENCES layout_template_category(ltcid) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Dashboard layout templates';
 
 -- Layout Instance Table (User layouts created from templates)
@@ -51,16 +71,26 @@ CREATE TABLE layout_instance (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User layout instances';
 
 -- ============================================================================
+-- SYSTEM TEMPLATE CATEGORIES (4 total)
+-- ============================================================================
+
+INSERT INTO layout_template_category (slug, name, description, icon, color, display_order, is_system, ltcsid) VALUES
+('columns', 'Columns', 'Simple column-based layouts with equal or varied widths', 'fa-columns', '#007bff', 10, 1, 1),
+('mixed', 'Mixed', 'Mixed layouts with sidebars and unequal column ratios', 'fa-table-columns', '#6610f2', 20, 1, 1),
+('advanced', 'Advanced', 'Complex multi-section layouts with nested areas', 'fa-th', '#6f42c1', 30, 1, 1),
+('rows', 'Rows', 'Row-based layouts with stacked sections', 'fa-bars', '#d63384', 40, 1, 1);
+
+-- ============================================================================
 -- SYSTEM LAYOUT TEMPLATES (13 total)
 -- CSS styling is handled entirely in SCSS, JSON only contains structure
 -- ============================================================================
 
 -- 1. Single Column Template
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Single Column',
     'Simple single column layout',
-    'columns',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'columns'),
     '{
         "sections": [
             {
@@ -82,11 +112,11 @@ VALUES (
 );
 
 -- 2. Two Column Template
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Two Columns',
     'Two equal columns side by side',
-    'columns',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'columns'),
     '{
         "sections": [
             {
@@ -114,11 +144,11 @@ VALUES (
 );
 
 -- 3. Three Column Template
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Three Columns',
     'Three equal columns for metrics',
-    'columns',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'columns'),
     '{
         "sections": [
             {
@@ -152,11 +182,11 @@ VALUES (
 );
 
 -- 4. Four Column Template
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Four Columns',
     'Four equal columns for KPIs',
-    'columns',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'columns'),
     '{
         "sections": [
             {
@@ -196,11 +226,11 @@ VALUES (
 );
 
 -- 5. Left Sidebar Template
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Left Sidebar',
     'Narrow left sidebar with main content area',
-    'mixed',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'mixed'),
     '{
         "sections": [
             {
@@ -228,11 +258,11 @@ VALUES (
 );
 
 -- 6. Right Sidebar Template
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Right Sidebar',
     'Main content with narrow right sidebar',
-    'mixed',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'mixed'),
     '{
         "sections": [
             {
@@ -260,11 +290,11 @@ VALUES (
 );
 
 -- 7. Holy Grail Template
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Holy Grail',
     'Classic three-column layout with navigation, content, and tools',
-    'mixed',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'mixed'),
     '{
         "sections": [
             {
@@ -298,11 +328,11 @@ VALUES (
 );
 
 -- 8. Multi-Section Template (Header + Two Columns)
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Header + Two Columns',
     'Full-width header with two columns below',
-    'advanced',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -342,11 +372,11 @@ VALUES (
 );
 
 -- 9. Dashboard Template
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Dashboard',
     'Complete dashboard with KPIs, main chart, and secondary charts',
-    'advanced',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -416,11 +446,11 @@ VALUES (
 );
 
 -- 10. Left Multi-Row + Right Single
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Left Multi-Row + Right Single',
     'Left column with 3 rows, right column with single large area',
-    'advanced',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -467,11 +497,11 @@ VALUES (
 );
 
 -- 11. Right Multi-Row + Left Single
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Right Multi-Row + Left Single',
     'Left column with single large area, right column with 3 rows',
-    'advanced',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -518,11 +548,11 @@ VALUES (
 );
 
 -- 12. Two Multi-Row Columns
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Two Multi-Row Columns',
     'Two columns, each with 2 rows',
-    'advanced',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -576,11 +606,11 @@ VALUES (
 );
 
 -- 13. Focal Point with Multi-Row
-INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO layout_template (name, description, ltcid, structure, is_system, ltsid)
 VALUES (
     'Focal Point with Multi-Row',
     'Large left area with right column split into 3 rows',
-    'advanced',
+    (SELECT ltcid FROM layout_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -627,5 +657,14 @@ VALUES (
 );
 
 -- ============================================================================
--- Migration Complete - All 13 System Templates Installed
+-- Migration Complete
+-- - 4 System Categories Installed
+-- - 13 System Templates Installed (linked to categories)
+-- ============================================================================
+--
+-- NOTES:
+-- - Categories now have their own table with ordering, icons, colors, and descriptions
+-- - Templates reference categories via foreign key (ltcid) instead of string values
+-- - Categories can be managed independently and have controlled ordering
+-- - ON DELETE SET NULL ensures templates won't break if a category is deleted
 -- ============================================================================

@@ -4,10 +4,18 @@
  */
 
 export class TemplateManager {
+  static initialized = false;
+
   /**
    * Initialize template list page handlers using event delegation
    */
   static initTemplateList() {
+    // Prevent multiple initializations
+    if (TemplateManager.initialized) {
+      return;
+    }
+    TemplateManager.initialized = true;
+
     // Use event delegation on document body for dynamic elements
     document.body.addEventListener("click", (e) => {
       // Check if delete button was clicked
@@ -21,8 +29,6 @@ export class TemplateManager {
       if (e.target.closest(".duplicate-template-btn")) {
         const btn = e.target.closest(".duplicate-template-btn");
         const templateId = btn.dataset.templateId;
-        console.log("duplicating");
-
         TemplateManager.duplicateTemplate(templateId);
       }
     });
