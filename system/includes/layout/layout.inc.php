@@ -634,7 +634,6 @@ function createTemplate($data)
     $template->setCategory($category);
     $template->setStructure($structure);
     $template->setIsSystem(0); // User template
-    $template->setLtsid(1); // Active
     $template->setCreatedUid($userId);
 
     if (!$template->insert()) {
@@ -710,21 +709,19 @@ function deleteTemplate($data)
         Utility::ajaxResponseFalse('Template not found');
     }
 
-    // Protect system templates
-    if ($template->getIsSystem()) {
-        Utility::ajaxResponseFalse('Cannot delete system templates');
-    }
-
     // Check if template is in use by any layouts
-    $db = Database::getInstance();
-    $sql = "SELECT COUNT(*) as count FROM " . SystemTables::LAYOUT_INSTANCE . "
-            WHERE ltid = ? AND lisid != 3";
-    $result = $db->fetchOne($sql, [$templateId]);
+    $db = Rapidkart::getInstance()->getDB();
+    $sql = "SELECT COUNT(*) as count FROM " . SystemTables::DB_TBL_LAYOUT_INSTANCE . "
+            WHERE ltid = '::ltid' AND lisid != 3";
+    $result = $db->query($sql, array('::ltid' => $templateId));
 
-    if ($result && $result['count'] > 0) {
-        Utility::ajaxResponseFalse(
-            'Cannot delete template. It is being used by ' . $result['count'] . ' layout(s)'
-        );
+    if ($result && $db->numRows($result) > 0) {
+        $row = $db->fetchAssoc($result);
+        if ($row && $row['count'] > 0) {
+            Utility::ajaxResponseFalse(
+                'Cannot delete template. It is being used by ' . $row['count'] . ' layout(s)'
+            );
+        }
     }
 
     if (!LayoutTemplate::delete($templateId)) {
@@ -760,7 +757,6 @@ function duplicateTemplate($data)
     $newTemplate->setThumbnail($sourceTemplate->getThumbnail());
     $newTemplate->setStructure($sourceTemplate->getStructure());
     $newTemplate->setIsSystem(0); // Always user template
-    $newTemplate->setLtsid(1);
     $newTemplate->setCreatedUid($userId);
 
     if (!$newTemplate->insert()) {

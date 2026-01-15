@@ -38,7 +38,7 @@
         </div>
         <div class="page-header-right">
             <a href="?urlq=graph/edit/<?php echo $graph->getId(); ?>" class="btn btn-outline">
-                <i class="fas fa-edit"></i> Edit
+                <i class="fas fa-pencil"></i> Edit
             </a>
         </div>
     </div>

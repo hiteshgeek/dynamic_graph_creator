@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Layout Templates - Dynamic Graph Creator</title>
+    <title>Dashboard Templates - Dynamic Graph Creator</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -28,16 +28,15 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
 <body>
     <div class="page-header">
         <div class="page-header-left">
-            <div class="nav-tabs">
-                <a href="?urlq=layout" class="nav-tab">
-                    <i class="fas fa-layer-group"></i> My Layouts
-                </a>
-                <a href="?urlq=layout/templates" class="nav-tab active">
-                    <i class="fas fa-th-large"></i> Templates
-                </a>
-            </div>
+            <h1>Dashboard Templates</h1>
         </div>
         <div class="page-header-right">
+            <a href="?urlq=layout" class="btn btn-secondary">
+                <i class="fas fa-layer-group"></i> My Dashboards
+            </a>
+            <a href="?urlq=graph" class="btn btn-secondary">
+                <i class="fas fa-chart-line"></i> Graphs
+            </a>
             <a href="?urlq=layout/template/create" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create Template
             </a>
@@ -85,18 +84,16 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
                                 <button class="btn-icon btn-warning"
                                         title="Edit Structure"
                                         onclick="window.location='?urlq=layout/template/builder/<?php echo $template['ltid']; ?>'">
-                                    <i class="fas fa-edit"></i>
+                                    <i class="fas fa-pencil"></i>
                                 </button>
-                                <button class="btn-icon btn-success"
+                                <button class="btn-icon btn-success duplicate-template-btn"
                                         title="Duplicate"
-                                        data-template-id="<?php echo $template['ltid']; ?>"
-                                        class="duplicate-template-btn">
+                                        data-template-id="<?php echo $template['ltid']; ?>">
                                     <i class="fas fa-copy"></i>
                                 </button>
-                                <button class="btn-icon btn-danger"
+                                <button class="btn-icon btn-danger delete-template-btn"
                                         title="Delete"
-                                        data-template-id="<?php echo $template['ltid']; ?>"
-                                        class="delete-template-btn">
+                                        data-template-id="<?php echo $template['ltid']; ?>">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>

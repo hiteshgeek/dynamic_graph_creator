@@ -19,6 +19,7 @@
     .preview-section {
       flex: 1;
       background: white;
+      gap: var(--preview-gap);
 
       &:first-child {
         padding-top: var(--preview-gap);
@@ -37,6 +38,7 @@
         display: grid;
         padding: 0;
         background: transparent;
+        gap: var(--preview-gap);
 
         .preview-sub-row {
           background: $template-preview-color;
@@ -64,24 +66,24 @@
 // Small preview variant (selector modal, list cards)
 @mixin template-preview-small {
   @extend %template-preview-base;
-  --preview-gap: 2px;
+  --preview-gap: #{$template-preview-gap};
   --preview-min-height: 20px;
   height: 150px;
   margin-bottom: $spacing-md;
 
   .template-preview-grid {
-    gap: 2px;
+    gap: $template-preview-gap;
 
     .preview-section {
       border-radius: 4px;
-      padding: 0 2px;
+      padding: 0 $template-preview-gap;
 
       .preview-area {
         border-radius: 2px;
       }
 
       .preview-area-nested {
-        gap: 2px;
+        gap: $template-preview-gap;
         border-radius: 2px;
 
         .preview-sub-row {
@@ -102,25 +104,25 @@
 // Large preview variant (preview page)
 @mixin template-preview-large {
   @extend %template-preview-base;
-  --preview-gap: 4px;
+  --preview-gap: #{$template-preview-gap};
   --preview-min-height: 40px;
   height: 400px;
   margin-bottom: $spacing-lg;
   padding: $spacing-md;
 
   .template-preview-grid {
-    gap: 4px;
+    gap: $template-preview-gap;
 
     .preview-section {
       border-radius: 6px;
-      padding: 0 4px;
+      padding: 0 $template-preview-gap;
 
       .preview-area {
         border-radius: 4px;
       }
 
       .preview-area-nested {
-        gap: 4px;
+        gap: $template-preview-gap;
         border-radius: 4px;
 
         .preview-sub-row {

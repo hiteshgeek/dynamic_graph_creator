@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $layout ? 'Edit Layout' : 'Create Layout'; ?> - Dynamic Graph Creator</title>
+    <title><?php echo $layout ? 'Edit Dashboard' : 'Create Dashboard'; ?> - Dynamic Graph Creator</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -16,87 +17,82 @@
 
     <!-- Custom CSS -->
     <?php if ($css = Utility::getCss('common')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
+        <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
     <?php if ($css = Utility::getCss('layout')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
+        <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
-<body>
+
+<body class="layout-builder-page">
     <div class="page-header">
         <div class="page-header-left">
             <a href="?urlq=layout" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
             <?php if ($layout && $layout->getId()): ?>
-            <div class="layout-name-editor">
-                <h1 id="layout-name-display"><?php echo htmlspecialchars($layout->getName()); ?></h1>
-                <input type="text"
-                       id="layout-name-input"
-                       class="form-control layout-name-input"
-                       value="<?php echo htmlspecialchars($layout->getName()); ?>"
-                       placeholder="Layout Name"
-                       style="display: none;">
-                <button id="edit-name-btn" class="btn-icon btn-warning" title="Edit Name">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button id="save-name-btn" class="btn-icon btn-success" title="Save Name" style="display: none;">
-                    <i class="fas fa-check"></i>
-                </button>
-                <button id="cancel-name-btn" class="btn-icon btn-secondary" title="Cancel" style="display: none;">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
+                <div class="layout-name-editor">
+                    <h1 id="layout-name-display"><?php echo htmlspecialchars($layout->getName()); ?></h1>
+                    <input type="text"
+                        id="layout-name-input"
+                        class="form-control layout-name-input"
+                        value="<?php echo htmlspecialchars($layout->getName()); ?>"
+                        placeholder="Dashboard Name"
+                        style="display: none;">
+                    <button id="edit-name-btn" class="btn-icon btn-warning" title="Edit Name">
+                        <i class="fas fa-pencil"></i>
+                    </button>
+                    <button id="save-name-btn" class="btn-icon btn-success" title="Save Name" style="display: none;">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button id="cancel-name-btn" class="btn-icon btn-secondary" title="Cancel" style="display: none;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             <?php else: ?>
-            <h1>Create Layout</h1>
+                <h1>Create Dashboard</h1>
             <?php endif; ?>
         </div>
         <div class="page-header-right">
             <?php if ($layout && $layout->getId()): ?>
-            <div class="save-indicator saved" style="display: flex;">
-                <i class="fas fa-check-circle"></i>
-                <span>Saved</span>
-            </div>
-            <a href="?urlq=layout/preview/<?php echo $layout->getId(); ?>"
-               class="btn btn-primary"
-               title="View Layout">
-                <i class="fas fa-eye"></i> View Layout
-            </a>
+                <div class="save-indicator saved" style="display: flex;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Saved</span>
+                </div>
+                <a href="?urlq=layout/preview/<?php echo $layout->getId(); ?>"
+                    class="btn btn-primary">
+                    <i class="fas fa-eye"></i> View Dashboard
+                </a>
             <?php else: ?>
-            <div class="save-indicator" style="display: none;">
-                <i class="fas fa-check-circle"></i>
-                <span>Saved</span>
-            </div>
+                <div class="save-indicator" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Saved</span>
+                </div>
             <?php endif; ?>
         </div>
     </div>
 
     <div id="layout-builder"
-         class="layout-builder"
-         data-layout-id="<?php echo $layout ? $layout->getId() : ''; ?>"
-         data-breakpoint="desktop">
+        class="layout-builder"
+        data-layout-id="<?php echo $layout ? $layout->getId() : ''; ?>"
+        data-breakpoint="desktop">
 
         <div class="builder-body">
             <div class="builder-main">
                 <div class="grid-editor">
                     <?php if ($layout && $layout->getId()): ?>
-                    <div class="layout-sections">
-                        <div class="loading-message">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            <p>Loading layout...</p>
-                        </div>
-                    </div>
+                        <div class="layout-sections"></div>
                     <?php else: ?>
-                    <div class="choose-template-card">
-                        <div class="choose-template-content">
-                            <i class="fas fa-th-large"></i>
-                            <h2>Create Your Dashboard</h2>
-                            <p>Choose from our pre-designed templates to get started</p>
-                            <button class="choose-template-btn">
-                                <i class="fas fa-th-large"></i> Choose Template
-                            </button>
+                        <div class="layout-empty-sections">
+                            <div class="empty-sections-content">
+                                <i class="fas fa-th-large"></i>
+                                <h3>Create Your Dashboard</h3>
+                                <p>Choose from our pre-designed templates to get started</p>
+                                <button class="btn btn-primary choose-template-btn">
+                                    <i class="fas fa-plus"></i> Choose Template
+                                </button>
+                            </div>
                         </div>
-                    </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -114,9 +110,9 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="template-loading">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading templates...</p>
+                <div class="loader">
+                    <i class="fas fa-spinner fa-spin loader-spinner"></i>
+                    <span class="loader-text">Loading templates...</span>
                 </div>
             </div>
         </div>
@@ -154,10 +150,10 @@
 
     <!-- Custom JS -->
     <?php if ($js = Utility::getJs('common')): ?>
-    <script src="<?php echo $js; ?>"></script>
+        <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
     <?php if ($js = Utility::getJs('layout')): ?>
-    <script src="<?php echo $js; ?>"></script>
+        <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 
     <script>
@@ -219,7 +215,10 @@
                     cancelBtn.disabled = true;
                     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-                    Ajax.post('update_layout_name', { id: layoutId, name: newName })
+                    Ajax.post('update_layout_name', {
+                            id: layoutId,
+                            name: newName
+                        })
                         .then(result => {
                             if (result.success) {
                                 Toast.success('Layout name updated');
@@ -264,4 +263,5 @@
         });
     </script>
 </body>
+
 </html>

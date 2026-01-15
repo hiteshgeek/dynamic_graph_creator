@@ -1,20 +1,42 @@
 // Grid Editor Styles
 @use '../variables' as *;
 
-.layout-preview {
-    margin-top: $spacing-lg;
+// Preview pages - remove container padding but add spacing to preview area
+.layout-preview-page,
+.template-preview-page {
+    background: white;
+
+    .container-fluid {
+        padding: 0;
+        padding-top: $spacing-lg;
+    }
+
+    .layout-preview {
+        margin-top: 0;
+        padding: $spacing-lg;
+    }
+}
+
+// Builder pages - keep default spacing
+.layout-builder-page,
+.template-builder-page {
+    background: white;
+
+    .layout-preview {
+        margin-top: $spacing-lg;
+    }
 }
 
 .layout-sections {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: $layout-grid-gap;
 }
 
 .layout-section {
     position: relative;
     display: grid;
-    gap: 8px;
+    gap: $layout-grid-gap;
     min-height: 200px;
     background: white;
     border: 2px solid #e0e0e0;
@@ -35,6 +57,24 @@
         opacity: 0.5;
         background: #f8f9fa;
         border-style: dashed;
+    }
+
+    // Preview mode - clean view without editing styles
+    .layout-preview-page &,
+    .template-preview-page & {
+        padding: 0;
+        background: transparent;
+        border: none;
+        min-height: auto;
+
+        &:hover {
+            border-color: transparent;
+            box-shadow: none;
+        }
+
+        .section-controls {
+            display: none;
+        }
     }
 
     .section-controls {
@@ -103,7 +143,7 @@
         background: transparent;
         border: none;
         display: grid;
-        gap: 8px;
+        gap: $layout-grid-gap;
     }
 
     .area-content {

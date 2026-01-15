@@ -3,7 +3,6 @@
 
 .layout-builder {
     min-height: calc(100vh - 60px);
-    background: #f5f7fa;
 
     .builder-body {
         display: flex;
@@ -22,65 +21,7 @@
         }
     }
 
-    // Choose Template Card (centered when no layout)
-    .choose-template-card {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: calc(100vh - 200px);
-
-        .choose-template-content {
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 3rem 2rem;
-            text-align: center;
-            max-width: 500px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-
-            i {
-                font-size: 4rem;
-                color: $primary;
-                margin-bottom: 1.5rem;
-                opacity: 0.8;
-            }
-
-            h2 {
-                font-size: 1.75rem;
-                font-weight: 600;
-                margin-bottom: 0.5rem;
-                color: #212529;
-            }
-
-            p {
-                color: #6c757d;
-                margin-bottom: 2rem;
-                font-size: 1rem;
-            }
-
-            .choose-template-btn {
-                padding: 0.75rem 2rem;
-                background: $primary;
-                color: white;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                font-weight: 500;
-                font-size: 1rem;
-                transition: background 0.2s, transform 0.2s;
-
-                &:hover {
-                    background: $primary-dark;
-                    transform: translateY(-2px);
-                }
-
-                i {
-                    margin-right: 0.5rem;
-                    font-size: 1rem;
-                }
-            }
-        }
-    }
+    // Choose Template Card now uses shared .layout-empty-sections styles from _empty-state.scss
 
     // Layout sections - no vertical centering
     .layout-sections {
@@ -217,27 +158,7 @@
         }
     }
 
-    .welcome-message,
-    .loading-message {
-        text-align: center;
-        padding: 4rem 2rem;
-        color: #6c757d;
-
-        i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        h2 {
-            font-size: 1.75rem;
-            margin-bottom: 0.5rem;
-        }
-
-        p {
-            font-size: 1rem;
-        }
-    }
+    // Loader styles moved to common _loader.scss
 
     .responsive-toggle {
         display: flex;

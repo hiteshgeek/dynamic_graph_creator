@@ -67,7 +67,16 @@
                                     <option value="advanced" <?php echo ($template && $template->getCategory() === 'advanced') ? 'selected' : ''; ?>>Advanced</option>
                                     <option value="rows" <?php echo ($template && $template->getCategory() === 'rows') ? 'selected' : ''; ?>>Rows</option>
                                     <option value="custom" <?php echo ($template && $template->getCategory() === 'custom') ? 'selected' : (!$template ? 'selected' : ''); ?>>Custom</option>
+                                    <option value="_new_">+ Add New Category</option>
                                 </select>
+                            </div>
+
+                            <div class="mb-3" id="new-category-input-group" style="display: none;">
+                                <label for="template-new-category" class="form-label">New Category Name *</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="template-new-category"
+                                       placeholder="Enter new category name">
                             </div>
 
                             <?php if ($template && $template->getId()): ?>
@@ -101,6 +110,25 @@
     <?php endif; ?>
 
     <script>
+        // Handle category selection change
+        const categorySelect = document.getElementById('template-category');
+        const newCategoryGroup = document.getElementById('new-category-input-group');
+        const newCategoryInput = document.getElementById('template-new-category');
+
+        if (categorySelect) {
+            categorySelect.addEventListener('change', function() {
+                if (this.value === '_new_') {
+                    newCategoryGroup.style.display = 'block';
+                    newCategoryInput.required = true;
+                    newCategoryInput.focus();
+                } else {
+                    newCategoryGroup.style.display = 'none';
+                    newCategoryInput.required = false;
+                    newCategoryInput.value = '';
+                }
+            });
+        }
+
         // Handle form submission
         document.getElementById('template-editor-form').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -117,6 +145,17 @@
             };
             for (const [key, value] of formData.entries()) {
                 data[key] = value;
+            }
+
+            // Check if creating new category
+            if (data.category === '_new_') {
+                const newCategory = newCategoryInput.value.trim();
+                if (!newCategory) {
+                    Toast.error('Please enter a category name');
+                    newCategoryInput.focus();
+                    return;
+                }
+                data.category = newCategory.toLowerCase().replace(/\s+/g, '-');
             }
 
             // Show loading state

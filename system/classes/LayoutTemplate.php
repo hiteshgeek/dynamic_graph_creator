@@ -104,7 +104,7 @@ class LayoutTemplate implements DatabaseObject
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
             '::category' => $this->category ? $this->category : 'columns',
-            '::thumbnail' => $this->thumbnail ? $this->thumbnail : NULL,
+            '::thumbnail' => $this->thumbnail ? $this->thumbnail : '',
             '::structure' => $this->structure,
             '::is_system' => $this->is_system ? 1 : 0,
             '::updated_uid' => $this->updated_uid ? $this->updated_uid : 0,
@@ -117,12 +117,6 @@ class LayoutTemplate implements DatabaseObject
     public static function delete($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-
-        // Don't allow deleting system templates
-        $template = new LayoutTemplate($id);
-        if ($template->getIsSystem()) {
-            return false;
-        }
 
         $sql = "UPDATE " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " SET ltsid = 3 WHERE ltid = '::ltid'";
         return $db->query($sql, array('::ltid' => intval($id))) ? true : false;
@@ -196,12 +190,7 @@ class LayoutTemplate implements DatabaseObject
         $sql = "SELECT * FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " WHERE ltsid != 3 ORDER BY category, name";
         $res = $db->query($sql);
 
-        $grouped = array(
-            'columns' => array(),
-            'rows' => array(),
-            'mixed' => array(),
-            'advanced' => array()
-        );
+        $grouped = array();
 
         while ($row = $db->fetchAssoc($res)) {
             $cat = $row['category'];
@@ -211,7 +200,10 @@ class LayoutTemplate implements DatabaseObject
             $grouped[$cat][] = $row;
         }
 
-        return $grouped;
+        // Filter out empty categories and return only categories with templates
+        return array_filter($grouped, function($templates) {
+            return !empty($templates);
+        });
     }
 
     /**

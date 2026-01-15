@@ -96,7 +96,7 @@
                                 </td>
                                 <td>
                                     <a href="?urlq=filters/edit/<?php echo $filter['fid']; ?>" class="btn btn-sm btn-outline-warning" title="Edit">
-                                        <i class="fas fa-edit"></i>
+                                        <i class="fas fa-pencil"></i>
                                     </a>
                                     <button type="button" class="btn btn-sm btn-outline-danger delete-filter-btn" data-id="<?php echo $filter['fid']; ?>" data-label="<?php echo htmlspecialchars($filter['filter_label']); ?>" title="Delete">
                                         <i class="fas fa-trash"></i>

@@ -1,0 +1,75 @@
+// Consistent Loader Component
+@use 'variables' as *;
+
+.loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #6c757d;
+    min-height: 200px;
+
+    .loader-spinner {
+        font-size: 2rem;
+        color: $primary;
+        margin-bottom: 0.75rem;
+        animation: spin 1s linear infinite;
+    }
+
+    .loader-text {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #6c757d;
+    }
+
+    // Overlay variant for modals
+    &.loader-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.95);
+        z-index: 10;
+    }
+
+    // Small variant
+    &.loader-sm {
+        min-height: 100px;
+        padding: 1rem;
+
+        .loader-spinner {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .loader-text {
+            font-size: 0.75rem;
+        }
+    }
+
+    // Large variant
+    &.loader-lg {
+        min-height: 300px;
+        padding: 3rem;
+
+        .loader-spinner {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .loader-text {
+            font-size: 1rem;
+        }
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

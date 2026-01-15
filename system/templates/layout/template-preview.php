@@ -25,7 +25,7 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
-<body>
+<body class="template-preview-page">
     <div class="page-header">
         <div class="page-header-left">
             <a href="?urlq=layout/templates" class="btn btn-secondary btn-sm">
@@ -41,19 +41,15 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
             <?php endif; ?>
         </div>
         <div class="page-header-right">
-            <?php if (!$template->getIsSystem()): ?>
-            <a href="?urlq=layout/template/builder/<?php echo $template->getId(); ?>" class="btn btn-warning">
-                <i class="fas fa-edit"></i> Edit Template
-            </a>
-            <?php endif; ?>
             <button class="btn btn-success duplicate-template-btn" data-template-id="<?php echo $template->getId(); ?>">
                 <i class="fas fa-copy"></i> Duplicate Template
             </button>
-            <?php if (!$template->getIsSystem()): ?>
+            <a href="?urlq=layout/template/builder/<?php echo $template->getId(); ?>" class="btn btn-warning">
+                <i class="fas fa-pencil"></i> Edit Template
+            </a>
             <button class="btn btn-danger delete-template-btn" data-template-id="<?php echo $template->getId(); ?>">
                 <i class="fas fa-trash"></i> Delete Template
             </button>
-            <?php endif; ?>
         </div>
     </div>
 
@@ -90,7 +86,12 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
     <?php endif; ?>
 
     <script>
-        // Will be handled by TemplateManager.js
+        // Initialize TemplateManager for delete and duplicate buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.TemplateManager) {
+                TemplateManager.initTemplateList();
+            }
+        });
     </script>
 </body>
 </html>

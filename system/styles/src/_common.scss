@@ -2,6 +2,7 @@
 // Used by both graph and filter modules
 
 @use "variables" as *;
+@use "loader";
 
 // Add padding for fixed header
 body {

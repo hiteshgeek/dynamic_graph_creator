@@ -25,16 +25,15 @@
 <body>
     <div class="page-header">
         <div class="page-header-left">
-            <div class="nav-tabs">
-                <a href="?urlq=layout" class="nav-tab active">
-                    <i class="fas fa-layer-group"></i> My Layouts
-                </a>
-                <a href="?urlq=layout/templates" class="nav-tab">
-                    <i class="fas fa-th-large"></i> Templates
-                </a>
-            </div>
+            <h1>My Dashboards</h1>
         </div>
         <div class="page-header-right">
+            <a href="?urlq=layout/templates" class="btn btn-secondary">
+                <i class="fas fa-th-large"></i> Templates
+            </a>
+            <a href="?urlq=graph" class="btn btn-secondary">
+                <i class="fas fa-chart-line"></i> Graphs
+            </a>
             <a href="?urlq=layout/builder" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create Dashboard
             </a>
@@ -43,50 +42,52 @@
 
     <div class="container">
         <div id="layout-list" class="layout-list-page">
+            <!-- Card header commented out - redundant with page header
             <div class="card">
                 <div class="card-header">
                     <div class="card-header-left">
-                        <h2>Dashboard Layouts</h2>
-                        <span class="text-muted"><?php echo count($layouts); ?> layout<?php echo count($layouts) !== 1 ? 's' : ''; ?></span>
+                        <h2>My Dashboards</h2>
+                        <span class="text-muted"><?php echo count($layouts); ?> dashboard<?php echo count($layouts) !== 1 ? 's' : ''; ?></span>
                     </div>
                 </div>
-
-                <?php if (empty($layouts)): ?>
-                <div class="layout-empty-state">
-                    <i class="fas fa-th-large"></i>
-                    <p>No layouts created yet</p>
-                    <span>Click "Create Layout" to build your first dashboard</span>
-                </div>
-                <?php else: ?>
-                <div class="layout-grid">
-                    <?php foreach ($layouts as $layout): ?>
-                    <div class="layout-card" data-layout-id="<?php echo $layout->getId(); ?>">
-                        <div class="layout-card-content">
-                            <h3><?php echo htmlspecialchars($layout->getName()); ?></h3>
-                            <div class="layout-meta">
-                                <span class="meta-item">
-                                    <i class="fas fa-clock"></i>
-                                    <?php echo date('M d, Y', strtotime($layout->getUpdatedTs())); ?>
-                                </span>
-                            </div>
-                        </div>
-                        <div class="layout-card-actions">
-                            <a href="?urlq=layout/preview/<?php echo $layout->getId(); ?>"
-                               class="btn-icon btn-primary"
-                               title="Preview">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="?urlq=layout/builder/<?php echo $layout->getId(); ?>"
-                               class="btn-icon btn-warning"
-                               title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
             </div>
+            -->
+
+            <?php if (empty($layouts)): ?>
+            <div class="layout-empty-state">
+                <i class="fas fa-th-large"></i>
+                <p>No dashboards created yet</p>
+                <span>Click "Create Dashboard" to build your first dashboard</span>
+            </div>
+            <?php else: ?>
+            <div class="layout-grid">
+                <?php foreach ($layouts as $layout): ?>
+                <div class="layout-card" data-layout-id="<?php echo $layout->getId(); ?>">
+                    <div class="layout-card-content">
+                        <h3><?php echo htmlspecialchars($layout->getName()); ?></h3>
+                        <div class="layout-meta">
+                            <span class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <?php echo date('M d, Y', strtotime($layout->getUpdatedTs())); ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="layout-card-actions">
+                        <a href="?urlq=layout/preview/<?php echo $layout->getId(); ?>"
+                           class="btn-icon btn-primary"
+                           title="View Dashboard">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="?urlq=layout/builder/<?php echo $layout->getId(); ?>"
+                           class="btn-icon btn-warning"
+                           title="Edit Dashboard">
+                            <i class="fas fa-pencil"></i>
+                        </a>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 

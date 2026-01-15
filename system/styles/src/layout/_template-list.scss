@@ -3,11 +3,11 @@
 @use "template-preview-shared" as *;
 
 .template-list-page {
-  padding: 2rem 0;
+  padding: 1rem 0;
 
   .template-category-section {
-    margin-bottom: 3rem;
-    padding-bottom: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
     border-bottom: 2px solid #e0e0e0;
 
     &:last-child {
@@ -16,14 +16,18 @@
     }
 
     h2 {
-      font-size: 1.5rem;
+      font-size: 1.125rem;
       font-weight: 600;
       margin-bottom: 1.5rem;
-      color: #212529;
-      text-transform: capitalize;
-      padding-bottom: 0.5rem;
-      border-bottom: 3px solid #007bff;
+      color: #495057;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0.5rem 1rem;
+      background: white;
+      border-left: 4px solid #007bff;
+      border-radius: 0 4px 4px 0;
       display: inline-block;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
     }
 
     .template-grid {

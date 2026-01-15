@@ -96,7 +96,7 @@
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <a href="?urlq=graph/edit/<?php echo $g->getId(); ?>" class="btn btn-sm btn-outline-warning" title="Edit">
-                                        <i class="fas fa-edit"></i>
+                                        <i class="fas fa-pencil"></i>
                                     </a>
                                     <button type="button" class="btn btn-sm btn-outline-danger delete-graph-btn"
                                             data-id="<?php echo $g->getId(); ?>"
