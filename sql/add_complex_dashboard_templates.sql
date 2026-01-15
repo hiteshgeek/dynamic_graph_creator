@@ -3,7 +3,7 @@
 
 -- Template: Left Multi-Row + Right Single
 -- 1fr (with 3 rows) | 2fr (single large area)
-INSERT INTO dashboard_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, category, structure, is_system, dtsid)
 VALUES (
     'Left Multi-Row + Right Single',
     'Left column with 3 rows, right column with single large area',
@@ -57,7 +57,7 @@ VALUES (
 
 -- Template: Right Multi-Row + Left Single
 -- 2fr (single large area) | 1fr (with 3 rows)
-INSERT INTO dashboard_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, category, structure, is_system, dtsid)
 VALUES (
     'Right Multi-Row + Left Single',
     'Left column with single large area, right column with 3 rows',
@@ -111,7 +111,7 @@ VALUES (
 
 -- Template: Complex Grid with Variable Heights
 -- Left column: 2 rows (1fr, 2fr), Right column: single
-INSERT INTO dashboard_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, category, structure, is_system, dtsid)
 VALUES (
     'Variable Height Multi-Row',
     'Left column with 2 rows (small + large), right column single',
@@ -159,7 +159,7 @@ VALUES (
 
 -- Template: Both Columns Multi-Row
 -- Both columns have subdivisions
-INSERT INTO dashboard_template (name, description, category, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, category, structure, is_system, dtsid)
 VALUES (
     'Dual Multi-Row Dashboard',
     'Both columns with multiple rows for maximum flexibility',

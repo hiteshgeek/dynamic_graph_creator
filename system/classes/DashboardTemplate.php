@@ -7,15 +7,15 @@
  */
 class DashboardTemplate implements DatabaseObject
 {
-    private $ltid;
+    private $dtid;
     private $name;
     private $description;
-    private $ltcid; // Foreign key to dashboard_template_category
+    private $dtcid; // Foreign key to dashboard_template_category
     private $thumbnail;
     private $structure; // JSON
     private $display_order;
     private $is_system;
-    private $ltsid;
+    private $dtsid;
     private $created_ts;
     private $updated_ts;
     private $created_uid;
@@ -24,7 +24,7 @@ class DashboardTemplate implements DatabaseObject
     public function __construct($id = null)
     {
         if ($id !== null) {
-            $this->ltid = intval($id);
+            $this->dtid = intval($id);
             $this->load();
         }
     }
@@ -32,12 +32,12 @@ class DashboardTemplate implements DatabaseObject
     public static function isExistent($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT ltid FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " WHERE ltid = '::ltid' AND ltsid != 3 LIMIT 1";
-        $res = $db->query($sql, array('::ltid' => intval($id)));
+        $sql = "SELECT dtid FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " WHERE dtid = '::dtid' AND dtsid != 3 LIMIT 1";
+        $res = $db->query($sql, array('::dtid' => intval($id)));
         return $db->numRows($res) > 0;
     }
 
-    public function getId() { return $this->ltid; }
+    public function getId() { return $this->dtid; }
 
     public function hasMandatoryData()
     {
@@ -51,12 +51,12 @@ class DashboardTemplate implements DatabaseObject
         $db = Rapidkart::getInstance()->getDB();
 
         // Build dynamic SQL to handle NULL values properly
-        $fields = array('name', 'description', 'ltcid', 'structure', 'display_order', 'is_system');
-        $values = array('::name', '::description', '::ltcid', '::structure', '::display_order', '::is_system');
+        $fields = array('name', 'description', 'dtcid', 'structure', 'display_order', 'is_system');
+        $values = array('::name', '::description', '::dtcid', '::structure', '::display_order', '::is_system');
         $args = array(
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
-            '::ltcid' => $this->ltcid ? $this->ltcid : null,
+            '::dtcid' => $this->dtcid ? $this->dtcid : null,
             '::structure' => $this->structure,
             '::display_order' => $this->display_order ? $this->display_order : 0,
             '::is_system' => $this->is_system ? 1 : 0
@@ -81,7 +81,7 @@ class DashboardTemplate implements DatabaseObject
         )";
 
         if ($db->query($sql, $args)) {
-            $this->ltid = $db->lastInsertId();
+            $this->dtid = $db->lastInsertId();
             return true;
         }
         return false;
@@ -89,30 +89,30 @@ class DashboardTemplate implements DatabaseObject
 
     public function update()
     {
-        if (!$this->ltid) return false;
+        if (!$this->dtid) return false;
 
         $db = Rapidkart::getInstance()->getDB();
         $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " SET
             name = '::name',
             description = '::description',
-            ltcid = '::ltcid',
+            dtcid = '::dtcid',
             thumbnail = '::thumbnail',
             structure = '::structure',
             display_order = '::display_order',
             is_system = '::is_system',
             updated_uid = '::updated_uid'
-        WHERE ltid = '::ltid'";
+        WHERE dtid = '::dtid'";
 
         $args = array(
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
-            '::ltcid' => $this->ltcid ? $this->ltcid : null,
+            '::dtcid' => $this->dtcid ? $this->dtcid : null,
             '::thumbnail' => $this->thumbnail ? $this->thumbnail : '',
             '::structure' => $this->structure,
             '::display_order' => $this->display_order ? $this->display_order : 0,
             '::is_system' => $this->is_system ? 1 : 0,
             '::updated_uid' => $this->updated_uid ? $this->updated_uid : 0,
-            '::ltid' => $this->ltid
+            '::dtid' => $this->dtid
         );
 
         return $db->query($sql, $args) ? true : false;
@@ -122,17 +122,17 @@ class DashboardTemplate implements DatabaseObject
     {
         $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " SET ltsid = 3 WHERE ltid = '::ltid'";
-        return $db->query($sql, array('::ltid' => intval($id))) ? true : false;
+        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " SET dtsid = 3 WHERE dtid = '::dtid'";
+        return $db->query($sql, array('::dtid' => intval($id))) ? true : false;
     }
 
     public function load()
     {
-        if (!$this->ltid) return false;
+        if (!$this->dtid) return false;
 
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " WHERE ltid = '::ltid' AND ltsid != 3 LIMIT 1";
-        $res = $db->query($sql, array('::ltid' => $this->ltid));
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " WHERE dtid = '::dtid' AND dtsid != 3 LIMIT 1";
+        $res = $db->query($sql, array('::dtid' => $this->dtid));
 
         if (!$res || $db->numRows($res) < 1) return false;
 
@@ -155,7 +155,7 @@ class DashboardTemplate implements DatabaseObject
     public function toArray()
     {
         return array(
-            'ltid' => $this->ltid,
+            'dtid' => $this->dtid,
             'name' => $this->name,
             'description' => $this->description,
             'category' => $this->category,
@@ -174,8 +174,8 @@ class DashboardTemplate implements DatabaseObject
     {
         $db = Rapidkart::getInstance()->getDB();
         $sql = "SELECT lt.* FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " lt
-                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " ltc ON lt.ltcid = ltc.ltcid
-                WHERE lt.ltsid != 3
+                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " ltc ON lt.dtcid = ltc.dtcid
+                WHERE lt.dtsid != 3
                 ORDER BY ltc.display_order ASC, lt.name ASC";
         $res = $db->query($sql);
 
@@ -203,8 +203,8 @@ class DashboardTemplate implements DatabaseObject
                     ltc.color as category_color,
                     ltc.display_order as category_order
                 FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " lt
-                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " ltc ON lt.ltcid = ltc.ltcid
-                WHERE lt.ltsid != 3 AND (ltc.ltcsid != 3 OR lt.ltcid IS NULL)
+                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " ltc ON lt.dtcid = ltc.dtcid
+                WHERE lt.dtsid != 3 AND (ltc.ltcsid != 3 OR lt.dtcid IS NULL)
                 ORDER BY ltc.display_order ASC, ltc.name ASC, lt.display_order ASC, lt.name ASC";
         $res = $db->query($sql);
 
@@ -253,7 +253,7 @@ class DashboardTemplate implements DatabaseObject
     public function createInstance($userId, $name = null)
     {
         $instance = new DashboardInstance();
-        $instance->setLtid($this->ltid);
+        $instance->setDtid($this->dtid);
         $instance->setName($name ? $name : $this->name . ' (Copy)');
         $instance->setStructure($this->structure);
         $instance->setUserId($userId);
@@ -268,14 +268,14 @@ class DashboardTemplate implements DatabaseObject
     public function getDescription() { return $this->description; }
     public function setDescription($value) { $this->description = $value; }
 
-    public function getLtcid() { return $this->ltcid; }
-    public function setLtcid($value) { $this->ltcid = intval($value); }
+    public function getDtcid() { return $this->dtcid; }
+    public function setDtcid($value) { $this->dtcid = intval($value); }
 
     // Helper method to get category object
     public function getCategory()
     {
-        if ($this->ltcid) {
-            return new DashboardTemplateCategory($this->ltcid);
+        if ($this->dtcid) {
+            return new DashboardTemplateCategory($this->dtcid);
         }
         return null;
     }

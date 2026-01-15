@@ -60,11 +60,11 @@
 
                             <div class="mb-3">
                                 <label for="template-category" class="form-label">Category</label>
-                                <select class="form-select" id="template-category" name="ltcid">
+                                <select class="form-select" id="template-category" name="dtcid">
                                     <option value="">None (Uncategorized)</option>
                                     <?php foreach ($categories as $category): ?>
                                     <option value="<?php echo $category->getId(); ?>"
-                                            <?php echo ($template && $template->getLtcid() == $category->getId()) ? 'selected' : ''; ?>>
+                                            <?php echo ($template && $template->getDtcid() == $category->getId()) ? 'selected' : ''; ?>>
                                         <?php echo htmlspecialchars($category->getName()); ?>
                                     </option>
                                     <?php endforeach; ?>

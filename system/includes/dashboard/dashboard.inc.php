@@ -605,7 +605,7 @@ function createTemplate($data)
 {
     $name = isset($data['name']) ? trim($data['name']) : '';
     $description = isset($data['description']) ? trim($data['description']) : '';
-    $ltcid = isset($data['ltcid']) ? intval($data['ltcid']) : null;
+    $dtcid = isset($data['dtcid']) ? intval($data['dtcid']) : null;
     // TODO: Get actual user ID from session
     $userId = 1;
 
@@ -637,7 +637,7 @@ function createTemplate($data)
     $template = new DashboardTemplate();
     $template->setName($name);
     $template->setDescription($description);
-    $template->setLtcid($ltcid);
+    $template->setDtcid($dtcid);
     $template->setStructure($structure);
     $template->setIsSystem(0); // User template
     $template->setCreatedUid($userId);
@@ -647,7 +647,7 @@ function createTemplate($data)
     }
 
     Utility::ajaxResponseTrue('Template created successfully', array(
-        'ltid' => $template->getId(),
+        'dtid' => $template->getId(),
         'redirect' => '?urlq=dashboard/template/builder/' . $template->getId()
     ));
 }
@@ -660,7 +660,7 @@ function updateTemplate($data)
     $templateId = isset($data['id']) ? intval($data['id']) : 0;
     $name = isset($data['name']) ? trim($data['name']) : '';
     $description = isset($data['description']) ? trim($data['description']) : '';
-    $ltcid = isset($data['ltcid']) && $data['ltcid'] !== '' ? intval($data['ltcid']) : null;
+    $dtcid = isset($data['dtcid']) && $data['dtcid'] !== '' ? intval($data['dtcid']) : null;
     // TODO: Get actual user ID from session
     $userId = 1;
 
@@ -684,7 +684,7 @@ function updateTemplate($data)
 
     $template->setName($name);
     $template->setDescription($description);
-    $template->setLtcid($ltcid);
+    $template->setDtcid($dtcid);
     $template->setUpdatedUid($userId);
 
     if (!$template->update()) {
@@ -692,7 +692,7 @@ function updateTemplate($data)
     }
 
     Utility::ajaxResponseTrue('Template updated successfully', array(
-        'ltid' => $template->getId(),
+        'dtid' => $template->getId(),
         'name' => $template->getName()
     ));
 }
@@ -716,8 +716,8 @@ function deleteTemplate($data)
     // Check if template is in use by any dashboards
     $db = Rapidkart::getInstance()->getDB();
     $sql = "SELECT COUNT(*) as count FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . "
-            WHERE ltid = '::ltid' AND lisid != 3";
-    $result = $db->query($sql, array('::ltid' => $templateId));
+            WHERE dtid = '::dtid' AND disid != 3";
+    $result = $db->query($sql, array('::dtid' => $templateId));
 
     if ($result && $db->numRows($result) > 0) {
         $row = $db->fetchAssoc($result);
@@ -757,7 +757,7 @@ function duplicateTemplate($data)
     $newTemplate = new DashboardTemplate();
     $newTemplate->setName($sourceTemplate->getName() . ' (Copy)');
     $newTemplate->setDescription($sourceTemplate->getDescription());
-    $newTemplate->setLtcid($sourceTemplate->getLtcid());
+    $newTemplate->setDtcid($sourceTemplate->getDtcid());
     $newTemplate->setThumbnail($sourceTemplate->getThumbnail());
     $newTemplate->setStructure($sourceTemplate->getStructure());
     $newTemplate->setIsSystem(0); // Always user template
@@ -768,7 +768,7 @@ function duplicateTemplate($data)
     }
 
     Utility::ajaxResponseTrue('Template duplicated successfully', array(
-        'ltid' => $newTemplate->getId(),
+        'dtid' => $newTemplate->getId(),
         'redirect' => '?urlq=dashboard/template/builder/' . $newTemplate->getId()
     ));
 }
@@ -819,7 +819,7 @@ function saveTemplateStructure($data)
     }
 
     Utility::ajaxResponseTrue('Template saved successfully', array(
-        'ltid' => $template->getId()
+        'dtid' => $template->getId()
     ));
 }
 
@@ -840,10 +840,10 @@ function getTemplate($data)
     }
 
     Utility::ajaxResponseTrue('Template loaded successfully', array(
-        'ltid' => $template->getId(),
+        'dtid' => $template->getId(),
         'name' => $template->getName(),
         'description' => $template->getDescription(),
-        'ltcid' => $template->getLtcid(),
+        'dtcid' => $template->getDtcid(),
         'structure' => $template->getStructure(),
         'is_system' => $template->getIsSystem()
     ));

@@ -57,8 +57,8 @@ class DashboardBuilder {
       if (result.success && result.data) {
         // Convert template to dashboard-like structure for rendering
         this.currentDashboard = {
-          liid: null, // No dashboard instance ID
-          ltid: result.data.ltid,
+          diid: null, // No dashboard instance ID
+          dtid: result.data.dtid,
           name: result.data.name,
           structure: result.data.structure,
           is_system: result.data.is_system,
@@ -180,7 +180,7 @@ class DashboardBuilder {
 
         templates[category].forEach((template) => {
           html += `<div class="template-card" data-template-id="${
-            template.ltid
+            template.dtid
           }">
                         <div class="template-preview">
                             ${this.renderTemplatePreview(template)}

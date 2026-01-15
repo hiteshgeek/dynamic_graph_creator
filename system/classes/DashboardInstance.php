@@ -7,15 +7,15 @@
  */
 class DashboardInstance implements DatabaseObject
 {
-    private $liid;
-    private $ltid; // Source template (nullable)
+    private $diid;
+    private $dtid; // Source template (nullable)
     private $name;
     private $description;
     private $structure; // JSON (template + content)
     private $config; // JSON (responsive config)
     private $company_id;
     private $user_id;
-    private $lisid;
+    private $disid;
     private $created_ts;
     private $updated_ts;
     private $created_uid;
@@ -24,7 +24,7 @@ class DashboardInstance implements DatabaseObject
     public function __construct($id = null)
     {
         if ($id !== null) {
-            $this->liid = intval($id);
+            $this->diid = intval($id);
             $this->load();
         }
     }
@@ -32,12 +32,12 @@ class DashboardInstance implements DatabaseObject
     public static function isExistent($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT liid FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " WHERE liid = '::liid' AND lisid != 3 LIMIT 1";
-        $res = $db->query($sql, array('::liid' => intval($id)));
+        $sql = "SELECT diid FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " WHERE diid = '::diid' AND disid != 3 LIMIT 1";
+        $res = $db->query($sql, array('::diid' => intval($id)));
         return $db->numRows($res) > 0;
     }
 
-    public function getId() { return $this->liid; }
+    public function getId() { return $this->diid; }
 
     public function hasMandatoryData()
     {
@@ -60,10 +60,10 @@ class DashboardInstance implements DatabaseObject
             '::config' => $this->config ? $this->config : '{}'
         );
 
-        if ($this->ltid) {
-            $fields[] = 'ltid';
-            $values[] = '::ltid';
-            $args['::ltid'] = $this->ltid;
+        if ($this->dtid) {
+            $fields[] = 'dtid';
+            $values[] = '::dtid';
+            $args['::dtid'] = $this->dtid;
         }
 
         if ($this->company_id) {
@@ -91,7 +91,7 @@ class DashboardInstance implements DatabaseObject
         )";
 
         if ($db->query($sql, $args)) {
-            $this->liid = $db->lastInsertId();
+            $this->diid = $db->lastInsertId();
             return true;
         }
         return false;
@@ -99,7 +99,7 @@ class DashboardInstance implements DatabaseObject
 
     public function update()
     {
-        if (!$this->liid) return false;
+        if (!$this->diid) return false;
 
         $db = Rapidkart::getInstance()->getDB();
 
@@ -118,11 +118,11 @@ class DashboardInstance implements DatabaseObject
             '::config' => $this->config ? $this->config : '{}'
         );
 
-        if ($this->ltid) {
-            $updates[] = "ltid = '::ltid'";
-            $args['::ltid'] = $this->ltid;
+        if ($this->dtid) {
+            $updates[] = "dtid = '::dtid'";
+            $args['::dtid'] = $this->dtid;
         } else {
-            $updates[] = "ltid = NULL";
+            $updates[] = "dtid = NULL";
         }
 
         if ($this->company_id) {
@@ -144,11 +144,11 @@ class DashboardInstance implements DatabaseObject
             $args['::updated_uid'] = $this->updated_uid;
         }
 
-        $args['::liid'] = $this->liid;
+        $args['::diid'] = $this->diid;
 
         $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " SET
             " . implode(', ', $updates) . "
-        WHERE liid = '::liid'";
+        WHERE diid = '::diid'";
 
         return $db->query($sql, $args) ? true : false;
     }
@@ -156,17 +156,17 @@ class DashboardInstance implements DatabaseObject
     public static function delete($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " SET lisid = 3 WHERE liid = '::liid'";
-        return $db->query($sql, array('::liid' => intval($id))) ? true : false;
+        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " SET disid = 3 WHERE diid = '::diid'";
+        return $db->query($sql, array('::diid' => intval($id))) ? true : false;
     }
 
     public function load()
     {
-        if (!$this->liid) return false;
+        if (!$this->diid) return false;
 
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " WHERE liid = '::liid' AND lisid != 3 LIMIT 1";
-        $res = $db->query($sql, array('::liid' => $this->liid));
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " WHERE diid = '::diid' AND disid != 3 LIMIT 1";
+        $res = $db->query($sql, array('::diid' => $this->diid));
 
         if (!$res || $db->numRows($res) < 1) return false;
 
@@ -189,8 +189,8 @@ class DashboardInstance implements DatabaseObject
     public function toArray()
     {
         return array(
-            'liid' => $this->liid,
-            'ltid' => $this->ltid,
+            'diid' => $this->diid,
+            'dtid' => $this->dtid,
             'name' => $this->name,
             'description' => $this->description,
             'structure' => $this->structure,
@@ -208,7 +208,7 @@ class DashboardInstance implements DatabaseObject
     public static function getAll()
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " WHERE lisid != 3 ORDER BY updated_ts DESC";
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " WHERE disid != 3 ORDER BY updated_ts DESC";
         $res = $db->query($sql);
 
         $instances = array();
@@ -227,7 +227,7 @@ class DashboardInstance implements DatabaseObject
     {
         $db = Rapidkart::getInstance()->getDB();
         $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . "
-                WHERE user_id = '::user_id' AND lisid != 3
+                WHERE user_id = '::user_id' AND disid != 3
                 ORDER BY updated_ts DESC";
         $res = $db->query($sql, array('::user_id' => intval($userId)));
 
@@ -342,8 +342,8 @@ class DashboardInstance implements DatabaseObject
     }
 
     // Getters and Setters
-    public function getLtid() { return $this->ltid; }
-    public function setLtid($value) { $this->ltid = $value ? intval($value) : NULL; }
+    public function getDtid() { return $this->dtid; }
+    public function setDtid($value) { $this->dtid = $value ? intval($value) : NULL; }
 
     public function getName() { return $this->name; }
     public function setName($value) { $this->name = $value; }

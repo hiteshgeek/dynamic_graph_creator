@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS dashboard_template_category;
 
 -- Dashboard Template Category Table
 CREATE TABLE dashboard_template_category (
-    ltcid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    dtcid INT(11) AUTO_INCREMENT PRIMARY KEY,
     slug VARCHAR(50) NOT NULL UNIQUE COMMENT 'URL-friendly identifier (e.g., "columns", "advanced")',
     name VARCHAR(100) NOT NULL COMMENT 'Display name (e.g., "Columns", "Advanced")',
     description TEXT COMMENT 'Category description',
@@ -20,61 +20,61 @@ CREATE TABLE dashboard_template_category (
     color VARCHAR(20) DEFAULT NULL COMMENT 'Category color for UI (e.g., "#007bff")',
     display_order INT(11) DEFAULT 0 COMMENT 'Display order (lower numbers first)',
     is_system TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=system category (protected), 0=custom category',
-    ltcsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
+    dtcsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
     created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_slug (slug),
     INDEX idx_display_order (display_order),
-    INDEX idx_ltcsid (ltcsid)
+    INDEX idx_dtcsid (dtcsid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Dashboard template categories';
 
 -- Dashboard Template Table (System templates and user-created templates)
 CREATE TABLE dashboard_template (
-    ltid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    dtid INT(11) AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL COMMENT 'Template name',
     description TEXT COMMENT 'Template description',
-    ltcid INT(11) DEFAULT NULL COMMENT 'Category ID (foreign key to dashboard_template_category)',
+    dtcid INT(11) DEFAULT NULL COMMENT 'Category ID (foreign key to dashboard_template_category)',
     thumbnail VARCHAR(255) DEFAULT NULL COMMENT 'Preview image path',
     structure TEXT NOT NULL COMMENT 'JSON dashboard structure',
     is_system TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=system template (protected), 0=user template',
-    ltsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
+    dtsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
     created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_uid INT(11) DEFAULT NULL COMMENT 'User who created',
     updated_uid INT(11) DEFAULT NULL COMMENT 'User who last updated',
-    INDEX idx_ltcid (ltcid),
-    INDEX idx_ltsid (ltsid),
+    INDEX idx_dtcid (dtcid),
+    INDEX idx_dtsid (dtsid),
     INDEX idx_is_system (is_system),
-    FOREIGN KEY (ltcid) REFERENCES dashboard_template_category(ltcid) ON DELETE SET NULL
+    FOREIGN KEY (dtcid) REFERENCES dashboard_template_category(dtcid) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Dashboard dashboard templates';
 
 -- Dashboard Instance Table (User dashboards created from templates)
 CREATE TABLE dashboard_instance (
-    liid INT(11) AUTO_INCREMENT PRIMARY KEY,
-    ltid INT(11) DEFAULT NULL COMMENT 'Source template ID (nullable)',
+    diid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    dtid INT(11) DEFAULT NULL COMMENT 'Source template ID (nullable)',
     name VARCHAR(255) NOT NULL COMMENT 'Dashboard instance name',
     description TEXT COMMENT 'Dashboard description',
     structure TEXT NOT NULL COMMENT 'JSON dashboard structure with content',
     config TEXT COMMENT 'JSON configuration (responsive breakpoints, etc)',
     company_id INT(11) DEFAULT NULL COMMENT 'Company association for multi-tenant',
     user_id INT(11) DEFAULT NULL COMMENT 'User who owns this dashboard',
-    lisid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
+    disid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
     created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     created_uid INT(11) DEFAULT NULL COMMENT 'User who created',
     updated_uid INT(11) DEFAULT NULL COMMENT 'User who last updated',
-    INDEX idx_ltid (ltid),
+    INDEX idx_dtid (dtid),
     INDEX idx_company_id (company_id),
     INDEX idx_user_id (user_id),
-    INDEX idx_lisid (lisid),
-    FOREIGN KEY (ltid) REFERENCES dashboard_template(ltid) ON DELETE SET NULL
+    INDEX idx_disid (disid),
+    FOREIGN KEY (dtid) REFERENCES dashboard_template(dtid) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User dashboard instances';
 
 -- ============================================================================
 -- SYSTEM TEMPLATE CATEGORIES (4 total)
 -- ============================================================================
 
-INSERT INTO dashboard_template_category (slug, name, description, icon, color, display_order, is_system, ltcsid) VALUES
+INSERT INTO dashboard_template_category (slug, name, description, icon, color, display_order, is_system, dtcsid) VALUES
 ('columns', 'Columns', 'Simple column-based dashboards with equal or varied widths', 'fa-columns', '#007bff', 10, 1, 1),
 ('mixed', 'Mixed', 'Mixed dashboards with sidebars and unequal column ratios', 'fa-table-columns', '#6610f2', 20, 1, 1),
 ('advanced', 'Advanced', 'Complex multi-section dashboards with nested areas', 'fa-th', '#6f42c1', 30, 1, 1),
@@ -86,11 +86,11 @@ INSERT INTO dashboard_template_category (slug, name, description, icon, color, d
 -- ============================================================================
 
 -- 1. Single Column Template
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Single Column',
     'Simple single column dashboard',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'columns'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'columns'),
     '{
         "sections": [
             {
@@ -112,11 +112,11 @@ VALUES (
 );
 
 -- 2. Two Column Template
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Two Columns',
     'Two equal columns side by side',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'columns'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'columns'),
     '{
         "sections": [
             {
@@ -144,11 +144,11 @@ VALUES (
 );
 
 -- 3. Three Column Template
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Three Columns',
     'Three equal columns for metrics',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'columns'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'columns'),
     '{
         "sections": [
             {
@@ -182,11 +182,11 @@ VALUES (
 );
 
 -- 4. Four Column Template
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Four Columns',
     'Four equal columns for KPIs',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'columns'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'columns'),
     '{
         "sections": [
             {
@@ -226,11 +226,11 @@ VALUES (
 );
 
 -- 5. Left Sidebar Template
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Left Sidebar',
     'Narrow left sidebar with main content area',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'mixed'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'mixed'),
     '{
         "sections": [
             {
@@ -258,11 +258,11 @@ VALUES (
 );
 
 -- 6. Right Sidebar Template
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Right Sidebar',
     'Main content with narrow right sidebar',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'mixed'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'mixed'),
     '{
         "sections": [
             {
@@ -290,11 +290,11 @@ VALUES (
 );
 
 -- 7. Holy Grail Template
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Holy Grail',
     'Classic three-column dashboard with navigation, content, and tools',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'mixed'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'mixed'),
     '{
         "sections": [
             {
@@ -328,11 +328,11 @@ VALUES (
 );
 
 -- 8. Multi-Section Template (Header + Two Columns)
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Header + Two Columns',
     'Full-width header with two columns below',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'advanced'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -372,11 +372,11 @@ VALUES (
 );
 
 -- 9. Dashboard Template
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Dashboard',
     'Complete dashboard with KPIs, main chart, and secondary charts',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'advanced'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -446,11 +446,11 @@ VALUES (
 );
 
 -- 10. Left Multi-Row + Right Single
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Left Multi-Row + Right Single',
     'Left column with 3 rows, right column with single large area',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'advanced'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -497,11 +497,11 @@ VALUES (
 );
 
 -- 11. Right Multi-Row + Left Single
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Right Multi-Row + Left Single',
     'Left column with single large area, right column with 3 rows',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'advanced'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -548,11 +548,11 @@ VALUES (
 );
 
 -- 12. Two Multi-Row Columns
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Two Multi-Row Columns',
     'Two columns, each with 2 rows',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'advanced'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -606,11 +606,11 @@ VALUES (
 );
 
 -- 13. Focal Point with Multi-Row
-INSERT INTO dashboard_template (name, description, ltcid, structure, is_system, ltsid)
+INSERT INTO dashboard_template (name, description, dtcid, structure, is_system, dtsid)
 VALUES (
     'Focal Point with Multi-Row',
     'Large left area with right column split into 3 rows',
-    (SELECT ltcid FROM dashboard_template_category WHERE slug = 'advanced'),
+    (SELECT dtcid FROM dashboard_template_category WHERE slug = 'advanced'),
     '{
         "sections": [
             {
@@ -664,7 +664,7 @@ VALUES (
 --
 -- NOTES:
 -- - Categories now have their own table with ordering, icons, colors, and descriptions
--- - Templates reference categories via foreign key (ltcid) instead of string values
+-- - Templates reference categories via foreign key (dtcid) instead of string values
 -- - Categories can be managed independently and have controlled ordering
 -- - ON DELETE SET NULL ensures templates won't break if a category is deleted
 -- ============================================================================

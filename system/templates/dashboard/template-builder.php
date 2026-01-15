@@ -128,7 +128,7 @@
                             <option value="">None (Uncategorized)</option>
                             <?php foreach ($categories as $category): ?>
                             <option value="<?php echo $category->getId(); ?>"
-                                    <?php echo ($template->getLtcid() == $category->getId()) ? 'selected' : ''; ?>>
+                                    <?php echo ($template->getDtcid() == $category->getId()) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($category->getName()); ?>
                             </option>
                             <?php endforeach; ?>
@@ -188,7 +188,7 @@
                 saveDetailsBtn.addEventListener('click', async function() {
                     const name = document.getElementById('edit-template-name').value.trim();
                     const description = document.getElementById('edit-template-description').value.trim();
-                    const ltcid = document.getElementById('edit-template-category').value;
+                    const dtcid = document.getElementById('edit-template-category').value;
 
                     if (!name) {
                         Toast.error('Template name is required');
@@ -204,7 +204,7 @@
                             id: templateId,
                             name: name,
                             description: description,
-                            ltcid: ltcid
+                            dtcid: dtcid
                         });
 
                         if (result.success) {

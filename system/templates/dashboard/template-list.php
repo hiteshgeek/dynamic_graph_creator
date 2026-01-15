@@ -67,7 +67,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                     <?php endif; ?>
                     <div class="template-grid">
                         <?php foreach ($categoryData['templates'] as $template): ?>
-                        <div class="template-card" data-template-id="<?php echo $template['ltid']; ?>">
+                        <div class="template-card" data-template-id="<?php echo $template['dtid']; ?>">
                             <div class="template-preview">
                                 <?php
                                 $structure = json_decode($template['structure'], true);
@@ -90,22 +90,22 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                             <div class="template-card-actions">
                                 <button class="btn-icon btn-primary"
                                         title="Preview"
-                                        onclick="window.location='?urlq=dashboard/template/preview/<?php echo $template['ltid']; ?>'">
+                                        onclick="window.location='?urlq=dashboard/template/preview/<?php echo $template['dtid']; ?>'">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <button class="btn-icon btn-warning"
                                         title="Edit Structure"
-                                        onclick="window.location='?urlq=dashboard/template/builder/<?php echo $template['ltid']; ?>'">
+                                        onclick="window.location='?urlq=dashboard/template/builder/<?php echo $template['dtid']; ?>'">
                                     <i class="fas fa-pencil"></i>
                                 </button>
                                 <button class="btn-icon btn-success duplicate-template-btn"
                                         title="Duplicate"
-                                        data-template-id="<?php echo $template['ltid']; ?>">
+                                        data-template-id="<?php echo $template['dtid']; ?>">
                                     <i class="fas fa-copy"></i>
                                 </button>
                                 <button class="btn-icon btn-danger delete-template-btn"
                                         title="Delete"
-                                        data-template-id="<?php echo $template['ltid']; ?>">
+                                        data-template-id="<?php echo $template['dtid']; ?>">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
