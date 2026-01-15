@@ -25,9 +25,12 @@
 <body>
     <div class="page-header">
         <div class="page-header-left">
-            <h1>Dynamic Graph Creator</h1>
+            <h1>Filters</h1>
         </div>
         <div class="page-header-right">
+            <a href="?urlq=dashboard" class="btn btn-secondary">
+                <i class="fas fa-th-large"></i> Dashboards
+            </a>
             <a href="?urlq=graph" class="btn btn-secondary">
                 <i class="fas fa-chart-bar"></i> Graphs
             </a>
@@ -39,76 +42,80 @@
 
     <div class="container">
         <div id="filter-list" class="filter-list-page">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <h2>All Filters</h2>
-                        <span class="text-muted"><?php echo count($filters); ?> filter<?php echo count($filters) !== 1 ? 's' : ''; ?></span>
+            <?php if (empty($filters)): ?>
+            <div class="filter-empty-state">
+                <div class="empty-state-content">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-filter"></i>
+                    </div>
+                    <h3>No Filters Yet</h3>
+                    <p>Create reusable filters for your graphs and dashboards</p>
+                    <a href="?urlq=filters/add" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Filter
+                    </a>
+                </div>
+            </div>
+            <?php else: ?>
+            <div class="filter-grid">
+                <?php foreach ($filters as $filter): ?>
+                <div class="filter-card" data-filter-id="<?php echo $filter['fid']; ?>">
+                    <div class="filter-card-content">
+                        <div class="filter-card-header">
+                            <?php
+                            $typeIcons = array(
+                                'text' => 'font',
+                                'number' => 'hashtag',
+                                'date' => 'calendar',
+                                'date_range' => 'calendar-week',
+                                'select' => 'list',
+                                'multi_select' => 'list-check',
+                                'checkbox' => 'check-square',
+                                'radio' => 'circle-dot',
+                                'tokeninput' => 'tags'
+                            );
+                            $typeIcon = isset($typeIcons[$filter['filter_type']]) ? $typeIcons[$filter['filter_type']] : 'filter';
+                            ?>
+                            <span class="filter-type-icon <?php echo $filter['filter_type']; ?>">
+                                <i class="fas fa-<?php echo $typeIcon; ?>"></i>
+                            </span>
+                            <span class="filter-type-badge <?php echo $filter['filter_type']; ?>">
+                                <?php echo ucfirst(str_replace('_', ' ', $filter['filter_type'])); ?>
+                            </span>
+                        </div>
+                        <h3><?php echo htmlspecialchars($filter['filter_label']); ?></h3>
+                        <div class="filter-key">
+                            <code><?php echo htmlspecialchars($filter['filter_key']); ?></code>
+                        </div>
+                        <div class="filter-meta">
+                            <span class="meta-item">
+                                <?php if ($filter['data_source'] === 'query'): ?>
+                                <i class="fas fa-database"></i> Query
+                                <?php else: ?>
+                                <i class="fas fa-list"></i> Static
+                                <?php endif; ?>
+                            </span>
+                            <?php if ($filter['is_required']): ?>
+                            <span class="meta-item required">
+                                <i class="fas fa-asterisk"></i> Required
+                            </span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="filter-card-actions">
+                        <a href="?urlq=filters/edit/<?php echo $filter['fid']; ?>" class="btn-icon btn-warning" title="Edit">
+                            <i class="fas fa-pencil"></i>
+                        </a>
+                        <button type="button" class="btn-icon btn-danger delete-filter-btn"
+                                data-id="<?php echo $filter['fid']; ?>"
+                                data-label="<?php echo htmlspecialchars($filter['filter_label']); ?>"
+                                title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
-
-                <?php if (empty($filters)): ?>
-                <div class="filter-empty-state">
-                    <i class="fas fa-filter"></i>
-                    <p>No filters created yet</p>
-                    <span>Click "Add Filter" to create your first filter</span>
-                </div>
-                <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Label</th>
-                                <th>Key</th>
-                                <th>Type</th>
-                                <th>Data Source</th>
-                                <th>Required</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($filters as $filter): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($filter['filter_label']); ?></td>
-                                <td><code><?php echo htmlspecialchars($filter['filter_key']); ?></code></td>
-                                <td>
-                                    <?php if (!empty($filter['filter_type'])): ?>
-                                    <span class="badge badge-<?php echo $filter['filter_type']; ?>">
-                                        <?php echo ucfirst(str_replace('_', ' ', $filter['filter_type'])); ?>
-                                    </span>
-                                    <?php else: ?>
-                                    <span class="text-muted">-</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if ($filter['data_source'] === 'query'): ?>
-                                    <span class="text-primary"><i class="fas fa-database"></i> Query</span>
-                                    <?php else: ?>
-                                    <span class="text-muted"><i class="fas fa-list"></i> Static</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if ($filter['is_required']): ?>
-                                    <i class="fas fa-check text-success"></i>
-                                    <?php else: ?>
-                                    <i class="fas fa-minus text-muted"></i>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <a href="?urlq=filters/edit/<?php echo $filter['fid']; ?>" class="btn btn-sm btn-outline-warning" title="Edit">
-                                        <i class="fas fa-pencil"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger delete-filter-btn" data-id="<?php echo $filter['fid']; ?>" data-label="<?php echo htmlspecialchars($filter['filter_label']); ?>" title="Delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-                <?php endif; ?>
+                <?php endforeach; ?>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 

@@ -25,7 +25,7 @@
 <body>
     <div class="page-header">
         <div class="page-header-left">
-            <h1>Dynamic Graph Creator</h1>
+            <h1>Graphs</h1>
         </div>
         <div class="page-header-right">
             <a href="?urlq=dashboard" class="btn btn-secondary">
@@ -42,76 +42,61 @@
 
     <div class="container">
         <div id="graph-list" class="graph-list-page">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-header-left">
-                        <h2>All Graphs</h2>
-                        <span class="text-muted"><?php echo count($graphs); ?> graph<?php echo count($graphs) !== 1 ? 's' : ''; ?></span>
+            <?php if (empty($graphs)): ?>
+            <div class="graph-empty-state">
+                <div class="empty-state-content">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3>No Graphs Yet</h3>
+                    <p>Create your first graph to visualize your data</p>
+                    <a href="?urlq=graph/create" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Create Graph
+                    </a>
+                </div>
+            </div>
+            <?php else: ?>
+            <div class="graph-grid">
+                <?php foreach ($graphs as $g): ?>
+                <div class="graph-card" data-graph-id="<?php echo $g->getId(); ?>">
+                    <div class="graph-card-content">
+                        <div class="graph-card-header">
+                            <span class="graph-type-icon <?php echo $g->getGraphType(); ?>">
+                                <i class="fas fa-chart-<?php echo $g->getGraphType(); ?>"></i>
+                            </span>
+                            <span class="graph-type-badge <?php echo $g->getGraphType(); ?>">
+                                <?php echo ucfirst($g->getGraphType()); ?>
+                            </span>
+                        </div>
+                        <h3><?php echo htmlspecialchars($g->getName()); ?></h3>
+                        <?php if ($g->getDescription()): ?>
+                        <p class="graph-description"><?php echo htmlspecialchars($g->getDescription()); ?></p>
+                        <?php endif; ?>
+                        <div class="graph-meta">
+                            <span class="meta-item">
+                                <i class="far fa-clock"></i>
+                                <?php echo date('M j, Y', strtotime($g->getUpdatedTs())); ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="graph-card-actions">
+                        <a href="?urlq=graph/view/<?php echo $g->getId(); ?>" class="btn-icon btn-primary" title="View">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="?urlq=graph/edit/<?php echo $g->getId(); ?>" class="btn-icon btn-warning" title="Edit">
+                            <i class="fas fa-pencil"></i>
+                        </a>
+                        <button type="button" class="btn-icon btn-danger delete-graph-btn"
+                                data-id="<?php echo $g->getId(); ?>"
+                                data-name="<?php echo htmlspecialchars($g->getName()); ?>"
+                                title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 </div>
-
-                <?php if (empty($graphs)): ?>
-                <div class="graph-empty-state">
-                    <i class="fas fa-chart-bar"></i>
-                    <p>No graphs created yet</p>
-                    <span>Click "Create Graph" to create your first graph</span>
-                </div>
-                <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Last Updated</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($graphs as $g): ?>
-                            <tr>
-                                <td>
-                                    <div class="graph-name-cell">
-                                        <span class="graph-type-badge <?php echo $g->getGraphType(); ?>">
-                                            <i class="fas fa-chart-<?php echo $g->getGraphType(); ?>"></i>
-                                        </span>
-                                        <div>
-                                            <div class="graph-name"><?php echo htmlspecialchars($g->getName()); ?></div>
-                                            <?php if ($g->getDescription()): ?>
-                                            <div class="graph-description"><?php echo htmlspecialchars($g->getDescription()); ?></div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge badge-<?php echo $g->getGraphType(); ?>">
-                                        <?php echo ucfirst($g->getGraphType()); ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="graph-date"><?php echo date('M j, Y', strtotime($g->getUpdatedTs())); ?></span>
-                                </td>
-                                <td>
-                                    <a href="?urlq=graph/view/<?php echo $g->getId(); ?>" class="btn btn-sm btn-outline-primary" title="View">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="?urlq=graph/edit/<?php echo $g->getId(); ?>" class="btn btn-sm btn-outline-warning" title="Edit">
-                                        <i class="fas fa-pencil"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger delete-graph-btn"
-                                            data-id="<?php echo $g->getId(); ?>"
-                                            data-name="<?php echo htmlspecialchars($g->getName()); ?>"
-                                            title="Delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-                <?php endif; ?>
+                <?php endforeach; ?>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 

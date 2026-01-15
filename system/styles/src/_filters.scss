@@ -3,38 +3,195 @@
 
 // Filter List Page
 .filter-list-page {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 1rem 0;
+}
 
-    .table {
-        margin-bottom: 0;
+// Filter grid layout
+.filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
 
-        th {
-            font-weight: $font-weight-medium;
-            color: $text-secondary;
-            font-size: $font-size-sm;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: $spacing-md;
-            border-bottom: 2px solid $border-color;
+// Filter card style (matching graph/dashboard cards)
+.filter-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+
+    &:hover {
+        border-color: $primary;
+    }
+
+    .filter-card-content {
+        flex: 1;
+        margin-bottom: 1rem;
+
+        .filter-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
         }
 
-        td {
-            padding: $spacing-md;
-            vertical-align: middle;
-            border-bottom: 1px solid $border-color;
+        h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #212529;
+        }
+
+        .filter-key {
+            margin-bottom: 0.5rem;
 
             code {
                 background: $gray-100;
-                padding: 2px 6px;
+                padding: 2px 8px;
                 border-radius: 4px;
-                font-size: $font-size-sm;
+                font-size: 0.8rem;
+                color: $text-secondary;
             }
         }
 
-        tbody tr:hover {
-            background: $gray-50;
+        .filter-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+
+            .meta-item {
+                display: flex;
+                align-items: center;
+                gap: 0.25rem;
+
+                &.required {
+                    color: $error;
+                }
+            }
         }
+    }
+
+    .filter-card-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        padding-top: 0.75rem;
+        border-top: 1px solid #e0e0e0;
+
+        .btn-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #dee2e6;
+            background: white;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+            text-decoration: none;
+
+            &.btn-warning {
+                border-color: #ffc107;
+                color: #ffc107;
+
+                &:hover {
+                    background: #ffc107;
+                    color: white;
+                }
+            }
+
+            &.btn-danger {
+                border-color: #dc3545;
+                color: #dc3545;
+
+                &:hover {
+                    background: #dc3545;
+                    color: white;
+                }
+            }
+        }
+    }
+}
+
+// Filter type icon (larger icon in card header)
+.filter-type-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: $border-radius;
+    font-size: 18px;
+
+    &.text, &.number {
+        background: rgba($gray-600, 0.1);
+        color: $gray-600;
+    }
+
+    &.select, &.multi_select {
+        background: rgba($primary, 0.1);
+        color: $primary;
+    }
+
+    &.date, &.date_range {
+        background: rgba($success, 0.1);
+        color: $success;
+    }
+
+    &.checkbox, &.radio {
+        background: rgba($warning, 0.1);
+        color: $warning-dark;
+    }
+
+    &.tokeninput {
+        background: rgba($info, 0.1);
+        color: $info-dark;
+    }
+}
+
+// Filter type badge (small badge)
+.filter-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+
+    &.text, &.number {
+        background: rgba($gray-600, 0.1);
+        color: $gray-600;
+    }
+
+    &.select, &.multi_select {
+        background: rgba($primary, 0.1);
+        color: $primary;
+    }
+
+    &.date, &.date_range {
+        background: rgba($success, 0.1);
+        color: $success;
+    }
+
+    &.checkbox, &.radio {
+        background: rgba($warning, 0.1);
+        color: $warning-dark;
+    }
+
+    &.tokeninput {
+        background: rgba($info, 0.1);
+        color: $info-dark;
     }
 }
 
@@ -156,26 +313,44 @@
     gap: $spacing-xs;
 }
 
+// Empty state (matching graph/dashboard empty state)
 .filter-empty-state {
-    padding: $spacing-xl * 2;
+    padding: 4rem 2rem;
     text-align: center;
-    color: $text-hint;
 
-    i {
-        font-size: 48px;
-        margin-bottom: $spacing-md;
-        opacity: 0.5;
-    }
+    .empty-state-content {
+        max-width: 400px;
+        margin: 0 auto;
 
-    p {
-        font-size: $font-size-lg;
-        font-weight: $font-weight-medium;
-        color: $text-secondary;
-        margin-bottom: $spacing-xs;
-    }
+        .empty-state-icon {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
 
-    span {
-        font-size: $font-size-sm;
+            i {
+                font-size: 2.5rem;
+                color: #4caf50;
+            }
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #495057;
+            margin: 0 0 0.5rem 0;
+        }
+
+        p {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin: 0 0 1.5rem 0;
+            line-height: 1.5;
+        }
     }
 }
 
