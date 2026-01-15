@@ -116,6 +116,7 @@
                             id="edit-template-name"
                             value="<?php echo htmlspecialchars($name ? $name : ''); ?>"
                             required>
+                        <div class="invalid-feedback">Template name is required</div>
                     </div>
                     <div class="mb-3">
                         <label for="edit-template-description" class="form-label">Description</label>
@@ -146,6 +147,7 @@
                                    class="form-control"
                                    id="new-category-name"
                                    placeholder="Enter category name">
+                            <div class="invalid-feedback">Category name is required</div>
                         </div>
                         <div class="mb-3">
                             <label for="new-category-description" class="form-label">Category Description</label>
@@ -215,6 +217,38 @@
                 });
             }
 
+            // Live validation for template name
+            const editTemplateNameInput = document.getElementById('edit-template-name');
+            if (editTemplateNameInput) {
+                editTemplateNameInput.addEventListener('input', function() {
+                    if (this.value.trim()) {
+                        this.classList.remove('is-invalid');
+                    } else if (this.classList.contains('is-invalid') || this.value === '') {
+                        this.classList.add('is-invalid');
+                    }
+                });
+            }
+
+            // Live validation for new category name
+            if (newCategoryNameInput) {
+                newCategoryNameInput.addEventListener('input', function() {
+                    if (categorySelect.value !== '__new__') return;
+
+                    const value = this.value.trim();
+                    const feedback = this.parentElement.querySelector('.invalid-feedback');
+
+                    if (!value) {
+                        this.classList.add('is-invalid');
+                        if (feedback) feedback.textContent = 'Category name is required';
+                    } else if (value.length < 2) {
+                        this.classList.add('is-invalid');
+                        if (feedback) feedback.textContent = 'Category name must be at least 2 characters';
+                    } else {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+            }
+
             // Edit template details button
             const editDetailsBtn = document.getElementById('edit-template-details-btn');
             if (editDetailsBtn) {
@@ -234,30 +268,43 @@
             const saveDetailsBtn = document.getElementById('save-template-details-btn');
             if (saveDetailsBtn) {
                 saveDetailsBtn.addEventListener('click', async function() {
-                    const name = document.getElementById('edit-template-name').value.trim();
+                    const nameInput = document.getElementById('edit-template-name');
+                    const name = nameInput.value.trim();
                     const description = document.getElementById('edit-template-description').value.trim();
                     const dtcid = document.getElementById('edit-template-category').value;
 
+                    // Validate all fields and collect errors
+                    let hasErrors = false;
+
+                    // Validate template name
                     if (!name) {
-                        Toast.error('Template name is required');
-                        return;
+                        nameInput.classList.add('is-invalid');
+                        hasErrors = true;
+                    } else {
+                        nameInput.classList.remove('is-invalid');
                     }
 
                     // Validate new category name if creating new category
                     if (dtcid === '__new__') {
                         const newCatName = newCategoryNameInput.value.trim();
+                        const catFeedback = newCategoryNameInput.parentElement.querySelector('.invalid-feedback');
                         if (!newCatName) {
-                            Toast.error('Category name is required');
                             newCategoryNameInput.classList.add('is-invalid');
-                            newCategoryNameInput.focus();
-                            return;
-                        }
-                        if (newCatName.length < 2) {
-                            Toast.error('Category name must be at least 2 characters');
+                            if (catFeedback) catFeedback.textContent = 'Category name is required';
+                            hasErrors = true;
+                        } else if (newCatName.length < 2) {
                             newCategoryNameInput.classList.add('is-invalid');
-                            newCategoryNameInput.focus();
-                            return;
+                            if (catFeedback) catFeedback.textContent = 'Category name must be at least 2 characters';
+                            hasErrors = true;
+                        } else {
+                            newCategoryNameInput.classList.remove('is-invalid');
                         }
+                    }
+
+                    // Show single toast if there are errors
+                    if (hasErrors) {
+                        Toast.error('Please correct the errors in the form');
+                        return;
                     }
 
                     const originalBtnContent = saveDetailsBtn.innerHTML;

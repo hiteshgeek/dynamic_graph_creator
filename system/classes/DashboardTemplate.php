@@ -51,16 +51,22 @@ class DashboardTemplate implements DatabaseObject
         $db = Rapidkart::getInstance()->getDB();
 
         // Build dynamic SQL to handle NULL values properly
-        $fields = array('name', 'description', 'dtcid', 'structure', 'display_order', 'is_system');
-        $values = array('::name', '::description', '::dtcid', '::structure', '::display_order', '::is_system');
+        $fields = array('name', 'description', 'structure', 'display_order', 'is_system');
+        $values = array('::name', '::description', '::structure', '::display_order', '::is_system');
         $args = array(
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
-            '::dtcid' => $this->dtcid ? $this->dtcid : 0,
             '::structure' => $this->structure,
             '::display_order' => $this->display_order ? $this->display_order : 0,
             '::is_system' => $this->is_system ? 1 : 0
         );
+
+        // Only include dtcid if it has a valid value (not null/0)
+        if ($this->dtcid) {
+            $fields[] = 'dtcid';
+            $values[] = '::dtcid';
+            $args['::dtcid'] = $this->dtcid;
+        }
 
         if ($this->thumbnail) {
             $fields[] = 'thumbnail';
@@ -92,10 +98,14 @@ class DashboardTemplate implements DatabaseObject
         if (!$this->dtid) return false;
 
         $db = Rapidkart::getInstance()->getDB();
+
+        // Handle dtcid - use NULL if not set, otherwise use the value
+        $dtcidSql = $this->dtcid ? "'::dtcid'" : "NULL";
+
         $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " SET
             name = '::name',
             description = '::description',
-            dtcid = '::dtcid',
+            dtcid = " . $dtcidSql . ",
             thumbnail = '::thumbnail',
             structure = '::structure',
             display_order = '::display_order',
@@ -106,7 +116,6 @@ class DashboardTemplate implements DatabaseObject
         $args = array(
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
-            '::dtcid' => $this->dtcid ? $this->dtcid : 0,
             '::thumbnail' => $this->thumbnail ? $this->thumbnail : '',
             '::structure' => $this->structure,
             '::display_order' => $this->display_order ? $this->display_order : 0,
@@ -114,6 +123,11 @@ class DashboardTemplate implements DatabaseObject
             '::updated_uid' => $this->updated_uid ? $this->updated_uid : 0,
             '::dtid' => $this->dtid
         );
+
+        // Only add dtcid to args if it has a value
+        if ($this->dtcid) {
+            $args['::dtcid'] = $this->dtcid;
+        }
 
         return $db->query($sql, $args) ? true : false;
     }
@@ -340,7 +354,7 @@ class DashboardTemplate implements DatabaseObject
     public function setDescription($value) { $this->description = $value; }
 
     public function getDtcid() { return $this->dtcid; }
-    public function setDtcid($value) { $this->dtcid = intval($value); }
+    public function setDtcid($value) { $this->dtcid = $value ? intval($value) : null; }
 
     // Helper method to get category object
     public function getCategory()

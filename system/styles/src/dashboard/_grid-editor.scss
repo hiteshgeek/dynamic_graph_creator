@@ -5,8 +5,7 @@
 $grid-gap: $spacing-md;
 
 // Preview pages - full-width content with edge-to-edge styling
-.dashboard-preview-page,
-.template-preview-page {
+.dashboard-preview-page {
   background: white;
 
   // Container-fluid: remove all default padding, dashboard-preview handles spacing
@@ -16,6 +15,16 @@ $grid-gap: $spacing-md;
 
   .dashboard-preview {
     margin-top: 0;
+    padding: $spacing-lg;
+  }
+}
+
+// Template preview page - uses container-fluid with template-preview-container
+.template-preview-page {
+  background: white;
+
+  // Container-fluid: remove default padding, add consistent spacing
+  .container-fluid {
     padding: $spacing-lg;
   }
 }

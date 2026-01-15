@@ -63,6 +63,9 @@ if (isset($_POST['submit'])) {
         case 'get_template':
             getTemplate($_POST);
             break;
+        case 'remove_template_section':
+            removeTemplateSection($_POST);
+            break;
         case 'delete_category':
             deleteCategory($_POST);
             break;
@@ -910,6 +913,56 @@ function saveTemplateStructure($data)
     Utility::ajaxResponseTrue('Template saved successfully', array(
         'dtid' => $template->getId()
     ));
+}
+
+/**
+ * Remove section from template
+ */
+function removeTemplateSection($data)
+{
+    $templateId = isset($data['template_id']) ? intval($data['template_id']) : 0;
+    $sectionId = isset($data['section_id']) ? $data['section_id'] : '';
+    // TODO: Get actual user ID from session
+    $userId = 1;
+
+    if (!$templateId) {
+        Utility::ajaxResponseFalse('Invalid template ID');
+    }
+
+    if (empty($sectionId)) {
+        Utility::ajaxResponseFalse('Section ID is required');
+    }
+
+    $template = new DashboardTemplate($templateId);
+    if (!$template->getId()) {
+        Utility::ajaxResponseFalse('Template not found');
+    }
+
+    // Protect system templates
+    if ($template->getIsSystem()) {
+        Utility::ajaxResponseFalse('Cannot modify system templates');
+    }
+
+    // Get current structure and remove the section
+    $structure = $template->getStructureArray();
+    if (!isset($structure['sections'])) {
+        Utility::ajaxResponseFalse('Invalid template structure');
+    }
+
+    // Filter out the section to remove
+    $structure['sections'] = array_values(array_filter($structure['sections'], function($section) use ($sectionId) {
+        return $section['sid'] !== $sectionId;
+    }));
+
+    // Save updated structure
+    $template->setStructure(json_encode($structure));
+    $template->setUpdatedUid($userId);
+
+    if (!$template->update()) {
+        Utility::ajaxResponseFalse('Failed to remove section');
+    }
+
+    Utility::ajaxResponseTrue('Section removed successfully');
 }
 
 /**

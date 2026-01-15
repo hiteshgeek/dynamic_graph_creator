@@ -1675,13 +1675,24 @@ class DashboardBuilder {
     Loading.show("Removing section...");
 
     try {
-      const result = await Ajax.post("remove_section", {
-        dashboard_id: this.dashboardId,
+      // Use appropriate endpoint based on mode
+      const action = this.mode === "template" ? "remove_template_section" : "remove_section";
+      const idParam = this.mode === "template"
+        ? { template_id: this.templateId }
+        : { dashboard_id: this.dashboardId };
+
+      const result = await Ajax.post(action, {
+        ...idParam,
         section_id: sectionId,
       });
 
       if (result.success) {
-        await this.loadDashboard();
+        // Reload based on mode
+        if (this.mode === "template") {
+          await this.loadTemplate();
+        } else {
+          await this.loadDashboard();
+        }
         Toast.success("Section removed");
       } else {
         Toast.error(result.message);
