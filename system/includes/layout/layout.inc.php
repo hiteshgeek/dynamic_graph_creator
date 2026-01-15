@@ -337,6 +337,11 @@ function reorderSections($data)
     $layoutId = isset($data['layout_id']) ? intval($data['layout_id']) : 0;
     $order = isset($data['order']) ? $data['order'] : array(); // Array of section IDs in new order
 
+    // Decode if it's a JSON string
+    if (is_string($order)) {
+        $order = json_decode($order, true);
+    }
+
     if (!$layoutId) {
         Utility::ajaxResponseFalse('Invalid layout ID');
     }
