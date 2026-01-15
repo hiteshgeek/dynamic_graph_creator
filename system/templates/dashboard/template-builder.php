@@ -126,7 +126,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="edit-template-category" class="form-label">Category</label>
-                        <select class="form-select" id="edit-template-category">
+                        <select class="form-select select-with-create" id="edit-template-category">
                             <option value="">None (Uncategorized)</option>
                             <?php foreach ($categories as $category): ?>
                             <option value="<?php echo $category->getId(); ?>"
@@ -134,7 +134,26 @@
                                 <?php echo htmlspecialchars($category->getName()); ?>
                             </option>
                             <?php endforeach; ?>
+                            <option value="__new__" class="option-create-new">+ Create New Category</option>
                         </select>
+                    </div>
+
+                    <!-- New Category Fields (hidden by default) -->
+                    <div id="new-category-fields" class="new-category-fields" style="display: none;">
+                        <div class="mb-3">
+                            <label for="new-category-name" class="form-label">Category Name *</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="new-category-name"
+                                   placeholder="Enter category name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="new-category-description" class="form-label">Category Description</label>
+                            <textarea class="form-control"
+                                      id="new-category-description"
+                                      rows="2"
+                                      placeholder="Enter category description (optional)"></textarea>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -175,10 +194,37 @@
                 console.error('DashboardBuilder not loaded. Make sure dashboard.js is included.');
             }
 
+            // Edit template details - category select and new category fields
+            const categorySelect = document.getElementById('edit-template-category');
+            const newCategoryFields = document.getElementById('new-category-fields');
+            const newCategoryNameInput = document.getElementById('new-category-name');
+            const newCategoryDescInput = document.getElementById('new-category-description');
+
+            // Toggle new category fields visibility
+            if (categorySelect) {
+                categorySelect.addEventListener('change', function() {
+                    const isNewCategory = this.value === '__new__';
+                    newCategoryFields.style.display = isNewCategory ? 'block' : 'none';
+
+                    // Clear new category fields when switching away
+                    if (!isNewCategory) {
+                        newCategoryNameInput.value = '';
+                        newCategoryDescInput.value = '';
+                        newCategoryNameInput.classList.remove('is-invalid');
+                    }
+                });
+            }
+
             // Edit template details button
             const editDetailsBtn = document.getElementById('edit-template-details-btn');
             if (editDetailsBtn) {
                 editDetailsBtn.addEventListener('click', function() {
+                    // Reset new category fields when opening modal
+                    if (categorySelect.value !== '__new__') {
+                        newCategoryFields.style.display = 'none';
+                        newCategoryNameInput.value = '';
+                        newCategoryDescInput.value = '';
+                    }
                     const modal = new bootstrap.Modal(document.getElementById('edit-template-details-modal'));
                     modal.show();
                 });
@@ -197,23 +243,62 @@
                         return;
                     }
 
+                    // Validate new category name if creating new category
+                    if (dtcid === '__new__') {
+                        const newCatName = newCategoryNameInput.value.trim();
+                        if (!newCatName) {
+                            Toast.error('Category name is required');
+                            newCategoryNameInput.classList.add('is-invalid');
+                            newCategoryNameInput.focus();
+                            return;
+                        }
+                        if (newCatName.length < 2) {
+                            Toast.error('Category name must be at least 2 characters');
+                            newCategoryNameInput.classList.add('is-invalid');
+                            newCategoryNameInput.focus();
+                            return;
+                        }
+                    }
+
                     const originalBtnContent = saveDetailsBtn.innerHTML;
                     saveDetailsBtn.disabled = true;
                     saveDetailsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
                     try {
-                        const result = await Ajax.post('update_template', {
+                        const postData = {
                             id: templateId,
                             name: name,
                             description: description,
                             dtcid: dtcid
-                        });
+                        };
+
+                        // Add new category data if creating new category
+                        if (dtcid === '__new__') {
+                            postData.new_category_name = newCategoryNameInput.value.trim();
+                            postData.new_category_description = newCategoryDescInput.value.trim();
+                        }
+
+                        const result = await Ajax.post('update_template', postData);
 
                         if (result.success) {
                             Toast.success('Template details updated');
 
                             // Update the page header title
                             document.querySelector('.page-header-left h1').textContent = name;
+
+                            // If a new category was created, add it to the select and select it
+                            if (result.data && result.data.new_category_id) {
+                                const newOption = document.createElement('option');
+                                newOption.value = result.data.new_category_id;
+                                newOption.textContent = newCategoryNameInput.value.trim();
+                                // Insert before the "Create New" option
+                                const createNewOption = categorySelect.querySelector('option[value="__new__"]');
+                                categorySelect.insertBefore(newOption, createNewOption);
+                                categorySelect.value = result.data.new_category_id;
+                                newCategoryFields.style.display = 'none';
+                                newCategoryNameInput.value = '';
+                                newCategoryDescInput.value = '';
+                            }
 
                             // Close modal
                             const modal = bootstrap.Modal.getInstance(document.getElementById('edit-template-details-modal'));

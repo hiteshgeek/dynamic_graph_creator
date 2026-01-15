@@ -7,6 +7,15 @@
 // Add padding for fixed header
 body {
   padding-top: 60px;
+
+  // Consistent spacing after page-header for all page content
+  // Applies to main content containers that come after .page-header
+  > .container,
+  > .container-fluid,
+  > .container-full,
+  > .dashboard-builder {
+    padding-top: $spacing-lg;
+  }
 }
 
 // Page header

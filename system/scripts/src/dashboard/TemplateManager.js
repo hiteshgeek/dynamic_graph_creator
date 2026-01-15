@@ -31,6 +31,14 @@ export class TemplateManager {
         const templateId = btn.dataset.templateId;
         TemplateManager.duplicateTemplate(templateId);
       }
+
+      // Check if delete category button was clicked
+      if (e.target.closest(".delete-category-btn")) {
+        const btn = e.target.closest(".delete-category-btn");
+        const categoryId = btn.dataset.categoryId;
+        const categoryName = btn.dataset.categoryName;
+        TemplateManager.deleteCategory(categoryId, categoryName);
+      }
     });
   }
 
@@ -164,6 +172,72 @@ export class TemplateManager {
     } catch (error) {
       console.error("Duplicate template error:", error);
       Toast.error("Failed to duplicate template");
+      Loading.hide();
+    }
+  }
+
+  /**
+   * Delete category with confirmation
+   * @param {number} categoryId - Category ID to delete
+   * @param {string} categoryName - Category name for confirmation message
+   */
+  static async deleteCategory(categoryId, categoryName) {
+    const Toast = window.Toast;
+    const Loading = window.Loading;
+    const Ajax = window.Ajax;
+    const ConfirmDialog = window.ConfirmDialog;
+
+    if (!categoryId) {
+      Toast.error("Invalid category ID");
+      return;
+    }
+
+    // Confirm deletion
+    const confirmed = await ConfirmDialog.delete(
+      `Are you sure you want to delete the category "${categoryName}"?`,
+      "Delete Category"
+    );
+
+    if (!confirmed) return;
+
+    // Show loading state
+    Loading.show("Deleting category...");
+
+    try {
+      const result = await Ajax.post("delete_category", { id: categoryId });
+
+      if (result.success) {
+        Toast.success(result.message || "Category deleted successfully");
+
+        // Remove category section from UI
+        const categoryCard = document.querySelector(
+          `.template-card-empty[data-category-id="${categoryId}"]`
+        );
+        if (categoryCard) {
+          const categorySection = categoryCard.closest(".template-category-section");
+          if (categorySection) {
+            categorySection.style.opacity = "0";
+            categorySection.style.transform = "translateY(-10px)";
+            categorySection.style.transition = "all 0.3s ease";
+            setTimeout(() => {
+              categorySection.remove();
+
+              // Check if page is now empty
+              const allSections = document.querySelectorAll(".template-category-section");
+              if (allSections.length === 0) {
+                // Reload page to show empty state
+                window.location.reload();
+              }
+            }, 300);
+          }
+        }
+      } else {
+        Toast.error(result.message || "Failed to delete category");
+      }
+    } catch (error) {
+      console.error("Delete category error:", error);
+      Toast.error("Failed to delete category");
+    } finally {
       Loading.hide();
     }
   }

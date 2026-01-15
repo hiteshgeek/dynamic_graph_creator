@@ -68,16 +68,23 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                     <div class="template-grid">
                         <?php if (empty($categoryData['templates'])): ?>
                         <!-- Empty Category State -->
-                        <div class="template-card template-card-empty">
+                        <div class="template-card template-card-empty" data-category-id="<?php echo $categoryData['category']['dtcid']; ?>">
                             <div class="empty-category-content">
                                 <div class="empty-category-icon">
                                     <i class="fas fa-folder-open"></i>
                                 </div>
                                 <h4>No Templates Yet</h4>
-                                <p>This category is empty. Create your first template to get started.</p>
-                                <a href="?urlq=dashboard/template/create" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-plus"></i> Create Template
-                                </a>
+                                <p>This category is empty. Create your first template or delete this category.</p>
+                                <div class="empty-category-actions">
+                                    <a href="?urlq=dashboard/template/create" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-plus"></i> Create Template
+                                    </a>
+                                    <button class="btn btn-outline-danger btn-sm delete-category-btn"
+                                            data-category-id="<?php echo $categoryData['category']['dtcid']; ?>"
+                                            data-category-name="<?php echo htmlspecialchars($categoryData['category']['name']); ?>">
+                                        <i class="fas fa-trash"></i> Delete Category
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <?php else: ?>
@@ -108,21 +115,25 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                                         onclick="window.location='?urlq=dashboard/template/preview/<?php echo $template['dtid']; ?>'">
                                     <i class="fas fa-eye"></i>
                                 </button>
+                                <?php if (!$template['is_system']): ?>
                                 <button class="btn-icon btn-warning"
                                         title="Edit Structure"
                                         onclick="window.location='?urlq=dashboard/template/builder/<?php echo $template['dtid']; ?>'">
                                     <i class="fas fa-pencil"></i>
                                 </button>
+                                <?php endif; ?>
                                 <button class="btn-icon btn-success duplicate-template-btn"
                                         title="Duplicate"
                                         data-template-id="<?php echo $template['dtid']; ?>">
                                     <i class="fas fa-copy"></i>
                                 </button>
+                                <?php if (!$template['is_system']): ?>
                                 <button class="btn-icon btn-danger delete-template-btn"
                                         title="Delete"
                                         data-template-id="<?php echo $template['dtid']; ?>">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <?php endforeach; ?>

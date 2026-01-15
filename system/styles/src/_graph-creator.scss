@@ -2,8 +2,8 @@
 @use "variables" as *;
 
 // Full width container
+// Top spacing handled by body > .container-full rule in _common.scss
 .container-full {
-  margin-top: $spacing-lg;
   max-width: 100%;
   padding: 0 $spacing-lg $spacing-xl;
 }

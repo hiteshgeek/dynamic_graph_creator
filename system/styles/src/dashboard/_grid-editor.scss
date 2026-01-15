@@ -4,14 +4,15 @@
 // Grid gap variable - shared between sections and nested areas
 $grid-gap: $spacing-md;
 
-// Preview pages - remove container padding but add spacing to preview area
+// Preview pages - full-width content with edge-to-edge styling
 .dashboard-preview-page,
 .template-preview-page {
   background: white;
 
+  // Container-fluid uses horizontal padding only; top spacing from body > .container-fluid
   .container-fluid {
-    padding: 0;
-    padding-top: $spacing-lg;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .dashboard-preview {
@@ -24,10 +25,7 @@ $grid-gap: $spacing-md;
 .dashboard-builder-page,
 .template-builder-page {
   background: white;
-
-  .dashboard-preview {
-    margin-top: $spacing-lg;
-  }
+  // Top spacing handled by body > .dashboard-builder rule in _common.scss
 }
 
 .dashboard-sections {

@@ -63,6 +63,9 @@ if (isset($_POST['submit'])) {
         case 'get_template':
             getTemplate($_POST);
             break;
+        case 'delete_category':
+            deleteCategory($_POST);
+            break;
     }
 }
 
@@ -765,10 +768,17 @@ function updateTemplate($data)
         Utility::ajaxResponseFalse('Failed to update template');
     }
 
-    Utility::ajaxResponseTrue('Template updated successfully', array(
+    $responseData = array(
         'dtid' => $template->getId(),
         'name' => $template->getName()
-    ));
+    );
+
+    // Include new category ID if one was created
+    if ($dtcidValue === '__new__' && $dtcid) {
+        $responseData['new_category_id'] = $dtcid;
+    }
+
+    Utility::ajaxResponseTrue('Template updated successfully', $responseData);
 }
 
 /**
@@ -785,6 +795,11 @@ function deleteTemplate($data)
     $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
         Utility::ajaxResponseFalse('Template not found');
+    }
+
+    // Check if it's a system template
+    if ($template->getIsSystem()) {
+        Utility::ajaxResponseFalse('System templates cannot be deleted');
     }
 
     // Check if template is in use by any dashboards
@@ -921,4 +936,49 @@ function getTemplate($data)
         'structure' => $template->getStructure(),
         'is_system' => $template->getIsSystem()
     ));
+}
+
+/**
+ * Delete template category (soft delete)
+ * Only allows deletion if category is empty (no templates)
+ */
+function deleteCategory($data)
+{
+    $categoryId = isset($data['id']) ? intval($data['id']) : 0;
+
+    if (!$categoryId) {
+        Utility::ajaxResponseFalse('Invalid category ID');
+    }
+
+    $category = new DashboardTemplateCategory($categoryId);
+    if (!$category->getId()) {
+        Utility::ajaxResponseFalse('Category not found');
+    }
+
+    // Check if it's a system category
+    if ($category->getIsSystem()) {
+        Utility::ajaxResponseFalse('System categories cannot be deleted');
+    }
+
+    // Check if category has any templates
+    $db = Rapidkart::getInstance()->getDB();
+    $sql = "SELECT COUNT(*) as count FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . "
+            WHERE dtcid = '::dtcid' AND dtsid != 3";
+    $result = $db->query($sql, array('::dtcid' => $categoryId));
+
+    if ($result && $db->numRows($result) > 0) {
+        $row = $db->fetchAssoc($result);
+        if ($row && $row['count'] > 0) {
+            Utility::ajaxResponseFalse(
+                'Cannot delete category. It contains ' . $row['count'] . ' template(s). Please move or delete templates first.'
+            );
+        }
+    }
+
+    // Soft delete the category
+    if (!DashboardTemplateCategory::delete($categoryId)) {
+        Utility::ajaxResponseFalse('Failed to delete category');
+    }
+
+    Utility::ajaxResponseTrue('Category deleted successfully');
 }

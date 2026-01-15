@@ -3,7 +3,7 @@
 @use "template-preview-shared" as *;
 
 .template-list-page {
-  padding: 1rem 0;
+  // Padding handled by body > .container rule in _common.scss
 
   .template-category-section {
     margin-bottom: 1rem;
@@ -234,6 +234,13 @@
         .btn {
           font-weight: 500;
         }
+
+        .empty-category-actions {
+          display: flex;
+          flex-direction: column;
+          gap: $spacing-sm;
+          align-items: center;
+        }
       }
     }
   }
@@ -241,7 +248,7 @@
 
 // Template Preview Page
 .template-preview-page {
-  padding: 2rem 0;
+  // Padding handled by body > .container rule in _common.scss
 
   .template-preview-container {
     max-width: 800px;

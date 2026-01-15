@@ -2,9 +2,7 @@
 @use "variables" as *;
 
 .graph-list-page {
-  // max-width: 1200px;
-  // margin: 0 auto;
-  padding: 1rem 0;
+  // Padding handled by body > .container rule in _common.scss
 }
 
 // Graph grid layout
