@@ -130,17 +130,6 @@
   align-items: center;
   justify-content: center;
 
-  &:hover {
-    background: rgba(248, 249, 250, 0.5);
-    border-color: rgba(#dee2e6, 0.6);
-
-    // Fade inner content to highlight controls
-    .empty-state,
-    .area-content {
-      opacity: 0.4;
-    }
-  }
-
   // Nested area with sub-rows
   &.dashboard-area-nested {
     padding: $spacing-sm;
@@ -150,12 +139,6 @@
     border: 2px dashed #e0e0e0;
     display: grid;
     gap: $spacing-sm;
-
-    &:hover {
-      .dashboard-sub-row {
-        opacity: 0.5;
-      }
-    }
   }
 
   .area-content {
@@ -187,8 +170,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
 
-  &:hover {
+// Edit mode only - translucent hover effects
+.dashboard-builder-page,
+.template-builder-page {
+  .dashboard-area:hover {
+    background: rgba(248, 249, 250, 0.5);
+    border-color: rgba(#dee2e6, 0.6);
+
+    // Fade inner content to highlight controls
+    .empty-state,
+    .area-content {
+      opacity: 0.4;
+    }
+  }
+
+  .dashboard-area-nested:hover {
+    .dashboard-sub-row {
+      opacity: 0.5;
+    }
+  }
+
+  .dashboard-sub-row:hover {
     background: white;
     border-color: $primary;
     box-shadow: 0 2px 6px rgba(0, 123, 255, 0.1);

@@ -13,12 +13,13 @@ const Ajax = window.Ajax;
 const ConfirmDialog = window.ConfirmDialog;
 
 // Grid configuration constants
+// Max total fr for a section is MAX_COLUMNS (4fr), not numColumns * MAX_FR_UNITS
 const GRID_CONFIG = {
-  MAX_FR_UNITS: 4, // Maximum fr units for any column/row (4fr max)
+  MAX_FR_UNITS: 4, // Maximum fr units for any single column/row (4fr max)
   MIN_FR_UNITS: 1, // Minimum fr units for any column/row
-  MAX_COLUMNS: 4, // Maximum columns per section
+  MAX_COLUMNS: 4, // Maximum columns per section AND max total fr
   MIN_COLUMNS: 1, // Minimum columns (can't remove last)
-  MAX_ROWS_PER_COLUMN: 4, // Maximum rows in a column
+  MAX_ROWS_PER_COLUMN: 4, // Maximum rows in a column AND max total row fr
   MIN_ROWS_PER_COLUMN: 1, // Minimum rows (can't remove last)
   DEFAULT_NEW_COLUMN_FR: 1,
   DEFAULT_NEW_ROW_FR: 1,
@@ -452,16 +453,33 @@ class DashboardBuilder {
       const isFirstColumn = areaIndex === 0;
       const isLastColumn = areaIndex === numColumns - 1;
 
+      // Calculate total fr - max is always MAX_COLUMNS (4fr) regardless of column count
+      const totalFr = widths.reduce((sum, w) => sum + w, 0);
+      const maxTotalFr = GRID_CONFIG.MAX_COLUMNS;
+      const hasRoomToGrowResize = totalFr < maxTotalFr;
+
       // Calculate resize options for this column
-      // Left resize: increase this column, decrease left neighbor
+      // Resize allowed if: this column can receive (< MAX) AND either:
+      // 1. There's room to grow (total fr < max), OR
+      // 2. The neighbor can give (> MIN)
       const canResizeLeft = !isFirstColumn &&
         widths[areaIndex] < GRID_CONFIG.MAX_FR_UNITS &&
-        widths[areaIndex - 1] > GRID_CONFIG.MIN_FR_UNITS;
-      // Right resize: increase this column, decrease right neighbor
+        (hasRoomToGrowResize || widths[areaIndex - 1] > GRID_CONFIG.MIN_FR_UNITS);
       const canResizeRight = !isLastColumn &&
         widths[areaIndex] < GRID_CONFIG.MAX_FR_UNITS &&
-        widths[areaIndex + 1] > GRID_CONFIG.MIN_FR_UNITS;
+        (hasRoomToGrowResize || widths[areaIndex + 1] > GRID_CONFIG.MIN_FR_UNITS);
       const hasResizeOptions = canResizeLeft || canResizeRight;
+
+      // Calculate add column options
+      // Can add if: under max columns AND (there's room to grow OR ANY column can give 1fr)
+      // Max total is always MAX_COLUMNS (4fr) regardless of column count
+      const hasRoomToGrow = totalFr < maxTotalFr;
+      const anyColumnCanGive = widths.some(w => w > GRID_CONFIG.MIN_FR_UNITS);
+      const canAddCol = canAddColumn && (hasRoomToGrow || anyColumnCanGive);
+
+      // Both left and right add column buttons use the same logic
+      const canAddColLeft = canAddCol;
+      const canAddColRight = canAddCol;
 
       // Column controls - edge buttons and center resize/delete
       const columnControls = `<div class="column-controls">
@@ -474,11 +492,11 @@ class DashboardBuilder {
                     Add Row
                 </button>
                 <!-- Left: Add Column -->
-                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColumn ? 'disabled' : ''}>
+                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColLeft ? 'disabled' : ''}>
                     Add Column
                 </button>
                 <!-- Right: Add Column -->
-                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColumn ? 'disabled' : ''}>
+                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColRight ? 'disabled' : ''}>
                     Add Column
                 </button>
                 <!-- Center: Resize arrows + Delete -->
@@ -507,12 +525,11 @@ class DashboardBuilder {
       if (hasSubRows) {
         areasHtml += this.renderAreaWithSubRows(
           area,
-          section.sid,
+          sectionId = section.sid,
           areaIndex,
           canRemoveColumn,
-          canAddColumn,
-          isLastColumn,
-          widths,
+          canAddColLeft,
+          canAddColRight,
           canResizeLeft,
           canResizeRight
         );
@@ -589,9 +606,8 @@ class DashboardBuilder {
     sectionId,
     areaIndex,
     canRemoveColumn,
-    canAddColumn,
-    isLastColumn,
-    columnWidths = [],
+    canAddColLeft = false,
+    canAddColRight = false,
     canResizeLeft = false,
     canResizeRight = false
   ) {
@@ -600,14 +616,13 @@ class DashboardBuilder {
     const numRows = area.subRows.length;
     const canAddRow = numRows < GRID_CONFIG.MAX_ROWS_PER_COLUMN;
     const canRemoveRow = numRows > GRID_CONFIG.MIN_ROWS_PER_COLUMN;
-    const hasResizeOptions = canResizeLeft || canResizeRight;
-
-    // Column controls for nested area - edge buttons and center resize/delete
-    // For nested areas, we don't show column controls here - they're shown on sub-rows
-    const columnControls = ``;
 
     // Calculate row heights for resize button state
+    // Max total is always MAX_ROWS_PER_COLUMN (4fr) regardless of row count
     const heights = area.subRows.map((r) => parseInt(r.height) || 1);
+    const totalRowFr = heights.reduce((sum, h) => sum + h, 0);
+    const maxRowTotalFr = GRID_CONFIG.MAX_ROWS_PER_COLUMN;
+    const hasRoomToGrowRows = totalRowFr < maxRowTotalFr;
 
     let subRowsHtml = "";
 
@@ -615,13 +630,14 @@ class DashboardBuilder {
       const isFirstRow = rowIndex === 0;
       const isLastRow = rowIndex === numRows - 1;
 
-      // Row resize conditions
+      // Row resize conditions - same logic as columns
+      // Can resize if: this row can receive (< MAX) AND either room to grow OR neighbor can give
       const canResizeUp = !isFirstRow &&
         heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS &&
-        heights[rowIndex - 1] > GRID_CONFIG.MIN_FR_UNITS;
+        (hasRoomToGrowRows || heights[rowIndex - 1] > GRID_CONFIG.MIN_FR_UNITS);
       const canResizeDown = !isLastRow &&
         heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS &&
-        heights[rowIndex + 1] > GRID_CONFIG.MIN_FR_UNITS;
+        (hasRoomToGrowRows || heights[rowIndex + 1] > GRID_CONFIG.MIN_FR_UNITS);
 
       // Sub-row controls - same design as column controls
       const subRowControls = `<div class="column-controls sub-row-controls">
@@ -634,11 +650,11 @@ class DashboardBuilder {
                     Add Row
                 </button>` : ''}
                 <!-- Left: Add Column (only on first row to avoid duplicates) -->
-                ${isFirstRow ? `<button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColumn ? 'disabled' : ''}>
+                ${isFirstRow ? `<button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColLeft ? 'disabled' : ''}>
                     Add Column
                 </button>` : ''}
                 <!-- Right: Add Column (only on first row to avoid duplicates) -->
-                ${isFirstRow ? `<button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColumn ? 'disabled' : ''}>
+                ${isFirstRow ? `<button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColRight ? 'disabled' : ''}>
                     Add Column
                 </button>` : ''}
                 <!-- Center: Resize arrows + Delete -->
@@ -1012,7 +1028,8 @@ class DashboardBuilder {
     });
   }
 
-  // Click-based column resize: increase one column, decrease the other
+  // Click-based column resize: increase one column, optionally decrease the other
+  // If total fr < max, can grow without taking. Otherwise, must take from neighbor.
   async resizeColumn(sectionId, colIndex, direction) {
     if (this.isReadOnly) return;
 
@@ -1024,21 +1041,39 @@ class DashboardBuilder {
     const widths = section.gridTemplate.split(" ").map((w) => parseInt(w) || 1);
     const leftIdx = colIndex;
     const rightIdx = colIndex + 1;
+    // Max total is always MAX_COLUMNS (4fr) regardless of column count
+    const totalFr = widths.reduce((sum, w) => sum + w, 0);
+    const maxTotalFr = GRID_CONFIG.MAX_COLUMNS;
+    const hasRoomToGrow = totalFr < maxTotalFr;
 
     let changed = false;
     if (direction === "left") {
-      // Increase right column, decrease left column (arrow points left = right col expands left)
-      if (widths[rightIdx] < GRID_CONFIG.MAX_FR_UNITS && widths[leftIdx] > GRID_CONFIG.MIN_FR_UNITS) {
-        widths[rightIdx]++;
-        widths[leftIdx]--;
-        changed = true;
+      // Increase right column (arrow points left = right col expands left)
+      if (widths[rightIdx] < GRID_CONFIG.MAX_FR_UNITS) {
+        if (hasRoomToGrow) {
+          // Room to grow - just increase without taking
+          widths[rightIdx]++;
+          changed = true;
+        } else if (widths[leftIdx] > GRID_CONFIG.MIN_FR_UNITS) {
+          // At max total - must take from left neighbor
+          widths[rightIdx]++;
+          widths[leftIdx]--;
+          changed = true;
+        }
       }
     } else {
-      // Increase left column, decrease right column (arrow points right = left col expands right)
-      if (widths[leftIdx] < GRID_CONFIG.MAX_FR_UNITS && widths[rightIdx] > GRID_CONFIG.MIN_FR_UNITS) {
-        widths[leftIdx]++;
-        widths[rightIdx]--;
-        changed = true;
+      // Increase left column (arrow points right = left col expands right)
+      if (widths[leftIdx] < GRID_CONFIG.MAX_FR_UNITS) {
+        if (hasRoomToGrow) {
+          // Room to grow - just increase without taking
+          widths[leftIdx]++;
+          changed = true;
+        } else if (widths[rightIdx] > GRID_CONFIG.MIN_FR_UNITS) {
+          // At max total - must take from right neighbor
+          widths[leftIdx]++;
+          widths[rightIdx]--;
+          changed = true;
+        }
       }
     }
 
@@ -1062,7 +1097,8 @@ class DashboardBuilder {
     await this.saveDashboard(false);
   }
 
-  // Click-based row resize: increase one row, decrease the other
+  // Click-based row resize: increase one row, optionally decrease the other
+  // If total fr < max, can grow without taking. Otherwise, must take from neighbor.
   async resizeRow(sectionId, areaIndex, rowIndex, direction) {
     if (this.isReadOnly) return;
 
@@ -1076,19 +1112,41 @@ class DashboardBuilder {
     if (!area.hasSubRows || !area.subRows) return;
 
     const heights = area.subRows.map((r) => parseInt(r.height) || 1);
+    // Max total is always MAX_ROWS_PER_COLUMN (4fr) regardless of row count
+    const totalFr = heights.reduce((sum, h) => sum + h, 0);
+    const maxTotalFr = GRID_CONFIG.MAX_ROWS_PER_COLUMN;
+    const hasRoomToGrow = totalFr < maxTotalFr;
 
+    let changed = false;
     if (direction === "up") {
-      // Increase top row, decrease bottom row
-      if (heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS && heights[rowIndex + 1] > GRID_CONFIG.MIN_FR_UNITS) {
-        heights[rowIndex]++;
-        heights[rowIndex + 1]--;
+      // Increase this row (expand up takes from row above)
+      if (heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS) {
+        if (hasRoomToGrow) {
+          heights[rowIndex]++;
+          changed = true;
+        } else if (heights[rowIndex - 1] > GRID_CONFIG.MIN_FR_UNITS) {
+          heights[rowIndex]++;
+          heights[rowIndex - 1]--;
+          changed = true;
+        }
       }
     } else {
-      // Increase bottom row, decrease top row
-      if (heights[rowIndex + 1] < GRID_CONFIG.MAX_FR_UNITS && heights[rowIndex] > GRID_CONFIG.MIN_FR_UNITS) {
-        heights[rowIndex + 1]++;
-        heights[rowIndex]--;
+      // Increase this row (expand down takes from row below)
+      if (heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS) {
+        if (hasRoomToGrow) {
+          heights[rowIndex]++;
+          changed = true;
+        } else if (heights[rowIndex + 1] > GRID_CONFIG.MIN_FR_UNITS) {
+          heights[rowIndex]++;
+          heights[rowIndex + 1]--;
+          changed = true;
+        }
       }
+    }
+
+    if (!changed) {
+      Toast.warning("Row at minimum/maximum size");
+      return;
     }
 
     // Update heights in subRows
@@ -1113,10 +1171,57 @@ class DashboardBuilder {
       return;
     }
 
-    // Add new 1fr column at the specified position
-    const widths = section.gridTemplate.split(" ");
-    widths.splice(position, 0, `${GRID_CONFIG.DEFAULT_NEW_COLUMN_FR}fr`);
-    section.gridTemplate = widths.join(" ");
+    // Parse current widths
+    const widths = section.gridTemplate.split(" ").map((w) => parseInt(w) || 1);
+    const numColumns = widths.length;
+    const totalFr = widths.reduce((sum, w) => sum + w, 0);
+    // Max total is always MAX_COLUMNS (4fr) regardless of column count
+    const maxTotalFr = GRID_CONFIG.MAX_COLUMNS;
+    const hasRoomToGrow = totalFr < maxTotalFr;
+
+    // If there's room to grow, just add 1fr without taking from anyone
+    // Otherwise, find a donor column that can give space
+    if (!hasRoomToGrow) {
+      // Need to take from a donor - try adjacent first, then any column
+      let donorIndex = -1;
+
+      // First try adjacent columns (preferred)
+      if (position >= numColumns) {
+        // Adding at right edge - try left neighbor first
+        if (widths[numColumns - 1] > GRID_CONFIG.MIN_FR_UNITS) {
+          donorIndex = numColumns - 1;
+        }
+      } else if (position === 0) {
+        // Adding at left edge - try right neighbor first
+        if (widths[0] > GRID_CONFIG.MIN_FR_UNITS) {
+          donorIndex = 0;
+        }
+      } else {
+        // Adding in between - try adjacent columns first
+        if (widths[position] > GRID_CONFIG.MIN_FR_UNITS) {
+          donorIndex = position;
+        } else if (widths[position - 1] > GRID_CONFIG.MIN_FR_UNITS) {
+          donorIndex = position - 1;
+        }
+      }
+
+      // If no adjacent donor, find ANY column that can give
+      if (donorIndex === -1) {
+        donorIndex = widths.findIndex((w) => w > GRID_CONFIG.MIN_FR_UNITS);
+      }
+
+      if (donorIndex === -1) {
+        Toast.warning("No column can give space");
+        return;
+      }
+      widths[donorIndex]--;
+    }
+
+    // Insert new 1fr column at the specified position
+    widths.splice(position, 0, GRID_CONFIG.DEFAULT_NEW_COLUMN_FR);
+
+    // Update gridTemplate
+    section.gridTemplate = widths.map((w) => `${w}fr`).join(" ");
 
     // Add new area at the specified position
     const newAreaId = `${sectionId}_a${Date.now()}`;
@@ -1125,6 +1230,11 @@ class DashboardBuilder {
       colSpanFr: `${GRID_CONFIG.DEFAULT_NEW_COLUMN_FR}fr`,
       content: { type: "empty" },
       emptyState: { icon: "fa-plus-circle", message: "Add content" },
+    });
+
+    // Update colSpanFr for all areas
+    section.areas.forEach((area, i) => {
+      area.colSpanFr = `${widths[i]}fr`;
     });
 
     this.currentDashboard.structure = JSON.stringify(structure);
@@ -1144,13 +1254,52 @@ class DashboardBuilder {
       return;
     }
 
+    // Parse widths as integers
+    const widths = section.gridTemplate.split(" ").map((w) => parseInt(w) || 1);
+    const removedWidth = widths[areaIndex];
+    const numColumns = widths.length;
+
     // Remove the column width
-    const widths = section.gridTemplate.split(" ");
     widths.splice(areaIndex, 1);
-    section.gridTemplate = widths.join(" ");
+
+    // Redistribute the removed column's space to adjacent column(s)
+    if (widths.length > 0) {
+      // If only one column remains, reset it to 1fr (no point having 4fr for a single column)
+      if (widths.length === 1) {
+        widths[0] = GRID_CONFIG.MIN_FR_UNITS;
+      } else {
+        // Determine which column gets the extra space
+        // If we removed the last column, give space to the new last column
+        // If we removed the first column, give space to the new first column
+        // Otherwise, give space to the left neighbor
+        let recipientIndex;
+        if (areaIndex >= widths.length) {
+          // Removed last column - give to new last
+          recipientIndex = widths.length - 1;
+        } else if (areaIndex === 0) {
+          // Removed first column - give to new first
+          recipientIndex = 0;
+        } else {
+          // Removed middle column - give to left neighbor
+          recipientIndex = areaIndex - 1;
+        }
+
+        // Add removed width to recipient, but cap at MAX_FR_UNITS
+        const newWidth = widths[recipientIndex] + removedWidth;
+        widths[recipientIndex] = Math.min(newWidth, GRID_CONFIG.MAX_FR_UNITS);
+      }
+    }
+
+    // Update gridTemplate with proper format
+    section.gridTemplate = widths.map((w) => `${w}fr`).join(" ");
 
     // Remove the area
     section.areas.splice(areaIndex, 1);
+
+    // Update colSpanFr for remaining areas
+    section.areas.forEach((area, i) => {
+      area.colSpanFr = `${widths[i]}fr`;
+    });
 
     this.currentDashboard.structure = JSON.stringify(structure);
     this.renderDashboard();
