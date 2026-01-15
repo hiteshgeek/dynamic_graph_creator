@@ -1,0 +1,99 @@
+// Grid Editor Styles
+
+.layout-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.layout-section {
+    position: relative;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+
+    &:hover {
+        border-color: #007bff;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+
+        .section-controls {
+            opacity: 1;
+        }
+    }
+
+    &.section-ghost {
+        opacity: 0.5;
+        background: #f8f9fa;
+        border-style: dashed;
+    }
+
+    .section-controls {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        display: flex;
+        gap: 4px;
+        opacity: 0;
+        transition: opacity 0.2s;
+
+        .section-control-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #6c757d;
+            transition: all 0.2s;
+
+            &:hover {
+                background: #f8f9fa;
+                color: #212529;
+            }
+
+            &.drag-handle {
+                cursor: move;
+            }
+
+            &.remove-btn:hover {
+                background: #dc3545;
+                color: white;
+                border-color: #dc3545;
+            }
+        }
+    }
+}
+
+.layout-area {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    min-height: 150px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        background: white;
+        border-color: #007bff;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+    }
+
+    .area-content {
+        width: 100%;
+
+        p {
+            color: #6c757d;
+            font-size: 0.875rem;
+            margin: 0;
+        }
+    }
+}

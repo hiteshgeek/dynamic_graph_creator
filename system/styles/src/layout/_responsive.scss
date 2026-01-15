@@ -1,0 +1,46 @@
+// Responsive Styles
+
+.layout-builder[data-breakpoint="mobile"] {
+    .grid-editor {
+        max-width: 375px;
+
+        .layout-section {
+            grid-template-columns: 1fr !important;
+
+            .layout-area {
+                grid-column: span 1 !important;
+            }
+        }
+    }
+}
+
+.layout-builder[data-breakpoint="tablet"] {
+    .grid-editor {
+        max-width: 768px;
+
+        .layout-section[data-columns="3"],
+        .layout-section[data-columns="4"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .layout-builder {
+        .builder-body {
+            flex-direction: column;
+
+            .builder-sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+        }
+    }
+
+    .layout-list-page {
+        .layout-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+}

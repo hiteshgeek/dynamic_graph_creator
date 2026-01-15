@@ -1,0 +1,171 @@
+// Template Selector Modal Styles
+
+.layout-template-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+        position: relative;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        max-width: 1200px;
+        width: 90%;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e0e0e0;
+
+            h2 {
+                font-size: 1.5rem;
+                font-weight: 600;
+                margin: 0;
+            }
+
+            .modal-close {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: none;
+                border: none;
+                color: #6c757d;
+                cursor: pointer;
+                border-radius: 8px;
+                transition: all 0.2s;
+
+                &:hover {
+                    background: #f8f9fa;
+                    color: #212529;
+                }
+            }
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+
+            .template-category {
+                margin-bottom: 2rem;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+
+                h3 {
+                    font-size: 1rem;
+                    font-weight: 600;
+                    color: #212529;
+                    margin-bottom: 1rem;
+                }
+
+                .template-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                    gap: 1.5rem;
+                }
+            }
+        }
+    }
+}
+
+.template-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: border-color 0.3s;
+
+    &:hover {
+        border-color: #007bff;
+    }
+
+    .template-preview {
+        height: 150px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        overflow: hidden;
+
+        .template-preview-grid {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .preview-section {
+                flex: 1;
+                background: white;
+                border-radius: 4px;
+                padding: 4px;
+
+                .preview-area {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    border-radius: 2px;
+                    min-height: 20px;
+                }
+            }
+        }
+
+        .template-preview-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            color: white;
+
+            i {
+                font-size: 3rem;
+                opacity: 0.8;
+            }
+        }
+    }
+
+    .template-info {
+        h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0 0 0.25rem 0;
+            color: #212529;
+        }
+
+        p {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin: 0;
+        }
+    }
+}

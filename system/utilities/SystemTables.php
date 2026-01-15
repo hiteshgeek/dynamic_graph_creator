@@ -24,4 +24,10 @@ class SystemTables
       const DB_TBL_FILTER = "filter";
       const DB_TBL_FILTER_STATUS = "filter_status";
 
+      /**
+       * Layout Builder Tables
+       */
+      const DB_TBL_LAYOUT_TEMPLATE = "layout_template";
+      const DB_TBL_LAYOUT_INSTANCE = "layout_instance";
+
 }

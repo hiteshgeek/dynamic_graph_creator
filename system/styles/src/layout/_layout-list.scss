@@ -1,0 +1,101 @@
+// Layout List Page Styles
+
+.layout-list-page {
+  .layout-empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+    color: #6c757d;
+
+    i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    p {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    span {
+      font-size: 0.9rem;
+    }
+  }
+
+  .layout-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .layout-card {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #007bff;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .layout-card-preview {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 3rem;
+      text-align: center;
+      color: white;
+
+      i {
+        font-size: 3rem;
+        opacity: 0.9;
+      }
+    }
+
+    .layout-card-content {
+      padding: 1.25rem;
+
+      h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #212529;
+      }
+
+      .layout-description {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.75rem;
+      }
+
+      .layout-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.8rem;
+        color: #6c757d;
+
+        .meta-item {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+      }
+    }
+
+    .layout-card-actions {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-top: 1px solid #e0e0e0;
+      background: #f8f9fa;
+
+      .btn {
+        flex: 1;
+      }
+    }
+  }
+}
