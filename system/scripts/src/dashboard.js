@@ -4,7 +4,7 @@
  */
 
 import Sortable from "sortablejs";
-import { TemplateManager } from "./layout/TemplateManager.js";
+import { TemplateManager } from "./dashboard/TemplateManager.js";
 
 // Use globals from common.js (Toast, Loading, Ajax, ConfirmDialog)
 const Toast = window.Toast;
@@ -15,10 +15,10 @@ const ConfirmDialog = window.ConfirmDialog;
 /**
  * Layout Builder - Main orchestrator
  */
-class LayoutBuilder {
+class DashboardBuilder {
   constructor(container, options = {}) {
     this.container = container;
-    this.mode = options.mode || "layout"; // 'layout' or 'template'
+    this.mode = options.mode || "dashboard"; // 'layout' or 'template'
     this.layoutId = options.layoutId || null;
     this.templateId = options.templateId || null;
     this.isReadOnly = options.isReadOnly || false;
@@ -28,7 +28,7 @@ class LayoutBuilder {
     this.sortableInstance = null;
     this.eventHandlersInitialized = false;
     this.autoSaveTimeout = null;
-    this.templateSelectorMode = "create-layout"; // or 'add-section'
+    this.templateSelectorMode = "create-dashboard"; // or 'add-section'
   }
 
   init() {
@@ -77,14 +77,14 @@ class LayoutBuilder {
 
   async loadLayout() {
     if (!this.layoutId) {
-      console.error("No layout ID specified");
+      console.error("No dashboard ID specified");
       return;
     }
 
-    Loading.show("Loading layout...");
+    Loading.show("Loading dashboard...");
 
     try {
-      const result = await Ajax.post("get_layout", { id: this.layoutId });
+      const result = await Ajax.post("get_dashboard", { id: this.layoutId });
 
       if (result.success) {
         this.currentLayout = result.data;
@@ -93,7 +93,7 @@ class LayoutBuilder {
         Toast.error(result.message);
       }
     } catch (error) {
-      Toast.error("Failed to load layout");
+      Toast.error("Failed to load dashboard");
     } finally {
       Loading.hide();
     }
@@ -212,7 +212,7 @@ class LayoutBuilder {
   }
 
   async createFromTemplate(templateId) {
-    Loading.show("Creating layout...");
+    Loading.show("Creating dashboard...");
 
     try {
       const result = await Ajax.post("create_from_template", {
@@ -224,7 +224,7 @@ class LayoutBuilder {
         this.layoutId = result.data.id;
 
         // Update URL to include layout ID (for refresh persistence)
-        const newUrl = `?urlq=layout/builder/${this.layoutId}`;
+        const newUrl = `?urlq=dashboard/builder/${this.layoutId}`;
         window.history.pushState({ layoutId: this.layoutId }, "", newUrl);
 
         // Update container data attribute
@@ -256,7 +256,7 @@ class LayoutBuilder {
         Toast.error(result.message);
       }
     } catch (error) {
-      Toast.error("Failed to create layout");
+      Toast.error("Failed to create dashboard");
     } finally {
       Loading.hide();
     }
@@ -279,7 +279,7 @@ class LayoutBuilder {
         document.getElementById("template-modal").style.display = "none";
 
         // Reset mode
-        this.templateSelectorMode = "create-layout";
+        this.templateSelectorMode = "create-dashboard";
 
         Toast.success("Section added successfully");
       } else {
@@ -308,11 +308,11 @@ class LayoutBuilder {
     const headerRight = document.querySelector(".page-header-right");
     if (headerRight && this.layoutId) {
       const existingViewBtn = headerRight.querySelector(
-        'a[href*="layout/preview"]'
+        'a[href*="dashboard/preview"]'
       );
       if (!existingViewBtn) {
         const viewBtn = document.createElement("a");
-        viewBtn.href = `?urlq=layout/preview/${this.layoutId}`;
+        viewBtn.href = `?urlq=dashboard/preview/${this.layoutId}`;
         viewBtn.className = "btn btn-primary";
         viewBtn.title = "View Layout";
         viewBtn.innerHTML = '<i class="fas fa-eye"></i> View Layout';
@@ -327,17 +327,17 @@ class LayoutBuilder {
     if (!gridEditor) return;
 
     gridEditor.innerHTML = `
-            <div class="layout-sections">
+            <div class="dashboard-sections">
                 <div class="loading-message">
                     <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading layout...</p>
+                    <p>Loading dashboard...</p>
                 </div>
             </div>
         `;
   }
 
   renderLayout() {
-    const sectionsContainer = this.container.querySelector(".layout-sections");
+    const sectionsContainer = this.container.querySelector(".dashboard-sections");
     if (!sectionsContainer) return;
 
     const structure = JSON.parse(this.currentLayout.structure);
@@ -352,11 +352,11 @@ class LayoutBuilder {
     } else {
       // Show empty state when no sections exist
       html = `
-                <div class="layout-empty-sections">
+                <div class="dashboard-empty-sections">
                     <div class="empty-sections-content">
                         <i class="fas fa-th-large"></i>
                         <h3>No Sections Yet</h3>
-                        <p>Start building your layout by adding a section or choosing a template</p>
+                        <p>Start building your dashboard by adding a section or choosing a template</p>
                         <button class="btn btn-primary add-first-section-btn">
                             <i class="fas fa-plus"></i> Add Section
                         </button>
@@ -433,7 +433,7 @@ class LayoutBuilder {
         areasHtml += this.renderAreaWithSubRows(area);
       } else {
         // Regular single area
-        areasHtml += `<div class="layout-area" data-area-id="${area.aid}">
+        areasHtml += `<div class="dashboard-area" data-area-id="${area.aid}">
                     ${
                       area.content && area.content.type === "empty"
                         ? this.renderEmptyState(area.emptyState)
@@ -480,10 +480,10 @@ class LayoutBuilder {
             </button>
         `;
 
-    return `<div class="layout-section-wrapper">
+    return `<div class="dashboard-section-wrapper">
             ${topBorderButton}
             ${topBorderControls}
-            <div class="layout-section" data-section-id="${section.sid}" style="grid-template-columns: ${section.gridTemplate};">
+            <div class="dashboard-section" data-section-id="${section.sid}" style="grid-template-columns: ${section.gridTemplate};">
                 ${areasHtml}
             </div>
             ${bottomBorderButton}
@@ -496,7 +496,7 @@ class LayoutBuilder {
 
     let subRowsHtml = "";
     area.subRows.forEach((subRow) => {
-      subRowsHtml += `<div class="layout-sub-row" data-row-id="${subRow.rowId}">
+      subRowsHtml += `<div class="dashboard-sub-row" data-row-id="${subRow.rowId}">
                 ${
                   subRow.content && subRow.content.type === "empty"
                     ? this.renderEmptyState(subRow.emptyState)
@@ -505,7 +505,7 @@ class LayoutBuilder {
             </div>`;
     });
 
-    return `<div class="layout-area layout-area-nested" data-area-id="${area.aid}" style="grid-template-rows: ${rowHeights};">
+    return `<div class="dashboard-area dashboard-area-nested" data-area-id="${area.aid}" style="grid-template-rows: ${rowHeights};">
             ${subRowsHtml}
         </div>`;
   }
@@ -528,7 +528,7 @@ class LayoutBuilder {
   }
 
   initDragDrop() {
-    const sectionsContainer = this.container.querySelector(".layout-sections");
+    const sectionsContainer = this.container.querySelector(".dashboard-sections");
 
     if (this.sortableInstance) {
       this.sortableInstance.destroy();
@@ -537,14 +537,14 @@ class LayoutBuilder {
     this.sortableInstance = Sortable.create(sectionsContainer, {
       animation: 150,
       handle: ".drag-handle",
-      draggable: ".layout-section-wrapper",
+      draggable: ".dashboard-section-wrapper",
       ghostClass: "section-ghost",
       onEnd: () => this.onSectionsReorder(),
     });
   }
 
   async onSectionsReorder() {
-    const sections = this.container.querySelectorAll(".layout-section");
+    const sections = this.container.querySelectorAll(".dashboard-section");
     const order = Array.from(sections).map(
       (section) => section.dataset.sectionId
     );
@@ -605,7 +605,7 @@ class LayoutBuilder {
 
     try {
       const endpoint =
-        this.mode === "template" ? "save_template_structure" : "save_layout";
+        this.mode === "template" ? "save_template_structure" : "save_dashboard";
       const data =
         this.mode === "template"
           ? {
@@ -630,7 +630,7 @@ class LayoutBuilder {
           Toast.success(
             this.mode === "template"
               ? "Template saved successfully"
-              : "Layout saved successfully"
+              : "Dashboard saved successfully"
           );
         }
       } else {
@@ -644,7 +644,7 @@ class LayoutBuilder {
       Toast.error(
         this.mode === "template"
           ? "Failed to save template"
-          : "Failed to save layout"
+          : "Failed to save dashboard"
       );
     } finally {
       this.isSaving = false;
@@ -727,7 +727,7 @@ class LayoutBuilder {
 
     // Template modal close
     const modalClose = document.querySelector(
-      ".layout-template-modal .modal-close"
+      ".template-modal .modal-close"
     );
     if (modalClose) {
       modalClose.addEventListener("click", () => {
@@ -876,7 +876,7 @@ class LayoutBuilder {
 }
 
 // Expose to window
-window.LayoutBuilder = LayoutBuilder;
+window.DashboardBuilder = DashboardBuilder;
 window.TemplateManager = TemplateManager;
 
 // Initialize template management globally (event delegation handles all pages)

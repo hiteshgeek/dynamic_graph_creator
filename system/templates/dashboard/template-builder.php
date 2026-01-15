@@ -19,7 +19,7 @@
     <?php if ($css = Utility::getCss('common')): ?>
         <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
-    <?php if ($css = Utility::getCss('layout')): ?>
+    <?php if ($css = Utility::getCss('dashboard')): ?>
         <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
@@ -27,7 +27,7 @@
 <body class="template-builder-page">
     <div class="page-header">
         <div class="page-header-left">
-            <a href="?urlq=layout/templates" class="btn btn-secondary btn-sm">
+            <a href="?urlq=dashboard/templates" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
             <h1><?php echo htmlspecialchars($template->getName() ?? 'Template'); ?></h1>
@@ -47,7 +47,7 @@
                     <span>Saved</span>
                 </div>
             <?php endif; ?>
-            <a href="?urlq=layout/template/preview/<?php echo $template->getId(); ?>"
+            <a href="?urlq=dashboard/template/preview/<?php echo $template->getId(); ?>"
                 class="btn btn-primary"
                 title="Preview Template">
                 <i class="fas fa-eye"></i> Preview Template
@@ -55,8 +55,8 @@
         </div>
     </div>
 
-    <div id="layout-builder"
-        class="layout-builder"
+    <div id="dashboard-builder"
+        class="dashboard-builder"
         data-mode="template"
         data-template-id="<?php echo $template->getId(); ?>"
         data-is-system="<?php echo $template->getIsSystem() ? '1' : '0'; ?>">
@@ -64,7 +64,7 @@
         <div class="builder-body">
             <div class="builder-main">
                 <div class="grid-editor">
-                    <div class="layout-sections">
+                    <div class="dashboard-sections">
                         <!-- Loader will be added dynamically by JavaScript -->
                     </div>
                 </div>
@@ -150,27 +150,27 @@
     <?php if ($js = Utility::getJs('common')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
-    <?php if ($js = Utility::getJs('layout')): ?>
+    <?php if ($js = Utility::getJs('dashboard')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 
     <script>
         // Initialize template builder when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('layout-builder');
+            const container = document.getElementById('dashboard-builder');
             const templateId = parseInt(container.dataset.templateId);
             const isSystem = container.dataset.isSystem === '1';
 
             // Initialize layout builder in template mode
-            if (typeof LayoutBuilder !== 'undefined') {
-                window.layoutBuilderInstance = new LayoutBuilder(container, {
+            if (typeof DashboardBuilder !== 'undefined') {
+                window.dashboardBuilderInstance = new DashboardBuilder(container, {
                     mode: 'template',
                     templateId: templateId,
                     isReadOnly: isSystem
                 });
-                window.layoutBuilderInstance.init();
+                window.dashboardBuilderInstance.init();
             } else {
-                console.error('LayoutBuilder not loaded. Make sure layout.js is included.');
+                console.error('DashboardBuilder not loaded. Make sure dashboard.js is included.');
             }
 
             // Edit template details button

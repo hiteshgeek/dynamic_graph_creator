@@ -1,7 +1,7 @@
 // Layout Builder Styles
 @use '../variables' as *;
 
-.layout-builder {
+.dashboard-builder {
     min-height: calc(100vh - 60px);
 
     .builder-body {
@@ -21,15 +21,15 @@
         }
     }
 
-    // Choose Template Card now uses shared .layout-empty-sections styles from _empty-state.scss
+    // Choose Template Card now uses shared .dashboard-empty-sections styles from _empty-state.scss
 
     // Layout sections - no vertical centering
-    .layout-sections {
+    .dashboard-sections {
         position: relative;
     }
 
     // Section wrapper for border button positioning
-    .layout-section-wrapper {
+    .dashboard-section-wrapper {
         position: relative;
 
         &.section-ghost {
@@ -142,8 +142,8 @@
 
     // Desktop: show on hover of section wrapper
     @media (min-width: 1024px) {
-        .layout-section-wrapper:hover .add-section-border-btn,
-        .layout-section-wrapper:hover .section-top-border-controls {
+        .dashboard-section-wrapper:hover .add-section-border-btn,
+        .dashboard-section-wrapper:hover .section-top-border-controls {
             opacity: 1;
             pointer-events: auto;
         }
@@ -188,7 +188,7 @@
 }
 
 // Layout Name Editor
-.layout-name-editor {
+.dashboard-name-editor {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -199,7 +199,7 @@
         line-height: 1;
     }
 
-    .layout-name-input {
+    .dashboard-name-input {
         font-size: $font-size-h2;
         font-weight: 600;
         min-width: 250px;

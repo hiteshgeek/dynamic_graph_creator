@@ -2,7 +2,7 @@
 @use '../variables' as *;
 
 // Preview pages - remove container padding but add spacing to preview area
-.layout-preview-page,
+.dashboard-preview-page,
 .template-preview-page {
     background: white;
 
@@ -11,32 +11,32 @@
         padding-top: $spacing-lg;
     }
 
-    .layout-preview {
+    .dashboard-preview {
         margin-top: 0;
         padding: $spacing-lg;
     }
 }
 
 // Builder pages - keep default spacing
-.layout-builder-page,
+.dashboard-builder-page,
 .template-builder-page {
     background: white;
 
-    .layout-preview {
+    .dashboard-preview {
         margin-top: $spacing-lg;
     }
 }
 
-.layout-sections {
+.dashboard-sections {
     display: flex;
     flex-direction: column;
-    gap: $layout-grid-gap;
+    gap: $spacing-md;
 }
 
-.layout-section {
+.dashboard-section {
     position: relative;
     display: grid;
-    gap: $layout-grid-gap;
+    gap: $spacing-md;
     min-height: 200px;
     background: white;
     border: 2px solid #e0e0e0;
@@ -60,7 +60,7 @@
     }
 
     // Preview mode - clean view without editing styles
-    .layout-preview-page &,
+    .dashboard-preview-page &,
     .template-preview-page & {
         padding: 0;
         background: transparent;
@@ -117,7 +117,7 @@
     }
 }
 
-.layout-area {
+.dashboard-area {
     background: #f8f9fa;
     border: 2px dashed #dee2e6;
     border-radius: 8px;
@@ -136,14 +136,14 @@
     }
 
     // Nested area with sub-rows
-    &.layout-area-nested {
+    &.dashboard-area-nested {
         padding: 0;
         align-items: stretch;
         justify-content: stretch;
         background: transparent;
         border: none;
         display: grid;
-        gap: $layout-grid-gap;
+        gap: $spacing-md;
     }
 
     .area-content {
@@ -158,7 +158,7 @@
 }
 
 // Sub-rows within nested areas
-.layout-sub-row {
+.dashboard-sub-row {
     background: #f8f9fa;
     border: 2px dashed #dee2e6;
     border-radius: 6px;

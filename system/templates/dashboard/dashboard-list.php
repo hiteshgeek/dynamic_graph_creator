@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Layouts - Dynamic Graph Creator</title>
+    <title>Dashboards - Dynamic Graph Creator</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -18,7 +18,7 @@
     <?php if ($css = Utility::getCss('common')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
-    <?php if ($css = Utility::getCss('layout')): ?>
+    <?php if ($css = Utility::getCss('dashboard')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
@@ -28,20 +28,20 @@
             <h1>My Dashboards</h1>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=layout/templates" class="btn btn-secondary">
+            <a href="?urlq=dashboard/templates" class="btn btn-secondary">
                 <i class="fas fa-th-large"></i> Templates
             </a>
             <a href="?urlq=graph" class="btn btn-secondary">
                 <i class="fas fa-chart-line"></i> Graphs
             </a>
-            <a href="?urlq=layout/builder" class="btn btn-primary">
+            <a href="?urlq=dashboard/builder" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create Dashboard
             </a>
         </div>
     </div>
 
     <div class="container">
-        <div id="layout-list" class="layout-list-page">
+        <div id="dashboard-list" class="dashboard-list-page">
             <!-- Card header commented out - redundant with page header
             <div class="card">
                 <div class="card-header">
@@ -54,31 +54,31 @@
             -->
 
             <?php if (empty($layouts)): ?>
-            <div class="layout-empty-state">
+            <div class="dashboard-empty-state">
                 <i class="fas fa-th-large"></i>
                 <p>No dashboards created yet</p>
                 <span>Click "Create Dashboard" to build your first dashboard</span>
             </div>
             <?php else: ?>
-            <div class="layout-grid">
+            <div class="dashboard-grid">
                 <?php foreach ($layouts as $layout): ?>
-                <div class="layout-card" data-layout-id="<?php echo $layout->getId(); ?>">
-                    <div class="layout-card-content">
+                <div class="dashboard-card" data-layout-id="<?php echo $layout->getId(); ?>">
+                    <div class="dashboard-card-content">
                         <h3><?php echo htmlspecialchars($layout->getName()); ?></h3>
-                        <div class="layout-meta">
+                        <div class="dashboard-meta">
                             <span class="meta-item">
                                 <i class="fas fa-clock"></i>
                                 <?php echo date('M d, Y', strtotime($layout->getUpdatedTs())); ?>
                             </span>
                         </div>
                     </div>
-                    <div class="layout-card-actions">
-                        <a href="?urlq=layout/preview/<?php echo $layout->getId(); ?>"
+                    <div class="dashboard-card-actions">
+                        <a href="?urlq=dashboard/preview/<?php echo $layout->getId(); ?>"
                            class="btn-icon btn-primary"
                            title="View Dashboard">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a href="?urlq=layout/builder/<?php echo $layout->getId(); ?>"
+                        <a href="?urlq=dashboard/builder/<?php echo $layout->getId(); ?>"
                            class="btn-icon btn-warning"
                            title="Edit Dashboard">
                             <i class="fas fa-pencil"></i>
@@ -98,7 +98,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
-    <?php if ($js = Utility::getJs('layout')): ?>
+    <?php if ($js = Utility::getJs('dashboard')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 

@@ -95,6 +95,11 @@ export class TemplateManager {
               window.location.reload();
             }
           }, 300);
+        } else {
+          // Not on template list page (e.g., preview page), redirect to template list
+          setTimeout(() => {
+            window.location.href = "?urlq=layout/templates";
+          }, 500);
         }
       } else {
         Toast.error(result.message || "Failed to delete template");

@@ -18,14 +18,14 @@
     <?php if ($css = Utility::getCss('common')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
-    <?php if ($css = Utility::getCss('layout')): ?>
+    <?php if ($css = Utility::getCss('dashboard')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
 <body>
     <div class="page-header">
         <div class="page-header-left">
-            <a href="?urlq=layout/templates" class="btn btn-secondary btn-sm">
+            <a href="?urlq=dashboard/templates" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
             <h1><?php echo htmlspecialchars($pageTitle); ?></h1>
@@ -76,7 +76,7 @@
                             <?php endif; ?>
 
                             <div class="d-flex justify-content-end gap-2">
-                                <a href="?urlq=layout/templates" class="btn btn-secondary">
+                                <a href="?urlq=dashboard/templates" class="btn btn-secondary">
                                     <i class="fas fa-times"></i> Cancel
                                 </a>
                                 <button type="submit" class="btn btn-primary" id="submit-btn">
@@ -97,7 +97,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
-    <?php if ($js = Utility::getJs('layout')): ?>
+    <?php if ($js = Utility::getJs('dashboard')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 
@@ -139,7 +139,7 @@
                     } else if (templateId) {
                         // If updating, redirect back to templates
                         setTimeout(() => {
-                            window.location.href = '?urlq=layout/templates';
+                            window.location.href = '?urlq=dashboard/templates';
                         }, 500);
                     }
                 } else {

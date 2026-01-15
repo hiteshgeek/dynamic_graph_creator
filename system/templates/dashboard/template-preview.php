@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
+require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,14 +21,14 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
     <?php if ($css = Utility::getCss('common')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
-    <?php if ($css = Utility::getCss('layout')): ?>
+    <?php if ($css = Utility::getCss('dashboard')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
 <body class="template-preview-page">
     <div class="page-header">
         <div class="page-header-left">
-            <a href="?urlq=layout/templates" class="btn btn-secondary btn-sm">
+            <a href="?urlq=dashboard/templates" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
             <h1><?php echo htmlspecialchars($template->getName() ?? 'Template'); ?></h1>
@@ -44,7 +44,7 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
             <button class="btn btn-success duplicate-template-btn" data-template-id="<?php echo $template->getId(); ?>">
                 <i class="fas fa-copy"></i> Duplicate Template
             </button>
-            <a href="?urlq=layout/template/builder/<?php echo $template->getId(); ?>" class="btn btn-warning">
+            <a href="?urlq=dashboard/template/builder/<?php echo $template->getId(); ?>" class="btn btn-warning">
                 <i class="fas fa-pencil"></i> Edit Template
             </a>
             <button class="btn btn-danger delete-template-btn" data-template-id="<?php echo $template->getId(); ?>">
@@ -81,7 +81,7 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
     <?php if ($js = Utility::getJs('common')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
-    <?php if ($js = Utility::getJs('layout')): ?>
+    <?php if ($js = Utility::getJs('dashboard')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 

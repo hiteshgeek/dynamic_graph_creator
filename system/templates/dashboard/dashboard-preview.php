@@ -19,21 +19,21 @@
     <?php if ($css = Utility::getCss('common')): ?>
         <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
-    <?php if ($css = Utility::getCss('layout')): ?>
+    <?php if ($css = Utility::getCss('dashboard')): ?>
         <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
 
-<body class="layout-preview-page">
+<body class="dashboard-preview-page">
     <div class="page-header">
         <div class="page-header-left">
-            <a href="?urlq=layout" class="btn btn-secondary btn-sm">
+            <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
             <h1><?php echo htmlspecialchars($layout->getName()); ?></h1>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=layout/builder/<?php echo $layout->getId(); ?>" class="btn btn-warning">
+            <a href="?urlq=dashboard/builder/<?php echo $layout->getId(); ?>" class="btn btn-warning">
                 <i class="fas fa-pencil"></i> Edit Dashboard
             </a>
             <button class="btn btn-danger delete-layout-btn" data-layout-id="<?php echo $layout->getId(); ?>">
@@ -43,8 +43,8 @@
     </div>
 
     <div class="container-fluid">
-        <div id="layout-preview" class="layout-preview" data-layout-id="<?php echo $layout->getId(); ?>">
-            <div class="layout-sections">
+        <div id="dashboard-preview" class="dashboard-preview" data-layout-id="<?php echo $layout->getId(); ?>">
+            <div class="dashboard-sections">
                 <?php
                 $structure = $layout->getStructureArray();
                 // Debug: Check structure
@@ -52,7 +52,7 @@
                 if (isset($structure['sections']) && count($structure['sections']) > 0):
                     foreach ($structure['sections'] as $section):
                 ?>
-                        <div class="layout-section"
+                        <div class="dashboard-section"
                             data-section-id="<?php echo htmlspecialchars($section['sid']); ?>"
                             style="grid-template-columns: <?php echo htmlspecialchars($section['gridTemplate']); ?>;">
 
@@ -70,12 +70,12 @@
                                     }, $area['subRows']);
                                     $rowHeightsStr = implode(' ', $rowHeights);
                                     ?>
-                                    <div class="layout-area layout-area-nested"
+                                    <div class="dashboard-area dashboard-area-nested"
                                         data-area-id="<?php echo htmlspecialchars($area['aid']); ?>"
                                         style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>; grid-template-rows: <?php echo $rowHeightsStr; ?>;">
 
                                         <?php foreach ($area['subRows'] as $subRow): ?>
-                                            <div class="layout-sub-row" data-row-id="<?php echo htmlspecialchars($subRow['rowId']); ?>">
+                                            <div class="dashboard-sub-row" data-row-id="<?php echo htmlspecialchars($subRow['rowId']); ?>">
                                                 <?php if (isset($subRow['content']) && $subRow['content']['type'] === 'empty'): ?>
                                                     <div class="empty-state">
                                                         <div class="empty-state-icon">
@@ -96,7 +96,7 @@
 
                                 <?php else: ?>
                                     <!-- Regular single area -->
-                                    <div class="layout-area"
+                                    <div class="dashboard-area"
                                         data-area-id="<?php echo htmlspecialchars($area['aid']); ?>"
                                         style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>;">
 
@@ -123,7 +123,7 @@
                 else:
                     ?>
                     <!-- Empty state when no sections -->
-                    <div class="layout-empty-sections">
+                    <div class="dashboard-empty-sections">
                         <div class="empty-sections-content">
                             <i class="fas fa-th-large"></i>
                             <h3>This Dashboard is Empty</h3>
@@ -142,6 +142,9 @@
 
     <!-- Custom JS -->
     <?php if ($js = Utility::getJs('common')): ?>
+        <script src="<?php echo $js; ?>"></script>
+    <?php endif; ?>
+    <?php if ($js = Utility::getJs('dashboard')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 
@@ -166,7 +169,7 @@
                         Toast.success('Dashboard deleted successfully');
                         // Redirect to layout list after a short delay
                         setTimeout(() => {
-                            window.location.href = '?urlq=layout';
+                            window.location.href = '?urlq=dashboard';
                         }, 500);
                     } else {
                         Toast.error(result.message || 'Failed to delete dashboard');

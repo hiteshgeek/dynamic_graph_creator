@@ -5,7 +5,7 @@
  *
  * @author Dynamic Graph Creator
  */
-class LayoutInstance implements DatabaseObject
+class DashboardInstance implements DatabaseObject
 {
     private $liid;
     private $ltid; // Source template (nullable)
@@ -32,7 +32,7 @@ class LayoutInstance implements DatabaseObject
     public static function isExistent($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT liid FROM " . SystemTables::DB_TBL_LAYOUT_INSTANCE . " WHERE liid = '::liid' AND lisid != 3 LIMIT 1";
+        $sql = "SELECT liid FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " WHERE liid = '::liid' AND lisid != 3 LIMIT 1";
         $res = $db->query($sql, array('::liid' => intval($id)));
         return $db->numRows($res) > 0;
     }
@@ -84,7 +84,7 @@ class LayoutInstance implements DatabaseObject
             $args['::created_uid'] = $this->created_uid;
         }
 
-        $sql = "INSERT INTO " . SystemTables::DB_TBL_LAYOUT_INSTANCE . " (
+        $sql = "INSERT INTO " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " (
             " . implode(', ', $fields) . "
         ) VALUES (
             '" . implode("', '", $values) . "'
@@ -146,7 +146,7 @@ class LayoutInstance implements DatabaseObject
 
         $args['::liid'] = $this->liid;
 
-        $sql = "UPDATE " . SystemTables::DB_TBL_LAYOUT_INSTANCE . " SET
+        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " SET
             " . implode(', ', $updates) . "
         WHERE liid = '::liid'";
 
@@ -156,7 +156,7 @@ class LayoutInstance implements DatabaseObject
     public static function delete($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "UPDATE " . SystemTables::DB_TBL_LAYOUT_INSTANCE . " SET lisid = 3 WHERE liid = '::liid'";
+        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " SET lisid = 3 WHERE liid = '::liid'";
         return $db->query($sql, array('::liid' => intval($id))) ? true : false;
     }
 
@@ -165,7 +165,7 @@ class LayoutInstance implements DatabaseObject
         if (!$this->liid) return false;
 
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_LAYOUT_INSTANCE . " WHERE liid = '::liid' AND lisid != 3 LIMIT 1";
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " WHERE liid = '::liid' AND lisid != 3 LIMIT 1";
         $res = $db->query($sql, array('::liid' => $this->liid));
 
         if (!$res || $db->numRows($res) < 1) return false;
@@ -208,12 +208,12 @@ class LayoutInstance implements DatabaseObject
     public static function getAll()
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_LAYOUT_INSTANCE . " WHERE lisid != 3 ORDER BY updated_ts DESC";
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " WHERE lisid != 3 ORDER BY updated_ts DESC";
         $res = $db->query($sql);
 
         $instances = array();
         while ($row = $db->fetchObject($res)) {
-            $instance = new LayoutInstance();
+            $instance = new DashboardInstance();
             $instance->parse($row);
             $instances[] = $instance;
         }
@@ -226,14 +226,14 @@ class LayoutInstance implements DatabaseObject
     public static function getUserLayouts($userId)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_LAYOUT_INSTANCE . "
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . "
                 WHERE user_id = '::user_id' AND lisid != 3
                 ORDER BY updated_ts DESC";
         $res = $db->query($sql, array('::user_id' => intval($userId)));
 
         $layouts = array();
         while ($row = $db->fetchObject($res)) {
-            $layout = new LayoutInstance();
+            $layout = new DashboardInstance();
             $layout->parse($row);
             $layouts[] = $layout;
         }

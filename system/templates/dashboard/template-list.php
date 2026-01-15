@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
+require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -21,7 +21,7 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
     <?php if ($css = Utility::getCss('common')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
-    <?php if ($css = Utility::getCss('layout')): ?>
+    <?php if ($css = Utility::getCss('dashboard')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
@@ -31,13 +31,13 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
             <h1>Dashboard Templates</h1>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=layout" class="btn btn-secondary">
+            <a href="?urlq=dashboard" class="btn btn-secondary">
                 <i class="fas fa-layer-group"></i> My Dashboards
             </a>
             <a href="?urlq=graph" class="btn btn-secondary">
                 <i class="fas fa-chart-line"></i> Graphs
             </a>
-            <a href="?urlq=layout/template/create" class="btn btn-primary">
+            <a href="?urlq=dashboard/template/create" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create Template
             </a>
         </div>
@@ -46,12 +46,12 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
     <div class="container-fluid">
         <div class="template-list-page">
             <?php if (empty($templates)): ?>
-            <div class="layout-empty-sections">
+            <div class="dashboard-empty-sections">
                 <div class="empty-sections-content">
                     <i class="fas fa-th-large"></i>
                     <h3>No Templates Found</h3>
                     <p>Start by creating your first custom template</p>
-                    <a href="?urlq=layout/template/create" class="btn btn-primary">
+                    <a href="?urlq=dashboard/template/create" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Create Template
                     </a>
                 </div>
@@ -90,12 +90,12 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
                             <div class="template-card-actions">
                                 <button class="btn-icon btn-primary"
                                         title="Preview"
-                                        onclick="window.location='?urlq=layout/template/preview/<?php echo $template['ltid']; ?>'">
+                                        onclick="window.location='?urlq=dashboard/template/preview/<?php echo $template['ltid']; ?>'">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <button class="btn-icon btn-warning"
                                         title="Edit Structure"
-                                        onclick="window.location='?urlq=layout/template/builder/<?php echo $template['ltid']; ?>'">
+                                        onclick="window.location='?urlq=dashboard/template/builder/<?php echo $template['ltid']; ?>'">
                                     <i class="fas fa-pencil"></i>
                                 </button>
                                 <button class="btn-icon btn-success duplicate-template-btn"
@@ -125,7 +125,7 @@ require_once __DIR__ . '/../../includes/layout/template-preview-component.php';
     <?php if ($js = Utility::getJs('common')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
-    <?php if ($js = Utility::getJs('layout')): ?>
+    <?php if ($js = Utility::getJs('dashboard')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 </body>

@@ -5,7 +5,7 @@
  *
  * @author Dynamic Graph Creator
  */
-class LayoutTemplate implements DatabaseObject
+class DashboardTemplate implements DatabaseObject
 {
     private $ltid;
     private $name;
@@ -13,6 +13,7 @@ class LayoutTemplate implements DatabaseObject
     private $ltcid; // Foreign key to layout_template_category
     private $thumbnail;
     private $structure; // JSON
+    private $display_order;
     private $is_system;
     private $ltsid;
     private $created_ts;
@@ -31,7 +32,7 @@ class LayoutTemplate implements DatabaseObject
     public static function isExistent($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT ltid FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " WHERE ltid = '::ltid' AND ltsid != 3 LIMIT 1";
+        $sql = "SELECT ltid FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " WHERE ltid = '::ltid' AND ltsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::ltid' => intval($id)));
         return $db->numRows($res) > 0;
     }
@@ -50,13 +51,14 @@ class LayoutTemplate implements DatabaseObject
         $db = Rapidkart::getInstance()->getDB();
 
         // Build dynamic SQL to handle NULL values properly
-        $fields = array('name', 'description', 'ltcid', 'structure', 'is_system');
-        $values = array('::name', '::description', '::ltcid', '::structure', '::is_system');
+        $fields = array('name', 'description', 'ltcid', 'structure', 'display_order', 'is_system');
+        $values = array('::name', '::description', '::ltcid', '::structure', '::display_order', '::is_system');
         $args = array(
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
             '::ltcid' => $this->ltcid ? $this->ltcid : null,
             '::structure' => $this->structure,
+            '::display_order' => $this->display_order ? $this->display_order : 0,
             '::is_system' => $this->is_system ? 1 : 0
         );
 
@@ -72,7 +74,7 @@ class LayoutTemplate implements DatabaseObject
             $args['::created_uid'] = $this->created_uid;
         }
 
-        $sql = "INSERT INTO " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " (
+        $sql = "INSERT INTO " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " (
             " . implode(', ', $fields) . "
         ) VALUES (
             '" . implode("', '", $values) . "'
@@ -90,12 +92,13 @@ class LayoutTemplate implements DatabaseObject
         if (!$this->ltid) return false;
 
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "UPDATE " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " SET
+        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " SET
             name = '::name',
             description = '::description',
             ltcid = '::ltcid',
             thumbnail = '::thumbnail',
             structure = '::structure',
+            display_order = '::display_order',
             is_system = '::is_system',
             updated_uid = '::updated_uid'
         WHERE ltid = '::ltid'";
@@ -106,6 +109,7 @@ class LayoutTemplate implements DatabaseObject
             '::ltcid' => $this->ltcid ? $this->ltcid : null,
             '::thumbnail' => $this->thumbnail ? $this->thumbnail : '',
             '::structure' => $this->structure,
+            '::display_order' => $this->display_order ? $this->display_order : 0,
             '::is_system' => $this->is_system ? 1 : 0,
             '::updated_uid' => $this->updated_uid ? $this->updated_uid : 0,
             '::ltid' => $this->ltid
@@ -118,7 +122,7 @@ class LayoutTemplate implements DatabaseObject
     {
         $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "UPDATE " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " SET ltsid = 3 WHERE ltid = '::ltid'";
+        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " SET ltsid = 3 WHERE ltid = '::ltid'";
         return $db->query($sql, array('::ltid' => intval($id))) ? true : false;
     }
 
@@ -127,7 +131,7 @@ class LayoutTemplate implements DatabaseObject
         if (!$this->ltid) return false;
 
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " WHERE ltid = '::ltid' AND ltsid != 3 LIMIT 1";
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " WHERE ltid = '::ltid' AND ltsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::ltid' => $this->ltid));
 
         if (!$res || $db->numRows($res) < 1) return false;
@@ -169,15 +173,15 @@ class LayoutTemplate implements DatabaseObject
     public static function getAll()
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT lt.* FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " lt
-                LEFT JOIN " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . " ltc ON lt.ltcid = ltc.ltcid
+        $sql = "SELECT lt.* FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " lt
+                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " ltc ON lt.ltcid = ltc.ltcid
                 WHERE lt.ltsid != 3
                 ORDER BY ltc.display_order ASC, lt.name ASC";
         $res = $db->query($sql);
 
         $templates = array();
         while ($row = $db->fetchObject($res)) {
-            $template = new LayoutTemplate();
+            $template = new DashboardTemplate();
             $template->parse($row);
             $templates[] = $template;
         }
@@ -198,10 +202,10 @@ class LayoutTemplate implements DatabaseObject
                     ltc.icon as category_icon,
                     ltc.color as category_color,
                     ltc.display_order as category_order
-                FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE . " lt
-                LEFT JOIN " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . " ltc ON lt.ltcid = ltc.ltcid
+                FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " lt
+                LEFT JOIN " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " ltc ON lt.ltcid = ltc.ltcid
                 WHERE lt.ltsid != 3 AND (ltc.ltcsid != 3 OR lt.ltcid IS NULL)
-                ORDER BY ltc.display_order ASC, ltc.name ASC, lt.name ASC";
+                ORDER BY ltc.display_order ASC, ltc.name ASC, lt.display_order ASC, lt.name ASC";
         $res = $db->query($sql);
 
         $grouped = array();
@@ -271,7 +275,7 @@ class LayoutTemplate implements DatabaseObject
     public function getCategory()
     {
         if ($this->ltcid) {
-            return new LayoutTemplateCategory($this->ltcid);
+            return new DashboardTemplateCategory($this->ltcid);
         }
         return null;
     }
@@ -283,6 +287,9 @@ class LayoutTemplate implements DatabaseObject
     public function setStructure($value) {
         $this->structure = is_string($value) ? $value : json_encode($value);
     }
+
+    public function getDisplayOrder() { return $this->display_order; }
+    public function setDisplayOrder($value) { $this->display_order = intval($value); }
 
     public function getIsSystem() { return $this->is_system; }
     public function setIsSystem($value) { $this->is_system = $value ? 1 : 0; }

@@ -28,7 +28,7 @@
             <h1>Dynamic Graph Creator</h1>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=layout" class="btn btn-secondary">
+            <a href="?urlq=dashboard" class="btn btn-secondary">
                 <i class="fas fa-th-large"></i> Dashboards
             </a>
             <a href="?urlq=filters" class="btn btn-secondary">

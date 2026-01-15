@@ -5,7 +5,7 @@
  * Manages template categories with ordering, icons, and colors
  */
 
-class LayoutTemplateCategory implements DatabaseObject
+class DashboardTemplateCategory implements DatabaseObject
 {
     private $ltcid;
     private $slug;
@@ -55,7 +55,7 @@ class LayoutTemplateCategory implements DatabaseObject
     public static function isExistent($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT ltcid FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . " WHERE ltcid = '::ltcid' AND ltcsid != 3 LIMIT 1";
+        $sql = "SELECT ltcid FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " WHERE ltcid = '::ltcid' AND ltcsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::ltcid' => intval($id)));
         return $db->numRows($res) > 0;
     }
@@ -66,7 +66,7 @@ class LayoutTemplateCategory implements DatabaseObject
     public static function slugExists($slug, $excludeId = null)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT ltcid FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . "
+        $sql = "SELECT ltcid FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . "
                 WHERE slug = '::slug' AND ltcsid != 3";
         $args = array('::slug' => $slug);
 
@@ -88,7 +88,7 @@ class LayoutTemplateCategory implements DatabaseObject
 
         $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "INSERT INTO " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . "
+        $sql = "INSERT INTO " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . "
                 (slug, name, description, icon, color, display_order, is_system, ltcsid)
                 VALUES ('::slug', '::name', '::description', '::icon', '::color', '::display_order', '::is_system', 1)";
 
@@ -119,7 +119,7 @@ class LayoutTemplateCategory implements DatabaseObject
 
         $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "UPDATE " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . " SET
+        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " SET
                 slug = '::slug',
                 name = '::name',
                 description = '::description',
@@ -149,7 +149,7 @@ class LayoutTemplateCategory implements DatabaseObject
     public static function delete($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "UPDATE " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . " SET ltcsid = 3 WHERE ltcid = '::ltcid'";
+        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " SET ltcsid = 3 WHERE ltcid = '::ltcid'";
         return $db->query($sql, array('::ltcid' => intval($id))) ? true : false;
     }
 
@@ -161,7 +161,7 @@ class LayoutTemplateCategory implements DatabaseObject
         if (!$this->ltcid) return false;
 
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . " WHERE ltcid = '::ltcid' AND ltcsid != 3 LIMIT 1";
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " WHERE ltcid = '::ltcid' AND ltcsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::ltcid' => $this->ltcid));
 
         if ($db->numRows($res) > 0) {
@@ -205,14 +205,14 @@ class LayoutTemplateCategory implements DatabaseObject
     public static function getAll()
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . "
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . "
                 WHERE ltcsid != 3
                 ORDER BY display_order ASC, name ASC";
         $res = $db->query($sql);
 
         $categories = array();
         while ($row = $db->fetchAssoc($res)) {
-            $category = new LayoutTemplateCategory();
+            $category = new DashboardTemplateCategory();
             $category->populate($row);
             $categories[] = $category;
         }
@@ -250,13 +250,13 @@ class LayoutTemplateCategory implements DatabaseObject
     public static function getBySlug($slug)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT ltcid FROM " . SystemTables::DB_TBL_LAYOUT_TEMPLATE_CATEGORY . "
+        $sql = "SELECT ltcid FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . "
                 WHERE slug = '::slug' AND ltcsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::slug' => $slug));
 
         if ($db->numRows($res) > 0) {
             $row = $db->fetchAssoc($res);
-            return new LayoutTemplateCategory($row['ltcid']);
+            return new DashboardTemplateCategory($row['ltcid']);
         }
 
         return null;

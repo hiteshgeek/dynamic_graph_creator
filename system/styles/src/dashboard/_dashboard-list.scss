@@ -1,7 +1,7 @@
 // Layout List Page Styles
 
-.layout-list-page {
-  .layout-empty-state {
+.dashboard-list-page {
+  .dashboard-empty-state {
     padding: 4rem 2rem;
     text-align: center;
     color: #6c757d;
@@ -23,13 +23,13 @@
     }
   }
 
-  .layout-grid {
+  .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1rem;
   }
 
-  .layout-card {
+  .dashboard-card {
     background: white;
     border: 2px solid #e0e0e0;
     border-radius: 8px;
@@ -43,7 +43,7 @@
       border-color: #007bff;
     }
 
-    .layout-card-content {
+    .dashboard-card-content {
       flex: 1;
       margin-bottom: 1rem;
 
@@ -54,7 +54,7 @@
         color: #212529;
       }
 
-      .layout-meta {
+      .dashboard-meta {
         display: flex;
         gap: 1rem;
         font-size: 0.8rem;
@@ -68,7 +68,7 @@
       }
     }
 
-    .layout-card-actions {
+    .dashboard-card-actions {
       display: flex;
       gap: 0.5rem;
       justify-content: center;

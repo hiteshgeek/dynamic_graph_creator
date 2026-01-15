@@ -19,22 +19,22 @@
     <?php if ($css = Utility::getCss('common')): ?>
         <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
-    <?php if ($css = Utility::getCss('layout')): ?>
+    <?php if ($css = Utility::getCss('dashboard')): ?>
         <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
 
-<body class="layout-builder-page">
+<body class="dashboard-builder-page">
     <div class="page-header">
         <div class="page-header-left">
-            <a href="?urlq=layout" class="btn btn-secondary btn-sm">
+            <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
             <?php if ($layout && $layout->getId()): ?>
-                <div class="layout-name-editor">
-                    <h1 id="layout-name-display"><?php echo htmlspecialchars($layout->getName()); ?></h1>
+                <div class="dashboard-name-editor">
+                    <h1 id="dashboard-name-display"><?php echo htmlspecialchars($layout->getName()); ?></h1>
                     <input type="text"
-                        id="layout-name-input"
+                        id="dashboard-name-input"
                         class="form-control layout-name-input"
                         value="<?php echo htmlspecialchars($layout->getName()); ?>"
                         placeholder="Dashboard Name"
@@ -59,7 +59,7 @@
                     <i class="fas fa-check-circle"></i>
                     <span>Saved</span>
                 </div>
-                <a href="?urlq=layout/preview/<?php echo $layout->getId(); ?>"
+                <a href="?urlq=dashboard/preview/<?php echo $layout->getId(); ?>"
                     class="btn btn-primary">
                     <i class="fas fa-eye"></i> View Dashboard
                 </a>
@@ -72,8 +72,8 @@
         </div>
     </div>
 
-    <div id="layout-builder"
-        class="layout-builder"
+    <div id="dashboard-builder"
+        class="dashboard-builder"
         data-layout-id="<?php echo $layout ? $layout->getId() : ''; ?>"
         data-breakpoint="desktop">
 
@@ -81,9 +81,9 @@
             <div class="builder-main">
                 <div class="grid-editor">
                     <?php if ($layout && $layout->getId()): ?>
-                        <div class="layout-sections"></div>
+                        <div class="dashboard-sections"></div>
                     <?php else: ?>
-                        <div class="layout-empty-sections">
+                        <div class="dashboard-empty-sections">
                             <div class="empty-sections-content">
                                 <i class="fas fa-th-large"></i>
                                 <h3>Create Your Dashboard</h3>
@@ -100,11 +100,11 @@
     </div>
 
     <!-- Template Selector Modal -->
-    <div id="template-modal" class="layout-template-modal" style="display: none;">
+    <div id="template-modal" class="dashboard-template-modal" style="display: none;">
         <div class="modal-overlay"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Choose a Layout Template</h2>
+                <h2>Choose a Dashboard Template</h2>
                 <button class="modal-close">
                     <i class="fas fa-times"></i>
                 </button>
@@ -152,25 +152,25 @@
     <?php if ($js = Utility::getJs('common')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
-    <?php if ($js = Utility::getJs('layout')): ?>
+    <?php if ($js = Utility::getJs('dashboard')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 
     <script>
         // Initialize layout builder when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('layout-builder');
+            const container = document.getElementById('dashboard-builder');
             const layoutId = container.dataset.layoutId || null;
 
             // Initialize layout builder
-            if (typeof LayoutBuilder !== 'undefined') {
-                window.layoutBuilderInstance = new LayoutBuilder(container, {
+            if (typeof DashboardBuilder !== 'undefined') {
+                window.dashboardBuilderInstance = new DashboardBuilder(container, {
                     layoutId: layoutId ? parseInt(layoutId) : null,
                     mode: 'edit'
                 });
-                window.layoutBuilderInstance.init();
+                window.dashboardBuilderInstance.init();
             } else {
-                console.error('LayoutBuilder not loaded. Make sure layout.js is included.');
+                console.error('DashboardBuilder not loaded. Make sure dashboard.js is included.');
             }
 
             // Handle layout name editing
@@ -235,14 +235,14 @@
                                 saveBtn.disabled = false;
                                 cancelBtn.disabled = false;
                             } else {
-                                Toast.error(result.message || 'Failed to update layout name');
+                                Toast.error(result.message || 'Failed to update dashboard name');
                                 saveBtn.innerHTML = '<i class="fas fa-check"></i>';
                                 saveBtn.disabled = false;
                                 cancelBtn.disabled = false;
                             }
                         })
                         .catch(error => {
-                            Toast.error('Failed to update layout name');
+                            Toast.error('Failed to update dashboard name');
                             saveBtn.innerHTML = '<i class="fas fa-check"></i>';
                             saveBtn.disabled = false;
                             cancelBtn.disabled = false;

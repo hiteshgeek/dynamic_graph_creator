@@ -17,13 +17,13 @@ if (isset($_POST['submit'])) {
         case 'create_from_template':
             createFromTemplate($_POST);
             break;
-        case 'save_layout':
+        case 'save_dashboard':
             saveLayout($_POST);
             break;
-        case 'get_layout':
+        case 'get_dashboard':
             getLayout($_POST);
             break;
-        case 'delete_layout':
+        case 'delete_dashboard':
             deleteLayout($_POST);
             break;
         case 'update_layout_name':
@@ -115,8 +115,8 @@ function showList()
 {
     // Get user's layouts - TODO: Replace with actual user ID from session
     $userId = 1;
-    $layouts = LayoutInstance::getUserLayouts($userId);
-    require_once SystemConfig::templatesPath() . 'layout/layout-list.php';
+    $layouts = DashboardInstance::getUserLayouts($userId);
+    require_once SystemConfig::templatesPath() . 'dashboard/dashboard-list.php';
 }
 
 /**
@@ -125,17 +125,17 @@ function showList()
 function showBuilder($layoutId = 0)
 {
     $layout = null;
-    $templates = LayoutTemplate::getAllGrouped();
+    $templates = DashboardTemplate::getAllGrouped();
 
     if ($layoutId) {
-        $layout = new LayoutInstance($layoutId);
+        $layout = new DashboardInstance($layoutId);
         if (!$layout->getId()) {
             Utility::redirect('layout');
             return;
         }
     }
 
-    require_once SystemConfig::templatesPath() . 'layout/layout-builder.php';
+    require_once SystemConfig::templatesPath() . 'dashboard/dashboard-builder.php';
 }
 
 /**
@@ -143,13 +143,13 @@ function showBuilder($layoutId = 0)
  */
 function showPreview($layoutId)
 {
-    $layout = new LayoutInstance($layoutId);
+    $layout = new DashboardInstance($layoutId);
     if (!$layout->getId()) {
         Utility::redirect('layout');
         return;
     }
 
-    require_once SystemConfig::templatesPath() . 'layout/layout-preview.php';
+    require_once SystemConfig::templatesPath() . 'dashboard/dashboard-preview.php';
 }
 
 /**
@@ -157,7 +157,7 @@ function showPreview($layoutId)
  */
 function getTemplates($data)
 {
-    $templates = LayoutTemplate::getAllGrouped();
+    $templates = DashboardTemplate::getAllGrouped();
     Utility::ajaxResponseTrue('Templates loaded', $templates);
 }
 
@@ -175,7 +175,7 @@ function createFromTemplate($data)
         Utility::ajaxResponseFalse('Template ID required');
     }
 
-    $template = new LayoutTemplate($templateId);
+    $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
         Utility::ajaxResponseFalse('Template not found');
     }
@@ -217,11 +217,11 @@ function saveLayout($data)
         Utility::ajaxResponseFalse('Invalid JSON structure');
     }
 
-    if (!LayoutBuilder::validateStructure($structureArray)) {
+    if (!DashboardBuilder::validateStructure($structureArray)) {
         Utility::ajaxResponseFalse('Invalid layout structure');
     }
 
-    $layout = $layoutId ? new LayoutInstance($layoutId) : new LayoutInstance();
+    $layout = $layoutId ? new DashboardInstance($layoutId) : new DashboardInstance();
 
     // Check if user owns this layout (if editing)
     if ($layoutId && $layout->getUserId() != $userId) {
@@ -246,7 +246,7 @@ function saveLayout($data)
         Utility::ajaxResponseFalse('Failed to save layout');
     }
 
-    Utility::ajaxResponseTrue('Layout saved successfully', array(
+    Utility::ajaxResponseTrue('Dashboard saved successfully', array(
         'id' => $layout->getId(),
         'name' => $layout->getName()
     ));
@@ -263,7 +263,7 @@ function getLayout($data)
         Utility::ajaxResponseFalse('Invalid layout ID');
     }
 
-    $layout = new LayoutInstance($layoutId);
+    $layout = new DashboardInstance($layoutId);
     if (!$layout->getId()) {
         Utility::ajaxResponseFalse('Layout not found');
     }
@@ -283,11 +283,11 @@ function deleteLayout($data)
     }
 
     // TODO: Verify user owns this layout
-    if (!LayoutInstance::delete($layoutId)) {
+    if (!DashboardInstance::delete($layoutId)) {
         Utility::ajaxResponseFalse('Failed to delete layout');
     }
 
-    Utility::ajaxResponseTrue('Layout deleted successfully');
+    Utility::ajaxResponseTrue('Dashboard deleted successfully');
 }
 
 /**
@@ -308,7 +308,7 @@ function updateLayoutName($data)
         Utility::ajaxResponseFalse('Layout name cannot be empty');
     }
 
-    $layout = new LayoutInstance($layoutId);
+    $layout = new DashboardInstance($layoutId);
     if (!$layout->getId()) {
         Utility::ajaxResponseFalse('Layout not found');
     }
@@ -345,7 +345,7 @@ function updateAreaContent($data)
         Utility::ajaxResponseFalse('Invalid layout ID');
     }
 
-    $layout = new LayoutInstance($layoutId);
+    $layout = new DashboardInstance($layoutId);
     if (!$layout->getId()) {
         Utility::ajaxResponseFalse('Layout not found');
     }
@@ -372,7 +372,7 @@ function addSection($data)
         Utility::ajaxResponseFalse('Invalid layout ID');
     }
 
-    $layout = new LayoutInstance($layoutId);
+    $layout = new DashboardInstance($layoutId);
     if (!$layout->getId()) {
         Utility::ajaxResponseFalse('Layout not found');
     }
@@ -380,7 +380,7 @@ function addSection($data)
     // TODO: Verify user owns this layout
 
     // Create empty section
-    $sectionData = LayoutBuilder::createEmptySection($columns);
+    $sectionData = DashboardBuilder::createEmptySection($columns);
 
     if (!$layout->addSection($sectionData, $position)) {
         Utility::ajaxResponseFalse('Failed to add section');
@@ -408,13 +408,13 @@ function addSectionFromTemplate($data)
         Utility::ajaxResponseFalse('Invalid template ID');
     }
 
-    $layout = new LayoutInstance($layoutId);
+    $layout = new DashboardInstance($layoutId);
     if (!$layout->getId()) {
         Utility::ajaxResponseFalse('Layout not found');
     }
 
     // Get template
-    $template = new LayoutTemplate($templateId);
+    $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
         Utility::ajaxResponseFalse('Template not found');
     }
@@ -465,7 +465,7 @@ function removeSection($data)
         Utility::ajaxResponseFalse('Section ID is required');
     }
 
-    $layout = new LayoutInstance($layoutId);
+    $layout = new DashboardInstance($layoutId);
     if (!$layout->getId()) {
         Utility::ajaxResponseFalse('Layout not found');
     }
@@ -500,7 +500,7 @@ function reorderSections($data)
         Utility::ajaxResponseFalse('Order array is required');
     }
 
-    $layout = new LayoutInstance($layoutId);
+    $layout = new DashboardInstance($layoutId);
     if (!$layout->getId()) {
         Utility::ajaxResponseFalse('Layout not found');
     }
@@ -523,8 +523,8 @@ function reorderSections($data)
  */
 function showTemplateList()
 {
-    $templates = LayoutTemplate::getAllGrouped();
-    require_once SystemConfig::templatesPath() . 'layout/template-list.php';
+    $templates = DashboardTemplate::getAllGrouped();
+    require_once SystemConfig::templatesPath() . 'dashboard/template-list.php';
 }
 
 /**
@@ -534,8 +534,8 @@ function showTemplateCreator()
 {
     $pageTitle = 'Create Template';
     $template = null;
-    $categories = LayoutTemplateCategory::getAll();
-    require_once SystemConfig::templatesPath() . 'layout/template-editor.php';
+    $categories = DashboardTemplateCategory::getAll();
+    require_once SystemConfig::templatesPath() . 'dashboard/template-editor.php';
 }
 
 /**
@@ -548,15 +548,15 @@ function showTemplateEditor($templateId)
         return;
     }
 
-    $template = new LayoutTemplate($templateId);
+    $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
         Utility::redirect('layout/templates');
         return;
     }
 
     $pageTitle = 'Edit Template';
-    $categories = LayoutTemplateCategory::getAll();
-    require_once SystemConfig::templatesPath() . 'layout/template-editor.php';
+    $categories = DashboardTemplateCategory::getAll();
+    require_once SystemConfig::templatesPath() . 'dashboard/template-editor.php';
 }
 
 /**
@@ -569,14 +569,14 @@ function showTemplateBuilder($templateId)
         return;
     }
 
-    $template = new LayoutTemplate($templateId);
+    $template = new DashboardTemplate($templateId);
     if (!$template->getId() || !$template->getName()) {
         Utility::redirect('layout/templates');
         return;
     }
 
-    $categories = LayoutTemplateCategory::getAll();
-    require_once SystemConfig::templatesPath() . 'layout/template-builder.php';
+    $categories = DashboardTemplateCategory::getAll();
+    require_once SystemConfig::templatesPath() . 'dashboard/template-builder.php';
 }
 
 /**
@@ -589,13 +589,13 @@ function showTemplatePreview($templateId)
         return;
     }
 
-    $template = new LayoutTemplate($templateId);
+    $template = new DashboardTemplate($templateId);
     if (!$template->getId() || !$template->getName()) {
         Utility::redirect('layout/templates');
         return;
     }
 
-    require_once SystemConfig::templatesPath() . 'layout/template-preview.php';
+    require_once SystemConfig::templatesPath() . 'dashboard/template-preview.php';
 }
 
 /**
@@ -634,7 +634,7 @@ function createTemplate($data)
         ]
     ]);
 
-    $template = new LayoutTemplate();
+    $template = new DashboardTemplate();
     $template->setName($name);
     $template->setDescription($description);
     $template->setLtcid($ltcid);
@@ -648,7 +648,7 @@ function createTemplate($data)
 
     Utility::ajaxResponseTrue('Template created successfully', array(
         'ltid' => $template->getId(),
-        'redirect' => '?urlq=layout/template/builder/' . $template->getId()
+        'redirect' => '?urlq=dashboard/template/builder/' . $template->getId()
     ));
 }
 
@@ -672,7 +672,7 @@ function updateTemplate($data)
         Utility::ajaxResponseFalse('Template name is required');
     }
 
-    $template = new LayoutTemplate($templateId);
+    $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
         Utility::ajaxResponseFalse('Template not found');
     }
@@ -708,14 +708,14 @@ function deleteTemplate($data)
         Utility::ajaxResponseFalse('Invalid template ID');
     }
 
-    $template = new LayoutTemplate($templateId);
+    $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
         Utility::ajaxResponseFalse('Template not found');
     }
 
     // Check if template is in use by any layouts
     $db = Rapidkart::getInstance()->getDB();
-    $sql = "SELECT COUNT(*) as count FROM " . SystemTables::DB_TBL_LAYOUT_INSTANCE . "
+    $sql = "SELECT COUNT(*) as count FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . "
             WHERE ltid = '::ltid' AND lisid != 3";
     $result = $db->query($sql, array('::ltid' => $templateId));
 
@@ -728,7 +728,7 @@ function deleteTemplate($data)
         }
     }
 
-    if (!LayoutTemplate::delete($templateId)) {
+    if (!DashboardTemplate::delete($templateId)) {
         Utility::ajaxResponseFalse('Failed to delete template');
     }
 
@@ -748,13 +748,13 @@ function duplicateTemplate($data)
         Utility::ajaxResponseFalse('Invalid template ID');
     }
 
-    $sourceTemplate = new LayoutTemplate($templateId);
+    $sourceTemplate = new DashboardTemplate($templateId);
     if (!$sourceTemplate->getId()) {
         Utility::ajaxResponseFalse('Template not found');
     }
 
     // Create duplicate
-    $newTemplate = new LayoutTemplate();
+    $newTemplate = new DashboardTemplate();
     $newTemplate->setName($sourceTemplate->getName() . ' (Copy)');
     $newTemplate->setDescription($sourceTemplate->getDescription());
     $newTemplate->setLtcid($sourceTemplate->getLtcid());
@@ -769,7 +769,7 @@ function duplicateTemplate($data)
 
     Utility::ajaxResponseTrue('Template duplicated successfully', array(
         'ltid' => $newTemplate->getId(),
-        'redirect' => '?urlq=layout/template/builder/' . $newTemplate->getId()
+        'redirect' => '?urlq=dashboard/template/builder/' . $newTemplate->getId()
     ));
 }
 
@@ -797,11 +797,11 @@ function saveTemplateStructure($data)
         Utility::ajaxResponseFalse('Invalid JSON structure');
     }
 
-    if (!LayoutBuilder::validateStructure($structureArray)) {
+    if (!DashboardBuilder::validateStructure($structureArray)) {
         Utility::ajaxResponseFalse('Invalid template structure');
     }
 
-    $template = new LayoutTemplate($templateId);
+    $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
         Utility::ajaxResponseFalse('Template not found');
     }
@@ -834,7 +834,7 @@ function getTemplate($data)
         Utility::ajaxResponseFalse('Invalid template ID');
     }
 
-    $template = new LayoutTemplate($templateId);
+    $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
         Utility::ajaxResponseFalse('Template not found');
     }

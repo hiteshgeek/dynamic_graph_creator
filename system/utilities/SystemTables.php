@@ -25,10 +25,10 @@ class SystemTables
       const DB_TBL_FILTER_STATUS = "filter_status";
 
       /**
-       * Layout Builder Tables
+       * Dashboard Builder Tables
        */
-      const DB_TBL_LAYOUT_TEMPLATE_CATEGORY = "layout_template_category";
-      const DB_TBL_LAYOUT_TEMPLATE = "layout_template";
-      const DB_TBL_LAYOUT_INSTANCE = "layout_instance";
+      const DB_TBL_DASHBOARD_TEMPLATE_CATEGORY = "dashboard_template_category";
+      const DB_TBL_DASHBOARD_TEMPLATE = "dashboard_template";
+      const DB_TBL_DASHBOARD_INSTANCE = "dashboard_instance";
 
 }

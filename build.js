@@ -13,7 +13,7 @@ const modules = [
     { name: 'common', scss: 'shared.scss', js: 'common.js' },
     { name: 'graph', scss: 'graph.scss', js: 'graph.js' },
     { name: 'filter', scss: 'filter.scss', js: 'filter.js' },
-    { name: 'layout', scss: 'layout.scss', js: 'layout.js' }
+    { name: 'dashboard', scss: 'dashboard.scss', js: 'dashboard.js' }
 ];
 
 if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });

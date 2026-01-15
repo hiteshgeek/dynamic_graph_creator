@@ -1,32 +1,32 @@
 // Responsive Styles
 
-.layout-builder[data-breakpoint="mobile"] {
+.dashboard-builder[data-breakpoint="mobile"] {
     .grid-editor {
         max-width: 375px;
 
-        .layout-section {
+        .dashboard-section {
             grid-template-columns: 1fr !important;
 
-            .layout-area {
+            .dashboard-area {
                 grid-column: span 1 !important;
             }
         }
     }
 }
 
-.layout-builder[data-breakpoint="tablet"] {
+.dashboard-builder[data-breakpoint="tablet"] {
     .grid-editor {
         max-width: 768px;
 
-        .layout-section[data-columns="3"],
-        .layout-section[data-columns="4"] {
+        .dashboard-section[data-columns="3"],
+        .dashboard-section[data-columns="4"] {
             grid-template-columns: repeat(2, 1fr) !important;
         }
     }
 }
 
 @media (max-width: 768px) {
-    .layout-builder {
+    .dashboard-builder {
         .builder-body {
             flex-direction: column;
 
@@ -38,8 +38,8 @@
         }
     }
 
-    .layout-list-page {
-        .layout-grid {
+    .dashboard-list-page {
+        .dashboard-grid {
             grid-template-columns: 1fr;
         }
     }

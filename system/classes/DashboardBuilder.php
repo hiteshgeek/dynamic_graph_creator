@@ -5,7 +5,7 @@
  *
  * @author Dynamic Graph Creator
  */
-class LayoutBuilder
+class DashboardBuilder
 {
     /**
      * Generate CSS Grid template from structure
