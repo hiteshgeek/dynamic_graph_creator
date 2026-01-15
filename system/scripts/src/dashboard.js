@@ -481,29 +481,26 @@ class DashboardBuilder {
       const canAddColLeft = canAddCol;
       const canAddColRight = canAddCol;
 
-      // Column controls - edge buttons and center resize/delete
-      const columnControls = `<div class="column-controls">
-                <!-- Top: Add Row -->
+      // Area controls - edge buttons and center resize/delete
+      const areaControls = `<div class="area-controls-overlay">
+                <!-- Top: Add Row Above (splits column into rows) -->
                 <button class="edge-btn edge-top add-row-top-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add row above">
-                    Add Row
+                    Add Row Above
                 </button>
-                <!-- Bottom: Add Row -->
+                <!-- Bottom: Add Row Below (splits column into rows) -->
                 <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add row below">
-                    Add Row
+                    Add Row Below
                 </button>
-                <!-- Left: Add Column -->
+                <!-- Left: Add Column Left -->
                 <button class="edge-btn edge-left add-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColLeft ? 'disabled' : ''}>
-                    Add Column
+                    Add Column Left
                 </button>
-                <!-- Right: Add Column -->
+                <!-- Right: Add Column Right -->
                 <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColRight ? 'disabled' : ''}>
-                    Add Column
+                    Add Column Right
                 </button>
                 <!-- Center: Resize arrows + Delete -->
                 <div class="center-controls">
-                    <button class="center-btn resize-row-up-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand up" disabled>
-                        <i class="fas fa-caret-up"></i>
-                    </button>
                     <div class="center-row">
                         <button class="center-btn resize-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand left" ${!canResizeLeft ? 'disabled' : ''}>
                             <i class="fas fa-caret-left"></i>
@@ -515,9 +512,6 @@ class DashboardBuilder {
                             <i class="fas fa-caret-right"></i>
                         </button>
                     </div>
-                    <button class="center-btn resize-row-down-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand down" disabled>
-                        <i class="fas fa-caret-down"></i>
-                    </button>
                 </div>
             </div>`;
 
@@ -525,7 +519,7 @@ class DashboardBuilder {
       if (hasSubRows) {
         areasHtml += this.renderAreaWithSubRows(
           area,
-          sectionId = section.sid,
+          section.sid,
           areaIndex,
           canRemoveColumn,
           canAddColLeft,
@@ -536,7 +530,7 @@ class DashboardBuilder {
       } else {
         // Regular single area with controls inside
         areasHtml += `<div class="dashboard-area" data-area-id="${area.aid}" data-area-index="${areaIndex}">
-                    ${columnControls}
+                    ${areaControls}
                     ${
                       area.content && area.content.type === "empty"
                         ? this.renderEmptyState(area.emptyState)
@@ -569,7 +563,7 @@ class DashboardBuilder {
     const topBorderButton = `
             <button class="add-section-border-btn add-section-top-btn" data-position="${index}" title="Add section above">
                 <i class="fas fa-plus"></i>
-                <span>Add Section</span>
+                <span>Add Section Above</span>
             </button>
         `;
 
@@ -579,7 +573,7 @@ class DashboardBuilder {
               index + 1
             }" title="Add section below">
                 <i class="fas fa-plus"></i>
-                <span>Add Section</span>
+                <span>Add Section Below</span>
             </button>
         `;
 
@@ -614,7 +608,6 @@ class DashboardBuilder {
     // Build grid-template-rows from sub-row heights
     const rowHeights = area.subRows.map((row) => row.height || "1fr").join(" ");
     const numRows = area.subRows.length;
-    const canAddRow = numRows < GRID_CONFIG.MAX_ROWS_PER_COLUMN;
     const canRemoveRow = numRows > GRID_CONFIG.MIN_ROWS_PER_COLUMN;
 
     // Calculate row heights for resize button state
@@ -623,6 +616,11 @@ class DashboardBuilder {
     const totalRowFr = heights.reduce((sum, h) => sum + h, 0);
     const maxRowTotalFr = GRID_CONFIG.MAX_ROWS_PER_COLUMN;
     const hasRoomToGrowRows = totalRowFr < maxRowTotalFr;
+
+    // Calculate add row options - same logic as columns
+    // Can add if: under max rows AND (there's room to grow OR ANY row can give 1fr)
+    const anyRowCanGive = heights.some((h) => h > GRID_CONFIG.MIN_FR_UNITS);
+    const canAddRow = numRows < GRID_CONFIG.MAX_ROWS_PER_COLUMN && (hasRoomToGrowRows || anyRowCanGive);
 
     let subRowsHtml = "";
 
@@ -639,25 +637,24 @@ class DashboardBuilder {
         heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS &&
         (hasRoomToGrowRows || heights[rowIndex + 1] > GRID_CONFIG.MIN_FR_UNITS);
 
-      // Sub-row controls - same design as column controls
-      const subRowControls = `<div class="column-controls sub-row-controls">
-                <!-- Top: Add Row (only on first row) -->
-                ${isFirstRow ? `<button class="edge-btn edge-top add-row-top-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add row above" ${!canAddRow ? 'disabled' : ''}>
-                    Add Row
-                </button>` : ''}
-                <!-- Bottom: Add Row (only on last row) -->
-                ${isLastRow ? `<button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add row below" ${!canAddRow ? 'disabled' : ''}>
-                    Add Row
-                </button>` : ''}
-                <!-- Left: Add Column (only on first row to avoid duplicates) -->
-                ${isFirstRow ? `<button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColLeft ? 'disabled' : ''}>
-                    Add Column
-                </button>` : ''}
-                <!-- Right: Add Column (only on first row to avoid duplicates) -->
-                ${isFirstRow ? `<button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColRight ? 'disabled' : ''}>
-                    Add Column
-                </button>` : ''}
-                <!-- Center: Resize arrows + Delete -->
+      // All controls inside each sub-row - both column and row actions
+      // Each row shows Add Row Above (inserts above this row) and Add Row Below (inserts below this row)
+      const controls = `<div class="area-controls-overlay">
+                <!-- Column actions: Add Column Left/Right -->
+                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColLeft ? 'disabled' : ''}>
+                    Add Column Left
+                </button>
+                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColRight ? 'disabled' : ''}>
+                    Add Column Right
+                </button>
+                <!-- Row actions: Add Row Above/Below - each row can add above or below itself -->
+                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Add row above" ${!canAddRow ? 'disabled' : ''}>
+                    Add Row Above
+                </button>
+                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Add row below" ${!canAddRow ? 'disabled' : ''}>
+                    Add Row Below
+                </button>
+                <!-- Center: All resize arrows + Delete buttons -->
                 <div class="center-controls">
                     <button class="center-btn resize-row-up-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Expand up" ${!canResizeUp ? 'disabled' : ''}>
                         <i class="fas fa-caret-up"></i>
@@ -680,7 +677,7 @@ class DashboardBuilder {
             </div>`;
 
       subRowsHtml += `<div class="dashboard-sub-row" data-row-id="${subRow.rowId}" data-row-index="${rowIndex}">
-                ${subRowControls}
+                ${controls}
                 ${
                   subRow.content && subRow.content.type === "empty"
                     ? this.renderEmptyState(subRow.emptyState)
@@ -959,20 +956,24 @@ class DashboardBuilder {
         this.removeColumn(sectionId, areaIndex);
       }
 
-      // Add row top (splits column or adds row at top in nested)
+      // Add row above (inserts row above the current row, or splits column if not nested)
       if (e.target.closest(".add-row-top-btn")) {
         const btn = e.target.closest(".add-row-top-btn");
         const sectionId = btn.dataset.sectionId;
         const areaIndex = parseInt(btn.dataset.areaIndex);
-        this.addRowAt(sectionId, areaIndex, 0);
+        const rowIndex = btn.dataset.rowIndex !== undefined ? parseInt(btn.dataset.rowIndex) : 0;
+        this.addRowAt(sectionId, areaIndex, rowIndex); // Insert at this position (pushes current down)
       }
 
-      // Add row bottom (splits column or adds row at bottom in nested)
+      // Add row below (inserts row below the current row, or splits column if not nested)
       if (e.target.closest(".add-row-bottom-btn")) {
         const btn = e.target.closest(".add-row-bottom-btn");
         const sectionId = btn.dataset.sectionId;
         const areaIndex = parseInt(btn.dataset.areaIndex);
-        this.addRowAt(sectionId, areaIndex, -1); // -1 means at end
+        const rowIndex = btn.dataset.rowIndex !== undefined ? parseInt(btn.dataset.rowIndex) : -1;
+        // Insert after this row: if rowIndex is defined, insert at rowIndex + 1, otherwise -1 means at end
+        const insertPosition = rowIndex >= 0 ? rowIndex + 1 : -1;
+        this.addRowAt(sectionId, areaIndex, insertPosition);
       }
 
       // Remove row
@@ -1400,6 +1401,54 @@ class DashboardBuilder {
     if (area.subRows.length >= GRID_CONFIG.MAX_ROWS_PER_COLUMN) {
       Toast.error(`Maximum ${GRID_CONFIG.MAX_ROWS_PER_COLUMN} rows allowed`);
       return;
+    }
+
+    // Parse current heights
+    const heights = area.subRows.map((r) => parseInt(r.height) || 1);
+    const numRows = heights.length;
+    const totalFr = heights.reduce((sum, h) => sum + h, 0);
+    // Max total is always MAX_ROWS_PER_COLUMN (4fr) regardless of row count
+    const maxTotalFr = GRID_CONFIG.MAX_ROWS_PER_COLUMN;
+    const hasRoomToGrow = totalFr < maxTotalFr;
+
+    // If no room to grow, find a donor row
+    if (!hasRoomToGrow) {
+      // Try adjacent rows first, then any row
+      let donorIndex = -1;
+      const insertPos = position === -1 ? numRows : position;
+
+      // First try adjacent rows (preferred)
+      if (insertPos >= numRows) {
+        // Adding at bottom - try last row first
+        if (heights[numRows - 1] > GRID_CONFIG.MIN_FR_UNITS) {
+          donorIndex = numRows - 1;
+        }
+      } else if (insertPos === 0) {
+        // Adding at top - try first row first
+        if (heights[0] > GRID_CONFIG.MIN_FR_UNITS) {
+          donorIndex = 0;
+        }
+      } else {
+        // Adding in between - try adjacent rows first
+        if (heights[insertPos] > GRID_CONFIG.MIN_FR_UNITS) {
+          donorIndex = insertPos;
+        } else if (heights[insertPos - 1] > GRID_CONFIG.MIN_FR_UNITS) {
+          donorIndex = insertPos - 1;
+        }
+      }
+
+      // If no adjacent donor, find ANY row that can give
+      if (donorIndex === -1) {
+        donorIndex = heights.findIndex((h) => h > GRID_CONFIG.MIN_FR_UNITS);
+      }
+
+      if (donorIndex === -1) {
+        Toast.warning("No row can give space");
+        return;
+      }
+
+      // Reduce donor row height
+      area.subRows[donorIndex].height = `${heights[donorIndex] - 1}fr`;
     }
 
     const newRowId = `${area.aid}_r${Date.now()}`;

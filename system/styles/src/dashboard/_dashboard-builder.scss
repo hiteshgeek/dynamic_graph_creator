@@ -328,8 +328,8 @@
   z-index: 20;
 }
 
-// Column controls container - full area coverage for edge positioning
-.column-controls {
+// Unified area controls overlay - used in both dashboard-area and dashboard-sub-row
+.area-controls-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -339,13 +339,8 @@
   pointer-events: none;
   transition: opacity 0.2s;
   z-index: 15;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 6px;
-
-  &.sub-row-controls {
-    // Sub-row controls inherit same styles
-    pointer-events: none;
-  }
 }
 
 // Edge buttons (Add Row / Add Column) - consistent 12px from each edge
@@ -586,20 +581,10 @@
     }
   }
 
-  .dashboard-area:hover {
-    .column-controls {
-      opacity: 1;
-      pointer-events: auto;
-
-      .edge-btn,
-      .center-btn {
-        pointer-events: auto;
-      }
-    }
-  }
-
+  // Area hover - show controls (works for both dashboard-area and dashboard-sub-row)
+  .dashboard-area:hover,
   .dashboard-sub-row:hover {
-    .column-controls {
+    > .area-controls-overlay {
       opacity: 1;
       pointer-events: auto;
 
@@ -613,7 +598,7 @@
 
 // Tablet and mobile: always show essential controls
 @media (max-width: 1023px) {
-  .column-controls {
+  .area-controls-overlay {
     opacity: 1;
     pointer-events: auto;
 
