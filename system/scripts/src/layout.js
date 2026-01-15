@@ -300,20 +300,47 @@ class LayoutBuilder {
 
         let html = '';
 
-        if (structure.sections) {
+        if (structure.sections && structure.sections.length > 0) {
             structure.sections.forEach((section, index) => {
                 // Render the section with add button on top border
                 html += this.renderSection(section, structure.sections.length, index);
             });
+        } else {
+            // Show empty state when no sections exist
+            html = `
+                <div class="layout-empty-sections">
+                    <div class="empty-sections-content">
+                        <i class="fas fa-th-large"></i>
+                        <h3>No Sections Yet</h3>
+                        <p>Start building your layout by adding a section or choosing a template</p>
+                        <button class="btn btn-primary add-first-section-btn">
+                            <i class="fas fa-plus"></i> Add Section
+                        </button>
+                    </div>
+                </div>
+            `;
         }
 
         sectionsContainer.innerHTML = html;
 
-        // Enable drag-drop
-        this.initDragDrop();
+        // If we have sections, enable drag-drop and border buttons
+        if (structure.sections && structure.sections.length > 0) {
+            // Enable drag-drop
+            this.initDragDrop();
 
-        // Attach event listeners to border buttons
-        this.initAddSectionBorderButtons();
+            // Attach event listeners to border buttons
+            this.initAddSectionBorderButtons();
+        } else {
+            // Attach event listener to add first section button
+            const addFirstBtn = sectionsContainer.querySelector('.add-first-section-btn');
+            if (addFirstBtn) {
+                addFirstBtn.addEventListener('click', async () => {
+                    this.pendingAddPosition = 0;
+                    this.templateSelectorMode = 'add-section';
+                    await this.showTemplateSelector();
+                });
+            }
+        }
     }
 
     initAddSectionBorderButtons() {

@@ -374,24 +374,33 @@ function addSectionFromTemplate($data)
         Utility::ajaxResponseFalse('Template not found');
     }
 
-    // Get first section from template structure
+    // Get all sections from template structure
     $templateStructure = $template->getStructureArray();
     if (!isset($templateStructure['sections']) || empty($templateStructure['sections'])) {
         Utility::ajaxResponseFalse('Template has no sections');
     }
 
-    // Use the first section from the template
-    $sectionData = $templateStructure['sections'][0];
+    // Add all sections from the template
+    $addedSections = array();
+    foreach ($templateStructure['sections'] as $sectionData) {
+        // Generate new section ID to avoid conflicts
+        $sectionData['sid'] = 's' . time() . rand(1000, 9999);
 
-    // Generate new section ID to avoid conflicts
-    $sectionData['sid'] = 's' . time() . rand(1000, 9999);
+        // Add section at the specified position
+        if (!$layout->addSection($sectionData, $position)) {
+            Utility::ajaxResponseFalse('Failed to add section');
+        }
 
-    if (!$layout->addSection($sectionData, $position)) {
-        Utility::ajaxResponseFalse('Failed to add section');
+        $addedSections[] = $sectionData;
+
+        // After adding the first section, subsequent sections should be added after it
+        if ($position !== 'bottom') {
+            $position = 'bottom';
+        }
     }
 
-    Utility::ajaxResponseTrue('Section added successfully', array(
-        'section' => $sectionData
+    Utility::ajaxResponseTrue('Section(s) added successfully', array(
+        'sections' => $addedSections
     ));
 }
 

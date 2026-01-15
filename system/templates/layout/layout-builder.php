@@ -37,13 +37,13 @@
                        value="<?php echo htmlspecialchars($layout->getName()); ?>"
                        placeholder="Layout Name"
                        style="display: none;">
-                <button id="edit-name-btn" class="btn btn-outline-primary" title="Edit Name">
+                <button id="edit-name-btn" class="btn-icon btn-warning" title="Edit Name">
                     <i class="fas fa-edit"></i>
                 </button>
-                <button id="save-name-btn" class="btn btn-success" title="Save Name" style="display: none;">
+                <button id="save-name-btn" class="btn-icon btn-success" title="Save Name" style="display: none;">
                     <i class="fas fa-check"></i>
                 </button>
-                <button id="cancel-name-btn" class="btn btn-secondary" title="Cancel" style="display: none;">
+                <button id="cancel-name-btn" class="btn-icon btn-secondary" title="Cancel" style="display: none;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>

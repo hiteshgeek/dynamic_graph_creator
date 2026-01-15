@@ -47,7 +47,7 @@
                 $structure = $layout->getStructureArray();
                 // Debug: Check structure
                 // error_log('Layout structure: ' . print_r($structure, true));
-                if (isset($structure['sections'])):
+                if (isset($structure['sections']) && count($structure['sections']) > 0):
                     foreach ($structure['sections'] as $section):
                 ?>
                 <div class="layout-section"
@@ -118,6 +118,17 @@
                 </div>
                 <?php
                     endforeach;
+                else:
+                ?>
+                <!-- Empty state when no sections -->
+                <div class="layout-empty-sections">
+                    <div class="empty-sections-content">
+                        <i class="fas fa-th-large"></i>
+                        <h3>This Layout is Empty</h3>
+                        <p>No sections have been added to this layout yet.<br>Use the "Edit Layout" button above to add sections.</p>
+                    </div>
+                </div>
+                <?php
                 endif;
                 ?>
             </div>
