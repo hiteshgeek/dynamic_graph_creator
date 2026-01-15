@@ -118,6 +118,7 @@
 }
 
 .dashboard-area {
+  position: relative;
   background: #f8f9fa;
   border: 2px dashed #dee2e6;
   border-radius: 8px;
@@ -130,24 +131,36 @@
   justify-content: center;
 
   &:hover {
-    background: white;
-    border-color: $primary;
-    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+    background: rgba(248, 249, 250, 0.5);
+    border-color: rgba(#dee2e6, 0.6);
+
+    // Fade inner content to highlight controls
+    .empty-state,
+    .area-content {
+      opacity: 0.4;
+    }
   }
 
   // Nested area with sub-rows
   &.dashboard-area-nested {
-    padding: 0;
+    padding: $spacing-sm;
     align-items: stretch;
     justify-content: stretch;
-    background: transparent;
-    border: none;
+    background: rgba(#f8f9fa, 0.5);
+    border: 2px dashed #e0e0e0;
     display: grid;
-    gap: $spacing-md;
+    gap: $spacing-sm;
+
+    &:hover {
+      .dashboard-sub-row {
+        opacity: 0.5;
+      }
+    }
   }
 
   .area-content {
     width: 100%;
+    transition: opacity 0.2s;
 
     p {
       color: #6c757d;
@@ -155,15 +168,20 @@
       margin: 0;
     }
   }
+
+  .empty-state {
+    transition: opacity 0.2s;
+  }
 }
 
 // Sub-rows within nested areas
 .dashboard-sub-row {
+  position: relative;
   background: #f8f9fa;
   border: 2px dashed #dee2e6;
   border-radius: 6px;
   padding: 1rem;
-  min-height: 100px;
+  min-height: 80px;
   cursor: pointer;
   transition: all 0.3s;
   display: flex;

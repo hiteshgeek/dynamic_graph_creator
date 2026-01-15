@@ -12,6 +12,19 @@ const Loading = window.Loading;
 const Ajax = window.Ajax;
 const ConfirmDialog = window.ConfirmDialog;
 
+// Grid configuration constants
+const GRID_CONFIG = {
+  MAX_FR_UNITS: 4, // Maximum fr units for any column/row (4fr max)
+  MIN_FR_UNITS: 1, // Minimum fr units for any column/row
+  MAX_COLUMNS: 4, // Maximum columns per section
+  MIN_COLUMNS: 1, // Minimum columns (can't remove last)
+  MAX_ROWS_PER_COLUMN: 4, // Maximum rows in a column
+  MIN_ROWS_PER_COLUMN: 1, // Minimum rows (can't remove last)
+  DEFAULT_NEW_COLUMN_FR: 1,
+  DEFAULT_NEW_ROW_FR: 1,
+  ALLOW_NESTED_ROWS: false, // Only one level of sub-rows allowed
+};
+
 /**
  * Dashboard Builder - Main orchestrator
  */
@@ -425,15 +438,88 @@ class DashboardBuilder {
   }
 
   renderSection(section, totalSections = 1, index = 0) {
+    const columnWidths = section.gridTemplate.split(" ");
+    const numColumns = columnWidths.length;
+    const widths = columnWidths.map((w) => parseInt(w) || 1);
+    const canAddColumn = numColumns < GRID_CONFIG.MAX_COLUMNS;
+    const canRemoveColumn = numColumns > GRID_CONFIG.MIN_COLUMNS;
+
     let areasHtml = "";
 
-    section.areas.forEach((area) => {
+    section.areas.forEach((area, areaIndex) => {
+      const hasSubRows =
+        area.hasSubRows && area.subRows && area.subRows.length > 0;
+      const isFirstColumn = areaIndex === 0;
+      const isLastColumn = areaIndex === numColumns - 1;
+
+      // Calculate resize options for this column
+      // Left resize: increase this column, decrease left neighbor
+      const canResizeLeft = !isFirstColumn &&
+        widths[areaIndex] < GRID_CONFIG.MAX_FR_UNITS &&
+        widths[areaIndex - 1] > GRID_CONFIG.MIN_FR_UNITS;
+      // Right resize: increase this column, decrease right neighbor
+      const canResizeRight = !isLastColumn &&
+        widths[areaIndex] < GRID_CONFIG.MAX_FR_UNITS &&
+        widths[areaIndex + 1] > GRID_CONFIG.MIN_FR_UNITS;
+      const hasResizeOptions = canResizeLeft || canResizeRight;
+
+      // Column controls - edge buttons and center resize/delete
+      const columnControls = `<div class="column-controls">
+                <!-- Top: Add Row -->
+                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add row above">
+                    Add Row
+                </button>
+                <!-- Bottom: Add Row -->
+                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add row below">
+                    Add Row
+                </button>
+                <!-- Left: Add Column -->
+                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColumn ? 'disabled' : ''}>
+                    Add Column
+                </button>
+                <!-- Right: Add Column -->
+                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColumn ? 'disabled' : ''}>
+                    Add Column
+                </button>
+                <!-- Center: Resize arrows + Delete -->
+                <div class="center-controls">
+                    <button class="center-btn resize-row-up-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand up" disabled>
+                        <i class="fas fa-caret-up"></i>
+                    </button>
+                    <div class="center-row">
+                        <button class="center-btn resize-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand left" ${!canResizeLeft ? 'disabled' : ''}>
+                            <i class="fas fa-caret-left"></i>
+                        </button>
+                        <button class="center-btn delete-btn remove-col-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Remove column" ${!canRemoveColumn ? 'disabled' : ''}>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="center-btn resize-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand right" ${!canResizeRight ? 'disabled' : ''}>
+                            <i class="fas fa-caret-right"></i>
+                        </button>
+                    </div>
+                    <button class="center-btn resize-row-down-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand down" disabled>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                </div>
+            </div>`;
+
       // Check if this area has sub-rows (nested structure)
-      if (area.hasSubRows && area.subRows && area.subRows.length > 0) {
-        areasHtml += this.renderAreaWithSubRows(area);
+      if (hasSubRows) {
+        areasHtml += this.renderAreaWithSubRows(
+          area,
+          section.sid,
+          areaIndex,
+          canRemoveColumn,
+          canAddColumn,
+          isLastColumn,
+          widths,
+          canResizeLeft,
+          canResizeRight
+        );
       } else {
-        // Regular single area
-        areasHtml += `<div class="dashboard-area" data-area-id="${area.aid}">
+        // Regular single area with controls inside
+        areasHtml += `<div class="dashboard-area" data-area-id="${area.aid}" data-area-index="${areaIndex}">
+                    ${columnControls}
                     ${
                       area.content && area.content.type === "empty"
                         ? this.renderEmptyState(area.emptyState)
@@ -480,23 +566,105 @@ class DashboardBuilder {
             </button>
         `;
 
-    return `<div class="dashboard-section-wrapper">
+    // Grid size indicator
+    const gridIndicator = `<div class="grid-size-indicator" data-section-id="${section.sid}">
+            ${columnWidths.join(" | ")}
+        </div>`;
+
+    return `<div class="dashboard-section-wrapper" data-section-id="${section.sid}">
             ${topBorderButton}
             ${topBorderControls}
-            <div class="dashboard-section" data-section-id="${section.sid}" style="grid-template-columns: ${section.gridTemplate};">
-                ${areasHtml}
+            <div class="dashboard-section-container">
+                <div class="dashboard-section" data-section-id="${section.sid}" style="grid-template-columns: ${section.gridTemplate};">
+                    ${areasHtml}
+                </div>
             </div>
+            ${gridIndicator}
             ${bottomBorderButton}
         </div>`;
   }
 
-  renderAreaWithSubRows(area) {
+  renderAreaWithSubRows(
+    area,
+    sectionId,
+    areaIndex,
+    canRemoveColumn,
+    canAddColumn,
+    isLastColumn,
+    columnWidths = [],
+    canResizeLeft = false,
+    canResizeRight = false
+  ) {
     // Build grid-template-rows from sub-row heights
     const rowHeights = area.subRows.map((row) => row.height || "1fr").join(" ");
+    const numRows = area.subRows.length;
+    const canAddRow = numRows < GRID_CONFIG.MAX_ROWS_PER_COLUMN;
+    const canRemoveRow = numRows > GRID_CONFIG.MIN_ROWS_PER_COLUMN;
+    const hasResizeOptions = canResizeLeft || canResizeRight;
+
+    // Column controls for nested area - edge buttons and center resize/delete
+    // For nested areas, we don't show column controls here - they're shown on sub-rows
+    const columnControls = ``;
+
+    // Calculate row heights for resize button state
+    const heights = area.subRows.map((r) => parseInt(r.height) || 1);
 
     let subRowsHtml = "";
-    area.subRows.forEach((subRow) => {
-      subRowsHtml += `<div class="dashboard-sub-row" data-row-id="${subRow.rowId}">
+
+    area.subRows.forEach((subRow, rowIndex) => {
+      const isFirstRow = rowIndex === 0;
+      const isLastRow = rowIndex === numRows - 1;
+
+      // Row resize conditions
+      const canResizeUp = !isFirstRow &&
+        heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS &&
+        heights[rowIndex - 1] > GRID_CONFIG.MIN_FR_UNITS;
+      const canResizeDown = !isLastRow &&
+        heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS &&
+        heights[rowIndex + 1] > GRID_CONFIG.MIN_FR_UNITS;
+
+      // Sub-row controls - same design as column controls
+      const subRowControls = `<div class="column-controls sub-row-controls">
+                <!-- Top: Add Row (only on first row) -->
+                ${isFirstRow ? `<button class="edge-btn edge-top add-row-top-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add row above" ${!canAddRow ? 'disabled' : ''}>
+                    Add Row
+                </button>` : ''}
+                <!-- Bottom: Add Row (only on last row) -->
+                ${isLastRow ? `<button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add row below" ${!canAddRow ? 'disabled' : ''}>
+                    Add Row
+                </button>` : ''}
+                <!-- Left: Add Column (only on first row to avoid duplicates) -->
+                ${isFirstRow ? `<button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColumn ? 'disabled' : ''}>
+                    Add Column
+                </button>` : ''}
+                <!-- Right: Add Column (only on first row to avoid duplicates) -->
+                ${isFirstRow ? `<button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColumn ? 'disabled' : ''}>
+                    Add Column
+                </button>` : ''}
+                <!-- Center: Resize arrows + Delete -->
+                <div class="center-controls">
+                    <button class="center-btn resize-row-up-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Expand up" ${!canResizeUp ? 'disabled' : ''}>
+                        <i class="fas fa-caret-up"></i>
+                    </button>
+                    <div class="center-row">
+                        <button class="center-btn resize-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Expand left" ${!canResizeLeft ? 'disabled' : ''}>
+                            <i class="fas fa-caret-left"></i>
+                        </button>
+                        <button class="center-btn delete-btn remove-row-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Remove row" ${!canRemoveRow ? 'disabled' : ''}>
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="center-btn resize-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Expand right" ${!canResizeRight ? 'disabled' : ''}>
+                            <i class="fas fa-caret-right"></i>
+                        </button>
+                    </div>
+                    <button class="center-btn resize-row-down-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Expand down" ${!canResizeDown ? 'disabled' : ''}>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
+                </div>
+            </div>`;
+
+      subRowsHtml += `<div class="dashboard-sub-row" data-row-id="${subRow.rowId}" data-row-index="${rowIndex}">
+                ${subRowControls}
                 ${
                   subRow.content && subRow.content.type === "empty"
                     ? this.renderEmptyState(subRow.emptyState)
@@ -505,7 +673,7 @@ class DashboardBuilder {
             </div>`;
     });
 
-    return `<div class="dashboard-area dashboard-area-nested" data-area-id="${area.aid}" style="grid-template-rows: ${rowHeights};">
+    return `<div class="dashboard-area dashboard-area-nested" data-area-id="${area.aid}" data-area-index="${areaIndex}" style="grid-template-rows: ${rowHeights};">
             ${subRowsHtml}
         </div>`;
   }
@@ -620,8 +788,6 @@ class DashboardBuilder {
             };
 
       const result = await Ajax.post(endpoint, data);
-
-      console.log("Save result:", result);
 
       if (result.success) {
         this.isDirty = false;
@@ -752,7 +918,433 @@ class DashboardBuilder {
         const sectionId = btn.dataset.sectionId;
         this.removeSection(sectionId);
       }
+
+      // Add column left (on column edge)
+      if (e.target.closest(".add-col-left-btn")) {
+        const btn = e.target.closest(".add-col-left-btn");
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        this.addColumnAt(sectionId, areaIndex);
+      }
+
+      // Add column right (on last column edge)
+      if (e.target.closest(".add-col-right-btn")) {
+        const btn = e.target.closest(".add-col-right-btn");
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        this.addColumnAt(sectionId, areaIndex + 1);
+      }
+
+      // Remove column (both old and new class names)
+      if (e.target.closest(".remove-column-btn") || e.target.closest(".remove-col-btn")) {
+        const btn = e.target.closest(".remove-column-btn") || e.target.closest(".remove-col-btn");
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        this.removeColumn(sectionId, areaIndex);
+      }
+
+      // Add row top (splits column or adds row at top in nested)
+      if (e.target.closest(".add-row-top-btn")) {
+        const btn = e.target.closest(".add-row-top-btn");
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        this.addRowAt(sectionId, areaIndex, 0);
+      }
+
+      // Add row bottom (splits column or adds row at bottom in nested)
+      if (e.target.closest(".add-row-bottom-btn")) {
+        const btn = e.target.closest(".add-row-bottom-btn");
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        this.addRowAt(sectionId, areaIndex, -1); // -1 means at end
+      }
+
+      // Remove row
+      if (e.target.closest(".remove-row-btn")) {
+        const btn = e.target.closest(".remove-row-btn");
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        const rowIndex = parseInt(btn.dataset.rowIndex);
+        this.removeRow(sectionId, areaIndex, rowIndex);
+      }
+
+      // Resize column left (expand this column by shrinking left neighbor)
+      if (e.target.closest(".resize-col-left-btn")) {
+        const btn = e.target.closest(".resize-col-left-btn");
+        if (btn.hasAttribute("disabled")) return;
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        // Expand this column (areaIndex), shrink left neighbor (areaIndex - 1)
+        // colIndex is the LEFT column of the pair, direction "left" = expand right col
+        this.resizeColumn(sectionId, areaIndex - 1, "left");
+      }
+
+      // Resize column right (expand this column by shrinking right neighbor)
+      if (e.target.closest(".resize-col-right-btn")) {
+        const btn = e.target.closest(".resize-col-right-btn");
+        if (btn.hasAttribute("disabled")) return;
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        // Expand this column (areaIndex), shrink right neighbor (areaIndex + 1)
+        // colIndex is the LEFT column of the pair, direction "right" = expand left col
+        this.resizeColumn(sectionId, areaIndex, "right");
+      }
+
+      // Resize row up (increase top row by 1fr)
+      if (e.target.closest(".resize-row-up-btn")) {
+        const btn = e.target.closest(".resize-row-up-btn");
+        if (btn.hasAttribute("disabled")) return;
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        const rowIndex = parseInt(btn.dataset.rowIndex);
+        this.resizeRow(sectionId, areaIndex, rowIndex, "up");
+      }
+
+      // Resize row down (increase bottom row by 1fr)
+      if (e.target.closest(".resize-row-down-btn")) {
+        const btn = e.target.closest(".resize-row-down-btn");
+        if (btn.hasAttribute("disabled")) return;
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        const rowIndex = parseInt(btn.dataset.rowIndex);
+        this.resizeRow(sectionId, areaIndex, rowIndex, "down");
+      }
     });
+  }
+
+  // Click-based column resize: increase one column, decrease the other
+  async resizeColumn(sectionId, colIndex, direction) {
+    if (this.isReadOnly) return;
+
+    const structure = JSON.parse(this.currentDashboard.structure);
+    const section = structure.sections.find((s) => s.sid === sectionId);
+
+    if (!section) return;
+
+    const widths = section.gridTemplate.split(" ").map((w) => parseInt(w) || 1);
+    const leftIdx = colIndex;
+    const rightIdx = colIndex + 1;
+
+    let changed = false;
+    if (direction === "left") {
+      // Increase right column, decrease left column (arrow points left = right col expands left)
+      if (widths[rightIdx] < GRID_CONFIG.MAX_FR_UNITS && widths[leftIdx] > GRID_CONFIG.MIN_FR_UNITS) {
+        widths[rightIdx]++;
+        widths[leftIdx]--;
+        changed = true;
+      }
+    } else {
+      // Increase left column, decrease right column (arrow points right = left col expands right)
+      if (widths[leftIdx] < GRID_CONFIG.MAX_FR_UNITS && widths[rightIdx] > GRID_CONFIG.MIN_FR_UNITS) {
+        widths[leftIdx]++;
+        widths[rightIdx]--;
+        changed = true;
+      }
+    }
+
+    if (!changed) {
+      Toast.warning("Column at minimum/maximum size");
+      return;
+    }
+
+    const newTemplate = widths.map((w) => `${w}fr`).join(" ");
+    section.gridTemplate = newTemplate;
+
+    // Also update each area's colSpanFr
+    section.areas.forEach((area, i) => {
+      if (widths[i]) {
+        area.colSpanFr = `${widths[i]}fr`;
+      }
+    });
+
+    this.currentDashboard.structure = JSON.stringify(structure);
+    this.renderDashboard();
+    await this.saveDashboard(false);
+  }
+
+  // Click-based row resize: increase one row, decrease the other
+  async resizeRow(sectionId, areaIndex, rowIndex, direction) {
+    if (this.isReadOnly) return;
+
+    const structure = JSON.parse(this.currentDashboard.structure);
+    const section = structure.sections.find((s) => s.sid === sectionId);
+
+    if (!section) return;
+
+    const area = section.areas[areaIndex];
+
+    if (!area.hasSubRows || !area.subRows) return;
+
+    const heights = area.subRows.map((r) => parseInt(r.height) || 1);
+
+    if (direction === "up") {
+      // Increase top row, decrease bottom row
+      if (heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS && heights[rowIndex + 1] > GRID_CONFIG.MIN_FR_UNITS) {
+        heights[rowIndex]++;
+        heights[rowIndex + 1]--;
+      }
+    } else {
+      // Increase bottom row, decrease top row
+      if (heights[rowIndex + 1] < GRID_CONFIG.MAX_FR_UNITS && heights[rowIndex] > GRID_CONFIG.MIN_FR_UNITS) {
+        heights[rowIndex + 1]++;
+        heights[rowIndex]--;
+      }
+    }
+
+    // Update heights in subRows
+    area.subRows.forEach((row, i) => {
+      row.height = `${heights[i]}fr`;
+    });
+
+    this.currentDashboard.structure = JSON.stringify(structure);
+    this.renderDashboard();
+    await this.saveDashboard(false);
+  }
+
+  // Column management methods
+  async addColumnAt(sectionId, position) {
+    if (this.isReadOnly) return;
+
+    const structure = JSON.parse(this.currentDashboard.structure);
+    const section = structure.sections.find((s) => s.sid === sectionId);
+
+    if (!section || section.areas.length >= GRID_CONFIG.MAX_COLUMNS) {
+      Toast.error(`Maximum ${GRID_CONFIG.MAX_COLUMNS} columns allowed`);
+      return;
+    }
+
+    // Add new 1fr column at the specified position
+    const widths = section.gridTemplate.split(" ");
+    widths.splice(position, 0, `${GRID_CONFIG.DEFAULT_NEW_COLUMN_FR}fr`);
+    section.gridTemplate = widths.join(" ");
+
+    // Add new area at the specified position
+    const newAreaId = `${sectionId}_a${Date.now()}`;
+    section.areas.splice(position, 0, {
+      aid: newAreaId,
+      colSpanFr: `${GRID_CONFIG.DEFAULT_NEW_COLUMN_FR}fr`,
+      content: { type: "empty" },
+      emptyState: { icon: "fa-plus-circle", message: "Add content" },
+    });
+
+    this.currentDashboard.structure = JSON.stringify(structure);
+    this.renderDashboard();
+    await this.saveDashboard(false);
+    Toast.success("Column added");
+  }
+
+  async removeColumn(sectionId, areaIndex) {
+    if (this.isReadOnly) return;
+
+    const structure = JSON.parse(this.currentDashboard.structure);
+    const section = structure.sections.find((s) => s.sid === sectionId);
+
+    if (!section || section.areas.length <= GRID_CONFIG.MIN_COLUMNS) {
+      Toast.error(`Minimum ${GRID_CONFIG.MIN_COLUMNS} column required`);
+      return;
+    }
+
+    // Remove the column width
+    const widths = section.gridTemplate.split(" ");
+    widths.splice(areaIndex, 1);
+    section.gridTemplate = widths.join(" ");
+
+    // Remove the area
+    section.areas.splice(areaIndex, 1);
+
+    this.currentDashboard.structure = JSON.stringify(structure);
+    this.renderDashboard();
+    await this.saveDashboard(false);
+    Toast.success("Column removed");
+  }
+
+  async updateSectionGridTemplate(sectionId, newTemplate) {
+    if (this.isReadOnly) return;
+
+    const structure = JSON.parse(this.currentDashboard.structure);
+    const section = structure.sections.find((s) => s.sid === sectionId);
+
+    if (section) {
+      section.gridTemplate = newTemplate;
+
+      // Also update each area's colSpanFr
+      const widths = newTemplate.split(" ");
+      section.areas.forEach((area, i) => {
+        if (widths[i]) {
+          area.colSpanFr = widths[i];
+        }
+      });
+
+      this.currentDashboard.structure = JSON.stringify(structure);
+      await this.saveDashboard(false);
+    }
+  }
+
+  // Row management methods
+  // Unified method to add row at any position (or split column if no rows exist)
+  async addRowAt(sectionId, areaIndex, position) {
+    if (this.isReadOnly) return;
+
+    const structure = JSON.parse(this.currentDashboard.structure);
+    const section = structure.sections.find((s) => s.sid === sectionId);
+
+    if (!section) return;
+
+    const area = section.areas[areaIndex];
+
+    // If area doesn't have sub-rows yet, split it
+    if (!area.hasSubRows || !area.subRows || area.subRows.length === 0) {
+      // Convert to sub-rows: keep existing content in one row, add empty row
+      area.hasSubRows = true;
+      const existingContent = area.content || { type: "empty" };
+      const existingEmptyState = area.emptyState || {
+        icon: "fa-plus-circle",
+        message: "Add content",
+      };
+
+      if (position === 0) {
+        // Add at top: new empty row first, existing content second
+        area.subRows = [
+          {
+            rowId: `${area.aid}_r${Date.now()}`,
+            height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
+            content: { type: "empty" },
+            emptyState: { icon: "fa-plus-circle", message: "Add content" },
+          },
+          {
+            rowId: `${area.aid}_r${Date.now() + 1}`,
+            height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
+            content: existingContent,
+            emptyState: existingEmptyState,
+          },
+        ];
+      } else {
+        // Add at bottom: existing content first, new empty row second
+        area.subRows = [
+          {
+            rowId: `${area.aid}_r${Date.now()}`,
+            height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
+            content: existingContent,
+            emptyState: existingEmptyState,
+          },
+          {
+            rowId: `${area.aid}_r${Date.now() + 1}`,
+            height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
+            content: { type: "empty" },
+            emptyState: { icon: "fa-plus-circle", message: "Add content" },
+          },
+        ];
+      }
+
+      // Clear area's direct content since it's now in subRows
+      delete area.content;
+      delete area.emptyState;
+
+      this.currentDashboard.structure = JSON.stringify(structure);
+      this.renderDashboard();
+      await this.saveDashboard(false);
+      Toast.success("Row added");
+      return;
+    }
+
+    // Area already has sub-rows, add new row at position
+    if (area.subRows.length >= GRID_CONFIG.MAX_ROWS_PER_COLUMN) {
+      Toast.error(`Maximum ${GRID_CONFIG.MAX_ROWS_PER_COLUMN} rows allowed`);
+      return;
+    }
+
+    const newRowId = `${area.aid}_r${Date.now()}`;
+    const newRow = {
+      rowId: newRowId,
+      height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
+      content: { type: "empty" },
+      emptyState: { icon: "fa-plus-circle", message: "Add content" },
+    };
+
+    if (position === 0) {
+      area.subRows.unshift(newRow);
+    } else if (position === -1) {
+      area.subRows.push(newRow);
+    } else {
+      area.subRows.splice(position, 0, newRow);
+    }
+
+    this.currentDashboard.structure = JSON.stringify(structure);
+    this.renderDashboard();
+    await this.saveDashboard(false);
+    Toast.success("Row added");
+  }
+
+  // Legacy methods for compatibility (now unused)
+  async splitColumn(sectionId, areaIndex) {
+    await this.addRowAt(sectionId, areaIndex, -1);
+  }
+
+  async addRowAbove(sectionId, areaIndex) {
+    await this.addRowAt(sectionId, areaIndex, 0);
+  }
+
+  async addRowBelow(sectionId, areaIndex, rowIndex) {
+    // Note: This was adding at end, not after specific row
+    await this.addRowAt(sectionId, areaIndex, -1);
+  }
+
+  async removeRow(sectionId, areaIndex, rowIndex) {
+    if (this.isReadOnly) return;
+
+    const structure = JSON.parse(this.currentDashboard.structure);
+    const section = structure.sections.find((s) => s.sid === sectionId);
+
+    if (!section) return;
+
+    const area = section.areas[areaIndex];
+
+    if (
+      !area.hasSubRows ||
+      !area.subRows ||
+      area.subRows.length <= GRID_CONFIG.MIN_ROWS_PER_COLUMN
+    ) {
+      Toast.error(`Minimum ${GRID_CONFIG.MIN_ROWS_PER_COLUMN} row required`);
+      return;
+    }
+
+    // Remove the row
+    area.subRows.splice(rowIndex, 1);
+
+    // If only one row remains, convert back to single area
+    if (area.subRows.length === 1) {
+      area.content = area.subRows[0].content;
+      area.emptyState = area.subRows[0].emptyState;
+      delete area.hasSubRows;
+      delete area.subRows;
+    }
+
+    this.currentDashboard.structure = JSON.stringify(structure);
+    this.renderDashboard();
+    await this.saveDashboard(false);
+    Toast.success("Row removed");
+  }
+
+  async updateRowHeights(sectionId, areaIndex, heights) {
+    if (this.isReadOnly) return;
+
+    const structure = JSON.parse(this.currentDashboard.structure);
+    const section = structure.sections.find((s) => s.sid === sectionId);
+
+    if (!section) return;
+
+    const area = section.areas[areaIndex];
+
+    if (area.hasSubRows && area.subRows) {
+      area.subRows.forEach((row, i) => {
+        if (heights[i] !== undefined) {
+          row.height = `${heights[i]}fr`;
+        }
+      });
+
+      this.currentDashboard.structure = JSON.stringify(structure);
+      await this.saveDashboard(false);
+    }
   }
 
   async handleAddSection() {
