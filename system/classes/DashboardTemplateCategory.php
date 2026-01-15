@@ -178,17 +178,17 @@ class DashboardTemplateCategory implements DatabaseObject
      */
     public function populate($row)
     {
-        $this->dtcid = $row['dtcid'] ?? null;
-        $this->slug = $row['slug'] ?? null;
-        $this->name = $row['name'] ?? null;
-        $this->description = $row['description'] ?? null;
-        $this->icon = $row['icon'] ?? null;
-        $this->color = $row['color'] ?? null;
-        $this->display_order = $row['display_order'] ?? 0;
-        $this->is_system = $row['is_system'] ?? 0;
-        $this->dtcsid = $row['dtcsid'] ?? 1;
-        $this->created_ts = $row['created_ts'] ?? null;
-        $this->updated_ts = $row['updated_ts'] ?? null;
+        $this->dtcid = isset($row['dtcid']) ? $row['dtcid'] : null;
+        $this->slug = isset($row['slug']) ? $row['slug'] : null;
+        $this->name = isset($row['name']) ? $row['name'] : null;
+        $this->description = isset($row['description']) ? $row['description'] : null;
+        $this->icon = isset($row['icon']) ? $row['icon'] : null;
+        $this->color = isset($row['color']) ? $row['color'] : null;
+        $this->display_order = isset($row['display_order']) ? $row['display_order'] : 0;
+        $this->is_system = isset($row['is_system']) ? $row['is_system'] : 0;
+        $this->dtcsid = isset($row['dtcsid']) ? $row['dtcsid'] : 1;
+        $this->created_ts = isset($row['created_ts']) ? $row['created_ts'] : null;
+        $this->updated_ts = isset($row['updated_ts']) ? $row['updated_ts'] : null;
     }
 
     /**

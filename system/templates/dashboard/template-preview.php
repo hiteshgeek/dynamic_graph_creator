@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($template->getName() ?? 'Template'); ?> - Preview</title>
+    <title><?php $name = $template->getName(); echo htmlspecialchars($name ? $name : 'Template'); ?> - Preview</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -31,7 +31,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
             <a href="?urlq=dashboard/templates" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <h1><?php echo htmlspecialchars($template->getName() ?? 'Template'); ?></h1>
+            <h1><?php $name = $template->getName(); echo htmlspecialchars($name ? $name : 'Template'); ?></h1>
             <?php if ($template->getIsSystem()): ?>
             <span class="badge badge-system">
                 <i class="fas fa-lock"></i> System
@@ -64,9 +64,9 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                         ?>
                     </div>
                     <div class="template-info">
-                        <h2><?php echo htmlspecialchars($template->getName() ?? 'Template'); ?></h2>
-                        <?php if (!empty($template->getDescription())): ?>
-                        <p><?php echo htmlspecialchars($template->getDescription() ?? ''); ?></p>
+                        <h2><?php $name = $template->getName(); echo htmlspecialchars($name ? $name : 'Template'); ?></h2>
+                        <?php $desc = $template->getDescription(); if (!empty($desc)): ?>
+                        <p><?php echo htmlspecialchars($desc); ?></p>
                         <?php endif; ?>
                     </div>
                 </div>

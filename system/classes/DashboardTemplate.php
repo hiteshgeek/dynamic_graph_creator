@@ -314,7 +314,8 @@ class DashboardTemplate implements DatabaseObject
         if (empty($this->structure)) {
             return ['sections' => []];
         }
-        return json_decode($this->structure, true) ?? ['sections' => []];
+        $decoded = json_decode($this->structure, true);
+        return $decoded !== null ? $decoded : array('sections' => array());
     }
 
     /**

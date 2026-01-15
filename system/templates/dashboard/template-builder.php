@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Template: <?php echo htmlspecialchars($template->getName() ?? 'Template'); ?> - Dynamic Graph Creator</title>
+    <title>Edit Template: <?php $name = $template->getName(); echo htmlspecialchars($name ? $name : 'Template'); ?> - Dynamic Graph Creator</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -30,7 +30,7 @@
             <a href="?urlq=dashboard/templates" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <h1><?php echo htmlspecialchars($template->getName() ?? 'Template'); ?></h1>
+            <h1><?php $name = $template->getName(); echo htmlspecialchars($name ? $name : 'Template'); ?></h1>
             <?php if ($template->getIsSystem()): ?>
                 <span class="badge badge-system">
                     <i class="fas fa-lock"></i> System Template (Read-Only)
@@ -110,17 +110,19 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="edit-template-name" class="form-label">Template Name *</label>
+                        <?php $name = $template->getName(); ?>
                         <input type="text"
                             class="form-control"
                             id="edit-template-name"
-                            value="<?php echo htmlspecialchars($template->getName() ?? ''); ?>"
+                            value="<?php echo htmlspecialchars($name ? $name : ''); ?>"
                             required>
                     </div>
                     <div class="mb-3">
                         <label for="edit-template-description" class="form-label">Description</label>
+                        <?php $desc = $template->getDescription(); ?>
                         <textarea class="form-control"
                             id="edit-template-description"
-                            rows="3"><?php echo htmlspecialchars($template->getDescription() ?? ''); ?></textarea>
+                            rows="3"><?php echo htmlspecialchars($desc ? $desc : ''); ?></textarea>
                     </div>
                     <div class="mb-3">
                         <label for="edit-template-category" class="form-label">Category</label>
