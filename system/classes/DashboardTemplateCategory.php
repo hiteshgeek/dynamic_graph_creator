@@ -95,11 +95,11 @@ class DashboardTemplateCategory implements DatabaseObject
         $args = array(
             '::slug' => $this->slug,
             '::name' => $this->name,
-            '::description' => $this->description ?: null,
-            '::icon' => $this->icon ?: null,
-            '::color' => $this->color ?: null,
-            '::display_order' => $this->display_order ?: 0,
-            '::is_system' => $this->is_system ?: 0
+            '::description' => $this->description !== null ? $this->description : '',
+            '::icon' => $this->icon !== null ? $this->icon : '',
+            '::color' => $this->color !== null ? $this->color : '',
+            '::display_order' => $this->display_order ? $this->display_order : 0,
+            '::is_system' => $this->is_system ? $this->is_system : 0
         );
 
         if ($db->query($sql, $args)) {
@@ -133,11 +133,11 @@ class DashboardTemplateCategory implements DatabaseObject
             '::dtcid' => $this->dtcid,
             '::slug' => $this->slug,
             '::name' => $this->name,
-            '::description' => $this->description ?: null,
-            '::icon' => $this->icon ?: null,
-            '::color' => $this->color ?: null,
-            '::display_order' => $this->display_order ?: 0,
-            '::is_system' => $this->is_system ?: 0
+            '::description' => $this->description !== null ? $this->description : '',
+            '::icon' => $this->icon !== null ? $this->icon : '',
+            '::color' => $this->color !== null ? $this->color : '',
+            '::display_order' => $this->display_order ? $this->display_order : 0,
+            '::is_system' => $this->is_system ? $this->is_system : 0
         );
 
         return $db->query($sql, $args) ? true : false;

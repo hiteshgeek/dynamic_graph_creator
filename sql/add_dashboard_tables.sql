@@ -33,6 +33,7 @@ CREATE TABLE dashboard_template (
     dtid INT(11) AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL COMMENT 'Template name',
     description TEXT COMMENT 'Template description',
+    display_order INT(11) DEFAULT 0 COMMENT 'Display order (lower numbers first)',
     dtcid INT(11) DEFAULT NULL COMMENT 'Category ID (foreign key to dashboard_template_category)',
     thumbnail VARCHAR(255) DEFAULT NULL COMMENT 'Preview image path',
     structure TEXT NOT NULL COMMENT 'JSON dashboard structure',

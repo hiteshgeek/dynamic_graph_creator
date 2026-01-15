@@ -1,178 +1,178 @@
 // Grid Editor Styles
-@use '../variables' as *;
+@use "../variables" as *;
 
 // Preview pages - remove container padding but add spacing to preview area
 .dashboard-preview-page,
 .template-preview-page {
-    background: white;
+  background: white;
 
-    .container-fluid {
-        padding: 0;
-        padding-top: $spacing-lg;
-    }
+  .container-fluid {
+    padding: 0;
+    padding-top: $spacing-lg;
+  }
 
-    .dashboard-preview {
-        margin-top: 0;
-        padding: $spacing-lg;
-    }
+  .dashboard-preview {
+    margin-top: 0;
+    padding: $spacing-lg;
+  }
 }
 
 // Builder pages - keep default spacing
 .dashboard-builder-page,
 .template-builder-page {
-    background: white;
+  background: white;
 
-    .dashboard-preview {
-        margin-top: $spacing-lg;
-    }
+  .dashboard-preview {
+    margin-top: $spacing-lg;
+  }
 }
 
 .dashboard-sections {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
 }
 
 .dashboard-section {
-    position: relative;
-    display: grid;
-    gap: $spacing-md;
-    min-height: 200px;
-    background: white;
-    border: 2px solid #e0e0e0;
-    border-radius: 12px;
-    padding: 1.5rem;
-    transition: all 0.3s;
+  position: relative;
+  display: grid;
+  gap: $spacing-md;
+  min-height: 200px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s;
+
+  &:hover {
+    border-color: $primary;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+
+    .section-controls {
+      opacity: 1;
+    }
+  }
+
+  &.section-ghost {
+    opacity: 0.5;
+    background: #f8f9fa;
+    border-style: dashed;
+  }
+
+  // Preview mode - clean view without editing styles
+  .dashboard-preview-page &,
+  .template-preview-page & {
+    padding: 0;
+    background: transparent;
+    border: none;
+    min-height: auto;
 
     &:hover {
-        border-color: $primary;
-        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
-
-        .section-controls {
-            opacity: 1;
-        }
-    }
-
-    &.section-ghost {
-        opacity: 0.5;
-        background: #f8f9fa;
-        border-style: dashed;
-    }
-
-    // Preview mode - clean view without editing styles
-    .dashboard-preview-page &,
-    .template-preview-page & {
-        padding: 0;
-        background: transparent;
-        border: none;
-        min-height: auto;
-
-        &:hover {
-            border-color: transparent;
-            box-shadow: none;
-        }
-
-        .section-controls {
-            display: none;
-        }
+      border-color: transparent;
+      box-shadow: none;
     }
 
     .section-controls {
-        position: absolute;
-        top: 8px;
-        right: 8px;
-        display: flex;
-        gap: 4px;
-        opacity: 0;
-        transition: opacity 0.2s;
-
-        .section-control-btn {
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            cursor: pointer;
-            color: #6c757d;
-            transition: all 0.2s;
-
-            &:hover {
-                background: #f8f9fa;
-                color: #212529;
-            }
-
-            &.drag-handle {
-                cursor: move;
-            }
-
-            &.remove-btn:hover {
-                background: #dc3545;
-                color: white;
-                border-color: #dc3545;
-            }
-        }
+      display: none;
     }
+  }
+
+  .section-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+
+    .section-control-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #6c757d;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #f8f9fa;
+        color: #212529;
+      }
+
+      &.drag-handle {
+        cursor: move;
+      }
+
+      &.remove-btn:hover {
+        background: #dc3545;
+        color: white;
+        border-color: #dc3545;
+      }
+    }
+  }
 }
 
 .dashboard-area {
-    background: #f8f9fa;
-    border: 2px dashed #dee2e6;
-    border-radius: 8px;
-    padding: 1.5rem;
-    min-height: 150px;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 1.5rem;
+  min-height: 150px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    &:hover {
-        background: white;
-        border-color: $primary;
-        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+  &:hover {
+    background: white;
+    border-color: $primary;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+  }
+
+  // Nested area with sub-rows
+  &.dashboard-area-nested {
+    padding: 0;
+    align-items: stretch;
+    justify-content: stretch;
+    background: transparent;
+    border: none;
+    display: grid;
+    gap: $spacing-md;
+  }
+
+  .area-content {
+    width: 100%;
+
+    p {
+      color: #6c757d;
+      font-size: 0.875rem;
+      margin: 0;
     }
-
-    // Nested area with sub-rows
-    &.dashboard-area-nested {
-        padding: 0;
-        align-items: stretch;
-        justify-content: stretch;
-        background: transparent;
-        border: none;
-        display: grid;
-        gap: $spacing-md;
-    }
-
-    .area-content {
-        width: 100%;
-
-        p {
-            color: #6c757d;
-            font-size: 0.875rem;
-            margin: 0;
-        }
-    }
+  }
 }
 
 // Sub-rows within nested areas
 .dashboard-sub-row {
-    background: #f8f9fa;
-    border: 2px dashed #dee2e6;
-    border-radius: 6px;
-    padding: 1rem;
-    min-height: 100px;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 6px;
+  padding: 1rem;
+  min-height: 100px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-    &:hover {
-        background: white;
-        border-color: $primary;
-        box-shadow: 0 2px 6px rgba(0, 123, 255, 0.1);
-    }
+  &:hover {
+    background: white;
+    border-color: $primary;
+    box-shadow: 0 2px 6px rgba(0, 123, 255, 0.1);
+  }
 }

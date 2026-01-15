@@ -605,12 +605,49 @@ function createTemplate($data)
 {
     $name = isset($data['name']) ? trim($data['name']) : '';
     $description = isset($data['description']) ? trim($data['description']) : '';
-    $dtcid = isset($data['dtcid']) ? intval($data['dtcid']) : null;
+    $dtcidValue = isset($data['dtcid']) ? $data['dtcid'] : '';
+    $newCategoryName = isset($data['new_category_name']) ? trim($data['new_category_name']) : '';
+    $newCategoryDescription = isset($data['new_category_description']) ? trim($data['new_category_description']) : '';
     // TODO: Get actual user ID from session
     $userId = 1;
 
     if (empty($name)) {
         Utility::ajaxResponseFalse('Template name is required');
+    }
+
+    // Handle category assignment
+    $dtcid = null;
+
+    if ($dtcidValue === '__new__') {
+        // Create new category
+        if (empty($newCategoryName)) {
+            Utility::ajaxResponseFalse('Category name is required');
+        }
+
+        // Generate slug from name
+        $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $newCategoryName));
+        $slug = trim($slug, '-');
+
+        // Check for duplicate slug
+        if (DashboardTemplateCategory::slugExists($slug)) {
+            Utility::ajaxResponseFalse('A category with this name already exists');
+        }
+
+        // Create the category
+        $category = new DashboardTemplateCategory();
+        $category->setSlug($slug);
+        $category->setName($newCategoryName);
+        $category->setDescription($newCategoryDescription);
+        $category->setDisplayOrder(100); // Put at end
+        $category->setIsSystem(0); // User category
+
+        if (!$category->insert()) {
+            Utility::ajaxResponseFalse('Failed to create category');
+        }
+
+        $dtcid = $category->getId();
+    } elseif (!empty($dtcidValue) && is_numeric($dtcidValue)) {
+        $dtcid = intval($dtcidValue);
     }
 
     // Create empty structure with single section
@@ -660,7 +697,9 @@ function updateTemplate($data)
     $templateId = isset($data['id']) ? intval($data['id']) : 0;
     $name = isset($data['name']) ? trim($data['name']) : '';
     $description = isset($data['description']) ? trim($data['description']) : '';
-    $dtcid = isset($data['dtcid']) && $data['dtcid'] !== '' ? intval($data['dtcid']) : null;
+    $dtcidValue = isset($data['dtcid']) ? $data['dtcid'] : '';
+    $newCategoryName = isset($data['new_category_name']) ? trim($data['new_category_name']) : '';
+    $newCategoryDescription = isset($data['new_category_description']) ? trim($data['new_category_description']) : '';
     // TODO: Get actual user ID from session
     $userId = 1;
 
@@ -680,6 +719,41 @@ function updateTemplate($data)
     // Protect system templates
     if ($template->getIsSystem()) {
         Utility::ajaxResponseFalse('Cannot modify system templates');
+    }
+
+    // Handle category assignment
+    $dtcid = null;
+
+    if ($dtcidValue === '__new__') {
+        // Create new category
+        if (empty($newCategoryName)) {
+            Utility::ajaxResponseFalse('Category name is required');
+        }
+
+        // Generate slug from name
+        $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $newCategoryName));
+        $slug = trim($slug, '-');
+
+        // Check for duplicate slug
+        if (DashboardTemplateCategory::slugExists($slug)) {
+            Utility::ajaxResponseFalse('A category with this name already exists');
+        }
+
+        // Create the category
+        $category = new DashboardTemplateCategory();
+        $category->setSlug($slug);
+        $category->setName($newCategoryName);
+        $category->setDescription($newCategoryDescription);
+        $category->setDisplayOrder(100); // Put at end
+        $category->setIsSystem(0); // User category
+
+        if (!$category->insert()) {
+            Utility::ajaxResponseFalse('Failed to create category');
+        }
+
+        $dtcid = $category->getId();
+    } elseif (!empty($dtcidValue) && is_numeric($dtcidValue)) {
+        $dtcid = intval($dtcidValue);
     }
 
     $template->setName($name);

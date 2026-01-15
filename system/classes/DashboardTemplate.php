@@ -56,7 +56,7 @@ class DashboardTemplate implements DatabaseObject
         $args = array(
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
-            '::dtcid' => $this->dtcid ? $this->dtcid : null,
+            '::dtcid' => $this->dtcid ? $this->dtcid : 0,
             '::structure' => $this->structure,
             '::display_order' => $this->display_order ? $this->display_order : 0,
             '::is_system' => $this->is_system ? 1 : 0
@@ -106,7 +106,7 @@ class DashboardTemplate implements DatabaseObject
         $args = array(
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
-            '::dtcid' => $this->dtcid ? $this->dtcid : null,
+            '::dtcid' => $this->dtcid ? $this->dtcid : 0,
             '::thumbnail' => $this->thumbnail ? $this->thumbnail : '',
             '::structure' => $this->structure,
             '::display_order' => $this->display_order ? $this->display_order : 0,

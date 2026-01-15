@@ -60,7 +60,7 @@
 
                             <div class="mb-3">
                                 <label for="template-category" class="form-label">Category</label>
-                                <select class="form-select" id="template-category" name="dtcid">
+                                <select class="form-select select-with-create" id="template-category" name="dtcid">
                                     <option value="">None (Uncategorized)</option>
                                     <?php foreach ($categories as $category): ?>
                                     <option value="<?php echo $category->getId(); ?>"
@@ -68,7 +68,28 @@
                                         <?php echo htmlspecialchars($category->getName()); ?>
                                     </option>
                                     <?php endforeach; ?>
+                                    <option value="__new__" class="option-create-new">+ Create New Category</option>
                                 </select>
+                            </div>
+
+                            <!-- New Category Fields (hidden by default) -->
+                            <div id="new-category-fields" class="new-category-fields" style="display: none;">
+                                <div class="mb-3">
+                                    <label for="new-category-name" class="form-label">Category Name *</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="new-category-name"
+                                           name="new_category_name"
+                                           placeholder="Enter category name">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="new-category-description" class="form-label">Category Description</label>
+                                    <textarea class="form-control"
+                                              id="new-category-description"
+                                              name="new_category_description"
+                                              rows="2"
+                                              placeholder="Enter category description (optional)"></textarea>
+                                </div>
                             </div>
 
                             <?php if ($template && $template->getId()): ?>
@@ -102,56 +123,147 @@
     <?php endif; ?>
 
     <script>
-        // Handle form submission
-        document.getElementById('template-editor-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const form = this;
+        // Initialize form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('template-editor-form');
             const submitBtn = document.getElementById('submit-btn');
             const templateId = form.querySelector('input[name="id"]')?.value;
             const action = templateId ? 'update_template' : 'create_template';
 
-            // Get form data
-            const formData = new FormData(form);
-            const data = {
-                submit: action
-            };
-            for (const [key, value] of formData.entries()) {
-                data[key] = value;
-            }
+            const categorySelect = document.getElementById('template-category');
+            const newCategoryFields = document.getElementById('new-category-fields');
+            const newCategoryNameInput = document.getElementById('new-category-name');
+            const newCategoryDescInput = document.getElementById('new-category-description');
 
-            // Show loading state
-            const originalBtnContent = submitBtn.innerHTML;
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (templateId ? 'Updating...' : 'Creating...');
+            // Toggle new category fields visibility
+            categorySelect.addEventListener('change', function() {
+                const isNewCategory = this.value === '__new__';
+                newCategoryFields.style.display = isNewCategory ? 'block' : 'none';
 
-            try {
-                const result = await Ajax.post(action, data);
-
-                if (result.success) {
-                    Toast.success(result.message || (templateId ? 'Template updated' : 'Template created'));
-
-                    // Redirect based on action
-                    if (result.data && result.data.redirect) {
-                        setTimeout(() => {
-                            window.location.href = result.data.redirect;
-                        }, 500);
-                    } else if (templateId) {
-                        // If updating, redirect back to templates
-                        setTimeout(() => {
-                            window.location.href = '?urlq=dashboard/templates';
-                        }, 500);
-                    }
-                } else {
-                    Toast.error(result.message || 'Failed to save template');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalBtnContent;
+                // Clear new category fields and errors when switching away
+                if (!isNewCategory) {
+                    newCategoryNameInput.value = '';
+                    newCategoryDescInput.value = '';
+                    newCategoryNameInput.classList.remove('is-invalid');
+                    const feedback = newCategoryNameInput.parentElement.querySelector('.invalid-feedback');
+                    if (feedback) feedback.textContent = '';
                 }
-            } catch (error) {
-                Toast.error('Failed to save template');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnContent;
-            }
+            });
+
+            // Custom validation for new category name (only when creating new category)
+            const validateNewCategoryName = () => {
+                if (categorySelect.value !== '__new__') {
+                    return true; // Skip validation if not creating new category
+                }
+                const value = newCategoryNameInput.value.trim();
+                if (!value) {
+                    return 'Category name is required';
+                }
+                if (value.length < 2) {
+                    return 'Category name must be at least 2 characters';
+                }
+                return true;
+            };
+
+            const validator = new FormValidator(form, {
+                rules: {
+                    name: {
+                        required: true,
+                        minLength: 2,
+                        maxLength: 255
+                    },
+                    new_category_name: {
+                        custom: validateNewCategoryName
+                    }
+                },
+                messages: {
+                    name: {
+                        required: 'Template name is required',
+                        minLength: 'Template name must be at least 2 characters'
+                    }
+                },
+                toastMessage: 'Please correct the errors in the form',
+                onSubmit: async (data) => {
+                    // Additional validation for new category
+                    if (categorySelect.value === '__new__') {
+                        const catNameResult = validateNewCategoryName();
+                        if (catNameResult !== true) {
+                            newCategoryNameInput.classList.add('is-invalid');
+                            let feedback = newCategoryNameInput.parentElement.querySelector('.invalid-feedback');
+                            if (!feedback) {
+                                feedback = document.createElement('div');
+                                feedback.className = 'invalid-feedback';
+                                newCategoryNameInput.parentElement.appendChild(feedback);
+                            }
+                            feedback.textContent = catNameResult;
+                            newCategoryNameInput.focus();
+                            Toast.error('Please correct the errors in the form');
+                            return;
+                        }
+                    }
+
+                    // Show loading state
+                    const originalBtnContent = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (templateId ? 'Updating...' : 'Creating...');
+
+                    try {
+                        const result = await Ajax.post(action, data);
+
+                        if (result.success) {
+                            Toast.success(result.message || (templateId ? 'Template updated' : 'Template created'));
+
+                            // Redirect based on action
+                            if (result.data && result.data.redirect) {
+                                setTimeout(() => {
+                                    window.location.href = result.data.redirect;
+                                }, 500);
+                            } else if (templateId) {
+                                // If updating, redirect back to templates
+                                setTimeout(() => {
+                                    window.location.href = '?urlq=dashboard/templates';
+                                }, 500);
+                            }
+                        } else {
+                            Toast.error(result.message || 'Failed to save template');
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnContent;
+                        }
+                    } catch (error) {
+                        Toast.error('Failed to save template');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnContent;
+                    }
+                }
+            });
+
+            // Live validation for new category name field
+            newCategoryNameInput.addEventListener('blur', function() {
+                if (categorySelect.value === '__new__') {
+                    const result = validateNewCategoryName();
+                    if (result !== true) {
+                        this.classList.add('is-invalid');
+                        let feedback = this.parentElement.querySelector('.invalid-feedback');
+                        if (!feedback) {
+                            feedback = document.createElement('div');
+                            feedback.className = 'invalid-feedback';
+                            this.parentElement.appendChild(feedback);
+                        }
+                        feedback.textContent = result;
+                    } else {
+                        this.classList.remove('is-invalid');
+                    }
+                }
+            });
+
+            newCategoryNameInput.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid')) {
+                    const result = validateNewCategoryName();
+                    if (result === true) {
+                        this.classList.remove('is-invalid');
+                    }
+                }
+            });
         });
     </script>
 </body>
