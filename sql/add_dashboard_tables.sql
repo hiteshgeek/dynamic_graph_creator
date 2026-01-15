@@ -59,6 +59,7 @@ CREATE TABLE dashboard_instance (
     config TEXT COMMENT 'JSON configuration (responsive breakpoints, etc)',
     company_id INT(11) DEFAULT NULL COMMENT 'Company association for multi-tenant',
     user_id INT(11) DEFAULT NULL COMMENT 'User who owns this dashboard',
+    is_system TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'System dashboards cannot be deleted',
     disid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
     created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -67,6 +68,7 @@ CREATE TABLE dashboard_instance (
     INDEX idx_dtid (dtid),
     INDEX idx_company_id (company_id),
     INDEX idx_user_id (user_id),
+    INDEX idx_is_system (is_system),
     INDEX idx_disid (disid),
     FOREIGN KEY (dtid) REFERENCES dashboard_template(dtid) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User dashboard instances';

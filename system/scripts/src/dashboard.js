@@ -193,6 +193,9 @@ class DashboardBuilder {
                     <div class="template-grid">`;
 
         categoryData.templates.forEach((template) => {
+          const systemBadge = template.is_system == 1
+            ? '<span class="badge badge-system"><i class="fas fa-lock"></i> System</span>'
+            : '';
           html += `<div class="template-card" data-template-id="${
             template.dtid
           }">
@@ -202,6 +205,7 @@ class DashboardBuilder {
                         <div class="template-info">
                             <h4>${template.name}</h4>
                             <p>${template.description || ""}</p>
+                            ${systemBadge ? `<div class="template-meta">${systemBadge}</div>` : ''}
                         </div>
                     </div>`;
         });

@@ -229,6 +229,11 @@ function saveDashboard($data)
 
     $dashboard = $dashboardId ? new DashboardInstance($dashboardId) : new DashboardInstance();
 
+    // Check if this is a system dashboard (if editing)
+    if ($dashboardId && $dashboard->getIsSystem()) {
+        Utility::ajaxResponseFalse('System dashboards cannot be edited');
+    }
+
     // Check if user owns this dashboard (if editing)
     if ($dashboardId && $dashboard->getUserId() != $userId) {
         Utility::ajaxResponseFalse('Unauthorized');
@@ -286,6 +291,12 @@ function deleteDashboard($data)
 
     if (!$dashboardId) {
         Utility::ajaxResponseFalse('Invalid dashboard ID');
+    }
+
+    // Check if this is a system dashboard
+    $dashboard = new DashboardInstance($dashboardId);
+    if ($dashboard->getIsSystem()) {
+        Utility::ajaxResponseFalse('System dashboards cannot be deleted');
     }
 
     // TODO: Verify user owns this dashboard

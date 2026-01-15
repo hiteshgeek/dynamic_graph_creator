@@ -15,6 +15,7 @@ class DashboardInstance implements DatabaseObject
     private $config; // JSON (responsive config)
     private $company_id;
     private $user_id;
+    private $is_system; // System dashboards cannot be deleted
     private $disid;
     private $created_ts;
     private $updated_ts;
@@ -51,13 +52,14 @@ class DashboardInstance implements DatabaseObject
         $db = Rapidkart::getInstance()->getDB();
 
         // Build dynamic SQL to handle NULL values properly
-        $fields = array('name', 'description', 'structure', 'config');
-        $values = array('::name', '::description', '::structure', '::config');
+        $fields = array('name', 'description', 'structure', 'config', 'is_system');
+        $values = array('::name', '::description', '::structure', '::config', '::is_system');
         $args = array(
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
             '::structure' => $this->structure,
-            '::config' => $this->config ? $this->config : '{}'
+            '::config' => $this->config ? $this->config : '{}',
+            '::is_system' => $this->is_system ? 1 : 0
         );
 
         if ($this->dtid) {
@@ -108,14 +110,16 @@ class DashboardInstance implements DatabaseObject
             "name = '::name'",
             "description = '::description'",
             "structure = '::structure'",
-            "config = '::config'"
+            "config = '::config'",
+            "is_system = '::is_system'"
         );
 
         $args = array(
             '::name' => $this->name,
             '::description' => $this->description ? $this->description : '',
             '::structure' => $this->structure,
-            '::config' => $this->config ? $this->config : '{}'
+            '::config' => $this->config ? $this->config : '{}',
+            '::is_system' => $this->is_system ? 1 : 0
         );
 
         if ($this->dtid) {
@@ -197,6 +201,7 @@ class DashboardInstance implements DatabaseObject
             'config' => $this->config,
             'company_id' => $this->company_id,
             'user_id' => $this->user_id,
+            'is_system' => $this->is_system,
             'created_ts' => $this->created_ts,
             'updated_ts' => $this->updated_ts
         );
@@ -366,6 +371,9 @@ class DashboardInstance implements DatabaseObject
 
     public function getUserId() { return $this->user_id; }
     public function setUserId($value) { $this->user_id = $value ? intval($value) : NULL; }
+
+    public function getIsSystem() { return $this->is_system; }
+    public function setIsSystem($value) { $this->is_system = $value ? 1 : 0; }
 
     public function getCreatedTs() { return $this->created_ts; }
     public function getUpdatedTs() { return $this->updated_ts; }

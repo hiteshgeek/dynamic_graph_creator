@@ -101,13 +101,15 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                                 <?php if (!empty($template['description'])): ?>
                                 <p><?php echo htmlspecialchars($template['description']); ?></p>
                                 <?php endif; ?>
-                                <?php if ($template['is_system']): ?>
-                                <span class="badge badge-system">
-                                    <i class="fas fa-lock"></i> System
-                                </span>
-                                <?php else: ?>
-                                <span class="badge badge-custom">Custom</span>
-                                <?php endif; ?>
+                                <div class="template-meta">
+                                    <?php if ($template['is_system']): ?>
+                                    <span class="badge badge-system">
+                                        <i class="fas fa-lock"></i> System
+                                    </span>
+                                    <?php else: ?>
+                                    <span class="badge badge-custom">Custom</span>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                             <div class="template-card-actions">
                                 <button class="btn-icon btn-primary"

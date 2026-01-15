@@ -71,6 +71,15 @@
                                 <?php echo date('M d, Y', strtotime($dashboard->getUpdatedTs())); ?>
                             </span>
                         </div>
+                        <div class="dashboard-tags">
+                            <?php if ($dashboard->getIsSystem()): ?>
+                            <span class="badge badge-system">
+                                <i class="fas fa-lock"></i> System
+                            </span>
+                            <?php else: ?>
+                            <span class="badge badge-custom">Custom</span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                     <div class="dashboard-card-actions">
                         <a href="?urlq=dashboard/preview/<?php echo $dashboard->getId(); ?>"
@@ -78,11 +87,13 @@
                            title="View Dashboard">
                             <i class="fas fa-eye"></i>
                         </a>
+                        <?php if (!$dashboard->getIsSystem()): ?>
                         <a href="?urlq=dashboard/builder/<?php echo $dashboard->getId(); ?>"
                            class="btn-icon btn-warning"
                            title="Edit Dashboard">
                             <i class="fas fa-pencil"></i>
                         </a>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endforeach; ?>

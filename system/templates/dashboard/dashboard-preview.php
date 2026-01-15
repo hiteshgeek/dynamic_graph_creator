@@ -31,14 +31,21 @@
                 <i class="fas fa-arrow-left"></i> Back
             </a>
             <h1><?php echo htmlspecialchars($dashboard->getName()); ?></h1>
+            <?php if ($dashboard->getIsSystem()): ?>
+                <span class="badge badge-system">
+                    <i class="fas fa-lock"></i> System
+                </span>
+            <?php endif; ?>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=dashboard/builder/<?php echo $dashboard->getId(); ?>" class="btn btn-warning">
-                <i class="fas fa-pencil"></i> Edit Dashboard
-            </a>
-            <button class="btn btn-danger delete-dashboard-btn" data-dashboard-id="<?php echo $dashboard->getId(); ?>">
-                <i class="fas fa-trash"></i> Delete Dashboard
-            </button>
+            <?php if (!$dashboard->getIsSystem()): ?>
+                <a href="?urlq=dashboard/builder/<?php echo $dashboard->getId(); ?>" class="btn btn-warning">
+                    <i class="fas fa-pencil"></i> Edit Dashboard
+                </a>
+                <button class="btn btn-danger delete-dashboard-btn" data-dashboard-id="<?php echo $dashboard->getId(); ?>">
+                    <i class="fas fa-trash"></i> Delete Dashboard
+                </button>
+            <?php endif; ?>
         </div>
     </div>
 
