@@ -80,11 +80,6 @@
                                title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <button class="btn-icon btn-danger delete-layout-btn"
-                                    data-layout-id="<?php echo $layout->getId(); ?>"
-                                    title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -106,71 +101,7 @@
     <?php endif; ?>
 
     <script>
-        // Handle delete layout
-        document.querySelectorAll('.delete-layout-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                const layoutId = this.dataset.layoutId;
-                const layoutCard = this.closest('.layout-card');
-
-                const confirmed = await ConfirmDialog.delete('Are you sure you want to delete this layout?', 'Confirm Delete');
-                if (!confirmed) return;
-
-                // Show inline loading state instead of full-page overlay
-                const deleteBtn = this;
-                deleteBtn.disabled = true;
-                deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                layoutCard.style.pointerEvents = 'none';
-                layoutCard.style.opacity = '0.6';
-
-                Ajax.post('delete_layout', { id: layoutId })
-                    .then(result => {
-                        if (result.success) {
-                            Toast.success('Layout deleted successfully');
-                            // Remove the card from DOM with fade out animation
-                            layoutCard.style.transition = 'opacity 0.3s, transform 0.3s';
-                            layoutCard.style.opacity = '0';
-                            layoutCard.style.transform = 'scale(0.9)';
-                            setTimeout(() => {
-                                layoutCard.remove();
-                                // Check if there are any layouts left
-                                const remainingCards = document.querySelectorAll('.layout-card');
-                                if (remainingCards.length === 0) {
-                                    // Replace grid with empty state
-                                    const layoutGrid = document.querySelector('.layout-grid');
-                                    const emptyStateHtml = `
-                                        <div class="layout-empty-state">
-                                            <i class="fas fa-th-large"></i>
-                                            <p>No layouts created yet</p>
-                                            <span>Click "Create Layout" to build your first dashboard</span>
-                                        </div>
-                                    `;
-                                    layoutGrid.outerHTML = emptyStateHtml;
-                                    // Update count in header
-                                    const countSpan = document.querySelector('.card-header-left span');
-                                    if (countSpan) {
-                                        countSpan.textContent = '0 layouts';
-                                    }
-                                }
-                            }, 300);
-                        } else {
-                            Toast.error(result.message || 'Failed to delete layout');
-                            // Restore button state on error
-                            deleteBtn.disabled = false;
-                            deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-                            layoutCard.style.pointerEvents = '';
-                            layoutCard.style.opacity = '';
-                        }
-                    })
-                    .catch(error => {
-                        Toast.error('Failed to delete layout');
-                        // Restore button state on error
-                        deleteBtn.disabled = false;
-                        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-                        layoutCard.style.pointerEvents = '';
-                        layoutCard.style.opacity = '';
-                    });
-            });
-        });
+        // Layout list page - no additional functionality needed
     </script>
 </body>
 </html>

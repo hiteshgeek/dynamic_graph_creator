@@ -26,6 +26,9 @@ if (isset($_POST['submit'])) {
         case 'delete_layout':
             deleteLayout($_POST);
             break;
+        case 'update_layout_name':
+            updateLayoutName($_POST);
+            break;
         case 'update_area_content':
             updateAreaContent($_POST);
             break;
@@ -240,6 +243,47 @@ function deleteLayout($data)
     }
 
     Utility::ajaxResponseTrue('Layout deleted successfully');
+}
+
+/**
+ * Update layout name
+ */
+function updateLayoutName($data)
+{
+    $layoutId = isset($data['id']) ? intval($data['id']) : 0;
+    $name = isset($data['name']) ? trim($data['name']) : '';
+    // TODO: Get actual user ID from session
+    $userId = 1;
+
+    if (!$layoutId) {
+        Utility::ajaxResponseFalse('Invalid layout ID');
+    }
+
+    if (empty($name)) {
+        Utility::ajaxResponseFalse('Layout name cannot be empty');
+    }
+
+    $layout = new LayoutInstance($layoutId);
+    if (!$layout->getId()) {
+        Utility::ajaxResponseFalse('Layout not found');
+    }
+
+    // Check if user owns this layout
+    if ($layout->getUserId() != $userId) {
+        Utility::ajaxResponseFalse('Unauthorized');
+    }
+
+    $layout->setName($name);
+    $layout->setUpdatedUid($userId);
+
+    if (!$layout->update()) {
+        Utility::ajaxResponseFalse('Failed to update layout name');
+    }
+
+    Utility::ajaxResponseTrue('Layout name updated', array(
+        'id' => $layout->getId(),
+        'name' => $layout->getName()
+    ));
 }
 
 /**

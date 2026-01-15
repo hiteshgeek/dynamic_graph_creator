@@ -2,9 +2,8 @@
 @use '../variables' as *;
 
 .layout-builder {
-    min-height: calc(100vh - 80px);
+    min-height: calc(100vh - 60px);
     background: #f5f7fa;
-    margin-top: 2px; // Small margin to allow header box-shadow to be visible
 
     .builder-body {
         display: flex;
@@ -91,6 +90,10 @@
     // Section wrapper for border button positioning
     .layout-section-wrapper {
         position: relative;
+
+        &.section-ghost {
+            opacity: 0.4;
+        }
     }
 
     // Add Section Border Buttons (on section borders)
@@ -138,9 +141,68 @@
         bottom: -16px; // Half of button height to center on border
     }
 
+    // Section top border controls (reorder/delete)
+    .section-top-border-controls {
+        position: absolute;
+        top: -16px;
+        right: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.2s;
+        z-index: 11;
+
+        .section-control-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 2px solid #dee2e6;
+            border-radius: 50%;
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+            i {
+                font-size: 0.875rem;
+            }
+
+            &.drag-handle {
+                cursor: grab;
+                border-color: $primary;
+                color: $primary;
+
+                &:active {
+                    cursor: grabbing;
+                }
+
+                &:hover {
+                    background: $primary;
+                    color: white;
+                }
+            }
+
+            &.remove-btn {
+                border-color: #dc3545;
+                color: #dc3545;
+
+                &:hover {
+                    background: #dc3545;
+                    color: white;
+                }
+            }
+        }
+    }
+
     // Desktop: show on hover of section wrapper
     @media (min-width: 1024px) {
-        .layout-section-wrapper:hover .add-section-border-btn {
+        .layout-section-wrapper:hover .add-section-border-btn,
+        .layout-section-wrapper:hover .section-top-border-controls {
             opacity: 1;
             pointer-events: auto;
         }
@@ -148,7 +210,8 @@
 
     // Tablet and mobile: always visible
     @media (max-width: 1023px) {
-        .add-section-border-btn {
+        .add-section-border-btn,
+        .section-top-border-controls {
             opacity: 1;
             pointer-events: auto;
         }
@@ -200,6 +263,25 @@
                 border-color: #007bff;
             }
         }
+    }
+}
+
+// Layout Name Editor
+.layout-name-editor {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    h1 {
+        margin: 0;
+        font-size: $font-size-h2;
+        line-height: 1;
+    }
+
+    .layout-name-input {
+        font-size: $font-size-h2;
+        font-weight: 600;
+        min-width: 250px;
     }
 }
 

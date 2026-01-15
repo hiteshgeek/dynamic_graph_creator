@@ -197,6 +197,9 @@ class LayoutBuilder {
                     headerTitle.textContent = 'Edit Layout';
                 }
 
+                // Show save indicator and View Layout button
+                this.updateHeaderAfterCreation();
+
                 // Update sidebar to show "Add Section" button instead of "Choose Template"
                 this.updateSidebarAfterCreation();
 
@@ -244,6 +247,33 @@ class LayoutBuilder {
             Toast.error('Failed to add section');
         } finally {
             Loading.hide();
+        }
+    }
+
+    updateHeaderAfterCreation() {
+        // Show save indicator with proper styling
+        const saveIndicator = document.querySelector('.save-indicator');
+        if (saveIndicator) {
+            saveIndicator.style.display = 'flex';
+            saveIndicator.className = 'save-indicator saved';
+            const icon = saveIndicator.querySelector('i');
+            const text = saveIndicator.querySelector('span');
+            if (icon) icon.className = 'fas fa-check-circle';
+            if (text) text.textContent = 'Saved';
+        }
+
+        // Add View Layout button if it doesn't exist
+        const headerRight = document.querySelector('.page-header-right');
+        if (headerRight && this.layoutId) {
+            const existingViewBtn = headerRight.querySelector('a[href*="layout/preview"]');
+            if (!existingViewBtn) {
+                const viewBtn = document.createElement('a');
+                viewBtn.href = `?urlq=layout/preview/${this.layoutId}`;
+                viewBtn.className = 'btn btn-primary';
+                viewBtn.title = 'View Layout';
+                viewBtn.innerHTML = '<i class="fas fa-eye"></i> View Layout';
+                headerRight.appendChild(viewBtn);
+            }
         }
     }
 
@@ -318,14 +348,23 @@ class LayoutBuilder {
             }
         });
 
-        // Only show drag handle if there are multiple sections
+        // Section control buttons on top border
         const dragHandleHtml = totalSections > 1 ? `
             <button class="section-control-btn drag-handle" title="Drag to reorder">
                 <i class="fas fa-grip-vertical"></i>
             </button>
         ` : '';
 
-        // Add button on top border (for all sections)
+        const topBorderControls = `
+            <div class="section-top-border-controls">
+                ${dragHandleHtml}
+                <button class="section-control-btn remove-btn" data-section-id="${section.sid}" title="Remove section">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+
+        // Add section button on top border
         const topBorderButton = `
             <button class="add-section-border-btn add-section-top-btn" data-position="${index}" title="Add section above">
                 <i class="fas fa-plus"></i>
@@ -333,7 +372,7 @@ class LayoutBuilder {
             </button>
         `;
 
-        // Add button on bottom border (for all sections)
+        // Add section button on bottom border
         const bottomBorderButton = `
             <button class="add-section-border-btn add-section-bottom-btn" data-position="${index + 1}" title="Add section below">
                 <i class="fas fa-plus"></i>
@@ -343,14 +382,9 @@ class LayoutBuilder {
 
         return `<div class="layout-section-wrapper">
             ${topBorderButton}
-            <div class="layout-section" data-section-id="${section.sid}" style="display: grid; grid-template-columns: ${section.gridTemplate}; gap: ${section.gap || '16px'}; min-height: ${section.minHeight || '200px'};">
+            ${topBorderControls}
+            <div class="layout-section" data-section-id="${section.sid}" style="grid-template-columns: ${section.gridTemplate};">
                 ${areasHtml}
-                <div class="section-controls">
-                    ${dragHandleHtml}
-                    <button class="section-control-btn remove-btn" data-section-id="${section.sid}" title="Remove">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
             </div>
             ${bottomBorderButton}
         </div>`;
@@ -367,7 +401,7 @@ class LayoutBuilder {
             </div>`;
         });
 
-        return `<div class="layout-area layout-area-nested" data-area-id="${area.aid}" style="display: grid; grid-template-rows: ${rowHeights}; gap: ${area.gap || '8px'};">
+        return `<div class="layout-area layout-area-nested" data-area-id="${area.aid}" style="grid-template-rows: ${rowHeights};">
             ${subRowsHtml}
         </div>`;
     }
@@ -399,7 +433,7 @@ class LayoutBuilder {
         this.sortableInstance = Sortable.create(sectionsContainer, {
             animation: 150,
             handle: '.drag-handle',
-            draggable: '.layout-section',
+            draggable: '.layout-section-wrapper',
             ghostClass: 'section-ghost',
             onEnd: () => this.onSectionsReorder()
         });

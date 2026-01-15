@@ -28,14 +28,46 @@
             <a href="?urlq=layout" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <h1><?php echo $layout ? 'Edit Layout' : 'Create Layout'; ?></h1>
+            <?php if ($layout && $layout->getId()): ?>
+            <div class="layout-name-editor">
+                <h1 id="layout-name-display"><?php echo htmlspecialchars($layout->getName()); ?></h1>
+                <input type="text"
+                       id="layout-name-input"
+                       class="form-control layout-name-input"
+                       value="<?php echo htmlspecialchars($layout->getName()); ?>"
+                       placeholder="Layout Name"
+                       style="display: none;">
+                <button id="edit-name-btn" class="btn btn-outline-primary" title="Edit Name">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button id="save-name-btn" class="btn btn-success" title="Save Name" style="display: none;">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button id="cancel-name-btn" class="btn btn-secondary" title="Cancel" style="display: none;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <?php else: ?>
+            <h1>Create Layout</h1>
+            <?php endif; ?>
         </div>
         <div class="page-header-right">
-            <div class="responsive-toggle"></div>
-            <div class="save-indicator saved">
+            <?php if ($layout && $layout->getId()): ?>
+            <div class="save-indicator saved" style="display: flex;">
                 <i class="fas fa-check-circle"></i>
                 <span>Saved</span>
             </div>
+            <a href="?urlq=layout/preview/<?php echo $layout->getId(); ?>"
+               class="btn btn-primary"
+               title="View Layout">
+                <i class="fas fa-eye"></i> View Layout
+            </a>
+            <?php else: ?>
+            <div class="save-indicator" style="display: none;">
+                <i class="fas fa-check-circle"></i>
+                <span>Saved</span>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -143,6 +175,91 @@
                 window.layoutBuilderInstance.init();
             } else {
                 console.error('LayoutBuilder not loaded. Make sure layout.js is included.');
+            }
+
+            // Handle layout name editing
+            const nameDisplay = document.getElementById('layout-name-display');
+            const nameInput = document.getElementById('layout-name-input');
+            const editBtn = document.getElementById('edit-name-btn');
+            const saveBtn = document.getElementById('save-name-btn');
+            const cancelBtn = document.getElementById('cancel-name-btn');
+
+            if (nameDisplay && nameInput && editBtn && saveBtn && cancelBtn && layoutId) {
+                // Edit button - show input, hide display
+                editBtn.addEventListener('click', function() {
+                    nameDisplay.style.display = 'none';
+                    nameInput.style.display = 'block';
+                    nameInput.focus();
+                    nameInput.select();
+                    editBtn.style.display = 'none';
+                    saveBtn.style.display = 'inline-flex';
+                    cancelBtn.style.display = 'inline-flex';
+                });
+
+                // Cancel button - restore display, hide input
+                cancelBtn.addEventListener('click', function() {
+                    nameInput.value = nameInput.defaultValue;
+                    nameInput.style.display = 'none';
+                    nameDisplay.style.display = 'block';
+                    editBtn.style.display = 'inline-flex';
+                    saveBtn.style.display = 'none';
+                    cancelBtn.style.display = 'none';
+                });
+
+                // Save button - update name
+                saveBtn.addEventListener('click', function() {
+                    const newName = nameInput.value.trim();
+                    if (!newName) {
+                        Toast.error('Layout name cannot be empty');
+                        return;
+                    }
+
+                    // Show saving state
+                    saveBtn.disabled = true;
+                    cancelBtn.disabled = true;
+                    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                    Ajax.post('update_layout_name', { id: layoutId, name: newName })
+                        .then(result => {
+                            if (result.success) {
+                                Toast.success('Layout name updated');
+                                // Update display text and default value
+                                nameDisplay.textContent = newName;
+                                nameInput.defaultValue = newName;
+                                // Switch back to display mode
+                                nameInput.style.display = 'none';
+                                nameDisplay.style.display = 'block';
+                                editBtn.style.display = 'inline-flex';
+                                saveBtn.style.display = 'none';
+                                cancelBtn.style.display = 'none';
+                                saveBtn.innerHTML = '<i class="fas fa-check"></i>';
+                                saveBtn.disabled = false;
+                                cancelBtn.disabled = false;
+                            } else {
+                                Toast.error(result.message || 'Failed to update layout name');
+                                saveBtn.innerHTML = '<i class="fas fa-check"></i>';
+                                saveBtn.disabled = false;
+                                cancelBtn.disabled = false;
+                            }
+                        })
+                        .catch(error => {
+                            Toast.error('Failed to update layout name');
+                            saveBtn.innerHTML = '<i class="fas fa-check"></i>';
+                            saveBtn.disabled = false;
+                            cancelBtn.disabled = false;
+                        });
+                });
+
+                // Handle Enter key to save
+                nameInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        saveBtn.click();
+                    } else if (e.key === 'Escape') {
+                        e.preventDefault();
+                        cancelBtn.click();
+                    }
+                });
             }
         });
     </script>

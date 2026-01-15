@@ -1,16 +1,20 @@
--- =================================================================
--- Layout Module Database Tables
--- =================================================================
--- This migration adds layout builder functionality to the system
--- Run this file to create layout_template and layout_instance tables
--- =================================================================
+-- ============================================================================
+-- Layout System Database Tables and Templates
+-- ============================================================================
+-- Creates layout_template and layout_instance tables
+-- Includes all 13 system layout templates (CSS handled in SCSS)
+-- ============================================================================
 
--- Layout templates table (pre-defined layout templates)
-CREATE TABLE IF NOT EXISTS layout_template (
+-- Drop existing tables if they exist
+DROP TABLE IF EXISTS layout_instance;
+DROP TABLE IF EXISTS layout_template;
+
+-- Layout Template Table (System templates and user-created templates)
+CREATE TABLE layout_template (
     ltid INT(11) AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL COMMENT 'Template name',
     description TEXT COMMENT 'Template description',
-    category ENUM('columns', 'rows', 'mixed', 'advanced') NOT NULL DEFAULT 'columns' COMMENT 'Template category for grouping',
+    category VARCHAR(50) DEFAULT 'basic' COMMENT 'basic, advanced, custom',
     thumbnail VARCHAR(255) DEFAULT NULL COMMENT 'Preview image path',
     structure TEXT NOT NULL COMMENT 'JSON layout structure',
     is_system TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1=system template (cannot be deleted), 0=user template',
@@ -24,8 +28,8 @@ CREATE TABLE IF NOT EXISTS layout_template (
     INDEX idx_is_system (is_system)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Dashboard layout templates';
 
--- Layout instances table (user-created layouts from templates)
-CREATE TABLE IF NOT EXISTS layout_instance (
+-- Layout Instance Table (User layouts created from templates)
+CREATE TABLE layout_instance (
     liid INT(11) AUTO_INCREMENT PRIMARY KEY,
     ltid INT(11) DEFAULT NULL COMMENT 'Source template ID (nullable)',
     name VARCHAR(255) NOT NULL COMMENT 'Layout instance name',
@@ -46,64 +50,582 @@ CREATE TABLE IF NOT EXISTS layout_instance (
     FOREIGN KEY (ltid) REFERENCES layout_template(ltid) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='User layout instances';
 
--- =================================================================
--- Insert System Templates
--- =================================================================
+-- ============================================================================
+-- SYSTEM LAYOUT TEMPLATES (13 total)
+-- CSS styling is handled entirely in SCSS, JSON only contains structure
+-- ============================================================================
 
--- Single Column Layout
-INSERT INTO layout_template (name, description, category, structure, is_system) VALUES
-('Single Column', 'Full width single column layout', 'columns',
-'{"version":"1.0","responsive":{"mobile":{"enabled":true,"breakpoint":768},"tablet":{"enabled":true,"breakpoint":1024},"desktop":{"enabled":true,"breakpoint":1920}},"sections":[{"sid":"s1","type":"row","height":"auto","heightFr":1,"minHeight":"200px","areas":[{"aid":"a1","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"300px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":1,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-bar","message":"Add content here"}}],"gridTemplate":"1fr","gap":"16px"}],"globalConfig":{"gap":"16px","padding":"16px","backgroundColor":"#f5f5f5","minSectionHeight":"200px"}}',
-1);
+-- 1. Single Column Template
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Single Column',
+    'Simple single column layout',
+    'columns',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "1fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-bar", "message": "Add content here"}
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+    1
+);
 
--- Two Equal Columns
-INSERT INTO layout_template (name, description, category, structure, is_system) VALUES
-('Two Equal Columns', '50/50 split layout', 'columns',
-'{"version":"1.0","responsive":{"mobile":{"enabled":true,"breakpoint":768},"tablet":{"enabled":true,"breakpoint":1024},"desktop":{"enabled":true,"breakpoint":1920}},"sections":[{"sid":"s1","type":"row","height":"auto","heightFr":1,"minHeight":"200px","areas":[{"aid":"a1","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"300px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":1,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-bar","message":"Chart"}},{"aid":"a2","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"300px","responsive":{"mobile":{"colSpan":1,"order":2},"tablet":{"colSpan":1,"order":2},"desktop":{"colSpan":1,"order":2}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-table","message":"Table"}}],"gridTemplate":"1fr 1fr","gap":"16px"}],"globalConfig":{"gap":"16px","padding":"16px","backgroundColor":"#f5f5f5","minSectionHeight":"200px"}}',
-1);
+-- 2. Two Column Template
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Two Columns',
+    'Two equal columns side by side',
+    'columns',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "1fr 1fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-bar", "message": "Chart"}
+                    },
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-table", "message": "Table"}
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
 
--- Three Equal Columns
-INSERT INTO layout_template (name, description, category, structure, is_system) VALUES
-('Three Equal Columns', '33/33/33 split layout', 'columns',
-'{"version":"1.0","responsive":{"mobile":{"enabled":true,"breakpoint":768},"tablet":{"enabled":true,"breakpoint":1024},"desktop":{"enabled":true,"breakpoint":1920}},"sections":[{"sid":"s1","type":"row","height":"auto","heightFr":1,"minHeight":"200px","areas":[{"aid":"a1","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"250px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":1,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-line","message":"Metric 1"}},{"aid":"a2","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"250px","responsive":{"mobile":{"colSpan":1,"order":2},"tablet":{"colSpan":1,"order":2},"desktop":{"colSpan":1,"order":2}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-pie","message":"Metric 2"}},{"aid":"a3","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"250px","responsive":{"mobile":{"colSpan":1,"order":3},"tablet":{"colSpan":1,"order":3},"desktop":{"colSpan":1,"order":3}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-area","message":"Metric 3"}}],"gridTemplate":"1fr 1fr 1fr","gap":"16px"}],"globalConfig":{"gap":"16px","padding":"16px","backgroundColor":"#f5f5f5","minSectionHeight":"200px"}}',
-1);
+-- 3. Three Column Template
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Three Columns',
+    'Three equal columns for metrics',
+    'columns',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "1fr 1fr 1fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-line", "message": "Metric 1"}
+                    },
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-pie", "message": "Metric 2"}
+                    },
+                    {
+                        "aid": "a3",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-area", "message": "Metric 3"}
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
 
--- Four Equal Columns
-INSERT INTO layout_template (name, description, category, structure, is_system) VALUES
-('Four Equal Columns', '25/25/25/25 split layout for KPIs', 'columns',
-'{"version":"1.0","responsive":{"mobile":{"enabled":true,"breakpoint":768},"tablet":{"enabled":true,"breakpoint":1024},"desktop":{"enabled":true,"breakpoint":1920}},"sections":[{"sid":"s1","type":"row","height":"auto","heightFr":1,"minHeight":"150px","areas":[{"aid":"a1","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"200px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":2,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-dollar-sign","message":"KPI 1"}},{"aid":"a2","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"200px","responsive":{"mobile":{"colSpan":1,"order":2},"tablet":{"colSpan":2,"order":2},"desktop":{"colSpan":1,"order":2}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-users","message":"KPI 2"}},{"aid":"a3","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"200px","responsive":{"mobile":{"colSpan":1,"order":3},"tablet":{"colSpan":2,"order":3},"desktop":{"colSpan":1,"order":3}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-shopping-cart","message":"KPI 3"}},{"aid":"a4","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"200px","responsive":{"mobile":{"colSpan":1,"order":4},"tablet":{"colSpan":2,"order":4},"desktop":{"colSpan":1,"order":4}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-line","message":"KPI 4"}}],"gridTemplate":"1fr 1fr 1fr 1fr","gap":"16px"}],"globalConfig":{"gap":"16px","padding":"16px","backgroundColor":"#f5f5f5","minSectionHeight":"150px"}}',
-1);
+-- 4. Four Column Template
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Four Columns',
+    'Four equal columns for KPIs',
+    'columns',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "1fr 1fr 1fr 1fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-dollar-sign", "message": "KPI 1"}
+                    },
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-users", "message": "KPI 2"}
+                    },
+                    {
+                        "aid": "a3",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-shopping-cart", "message": "KPI 3"}
+                    },
+                    {
+                        "aid": "a4",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-line", "message": "KPI 4"}
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
 
--- Sidebar Left (25/75)
-INSERT INTO layout_template (name, description, category, structure, is_system) VALUES
-('Sidebar Left', '25/75 split with left sidebar', 'mixed',
-'{"version":"1.0","responsive":{"mobile":{"enabled":true,"breakpoint":768},"tablet":{"enabled":true,"breakpoint":1024},"desktop":{"enabled":true,"breakpoint":1920}},"sections":[{"sid":"s1","type":"row","height":"auto","heightFr":1,"minHeight":"400px","areas":[{"aid":"a1","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"250px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":1,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-bars","message":"Sidebar"}},{"aid":"a2","colSpan":1,"colSpanFr":"3fr","rowSpan":1,"minWidth":"500px","responsive":{"mobile":{"colSpan":1,"order":2},"tablet":{"colSpan":1,"order":2},"desktop":{"colSpan":1,"order":2}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-bar","message":"Main Content"}}],"gridTemplate":"1fr 3fr","gap":"16px"}],"globalConfig":{"gap":"16px","padding":"16px","backgroundColor":"#f5f5f5","minSectionHeight":"400px"}}',
-1);
+-- 5. Left Sidebar Template
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Left Sidebar',
+    'Narrow left sidebar with main content area',
+    'mixed',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "1fr 3fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-bars", "message": "Sidebar"}
+                    },
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "3fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-bar", "message": "Main Content"}
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
 
--- Sidebar Right (75/25)
-INSERT INTO layout_template (name, description, category, structure, is_system) VALUES
-('Sidebar Right', '75/25 split with right sidebar', 'mixed',
-'{"version":"1.0","responsive":{"mobile":{"enabled":true,"breakpoint":768},"tablet":{"enabled":true,"breakpoint":1024},"desktop":{"enabled":true,"breakpoint":1920}},"sections":[{"sid":"s1","type":"row","height":"auto","heightFr":1,"minHeight":"400px","areas":[{"aid":"a1","colSpan":1,"colSpanFr":"3fr","rowSpan":1,"minWidth":"500px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":1,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-area","message":"Main Content"}},{"aid":"a2","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"250px","responsive":{"mobile":{"colSpan":1,"order":2},"tablet":{"colSpan":1,"order":2},"desktop":{"colSpan":1,"order":2}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-info-circle","message":"Info Panel"}}],"gridTemplate":"3fr 1fr","gap":"16px"}],"globalConfig":{"gap":"16px","padding":"16px","backgroundColor":"#f5f5f5","minSectionHeight":"400px"}}',
-1);
+-- 6. Right Sidebar Template
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Right Sidebar',
+    'Main content with narrow right sidebar',
+    'mixed',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "3fr 1fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "3fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-area", "message": "Main Content"}
+                    },
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-info-circle", "message": "Info Panel"}
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
 
--- Holy Grail (25/50/25)
-INSERT INTO layout_template (name, description, category, structure, is_system) VALUES
-('Holy Grail', 'Classic three column layout (1:2:1)', 'mixed',
-'{"version":"1.0","responsive":{"mobile":{"enabled":true,"breakpoint":768},"tablet":{"enabled":true,"breakpoint":1024},"desktop":{"enabled":true,"breakpoint":1920}},"sections":[{"sid":"s1","type":"row","height":"auto","heightFr":1,"minHeight":"400px","areas":[{"aid":"a1","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"200px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":1,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-list","message":"Left Nav"}},{"aid":"a2","colSpan":1,"colSpanFr":"2fr","rowSpan":1,"minWidth":"400px","responsive":{"mobile":{"colSpan":1,"order":2},"tablet":{"colSpan":1,"order":2},"desktop":{"colSpan":1,"order":2}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-line","message":"Main Content"}},{"aid":"a3","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"200px","responsive":{"mobile":{"colSpan":1,"order":3},"tablet":{"colSpan":1,"order":3},"desktop":{"colSpan":1,"order":3}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-cog","message":"Tools"}}],"gridTemplate":"1fr 2fr 1fr","gap":"16px"}],"globalConfig":{"gap":"16px","padding":"16px","backgroundColor":"#f5f5f5","minSectionHeight":"400px"}}',
-1);
+-- 7. Holy Grail Template
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Holy Grail',
+    'Classic three-column layout with navigation, content, and tools',
+    'mixed',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "1fr 2fr 1fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-list", "message": "Left Nav"}
+                    },
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "2fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-line", "message": "Main Content"}
+                    },
+                    {
+                        "aid": "a3",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-cog", "message": "Tools"}
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
 
--- Header + Two Columns
-INSERT INTO layout_template (name, description, category, structure, is_system) VALUES
-('Header + Two Columns', 'Full width header with two equal columns below', 'mixed',
-'{"version":"1.0","responsive":{"mobile":{"enabled":true,"breakpoint":768},"tablet":{"enabled":true,"breakpoint":1024},"desktop":{"enabled":true,"breakpoint":1920}},"sections":[{"sid":"s1","type":"row","height":"auto","heightFr":1,"minHeight":"150px","areas":[{"aid":"a1","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"300px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":1,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-heading","message":"Header / Title"}}],"gridTemplate":"1fr","gap":"16px"},{"sid":"s2","type":"row","height":"auto","heightFr":2,"minHeight":"300px","areas":[{"aid":"a2","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"300px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":1,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-bar","message":"Chart 1"}},{"aid":"a3","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"300px","responsive":{"mobile":{"colSpan":1,"order":2},"tablet":{"colSpan":1,"order":2},"desktop":{"colSpan":1,"order":2}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-pie","message":"Chart 2"}}],"gridTemplate":"1fr 1fr","gap":"16px"}],"globalConfig":{"gap":"16px","padding":"16px","backgroundColor":"#f5f5f5","minSectionHeight":"200px"}}',
-1);
+-- 8. Multi-Section Template (Header + Two Columns)
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Header + Two Columns',
+    'Full-width header with two columns below',
+    'advanced',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "1fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-heading", "message": "Header / Title"}
+                    }
+                ]
+            },
+            {
+                "sid": "s2",
+                "gridTemplate": "1fr 1fr",
+                "areas": [
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-bar", "message": "Chart 1"}
+                    },
+                    {
+                        "aid": "a3",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-pie", "message": "Chart 2"}
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
 
--- Dashboard (KPI + Charts)
-INSERT INTO layout_template (name, description, category, structure, is_system) VALUES
-('Dashboard', 'KPI banner with charts below', 'advanced',
-'{"version":"1.0","responsive":{"mobile":{"enabled":true,"breakpoint":768},"tablet":{"enabled":true,"breakpoint":1024},"desktop":{"enabled":true,"breakpoint":1920}},"sections":[{"sid":"s1","type":"row","height":"auto","heightFr":1,"minHeight":"120px","areas":[{"aid":"a1","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"150px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":2,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-dollar-sign","message":"Revenue"}},{"aid":"a2","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"150px","responsive":{"mobile":{"colSpan":1,"order":2},"tablet":{"colSpan":2,"order":2},"desktop":{"colSpan":1,"order":2}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-shopping-cart","message":"Orders"}},{"aid":"a3","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"150px","responsive":{"mobile":{"colSpan":1,"order":3},"tablet":{"colSpan":2,"order":3},"desktop":{"colSpan":1,"order":3}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-users","message":"Customers"}},{"aid":"a4","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"150px","responsive":{"mobile":{"colSpan":1,"order":4},"tablet":{"colSpan":2,"order":4},"desktop":{"colSpan":1,"order":4}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-percent","message":"Growth"}}],"gridTemplate":"1fr 1fr 1fr 1fr","gap":"16px"},{"sid":"s2","type":"row","height":"auto","heightFr":2,"minHeight":"300px","areas":[{"aid":"a5","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"300px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":1,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-line","message":"Main Chart"}}],"gridTemplate":"1fr","gap":"16px"},{"sid":"s3","type":"row","height":"auto","heightFr":1,"minHeight":"200px","areas":[{"aid":"a6","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"300px","responsive":{"mobile":{"colSpan":1,"order":1},"tablet":{"colSpan":1,"order":1},"desktop":{"colSpan":1,"order":1}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-chart-bar","message":"Chart"}},{"aid":"a7","colSpan":1,"colSpanFr":"1fr","rowSpan":1,"minWidth":"300px","responsive":{"mobile":{"colSpan":1,"order":2},"tablet":{"colSpan":1,"order":2},"desktop":{"colSpan":1,"order":2}},"content":{"type":"empty","widgetId":null,"widgetType":null,"config":{}},"emptyState":{"enabled":true,"icon":"fa-table","message":"Table"}}],"gridTemplate":"1fr 1fr","gap":"16px"}],"globalConfig":{"gap":"16px","padding":"16px","backgroundColor":"#f5f5f5","minSectionHeight":"150px"}}',
-1);
+-- 9. Dashboard Template
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Dashboard',
+    'Complete dashboard with KPIs, main chart, and secondary charts',
+    'advanced',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "1fr 1fr 1fr 1fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-dollar-sign", "message": "Revenue"}
+                    },
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-shopping-cart", "message": "Orders"}
+                    },
+                    {
+                        "aid": "a3",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-users", "message": "Customers"}
+                    },
+                    {
+                        "aid": "a4",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-percent", "message": "Growth"}
+                    }
+                ]
+            },
+            {
+                "sid": "s2",
+                "gridTemplate": "1fr",
+                "areas": [
+                    {
+                        "aid": "a5",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-line", "message": "Main Chart"}
+                    }
+                ]
+            },
+            {
+                "sid": "s3",
+                "gridTemplate": "1fr 1fr",
+                "areas": [
+                    {
+                        "aid": "a6",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-bar", "message": "Chart"}
+                    },
+                    {
+                        "aid": "a7",
+                        "colSpanFr": "1fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-table", "message": "Table"}
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
 
--- =================================================================
--- Migration Complete
--- =================================================================
+-- 10. Left Multi-Row + Right Single
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Left Multi-Row + Right Single',
+    'Left column with 3 rows, right column with single large area',
+    'advanced',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "1fr 2fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "1fr",
+                        "hasSubRows": true,
+                        "subRows": [
+                            {
+                                "rowId": "r1",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-chart-line", "message": "Add chart here"}
+                            },
+                            {
+                                "rowId": "r2",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-table", "message": "Add table here"}
+                            },
+                            {
+                                "rowId": "r3",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-chart-bar", "message": "Add chart here"}
+                            }
+                        ]
+                    },
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "2fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-area", "message": "Add main chart here"}
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
+
+-- 11. Right Multi-Row + Left Single
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Right Multi-Row + Left Single',
+    'Left column with single large area, right column with 3 rows',
+    'advanced',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "2fr 1fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "2fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-area", "message": "Add main chart here"}
+                    },
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "1fr",
+                        "hasSubRows": true,
+                        "subRows": [
+                            {
+                                "rowId": "r1",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-chart-line", "message": "Add chart here"}
+                            },
+                            {
+                                "rowId": "r2",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-table", "message": "Add table here"}
+                            },
+                            {
+                                "rowId": "r3",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-chart-bar", "message": "Add chart here"}
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
+
+-- 12. Two Multi-Row Columns
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Two Multi-Row Columns',
+    'Two columns, each with 2 rows',
+    'advanced',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "1fr 1fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "1fr",
+                        "hasSubRows": true,
+                        "subRows": [
+                            {
+                                "rowId": "r1",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-chart-line", "message": "Top chart"}
+                            },
+                            {
+                                "rowId": "r2",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-table", "message": "Bottom table"}
+                            }
+                        ]
+                    },
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "1fr",
+                        "hasSubRows": true,
+                        "subRows": [
+                            {
+                                "rowId": "r3",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-chart-bar", "message": "Top chart"}
+                            },
+                            {
+                                "rowId": "r4",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-chart-pie", "message": "Bottom chart"}
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
+
+-- 13. Focal Point with Multi-Row
+INSERT INTO layout_template (name, description, category, structure, is_system, ltsid)
+VALUES (
+    'Focal Point with Multi-Row',
+    'Large left area with right column split into 3 rows',
+    'advanced',
+    '{
+        "sections": [
+            {
+                "sid": "s1",
+                "gridTemplate": "2fr 1fr",
+                "areas": [
+                    {
+                        "aid": "a1",
+                        "colSpanFr": "2fr",
+                        "content": {"type": "empty"},
+                        "emptyState": {"icon": "fa-chart-area", "message": "Featured Content"}
+                    },
+                    {
+                        "aid": "a2",
+                        "colSpanFr": "1fr",
+                        "hasSubRows": true,
+                        "subRows": [
+                            {
+                                "rowId": "r1",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-dollar-sign", "message": "KPI 1"}
+                            },
+                            {
+                                "rowId": "r2",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-users", "message": "KPI 2"}
+                            },
+                            {
+                                "rowId": "r3",
+                                "height": "1fr",
+                                "content": {"type": "empty"},
+                                "emptyState": {"icon": "fa-chart-line", "message": "KPI 3"}
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }',
+    1,
+     1
+);
+
+-- ============================================================================
+-- Migration Complete - All 13 System Templates Installed
+-- ============================================================================
