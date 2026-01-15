@@ -25,15 +25,16 @@
 <body>
     <div class="page-header">
         <div class="page-header-left">
-            <h1>Dynamic Graph Creator</h1>
+            <div class="nav-tabs">
+                <a href="?urlq=layout" class="nav-tab active">
+                    <i class="fas fa-layer-group"></i> My Layouts
+                </a>
+                <a href="?urlq=layout/templates" class="nav-tab">
+                    <i class="fas fa-th-large"></i> Templates
+                </a>
+            </div>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=graph" class="btn btn-secondary">
-                <i class="fas fa-chart-bar"></i> Graphs
-            </a>
-            <a href="?urlq=filters" class="btn btn-secondary">
-                <i class="fas fa-filter"></i> Filters
-            </a>
             <a href="?urlq=layout/builder" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create Dashboard
             </a>

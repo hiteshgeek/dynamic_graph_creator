@@ -1,194 +1,129 @@
 // Template Selector Modal Styles
-@use '../variables' as *;
+@use "../variables" as *;
+@use "template-preview-shared" as *;
 
 .layout-template-modal {
-    position: fixed;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .modal-overlay {
+    position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+  }
 
-    .modal-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-content {
-        position: relative;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        max-width: 1200px;
-        width: 90%;
-        max-height: 90vh;
-        display: flex;
-        flex-direction: column;
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: $spacing-md;
-            border-bottom: 1px solid #e0e0e0;
-
-            h2 {
-                font-size: 1.5rem;
-                font-weight: 600;
-                margin: 0;
-            }
-
-            .modal-close {
-                width: 40px;
-                height: 40px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: none;
-                border: none;
-                color: #6c757d;
-                cursor: pointer;
-                border-radius: 8px;
-                transition: all 0.2s;
-
-                &:hover {
-                    background: #f8f9fa;
-                    color: #212529;
-                }
-            }
-        }
-
-        .modal-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: $spacing-md;
-
-            .template-category {
-                margin-bottom: $spacing-md;
-
-                &:last-child {
-                    margin-bottom: 0;
-                }
-
-                h3 {
-                    font-size: 1rem;
-                    font-weight: 600;
-                    color: #212529;
-                    margin-bottom: $spacing-md;
-                }
-
-                .template-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                    gap: $spacing-md;
-                }
-            }
-        }
-    }
-}
-
-.template-card {
+  .modal-content {
+    position: relative;
     background: white;
-    border: 2px solid #e0e0e0;
     border-radius: 12px;
-    padding: $spacing-md;
-    cursor: pointer;
-    transition: border-color 0.3s;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    max-width: 1200px;
+    width: 90%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
 
-    &:hover {
-        border-color: #007bff;
-    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $spacing-md;
+      border-bottom: 1px solid #e0e0e0;
 
-    .template-preview {
-        height: 150px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        margin-bottom: $spacing-md;
+      h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .modal-close {
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: $spacing-sm;
-        overflow: hidden;
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.2s;
 
-        .template-preview-grid {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-
-            .preview-section {
-                flex: 1;
-                background: white;
-                border-radius: 4px;
-                padding: 0 2px;
-
-                &:first-child {
-                    padding-top: 2px;
-                }
-
-                &:last-child {
-                    padding-bottom: 2px;
-                }
-
-                .preview-area {
-                    background: linear-gradient(135deg, $gradient-start 0%, $gradient-end 100%);
-                    border-radius: 2px;
-                    min-height: 20px;
-                }
-
-                .preview-area-nested {
-                    display: grid;
-                    gap: 2px;
-                    padding: 0;
-                    background: transparent;
-                    border-radius: 2px;
-
-                    .preview-sub-row {
-                        background: linear-gradient(135deg, $gradient-start 0%, $gradient-end 100%);
-                        border-radius: 2px;
-                        min-height: 15px;
-                    }
-                }
-            }
+        &:hover {
+          background: #f8f9fa;
+          color: #212529;
         }
-
-        .template-preview-fallback {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, $gradient-start 0%, $gradient-end 100%);
-            border-radius: 8px;
-            color: white;
-
-            i {
-                font-size: 3rem;
-                opacity: 0.8;
-            }
-        }
+      }
     }
 
-    .template-info {
-        h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 0 0 0.25rem 0;
-            color: #212529;
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: $spacing-md;
+
+      .template-category {
+        margin-bottom: $spacing-md;
+
+        &:last-child {
+          margin-bottom: 0;
         }
 
-        p {
-            font-size: 0.875rem;
-            color: #6c757d;
-            margin: 0;
+        h3 {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #212529;
+          margin-bottom: $spacing-md;
         }
+
+        .template-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+          gap: $spacing-md;
+        }
+      }
     }
+  }
+}
+
+.template-card {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: $spacing-md;
+  cursor: pointer;
+  transition: border-color 0.3s;
+
+  &:hover {
+    border-color: #007bff;
+  }
+
+  .template-preview {
+    @include template-preview-small;
+    padding: 0;
+  }
+
+  .template-info {
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+      color: #212529;
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: #6c757d;
+      margin: 0;
+    }
+  }
 }

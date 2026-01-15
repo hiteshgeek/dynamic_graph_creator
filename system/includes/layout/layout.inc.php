@@ -44,6 +44,22 @@ if (isset($_POST['submit'])) {
         case 'reorder_sections':
             reorderSections($_POST);
             break;
+        // Template management actions
+        case 'create_template':
+            createTemplate($_POST);
+            break;
+        case 'update_template':
+            updateTemplate($_POST);
+            break;
+        case 'delete_template':
+            deleteTemplate($_POST);
+            break;
+        case 'duplicate_template':
+            duplicateTemplate($_POST);
+            break;
+        case 'save_template_structure':
+            saveTemplateStructure($_POST);
+            break;
     }
 }
 
@@ -56,6 +72,32 @@ switch ($action) {
     case 'preview':
         $layoutId = isset($url[2]) ? intval($url[2]) : 0;
         showPreview($layoutId);
+        break;
+    case 'templates':
+        showTemplateList();
+        break;
+    case 'template':
+        $subAction = isset($url[2]) ? $url[2] : '';
+        switch ($subAction) {
+            case 'create':
+                showTemplateCreator();
+                break;
+            case 'edit':
+                $templateId = isset($url[3]) ? intval($url[3]) : 0;
+                showTemplateEditor($templateId);
+                break;
+            case 'builder':
+                $templateId = isset($url[3]) ? intval($url[3]) : 0;
+                showTemplateBuilder($templateId);
+                break;
+            case 'preview':
+                $templateId = isset($url[3]) ? intval($url[3]) : 0;
+                showTemplatePreview($templateId);
+                break;
+            default:
+                Utility::redirect('layout/templates');
+                break;
+        }
         break;
     case 'list':
     default:
@@ -467,4 +509,316 @@ function reorderSections($data)
     }
 
     Utility::ajaxResponseTrue('Sections reordered successfully');
+}
+
+// ============================================================
+// TEMPLATE MANAGEMENT FUNCTIONS
+// ============================================================
+
+/**
+ * Show template list
+ */
+function showTemplateList()
+{
+    $templates = LayoutTemplate::getAllGrouped();
+    require_once SystemConfig::templatesPath() . 'layout/template-list.php';
+}
+
+/**
+ * Show template creator form
+ */
+function showTemplateCreator()
+{
+    $pageTitle = 'Create Template';
+    $template = null;
+    require_once SystemConfig::templatesPath() . 'layout/template-editor.php';
+}
+
+/**
+ * Show template editor form
+ */
+function showTemplateEditor($templateId)
+{
+    if (!$templateId) {
+        Utility::redirect('layout/templates');
+        return;
+    }
+
+    $template = new LayoutTemplate($templateId);
+    if (!$template->getId()) {
+        Utility::redirect('layout/templates');
+        return;
+    }
+
+    $pageTitle = 'Edit Template';
+    require_once SystemConfig::templatesPath() . 'layout/template-editor.php';
+}
+
+/**
+ * Show template builder (structure editor)
+ */
+function showTemplateBuilder($templateId)
+{
+    if (!$templateId) {
+        Utility::redirect('layout/templates');
+        return;
+    }
+
+    $template = new LayoutTemplate($templateId);
+    if (!$template->getId()) {
+        Utility::redirect('layout/templates');
+        return;
+    }
+
+    require_once SystemConfig::templatesPath() . 'layout/template-builder.php';
+}
+
+/**
+ * Show template preview
+ */
+function showTemplatePreview($templateId)
+{
+    if (!$templateId) {
+        Utility::redirect('layout/templates');
+        return;
+    }
+
+    $template = new LayoutTemplate($templateId);
+    if (!$template->getId()) {
+        Utility::redirect('layout/templates');
+        return;
+    }
+
+    require_once SystemConfig::templatesPath() . 'layout/template-preview.php';
+}
+
+/**
+ * Create new template
+ */
+function createTemplate($data)
+{
+    $name = isset($data['name']) ? trim($data['name']) : '';
+    $description = isset($data['description']) ? trim($data['description']) : '';
+    $category = isset($data['category']) ? trim($data['category']) : 'custom';
+    // TODO: Get actual user ID from session
+    $userId = 1;
+
+    if (empty($name)) {
+        Utility::ajaxResponseFalse('Template name is required');
+    }
+
+    // Create empty structure with single section
+    $structure = json_encode([
+        'sections' => [
+            [
+                'sid' => 's1',
+                'gridTemplate' => '1fr',
+                'areas' => [
+                    [
+                        'aid' => 'a1',
+                        'colSpanFr' => '1fr',
+                        'content' => ['type' => 'empty'],
+                        'emptyState' => [
+                            'icon' => 'fa-plus-circle',
+                            'message' => 'Add content'
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ]);
+
+    $template = new LayoutTemplate();
+    $template->setName($name);
+    $template->setDescription($description);
+    $template->setCategory($category);
+    $template->setStructure($structure);
+    $template->setIsSystem(0); // User template
+    $template->setLtsid(1); // Active
+    $template->setCreatedUid($userId);
+
+    if (!$template->insert()) {
+        Utility::ajaxResponseFalse('Failed to create template');
+    }
+
+    Utility::ajaxResponseTrue('Template created successfully', array(
+        'ltid' => $template->getId(),
+        'redirect' => '?urlq=layout/template/builder/' . $template->getId()
+    ));
+}
+
+/**
+ * Update template metadata
+ */
+function updateTemplate($data)
+{
+    $templateId = isset($data['id']) ? intval($data['id']) : 0;
+    $name = isset($data['name']) ? trim($data['name']) : '';
+    $description = isset($data['description']) ? trim($data['description']) : '';
+    $category = isset($data['category']) ? trim($data['category']) : '';
+    // TODO: Get actual user ID from session
+    $userId = 1;
+
+    if (!$templateId) {
+        Utility::ajaxResponseFalse('Invalid template ID');
+    }
+
+    if (empty($name)) {
+        Utility::ajaxResponseFalse('Template name is required');
+    }
+
+    $template = new LayoutTemplate($templateId);
+    if (!$template->getId()) {
+        Utility::ajaxResponseFalse('Template not found');
+    }
+
+    // Protect system templates
+    if ($template->getIsSystem()) {
+        Utility::ajaxResponseFalse('Cannot modify system templates');
+    }
+
+    $template->setName($name);
+    $template->setDescription($description);
+    if (!empty($category)) {
+        $template->setCategory($category);
+    }
+    $template->setUpdatedUid($userId);
+
+    if (!$template->update()) {
+        Utility::ajaxResponseFalse('Failed to update template');
+    }
+
+    Utility::ajaxResponseTrue('Template updated successfully', array(
+        'ltid' => $template->getId(),
+        'name' => $template->getName()
+    ));
+}
+
+/**
+ * Delete template (soft delete)
+ */
+function deleteTemplate($data)
+{
+    $templateId = isset($data['id']) ? intval($data['id']) : 0;
+
+    if (!$templateId) {
+        Utility::ajaxResponseFalse('Invalid template ID');
+    }
+
+    $template = new LayoutTemplate($templateId);
+    if (!$template->getId()) {
+        Utility::ajaxResponseFalse('Template not found');
+    }
+
+    // Protect system templates
+    if ($template->getIsSystem()) {
+        Utility::ajaxResponseFalse('Cannot delete system templates');
+    }
+
+    // Check if template is in use by any layouts
+    $db = Database::getInstance();
+    $sql = "SELECT COUNT(*) as count FROM " . SystemTables::LAYOUT_INSTANCE . "
+            WHERE ltid = ? AND lisid != 3";
+    $result = $db->fetchOne($sql, [$templateId]);
+
+    if ($result && $result['count'] > 0) {
+        Utility::ajaxResponseFalse(
+            'Cannot delete template. It is being used by ' . $result['count'] . ' layout(s)'
+        );
+    }
+
+    if (!LayoutTemplate::delete($templateId)) {
+        Utility::ajaxResponseFalse('Failed to delete template');
+    }
+
+    Utility::ajaxResponseTrue('Template deleted successfully');
+}
+
+/**
+ * Duplicate template
+ */
+function duplicateTemplate($data)
+{
+    $templateId = isset($data['id']) ? intval($data['id']) : 0;
+    // TODO: Get actual user ID from session
+    $userId = 1;
+
+    if (!$templateId) {
+        Utility::ajaxResponseFalse('Invalid template ID');
+    }
+
+    $sourceTemplate = new LayoutTemplate($templateId);
+    if (!$sourceTemplate->getId()) {
+        Utility::ajaxResponseFalse('Template not found');
+    }
+
+    // Create duplicate
+    $newTemplate = new LayoutTemplate();
+    $newTemplate->setName($sourceTemplate->getName() . ' (Copy)');
+    $newTemplate->setDescription($sourceTemplate->getDescription());
+    $newTemplate->setCategory($sourceTemplate->getCategory());
+    $newTemplate->setThumbnail($sourceTemplate->getThumbnail());
+    $newTemplate->setStructure($sourceTemplate->getStructure());
+    $newTemplate->setIsSystem(0); // Always user template
+    $newTemplate->setLtsid(1);
+    $newTemplate->setCreatedUid($userId);
+
+    if (!$newTemplate->insert()) {
+        Utility::ajaxResponseFalse('Failed to duplicate template');
+    }
+
+    Utility::ajaxResponseTrue('Template duplicated successfully', array(
+        'ltid' => $newTemplate->getId(),
+        'redirect' => '?urlq=layout/template/builder/' . $newTemplate->getId()
+    ));
+}
+
+/**
+ * Save template structure
+ */
+function saveTemplateStructure($data)
+{
+    $templateId = isset($data['id']) ? intval($data['id']) : 0;
+    $structure = isset($data['structure']) ? $data['structure'] : '';
+    // TODO: Get actual user ID from session
+    $userId = 1;
+
+    if (!$templateId) {
+        Utility::ajaxResponseFalse('Invalid template ID');
+    }
+
+    if (empty($structure)) {
+        Utility::ajaxResponseFalse('Template structure is required');
+    }
+
+    // Validate structure
+    $structureArray = json_decode($structure, true);
+    if (!$structureArray) {
+        Utility::ajaxResponseFalse('Invalid JSON structure');
+    }
+
+    if (!LayoutBuilder::validateStructure($structureArray)) {
+        Utility::ajaxResponseFalse('Invalid template structure');
+    }
+
+    $template = new LayoutTemplate($templateId);
+    if (!$template->getId()) {
+        Utility::ajaxResponseFalse('Template not found');
+    }
+
+    // Protect system templates
+    if ($template->getIsSystem()) {
+        Utility::ajaxResponseFalse('Cannot modify system templates');
+    }
+
+    $template->setStructure($structure);
+    $template->setUpdatedUid($userId);
+
+    if (!$template->update()) {
+        Utility::ajaxResponseFalse('Failed to save template structure');
+    }
+
+    Utility::ajaxResponseTrue('Template saved successfully', array(
+        'ltid' => $template->getId()
+    ));
 }

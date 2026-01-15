@@ -4,6 +4,7 @@
  */
 
 import Sortable from 'sortablejs';
+import { TemplateManager } from './layout/TemplateManager.js';
 
 // Use globals from common.js (Toast, Loading, Ajax, ConfirmDialog)
 const Toast = window.Toast;
@@ -17,8 +18,10 @@ const ConfirmDialog = window.ConfirmDialog;
 class LayoutBuilder {
     constructor(container, options = {}) {
         this.container = container;
+        this.mode = options.mode || 'layout'; // 'layout' or 'template'
         this.layoutId = options.layoutId || null;
-        this.mode = options.mode || 'edit';
+        this.templateId = options.templateId || null;
+        this.isReadOnly = options.isReadOnly || false;
         this.currentLayout = null;
         this.isDirty = false;
         this.isSaving = false;
@@ -29,12 +32,56 @@ class LayoutBuilder {
     }
 
     init() {
-        if (this.layoutId) {
+        if (this.mode === 'template' && this.templateId) {
+            this.loadTemplate();
+        } else if (this.layoutId) {
             this.loadLayout();
         } else {
             this.showTemplateSelector();
         }
         this.initEventHandlers();
+    }
+
+    async loadTemplate() {
+        if (!this.templateId) {
+            console.error('No template ID specified');
+            return;
+        }
+
+        Loading.show('Loading template...');
+
+        try {
+            // Load template data (we'll use a dedicated endpoint or adapt get_layout)
+            const result = await Ajax.post('get_templates', {});
+
+            if (result.success && result.data) {
+                // Find the template from the grouped data
+                let template = null;
+                for (const category in result.data) {
+                    template = result.data[category].find(t => t.ltid === this.templateId);
+                    if (template) break;
+                }
+
+                if (template) {
+                    // Convert template to layout-like structure for rendering
+                    this.currentLayout = {
+                        liid: null, // No layout instance ID
+                        name: template.name,
+                        structure: template.structure
+                    };
+                    this.renderLayout();
+                } else {
+                    Toast.error('Template not found');
+                }
+            } else {
+                Toast.error('Failed to load template');
+            }
+        } catch (error) {
+            console.error('Template load error:', error);
+            Toast.error('Failed to load template');
+        } finally {
+            Loading.hide();
+        }
     }
 
     async loadLayout() {
@@ -494,22 +541,40 @@ class LayoutBuilder {
     async saveLayout(showToast = false) {
         if (!this.currentLayout || this.isSaving) return;
 
+        // Don't save if read-only (system templates)
+        if (this.isReadOnly) {
+            Toast.warning('Cannot modify system templates');
+            return;
+        }
+
         this.isSaving = true;
         this.updateSaveIndicator('saving');
 
         try {
-            const result = await Ajax.post('save_layout', {
-                layout_id: this.layoutId,
-                name: this.currentLayout.name,
-                structure: this.currentLayout.structure,
-                config: this.currentLayout.config || '{}'
-            });
+            const endpoint = this.mode === 'template' ? 'save_template_structure' : 'save_layout';
+            const data = this.mode === 'template'
+                ? {
+                    id: this.templateId,
+                    structure: this.currentLayout.structure
+                }
+                : {
+                    layout_id: this.layoutId,
+                    name: this.currentLayout.name,
+                    structure: this.currentLayout.structure,
+                    config: this.currentLayout.config || '{}'
+                };
+
+            const result = await Ajax.post(endpoint, data);
 
             if (result.success) {
                 this.isDirty = false;
                 this.updateSaveIndicator('saved');
                 if (showToast) {
-                    Toast.success('Layout saved successfully');
+                    Toast.success(
+                        this.mode === 'template'
+                            ? 'Template saved successfully'
+                            : 'Layout saved successfully'
+                    );
                 }
             } else {
                 this.updateSaveIndicator('error');
@@ -517,7 +582,11 @@ class LayoutBuilder {
             }
         } catch (error) {
             this.updateSaveIndicator('error');
-            Toast.error('Failed to save layout');
+            Toast.error(
+                this.mode === 'template'
+                    ? 'Failed to save template'
+                    : 'Failed to save layout'
+            );
         } finally {
             this.isSaving = false;
         }
@@ -693,3 +762,17 @@ class LayoutBuilder {
 
 // Expose to window
 window.LayoutBuilder = LayoutBuilder;
+
+// Initialize template management on template list page
+if (document.querySelector('.template-list-page')) {
+    document.addEventListener('DOMContentLoaded', () => {
+        TemplateManager.initTemplateList();
+    });
+}
+
+// Initialize template management on template preview page
+if (document.querySelector('[data-template-id].layout-preview')) {
+    document.addEventListener('DOMContentLoaded', () => {
+        TemplateManager.initTemplateList();
+    });
+}

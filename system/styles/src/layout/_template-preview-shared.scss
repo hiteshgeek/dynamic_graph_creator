@@ -1,0 +1,139 @@
+// Shared Template Preview Styles
+@use "../variables" as *;
+
+// Base template preview styles shared across all contexts
+%template-preview-base {
+  background: #f8f9fa;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  .template-preview-grid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .preview-section {
+      flex: 1;
+      background: white;
+
+      &:first-child {
+        padding-top: var(--preview-gap);
+      }
+
+      &:last-child {
+        padding-bottom: var(--preview-gap);
+      }
+
+      .preview-area {
+        background: $template-preview-color;
+        min-height: var(--preview-min-height);
+      }
+
+      .preview-area-nested {
+        display: grid;
+        padding: 0;
+        background: transparent;
+
+        .preview-sub-row {
+          background: $template-preview-color;
+        }
+      }
+    }
+  }
+
+  .template-preview-fallback {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $template-preview-color;
+    border-radius: 8px;
+    color: #1976d2;
+
+    i {
+      opacity: 0.5;
+    }
+  }
+}
+
+// Small preview variant (selector modal, list cards)
+@mixin template-preview-small {
+  @extend %template-preview-base;
+  --preview-gap: 2px;
+  --preview-min-height: 20px;
+  height: 150px;
+  margin-bottom: $spacing-md;
+
+  .template-preview-grid {
+    gap: 2px;
+
+    .preview-section {
+      border-radius: 4px;
+      padding: 0 2px;
+
+      .preview-area {
+        border-radius: 2px;
+      }
+
+      .preview-area-nested {
+        gap: 2px;
+        border-radius: 2px;
+
+        .preview-sub-row {
+          border-radius: 2px;
+          min-height: 15px;
+        }
+      }
+    }
+  }
+
+  .template-preview-fallback {
+    i {
+      font-size: 3rem;
+    }
+  }
+}
+
+// Large preview variant (preview page)
+@mixin template-preview-large {
+  @extend %template-preview-base;
+  --preview-gap: 4px;
+  --preview-min-height: 40px;
+  height: 400px;
+  margin-bottom: $spacing-lg;
+  padding: $spacing-md;
+
+  .template-preview-grid {
+    gap: 4px;
+
+    .preview-section {
+      border-radius: 6px;
+      padding: 0 4px;
+
+      .preview-area {
+        border-radius: 4px;
+      }
+
+      .preview-area-nested {
+        gap: 4px;
+        border-radius: 4px;
+
+        .preview-sub-row {
+          border-radius: 4px;
+          min-height: 30px;
+        }
+      }
+    }
+  }
+
+  .template-preview-fallback {
+    i {
+      font-size: 5rem;
+    }
+  }
+}
