@@ -577,9 +577,18 @@ class DashboardBuilder {
             </button>
         `;
 
-    // Grid size indicator
+    // Grid size indicator - show column widths and row heights for nested areas
+    // Format: "1fr | 2fr (2fr/1fr) | 1fr" where (2fr/1fr) shows row heights
+    const gridIndicatorParts = section.areas.map((area, idx) => {
+      const colWidth = columnWidths[idx];
+      if (area.hasSubRows && area.subRows && area.subRows.length > 0) {
+        const rowHeights = area.subRows.map(r => r.height || '1fr').join('/');
+        return `${colWidth} (${rowHeights})`;
+      }
+      return colWidth;
+    });
     const gridIndicator = `<div class="grid-size-indicator" data-section-id="${section.sid}">
-            ${columnWidths.join(" | ")}
+            ${gridIndicatorParts.join(" | ")}
         </div>`;
 
     return `<div class="dashboard-section-wrapper" data-section-id="${section.sid}">
@@ -618,9 +627,10 @@ class DashboardBuilder {
     const hasRoomToGrowRows = totalRowFr < maxRowTotalFr;
 
     // Calculate add row options - same logic as columns
-    // Can add if: under max rows AND (there's room to grow OR ANY row can give 1fr)
+    // Can add if: there's room to grow OR ANY row can give 1fr
+    // The MAX_ROWS limit is enforced in addRowAt(), here we just check if adding is possible
     const anyRowCanGive = heights.some((h) => h > GRID_CONFIG.MIN_FR_UNITS);
-    const canAddRow = numRows < GRID_CONFIG.MAX_ROWS_PER_COLUMN && (hasRoomToGrowRows || anyRowCanGive);
+    const canAddRow = hasRoomToGrowRows || anyRowCanGive;
 
     let subRowsHtml = "";
 
@@ -676,7 +686,11 @@ class DashboardBuilder {
                 </div>
             </div>`;
 
-      subRowsHtml += `<div class="dashboard-sub-row" data-row-id="${subRow.rowId}" data-row-index="${rowIndex}">
+      // Calculate min-height based on fr value (150px per fr unit, matching .dashboard-area min-height)
+      const rowFr = parseInt(subRow.height) || 1;
+      const minRowHeight = rowFr * 150;
+
+      subRowsHtml += `<div class="dashboard-sub-row" data-row-id="${subRow.rowId}" data-row-index="${rowIndex}" style="min-height: ${minRowHeight}px;">
                 ${controls}
                 ${
                   subRow.content && subRow.content.type === "empty"
@@ -686,7 +700,12 @@ class DashboardBuilder {
             </div>`;
     });
 
-    return `<div class="dashboard-area dashboard-area-nested" data-area-id="${area.aid}" data-area-index="${areaIndex}" style="grid-template-rows: ${rowHeights};">
+    // Calculate min-height for the nested container based on total fr (150px per fr unit)
+    // This gives the grid actual space to distribute among rows
+    const totalFrForHeight = heights.reduce((sum, h) => sum + h, 0);
+    const nestedMinHeight = totalFrForHeight * 150;
+
+    return `<div class="dashboard-area dashboard-area-nested" data-area-id="${area.aid}" data-area-index="${areaIndex}" style="grid-template-rows: ${rowHeights}; min-height: ${nestedMinHeight}px;">
             ${subRowsHtml}
         </div>`;
   }
