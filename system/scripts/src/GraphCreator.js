@@ -45,6 +45,7 @@ export default class GraphCreator {
         this.initSaveHandler();
         this.initTabs();
         this.initCollapsiblePanels();
+        this.initSidebarFilters();
 
         // Load existing graph if editing
         if (this.graphId) {
@@ -238,6 +239,102 @@ export default class GraphCreator {
                         this.preview.resize();
                     }
                 }, 350);
+            });
+        });
+    }
+
+    /**
+     * Initialize sidebar filters (multi-select dropdowns, etc.)
+     */
+    initSidebarFilters() {
+        const filtersContainer = this.container.querySelector('#graph-filters');
+        if (!filtersContainer) return;
+
+        // Initialize multi-select dropdowns
+        const multiSelectDropdowns = filtersContainer.querySelectorAll('.filter-multiselect-dropdown');
+        multiSelectDropdowns.forEach(dropdown => {
+            const trigger = dropdown.querySelector('.filter-multiselect-trigger');
+            const optionsPanel = dropdown.querySelector('.filter-multiselect-options');
+            const placeholder = dropdown.querySelector('.filter-multiselect-placeholder');
+            const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+
+            if (!trigger || !optionsPanel) return;
+
+            // Toggle dropdown on trigger click
+            trigger.addEventListener('click', (e) => {
+                e.stopPropagation();
+
+                // Close other open dropdowns
+                multiSelectDropdowns.forEach(other => {
+                    if (other !== dropdown) {
+                        other.querySelector('.filter-multiselect-options')?.classList.remove('open');
+                        const icon = other.querySelector('.filter-multiselect-trigger i');
+                        if (icon) {
+                            icon.classList.remove('fa-chevron-up');
+                            icon.classList.add('fa-chevron-down');
+                        }
+                    }
+                });
+
+                optionsPanel.classList.toggle('open');
+                const icon = trigger.querySelector('i');
+                if (icon) {
+                    icon.classList.toggle('fa-chevron-down');
+                    icon.classList.toggle('fa-chevron-up');
+                }
+            });
+
+            // Update placeholder text when checkboxes change
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const selected = Array.from(checkboxes)
+                        .filter(cb => cb.checked)
+                        .map(cb => cb.nextElementSibling?.textContent || cb.value);
+
+                    if (selected.length === 0) {
+                        placeholder.textContent = '-- Select multiple --';
+                    } else if (selected.length <= 2) {
+                        placeholder.textContent = selected.join(', ');
+                    } else {
+                        placeholder.textContent = `${selected.length} selected`;
+                    }
+                });
+            });
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.filter-multiselect-dropdown')) {
+                multiSelectDropdowns.forEach(dropdown => {
+                    dropdown.querySelector('.filter-multiselect-options')?.classList.remove('open');
+                    const icon = dropdown.querySelector('.filter-multiselect-trigger i');
+                    if (icon) {
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                    }
+                });
+            }
+        });
+
+        // Copy filter placeholder to clipboard on click
+        const placeholders = filtersContainer.querySelectorAll('.filter-placeholder');
+        placeholders.forEach(placeholder => {
+            placeholder.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const text = placeholder.textContent;
+                try {
+                    await navigator.clipboard.writeText(text);
+                    Toast.success(`Copied "${text}" to clipboard`);
+                } catch (err) {
+                    // Fallback for older browsers
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    Toast.success(`Copied "${text}" to clipboard`);
+                }
             });
         });
     }

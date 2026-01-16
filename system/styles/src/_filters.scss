@@ -530,26 +530,188 @@
   gap: $spacing-xs;
 }
 
-.filter-display-item {
+// Filter Input Items (Graph Creator Sidebar)
+.filter-input-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   padding: $spacing-sm;
   background: $gray-50;
   border-radius: $border-radius;
   border: 1px solid $border-color;
+  gap: $spacing-xs;
+
+  &:hover {
+    border-color: $primary-light;
+  }
+}
+
+.filter-input-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.filter-input-label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+  margin: 0;
+}
+
+.filter-placeholder {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: $gray-200;
+  color: $text-hint;
+  border-radius: 4px;
+  font-family: monospace;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    background: $primary;
+    color: white;
+  }
+}
+
+.filter-input {
+  font-size: $font-size-sm !important;
+}
+
+.filter-checkbox-group,
+.filter-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 120px;
+  overflow-y: auto;
+  padding: $spacing-xs;
+  background: white;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+}
+
+.filter-checkbox,
+.filter-radio {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  cursor: pointer;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+  padding: 2px 0;
+
+  input {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+.filter-date-range {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .date-range-separator {
+    font-size: $font-size-sm;
+    color: $text-hint;
+    flex-shrink: 0;
+  }
+}
+
+// Legacy display item styles (keep for backward compatibility)
+.filter-display-item {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-sm;
+  background: $gray-50;
+  border-radius: $border-radius;
+  border: 1px solid $border-color;
+  gap: $spacing-xs;
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: $primary-light;
+    background: rgba($primary, 0.02);
+  }
+}
+
+.filter-display-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-display-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
 }
 
 .filter-display-label {
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
   color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .filter-display-type {
-  font-size: 11px;
+  font-size: 10px;
   color: $text-hint;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-display-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.filter-value-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: white;
+  border: 1px solid $border-color;
+  border-radius: 10px;
+  color: $text-secondary;
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filter-value-more {
+  font-size: 10px;
+  padding: 2px 6px;
+  background: $gray-200;
+  border-radius: 10px;
+  color: $text-hint;
+  font-style: italic;
+}
+
+.filter-display-hint {
+  font-size: 10px;
+  color: $text-hint;
+  font-style: italic;
+  margin-top: 2px;
 }
 
 .filters-empty {

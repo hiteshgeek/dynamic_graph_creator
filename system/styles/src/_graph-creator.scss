@@ -44,7 +44,7 @@
   border-radius: $border-radius-lg;
   box-shadow: $shadow-1;
   height: fit-content;
-  overflow: hidden;
+  overflow: visible;
   transition: all $transition-normal;
 
   &.collapsed {
@@ -173,6 +173,7 @@
 
 .collapsible-content {
   padding: $spacing-md;
+  overflow: visible;
 }
 
 // Sidebar sections (inside collapsible content)
@@ -544,5 +545,219 @@
 
   .btn {
     height: 38px;
+  }
+}
+
+// Filters panel in sidebar
+.filters-panel {
+  overflow: visible;
+
+  .filters-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-sm;
+    overflow: visible;
+  }
+
+  .filters-empty {
+    padding: $spacing-md;
+    text-align: center;
+    color: $text-hint;
+    font-size: $font-size-sm;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  .filters-manage-btn {
+    width: 100%;
+  }
+}
+
+// Filter input items (Graph Creator Sidebar)
+.filter-input-item {
+  display: flex;
+  flex-direction: column;
+  padding: $spacing-sm;
+  background: $gray-50;
+  border-radius: $border-radius;
+  border: 1px solid $border-color;
+  gap: $spacing-xs;
+  overflow: visible;
+
+  &:hover {
+    border-color: $primary-light;
+  }
+}
+
+.filter-input-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.filter-input-label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+  margin: 0;
+}
+
+.filter-placeholder {
+  font-size: 11px;
+  padding: 3px 8px;
+  background: $warning;
+  color: white;
+  border-radius: 4px;
+  font-family: monospace;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: all $transition-fast;
+  flex-shrink: 0;
+
+  &:hover {
+    background: #e67e00;
+    color: white;
+  }
+}
+
+.filter-input {
+  font-size: $font-size-sm;
+}
+
+// Checkbox and radio groups
+.filter-checkbox-group,
+.filter-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 120px;
+  overflow-y: auto;
+  padding: $spacing-xs;
+  background: white;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+}
+
+.filter-checkbox,
+.filter-radio {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 2px 0;
+  cursor: pointer;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+
+  input {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+// Date range filter
+.filter-date-range {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .date-range-separator {
+    font-size: $font-size-sm;
+    color: $text-hint;
+    flex-shrink: 0;
+  }
+}
+
+// Multi-select dropdown with checkboxes
+.filter-multiselect-dropdown {
+  position: relative;
+}
+
+.filter-multiselect-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-xs $spacing-sm;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  background: white;
+  cursor: pointer;
+  transition: border-color $transition-fast;
+  font-size: $font-size-sm;
+
+  &:hover {
+    border-color: $gray-400;
+  }
+
+  i {
+    color: $text-hint;
+    font-size: 10px;
+    transition: transform $transition-fast;
+  }
+}
+
+.filter-multiselect-placeholder {
+  color: $text-hint;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filter-multiselect-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  padding: $spacing-xs 0;
+  background: white;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  box-shadow: $shadow-2;
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 100;
+  display: none;
+
+  &.open {
+    display: block;
+  }
+}
+
+.filter-multiselect-option {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  cursor: pointer;
+  transition: background $transition-fast;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+
+  &:hover {
+    background: $gray-50;
+  }
+
+  input {
+    margin: 0;
+    cursor: pointer;
+  }
+
+  span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
