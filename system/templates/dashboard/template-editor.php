@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,12 +17,13 @@
 
     <!-- Custom CSS -->
     <?php if ($css = Utility::getCss('common')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
+        <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
     <?php if ($css = Utility::getCss('dashboard')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
+        <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
 </head>
+
 <body>
     <?php
     echo Utility::renderPageHeader([
@@ -39,21 +41,21 @@
                             <div class="mb-3">
                                 <label for="template-name" class="form-label">Template Name *</label>
                                 <input type="text"
-                                       class="form-control"
-                                       id="template-name"
-                                       name="name"
-                                       placeholder="Enter template name"
-                                       value="<?php echo $template ? htmlspecialchars($template->getName()) : ''; ?>"
-                                       required>
+                                    class="form-control"
+                                    id="template-name"
+                                    name="name"
+                                    placeholder="Enter template name"
+                                    value="<?php echo $template ? htmlspecialchars($template->getName()) : ''; ?>"
+                                    required>
                             </div>
 
                             <div class="mb-3">
                                 <label for="template-description" class="form-label">Description</label>
                                 <textarea class="form-control"
-                                          id="template-description"
-                                          name="description"
-                                          rows="3"
-                                          placeholder="Enter template description (optional)"><?php echo $template ? htmlspecialchars($template->getDescription()) : ''; ?></textarea>
+                                    id="template-description"
+                                    name="description"
+                                    rows="3"
+                                    placeholder="Enter template description (optional)"><?php echo $template ? htmlspecialchars($template->getDescription()) : ''; ?></textarea>
                             </div>
 
                             <div class="mb-3">
@@ -61,10 +63,10 @@
                                 <select class="form-select select-with-create" id="template-category" name="dtcid">
                                     <option value="">None (Uncategorized)</option>
                                     <?php foreach ($categories as $category): ?>
-                                    <option value="<?php echo $category->getId(); ?>"
+                                        <option value="<?php echo $category->getId(); ?>"
                                             <?php echo ($template && $template->getDtcid() == $category->getId()) ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($category->getName()); ?>
-                                    </option>
+                                            <?php echo htmlspecialchars($category->getName()); ?>
+                                        </option>
                                     <?php endforeach; ?>
                                     <option value="__new__" class="option-create-new">+ Create New Category</option>
                                 </select>
@@ -75,30 +77,27 @@
                                 <div class="mb-3">
                                     <label for="new-category-name" class="form-label">Category Name *</label>
                                     <input type="text"
-                                           class="form-control"
-                                           id="new-category-name"
-                                           name="new_category_name"
-                                           placeholder="Enter category name">
+                                        class="form-control"
+                                        id="new-category-name"
+                                        name="new_category_name"
+                                        placeholder="Enter category name">
                                 </div>
                                 <div class="mb-3">
                                     <label for="new-category-description" class="form-label">Category Description</label>
                                     <textarea class="form-control"
-                                              id="new-category-description"
-                                              name="new_category_description"
-                                              rows="2"
-                                              placeholder="Enter category description (optional)"></textarea>
+                                        id="new-category-description"
+                                        name="new_category_description"
+                                        rows="2"
+                                        placeholder="Enter category description (optional)"></textarea>
                                 </div>
                             </div>
 
                             <?php if ($template && $template->getId()): ?>
-                            <input type="hidden" name="id" value="<?php echo $template->getId(); ?>">
+                                <input type="hidden" name="id" value="<?php echo $template->getId(); ?>">
                             <?php endif; ?>
 
                             <div class="d-flex justify-content-end gap-2">
-                                <a href="?urlq=dashboard/templates" class="btn btn-secondary">
-                                    <i class="fas fa-times"></i> Cancel
-                                </a>
-                                <button type="submit" class="btn btn-primary" id="submit-btn">
+                                <button type="submit" class="btn btn-sm btn-primary" id="submit-btn">
                                     <i class="fas fa-check"></i> <?php echo $template && $template->getId() ? 'Update' : 'Create & Edit Structure'; ?>
                                 </button>
                             </div>
@@ -114,11 +113,11 @@
 
     <!-- Custom JS -->
     <?php if ($js = Utility::getJs('common')): ?>
-    <script src="<?php echo $js; ?>"></script>
+        <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
     <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('dashboard')): ?>
-    <script src="<?php echo $js; ?>"></script>
+        <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
 
     <script>
@@ -266,4 +265,5 @@
         });
     </script>
 </body>
+
 </html>

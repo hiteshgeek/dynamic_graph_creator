@@ -8,7 +8,7 @@
   .template-category-section {
     margin-bottom: 1.5rem;
     padding-bottom: 1.5rem;
-    border-bottom: 2px solid #e0e0e0;
+    border-bottom: 2px solid var(--dgc-border-color);
 
     &:last-child {
       border-bottom: none;
@@ -16,12 +16,12 @@
     }
 
     .category-header {
-      background: white;
-      border: 1px solid #e0e0e0;
+      background: var(--dgc-bg-card);
+      border: 1px solid var(--dgc-border-color);
       border-radius: 6px;
       padding: 0.5rem 0.75rem;
       margin-bottom: 1rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      box-shadow: var(--dgc-shadow-1);
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
@@ -49,7 +49,7 @@
           transform: translateY(-50%);
           width: 3px;
           height: 1.25rem;
-          background: $primary;
+          background: var(--dgc-primary);
           border-radius: 2px;
         }
       }
@@ -58,7 +58,7 @@
         font-size: 0.875rem;
         font-weight: 600;
         margin: 0;
-        color: #495057;
+        color: var(--dgc-text-primary);
         text-transform: uppercase;
         letter-spacing: 0.5px;
       }
@@ -70,8 +70,8 @@
         min-width: 1.25rem;
         height: 1.25rem;
         padding: 0 0.35rem;
-        background: #f1f3f4;
-        color: #5f6368;
+        background: var(--dgc-gray-100);
+        color: var(--dgc-text-secondary);
         font-size: 0.7rem;
         font-weight: 600;
         border-radius: 10px;
@@ -79,7 +79,7 @@
 
       .category-description {
         font-size: 0.75rem;
-        color: #6c757d;
+        color: var(--dgc-text-secondary);
         margin: 0;
         line-height: 1.4;
       }
@@ -88,8 +88,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: #e3f2fd;
-        color: #1976d2;
+        background: var(--dgc-info-bg);
+        color: var(--dgc-info-dark);
         font-size: 0.65rem;
         padding: 0.2rem 0.4rem;
         border-radius: 4px;
@@ -100,7 +100,7 @@
         border: none;
         padding: 0.25rem;
         cursor: pointer;
-        color: #6c757d;
+        color: var(--dgc-text-secondary);
         font-size: 0.75rem;
         transition: all 0.2s;
         display: flex;
@@ -114,20 +114,20 @@
         }
 
         &:hover {
-          color: $primary;
+          color: var(--dgc-primary);
         }
       }
 
       .category-drag-handle {
         cursor: grab;
-        color: #adb5bd;
+        color: var(--dgc-text-hint);
         font-size: 0.875rem;
         padding: 0.25rem;
         transition: all 0.2s;
         opacity: 0;
 
         &:hover {
-          color: #6c757d;
+          color: var(--dgc-text-secondary);
         }
 
         &:active {
@@ -165,8 +165,8 @@
 
   // Reuse template card styles from template-selector
   .template-card {
-    background: white;
-    border: 2px solid #e0e0e0;
+    background: var(--dgc-bg-card);
+    border: 2px solid var(--dgc-border-color);
     border-radius: 12px;
     padding: $spacing-md;
     cursor: default;
@@ -177,8 +177,8 @@
     position: relative;
 
     &:hover {
-      border-color: $primary;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-color: var(--dgc-primary);
+      box-shadow: var(--dgc-shadow-2);
 
       .template-card-actions .template-drag-handle {
         opacity: 1;
@@ -199,12 +199,12 @@
         font-size: 1rem;
         font-weight: 600;
         margin: 0 0 0.25rem 0;
-        color: #212529;
+        color: var(--dgc-text-primary);
       }
 
       p {
         font-size: 0.875rem;
-        color: #6c757d;
+        color: var(--dgc-text-secondary);
         margin: 0 0 0.5rem 0;
         line-height: 1.4;
         display: -webkit-box;
@@ -228,8 +228,8 @@
           font-weight: 500;
 
           &.badge-system {
-            background: #e3f2fd;
-            color: #1976d2;
+            background: var(--dgc-info-bg);
+            color: var(--dgc-info-dark);
 
             i {
               margin-right: 0.25rem;
@@ -237,13 +237,13 @@
           }
 
           &.badge-custom {
-            background: #f3e5f5;
-            color: #7b1fa2;
+            background: rgba(123, 31, 162, 0.1);
+            color: #9c27b0;
           }
 
           &.badge-category {
-            background: #f5f5f5;
-            color: #757575;
+            background: var(--dgc-gray-100);
+            color: var(--dgc-text-secondary);
           }
         }
       }
@@ -256,19 +256,19 @@
       align-items: center;
       padding-top: $spacing-md;
       margin-top: auto;
-      border-top: 1px solid #e0e0e0;
+      border-top: 1px solid var(--dgc-border-color);
 
       .template-drag-handle {
         margin-left: auto;
         cursor: grab;
-        color: #adb5bd;
+        color: var(--dgc-text-hint);
         font-size: 1rem;
         padding: 0.25rem 0.5rem;
         transition: all 0.2s;
         opacity: 0;
 
         &:hover {
-          color: #6c757d;
+          color: var(--dgc-text-secondary);
         }
 
         &:active {
@@ -286,51 +286,51 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid #dee2e6;
-        background: white;
-        color: #6c757d;
+        border: 1px solid var(--dgc-border-color);
+        background: var(--dgc-bg-card);
+        color: var(--dgc-text-secondary);
         cursor: pointer;
         transition: all 0.2s;
         font-size: 0.875rem;
         flex-shrink: 0;
 
         &.btn-primary {
-          border-color: $primary;
-          color: $primary;
+          border-color: var(--dgc-primary);
+          color: var(--dgc-primary);
 
           &:hover {
-            background: $primary;
-            color: white;
+            background: var(--dgc-primary);
+            color: var(--dgc-text-inverse);
           }
         }
 
         &.btn-warning {
-          border-color: #ffc107;
-          color: #ffc107;
+          border-color: var(--dgc-warning);
+          color: var(--dgc-warning);
 
           &:hover {
-            background: #ffc107;
-            color: white;
+            background: var(--dgc-warning);
+            color: var(--dgc-text-inverse);
           }
         }
 
         &.btn-success {
-          border-color: #198754;
-          color: #198754;
+          border-color: var(--dgc-success);
+          color: var(--dgc-success);
 
           &:hover {
-            background: #198754;
-            color: white;
+            background: var(--dgc-success);
+            color: var(--dgc-text-inverse);
           }
         }
 
         &.btn-danger {
-          border-color: #dc3545;
-          color: #dc3545;
+          border-color: var(--dgc-error);
+          color: var(--dgc-error);
 
           &:hover {
-            background: #dc3545;
-            color: white;
+            background: var(--dgc-error);
+            color: var(--dgc-text-inverse);
           }
         }
       }
@@ -338,15 +338,15 @@
 
     // Empty category state card
     &.template-card-empty {
-      border: 2px dashed #dee2e6;
-      background: #fafbfc;
+      border: 2px dashed var(--dgc-border-color);
+      background: var(--dgc-bg-elevated);
       min-height: 200px;
       justify-content: center;
       align-items: center;
 
       &:hover {
-        border-color: $primary;
-        background: #f5f8ff;
+        border-color: var(--dgc-primary);
+        background: var(--dgc-bg-hover);
       }
 
       .empty-category-content {
@@ -357,7 +357,7 @@
           width: 60px;
           height: 60px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+          background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.2) 100%);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -372,13 +372,13 @@
         h4 {
           font-size: 1rem;
           font-weight: 600;
-          color: #495057;
+          color: var(--dgc-text-primary);
           margin: 0 0 0.25rem 0;
         }
 
         p {
           font-size: 0.8rem;
-          color: #6c757d;
+          color: var(--dgc-text-secondary);
           margin: 0 0 1rem 0;
           line-height: 1.4;
         }
@@ -406,9 +406,9 @@
           }
 
           .btn-primary {
-            background: $primary;
-            border-color: $primary;
-            color: white;
+            background: var(--dgc-primary);
+            border-color: var(--dgc-primary);
+            color: var(--dgc-text-inverse);
 
             &:hover {
               background: #1565c0;
@@ -417,14 +417,14 @@
           }
 
           .btn-outline-danger {
-            background: white;
-            border: 1px solid #dc3545;
-            color: #dc3545;
+            background: var(--dgc-bg-card);
+            border: 1px solid var(--dgc-error);
+            color: var(--dgc-error);
 
             &:hover {
-              background: #dc3545;
-              border-color: #dc3545;
-              color: white;
+              background: var(--dgc-error);
+              border-color: var(--dgc-error);
+              color: var(--dgc-text-inverse);
             }
           }
         }
@@ -443,11 +443,11 @@
   }
 
   .template-preview-card {
-    background: white;
-    border: 2px solid #e0e0e0;
+    background: var(--dgc-bg-card);
+    border: 2px solid var(--dgc-border-color);
     border-radius: 12px;
     padding: $spacing-lg;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--dgc-shadow-2);
 
     .template-preview {
       @include template-preview-large;
@@ -460,12 +460,12 @@
         font-size: 2rem;
         font-weight: 600;
         margin: 0 0 1rem 0;
-        color: #212529;
+        color: var(--dgc-text-primary);
       }
 
       p {
         font-size: 1rem;
-        color: #6c757d;
+        color: var(--dgc-text-secondary);
         margin: 0;
         line-height: 1.6;
       }
@@ -481,11 +481,11 @@
 
   .nav-tab {
     padding: 0.5rem 1.5rem;
-    background: white;
+    background: var(--dgc-bg-card);
     border: none;
     border-radius: 8px;
     text-decoration: none;
-    color: #6c757d;
+    color: var(--dgc-text-secondary);
     font-weight: 500;
     transition: all 0.2s;
     display: flex;
@@ -497,14 +497,14 @@
     }
 
     &:hover {
-      border-color: $primary;
-      color: $primary;
+      border-color: var(--dgc-primary);
+      color: var(--dgc-primary);
     }
 
     &.active {
-      background: $primary;
-      border-color: $primary;
-      color: white;
+      background: var(--dgc-primary);
+      border-color: var(--dgc-primary);
+      color: var(--dgc-text-inverse);
     }
   }
 }
@@ -514,13 +514,13 @@
   // Category being dragged
   .template-category-section.sortable-ghost {
     opacity: 0.4;
-    background: #f8f9fa;
+    background: var(--dgc-bg-elevated);
   }
 
   .template-category-section.sortable-chosen {
     .category-header {
-      border-color: $primary;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-color: var(--dgc-primary);
+      box-shadow: var(--dgc-shadow-2);
     }
   }
 
@@ -530,12 +530,12 @@
   }
 
   .template-card.sortable-chosen {
-    border-color: $primary;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    border-color: var(--dgc-primary);
+    box-shadow: var(--dgc-shadow-2);
     z-index: 10;
 
     .template-card-actions .template-drag-handle {
-      color: $primary;
+      color: var(--dgc-primary);
     }
   }
 
@@ -548,15 +548,15 @@
   .template-category-section.drag-target-different-category {
     .category-header {
       border-color: rgba($error, 0.3);
-      background: linear-gradient(90deg, rgba($error, 0.08) 0%, white 50%);
+      background: linear-gradient(90deg, rgba($error, 0.08) 0%, var(--dgc-bg-card) 50%);
       box-shadow: 0 2px 8px rgba($error, 0.2);
 
       .category-header-content::before {
-        background: $error;
+        background: var(--dgc-error);
       }
 
       h2 {
-        color: $error;
+        color: var(--dgc-error);
       }
     }
 
@@ -586,11 +586,11 @@ body.template-dragging {
         width: 100%;
         margin-top: 0.5rem;
         padding: 0.4rem 0.75rem;
-        background: rgba(0, 0, 0, 0.03);
-        border: 1px dashed rgba(0, 0, 0, 0.15);
+        background: var(--dgc-bg-elevated);
+        border: 1px dashed var(--dgc-border-color);
         border-radius: 4px;
         font-size: 0.75rem;
-        color: $text-secondary;
+        color: var(--dgc-text-secondary);
         text-align: center;
 
         i {
@@ -606,7 +606,7 @@ body.template-dragging {
       .collapsed-drop-indicator {
         background: rgba($error, 0.08);
         border-color: rgba($error, 0.3);
-        color: $error;
+        color: var(--dgc-error);
         font-weight: 500;
       }
     }
@@ -617,8 +617,8 @@ body.template-dragging {
 // because fallbackOnBody appends it to <body>, so we need to replicate the card styles here
 .sortable-fallback.template-card {
   // Base card styles (since it's outside .template-list-page context)
-  background: white;
-  border: 2px solid #e0e0e0;
+  background: var(--dgc-bg-card);
+  border: 2px solid var(--dgc-border-color);
   border-radius: 12px;
   padding: $spacing-md;
   display: flex;
@@ -647,12 +647,12 @@ body.template-dragging {
       font-size: 1rem;
       font-weight: 600;
       margin: 0 0 0.25rem 0;
-      color: #212529;
+      color: var(--dgc-text-primary);
     }
 
     p {
       font-size: 0.875rem;
-      color: #6c757d;
+      color: var(--dgc-text-secondary);
       margin: 0 0 0.5rem 0;
       line-height: 1.4;
       display: -webkit-box;
@@ -676,8 +676,8 @@ body.template-dragging {
         font-weight: 500;
 
         &.badge-system {
-          background: #e3f2fd;
-          color: #1976d2;
+          background: var(--dgc-info-bg);
+          color: var(--dgc-info-dark);
 
           i {
             margin-right: 0.25rem;
@@ -695,11 +695,11 @@ body.template-dragging {
     align-items: center;
     padding-top: $spacing-md;
     margin-top: auto;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--dgc-border-color);
 
     .template-drag-handle {
       margin-left: auto;
-      color: $primary;
+      color: var(--dgc-primary);
       font-size: 1rem;
       padding: 0.25rem 0.5rem;
       opacity: 1;
@@ -715,32 +715,32 @@ body.template-dragging {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid #dee2e6;
-      background: white;
-      color: #6c757d;
+      border: 1px solid var(--dgc-border-color);
+      background: var(--dgc-bg-card);
+      color: var(--dgc-text-secondary);
       font-size: 0.875rem;
       flex-shrink: 0;
 
       &.btn-primary {
-        border-color: $primary;
-        color: $primary;
+        border-color: var(--dgc-primary);
+        color: var(--dgc-primary);
       }
 
       &.btn-success {
-        border-color: #198754;
-        color: #198754;
+        border-color: var(--dgc-success);
+        color: var(--dgc-success);
       }
 
       &.btn-danger {
-        border-color: #dc3545;
-        color: #dc3545;
+        border-color: var(--dgc-error);
+        color: var(--dgc-error);
       }
     }
   }
 
   // Cross-category drag - highlight with danger color
   &.cross-category-drag {
-    border-color: $error !important;
+    border-color: var(--dgc-error) !important;
     box-shadow: 0 12px 28px rgba($error, 0.3), 0 0 0 3px rgba($error, 0.2) !important;
 
     &::after {
@@ -749,8 +749,8 @@ body.template-dragging {
       bottom: -28px;
       left: 50%;
       transform: translateX(-50%) rotate(-2deg);
-      background: $error;
-      color: white;
+      background: var(--dgc-error);
+      color: var(--dgc-text-inverse);
       font-size: 0.75rem;
       font-weight: 500;
       padding: 0.25rem 0.75rem;
@@ -767,5 +767,14 @@ body.template-ordering-disabled {
     .template-drag-handle {
       display: none !important;
     }
+  }
+}
+
+// Dark mode adjustments for badges
+:root.theme-dark {
+  .template-list-page .template-card .badge-custom,
+  .sortable-fallback.template-card .badge-custom {
+    background: rgba(156, 39, 176, 0.2);
+    color: #ce93d8;
   }
 }

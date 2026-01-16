@@ -7,7 +7,7 @@
 
 // Permission control for template ordering operations
 // Set to true to allow category reordering, template reordering, and moving templates between categories
-$allowTemplateOrdering = false;
+$allowTemplateOrdering = true;
 
 $url = Utility::parseUrl();
 $action = isset($url[1]) ? $url[1] : 'list';

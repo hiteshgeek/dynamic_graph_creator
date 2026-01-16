@@ -359,6 +359,12 @@ select {
             color: rgba(255, 255, 255, 0.87);
         }
     }
+
+    // Secondary button - ensure text is visible on dark background
+    .btn-secondary {
+        --bs-btn-color: rgba(255, 255, 255, 0.87);
+        --bs-btn-hover-color: rgba(255, 255, 255, 0.87);
+    }
 }
 
 // Tables

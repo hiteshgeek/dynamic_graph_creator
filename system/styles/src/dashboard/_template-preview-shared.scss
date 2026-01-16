@@ -3,7 +3,7 @@
 
 // Base template preview styles shared across all contexts
 %template-preview-base {
-  background: #f8f9fa;
+  background: var(--dgc-gray-100);
   border-radius: 0;
   display: flex;
   align-items: center;
@@ -18,7 +18,7 @@
 
     .preview-section {
       flex: 1;
-      background: white;
+      background: var(--dgc-bg-card);
       gap: var(--preview-gap);
 
       &:first-child {
@@ -55,7 +55,7 @@
     justify-content: center;
     background: $template-preview-color;
     border-radius: 8px;
-    color: #1976d2;
+    color: var(--dgc-info-dark);
 
     i {
       opacity: 0.5;

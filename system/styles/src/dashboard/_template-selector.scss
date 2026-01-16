@@ -18,7 +18,7 @@
       .modal-subtitle {
         font-size: $font-size-sm;
         font-weight: normal;
-        color: $text-hint;
+        color: var(--dgc-text-hint);
       }
     }
   }
@@ -27,7 +27,7 @@
     .template-category {
       margin-bottom: $spacing-lg;
       padding-bottom: $spacing-lg;
-      border-bottom: 2px solid #e0e0e0;
+      border-bottom: 2px solid var(--dgc-border-color);
 
       &:last-child {
         margin-bottom: 0;
@@ -38,19 +38,19 @@
       .template-category-header {
         margin-bottom: $spacing-md;
         padding-left: $spacing-md;
-        border-left: 4px solid $primary;
+        border-left: 4px solid var(--dgc-primary);
 
         h3 {
           font-size: 0.875rem;
           font-weight: 600;
           letter-spacing: 0.5px;
-          color: #495057;
+          color: var(--dgc-text-primary);
           margin: 0 0 0.25rem 0;
         }
 
         p {
           font-size: 0.813rem;
-          color: #6c757d;
+          color: var(--dgc-text-secondary);
           margin: 0;
           line-height: 1.4;
         }
@@ -66,8 +66,8 @@
 }
 
 .template-card {
-  background: white;
-  border: 2px solid #e0e0e0;
+  background: var(--dgc-bg-card);
+  border: 2px solid var(--dgc-border-color);
   border-radius: 12px;
   padding: $spacing-md;
   cursor: pointer;
@@ -77,7 +77,7 @@
   height: 100%;
 
   &:hover {
-    border-color: $primary;
+    border-color: var(--dgc-primary);
   }
 
   .template-preview {
@@ -94,12 +94,12 @@
       font-size: 1rem;
       font-weight: 600;
       margin: 0 0 0.25rem 0;
-      color: #212529;
+      color: var(--dgc-text-primary);
     }
 
     p {
       font-size: 0.875rem;
-      color: #6c757d;
+      color: var(--dgc-text-secondary);
       margin: 0;
     }
 
@@ -115,8 +115,8 @@
         padding: 0.25rem 0.5rem;
         border-radius: 4px;
         font-weight: 500;
-        background: #e3f2fd;
-        color: #1976d2;
+        background: var(--dgc-info-bg);
+        color: var(--dgc-info-dark);
         display: inline-flex;
         align-items: center;
         gap: 0.25rem;
