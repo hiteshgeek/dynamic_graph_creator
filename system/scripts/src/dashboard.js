@@ -1490,7 +1490,7 @@ class DashboardBuilder {
     section.gridTemplate = widths.map((w) => `${w}fr`).join(" ");
 
     // Add new area at the specified position
-    const newAreaId = `${sectionId}_a${Date.now()}`;
+    const newAreaId = IdGenerator.areaId();
     section.areas.splice(position, 0, {
       aid: newAreaId,
       colSpanFr: `${GRID_CONFIG.DEFAULT_NEW_COLUMN_FR}fr`,
@@ -1621,13 +1621,13 @@ class DashboardBuilder {
         // Add at top: new empty row first, existing content second
         area.subRows = [
           {
-            rowId: `${area.aid}_r${Date.now()}`,
+            rowId: IdGenerator.rowId(),
             height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
             content: { type: "empty" },
             emptyState: { icon: "fa-plus-circle", message: "Add content" },
           },
           {
-            rowId: `${area.aid}_r${Date.now() + 1}`,
+            rowId: IdGenerator.rowId(),
             height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
             content: existingContent,
             emptyState: existingEmptyState,
@@ -1637,13 +1637,13 @@ class DashboardBuilder {
         // Add at bottom: existing content first, new empty row second
         area.subRows = [
           {
-            rowId: `${area.aid}_r${Date.now()}`,
+            rowId: IdGenerator.rowId(),
             height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
             content: existingContent,
             emptyState: existingEmptyState,
           },
           {
-            rowId: `${area.aid}_r${Date.now() + 1}`,
+            rowId: IdGenerator.rowId(),
             height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
             content: { type: "empty" },
             emptyState: { icon: "fa-plus-circle", message: "Add content" },
@@ -1716,7 +1716,7 @@ class DashboardBuilder {
       area.subRows[donorIndex].height = `${heights[donorIndex] - 1}fr`;
     }
 
-    const newRowId = `${area.aid}_r${Date.now()}`;
+    const newRowId = IdGenerator.rowId();
     const newRow = {
       rowId: newRowId,
       height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
@@ -1849,7 +1849,7 @@ class DashboardBuilder {
         const structure = JSON.parse(this.currentDashboard.structure);
 
         // Generate new section ID
-        const newSectionId = "s" + Date.now();
+        const newSectionId = IdGenerator.sectionId();
 
         // Create column template
         const colWidths = Array(parseInt(columns)).fill("1fr").join(" ");
@@ -1858,7 +1858,7 @@ class DashboardBuilder {
         const areas = [];
         for (let i = 0; i < parseInt(columns); i++) {
           areas.push({
-            aid: `${newSectionId}_a${i}`,
+            aid: IdGenerator.areaId(),
             colSpanFr: "1fr",
             content: { type: "empty" },
             emptyState: {

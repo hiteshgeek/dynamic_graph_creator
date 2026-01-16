@@ -436,4 +436,57 @@ window.FormValidator = class FormValidator {
     }
 };
 
+/**
+ * IdGenerator - Centralized UUID-based ID generation
+ * Matches PHP Utility::generateUUID() and Utility::generateShortId()
+ */
+window.IdGenerator = {
+    /**
+     * Generate a UUID v4
+     * Format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+     */
+    generateUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
+    },
+
+    /**
+     * Generate a short unique ID (8 characters from UUID)
+     * @param {string} prefix - Optional prefix for the ID
+     * @returns {string} Short unique ID with optional prefix
+     */
+    generateShortId(prefix = '') {
+        const uuid = this.generateUUID().replace(/-/g, '');
+        const shortId = uuid.substring(0, 8);
+        return prefix ? `${prefix}-${shortId}` : shortId;
+    },
+
+    /**
+     * Generate unique section ID
+     * Format: s-xxxxxxxx
+     */
+    sectionId() {
+        return this.generateShortId('s');
+    },
+
+    /**
+     * Generate unique area ID
+     * Format: a-xxxxxxxx
+     */
+    areaId() {
+        return this.generateShortId('a');
+    },
+
+    /**
+     * Generate unique row ID
+     * Format: r-xxxxxxxx
+     */
+    rowId() {
+        return this.generateShortId('r');
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => Toast.init());

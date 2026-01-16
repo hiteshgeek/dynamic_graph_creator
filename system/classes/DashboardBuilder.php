@@ -123,18 +123,20 @@ class DashboardBuilder
 
     /**
      * Generate unique section ID
+     * Format: s-xxxxxxxx (UUID-based)
      */
     public static function generateSectionId()
     {
-        return 's' . uniqid();
+        return Utility::generateShortId('s');
     }
 
     /**
      * Generate unique area ID
+     * Format: a-xxxxxxxx (UUID-based)
      */
     public static function generateAreaId()
     {
-        return 'a' . uniqid();
+        return Utility::generateShortId('a');
     }
 
     /**

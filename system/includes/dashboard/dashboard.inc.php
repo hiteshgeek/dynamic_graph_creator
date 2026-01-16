@@ -459,7 +459,7 @@ function addSectionFromTemplate($data)
     $addedSections = array();
     foreach ($templateStructure['sections'] as $sectionData) {
         // Generate new section ID to avoid conflicts
-        $sectionData['sid'] = 's' . time() . rand(1000, 9999);
+        $sectionData['sid'] = DashboardBuilder::generateSectionId();
 
         // Add section at the specified position
         if (!$dashboard->addSection($sectionData, $position)) {
