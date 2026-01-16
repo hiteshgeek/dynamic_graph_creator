@@ -69,6 +69,12 @@ if (isset($_POST['submit'])) {
         case 'delete_category':
             deleteCategory($_POST);
             break;
+        case 'reorder_templates':
+            reorderTemplates($_POST);
+            break;
+        case 'reorder_categories':
+            reorderCategories($_POST);
+            break;
     }
 }
 
@@ -1045,4 +1051,68 @@ function deleteCategory($data)
     }
 
     Utility::ajaxResponseTrue('Category deleted successfully');
+}
+
+/**
+ * Reorder templates within a category
+ */
+function reorderTemplates($data)
+{
+    $order = isset($data['order']) ? $data['order'] : array();
+
+    // Decode if it's a JSON string
+    if (is_string($order)) {
+        $order = json_decode($order, true);
+    }
+
+    if (empty($order) || !is_array($order)) {
+        Utility::ajaxResponseFalse('Order array is required');
+    }
+
+    $db = Rapidkart::getInstance()->getDB();
+
+    // Update display_order for each template
+    foreach ($order as $index => $templateId) {
+        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . "
+                SET display_order = '::order'
+                WHERE dtid = '::dtid'";
+        $db->query($sql, array(
+            '::order' => $index,
+            '::dtid' => intval($templateId)
+        ));
+    }
+
+    Utility::ajaxResponseTrue('Templates reordered successfully');
+}
+
+/**
+ * Reorder template categories
+ */
+function reorderCategories($data)
+{
+    $order = isset($data['order']) ? $data['order'] : array();
+
+    // Decode if it's a JSON string
+    if (is_string($order)) {
+        $order = json_decode($order, true);
+    }
+
+    if (empty($order) || !is_array($order)) {
+        Utility::ajaxResponseFalse('Order array is required');
+    }
+
+    $db = Rapidkart::getInstance()->getDB();
+
+    // Update display_order for each category
+    foreach ($order as $index => $categoryId) {
+        $sql = "UPDATE " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . "
+                SET display_order = '::order'
+                WHERE dtcid = '::dtcid'";
+        $db->query($sql, array(
+            '::order' => $index,
+            '::dtcid' => intval($categoryId)
+        ));
+    }
+
+    Utility::ajaxResponseTrue('Categories reordered successfully');
 }

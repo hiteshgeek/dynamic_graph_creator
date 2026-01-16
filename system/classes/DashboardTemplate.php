@@ -273,7 +273,8 @@ class DashboardTemplate implements DatabaseObject
                     'description' => $category->getDescription(),
                     'icon' => $category->getIcon() ? $category->getIcon() : 'fa-folder',
                     'color' => $category->getColor() ? $category->getColor() : '#6c757d',
-                    'display_order' => $category->getDisplayOrder()
+                    'display_order' => $category->getDisplayOrder(),
+                    'is_system' => $category->getIsSystem()
                 ),
                 'templates' => array()
             );
@@ -301,7 +302,8 @@ class DashboardTemplate implements DatabaseObject
                             'description' => 'Templates without a category',
                             'icon' => 'fa-folder-open',
                             'color' => '#6c757d',
-                            'display_order' => 999
+                            'display_order' => 999,
+                            'is_system' => 0
                         ),
                         'templates' => array()
                     );

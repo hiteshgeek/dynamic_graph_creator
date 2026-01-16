@@ -29,6 +29,11 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
     <div class="page-header">
         <div class="page-header-left">
             <h1>Dashboard Templates</h1>
+            <?php if (!empty($templates)): ?>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-all-categories" title="Collapse All">
+                <i class="fas fa-compress-alt"></i> <span>Collapse All</span>
+            </button>
+            <?php endif; ?>
         </div>
         <div class="page-header-right">
             <a href="?urlq=dashboard" class="btn btn-secondary">
@@ -57,13 +62,27 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                 'purple'
             ); ?>
             <?php else: ?>
-                <?php foreach ($templates as $categorySlug => $categoryData): ?>
-                <div class="template-category-section">
+                <div id="category-list">
+            <?php foreach ($templates as $categorySlug => $categoryData): ?>
+                <div class="template-category-section" data-category-id="<?php echo $categoryData['category']['dtcid']; ?>">
                     <div class="category-header">
-                        <h2><?php echo htmlspecialchars($categoryData['category']['name']); ?></h2>
-                        <?php if (!empty($categoryData['category']['description'])): ?>
-                        <p class="category-description"><?php echo htmlspecialchars($categoryData['category']['description']); ?></p>
-                        <?php endif; ?>
+                        <button type="button" class="category-collapse-toggle" title="Toggle category">
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="category-header-content">
+                            <h2><?php echo htmlspecialchars($categoryData['category']['name']); ?></h2>
+                            <?php if (!empty($categoryData['category']['is_system'])): ?>
+                            <span class="category-system-badge" title="System Category">
+                                <i class="fas fa-lock"></i>
+                            </span>
+                            <?php endif; ?>
+                            <?php if (!empty($categoryData['category']['description'])): ?>
+                            <p class="category-description"><?php echo htmlspecialchars($categoryData['category']['description']); ?></p>
+                            <?php endif; ?>
+                        </div>
+                        <div class="category-drag-handle" title="Drag to reorder category">
+                            <i class="fas fa-grip-vertical"></i>
+                        </div>
                     </div>
                     <div class="template-grid">
                         <?php if (empty($categoryData['templates'])): ?>
@@ -79,11 +98,13 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                                     <a href="?urlq=dashboard/template/create" class="btn btn-primary btn-sm">
                                         <i class="fas fa-plus"></i> Add Template
                                     </a>
+                                    <?php if (empty($categoryData['category']['is_system'])): ?>
                                     <button class="btn btn-outline-danger btn-sm delete-category-btn"
                                             data-category-id="<?php echo $categoryData['category']['dtcid']; ?>"
                                             data-category-name="<?php echo htmlspecialchars($categoryData['category']['name']); ?>">
                                         <i class="fas fa-trash"></i> Remove
                                     </button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -134,6 +155,9 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                                     <i class="fas fa-trash"></i>
                                 </button>
                                 <?php endif; ?>
+                                <div class="template-drag-handle" title="Drag to reorder">
+                                    <i class="fas fa-grip-vertical"></i>
+                                </div>
                             </div>
                         </div>
                         <?php endforeach; ?>
@@ -141,6 +165,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                     </div>
                 </div>
                 <?php endforeach; ?>
+            </div>
             <?php endif; ?>
         </div>
     </div>
