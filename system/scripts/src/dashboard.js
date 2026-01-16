@@ -368,11 +368,13 @@ class DashboardBuilder {
         html += this.renderSection(section, structure.sections.length, index);
       });
     } else {
-      // Show empty state when no sections exist
+      // Show empty state when no sections exist - use common empty state pattern
       html = `
-                <div class="dashboard-empty-sections">
-                    <div class="empty-sections-content">
-                        <i class="fas fa-th-large"></i>
+                <div class="empty-state empty-state-blue">
+                    <div class="empty-state-content">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-th-large"></i>
+                        </div>
                         <h3>No Sections Yet</h3>
                         <p>Start building your dashboard by adding a section or choosing a template</p>
                         <button class="btn btn-primary add-first-section-btn">
@@ -742,11 +744,11 @@ class DashboardBuilder {
   }
 
   renderEmptyState(emptyState) {
-    return `<div class="empty-state">
-            <div class="empty-state-icon">
+    return `<div class="dashboard-cell-empty">
+            <div class="cell-empty-icon">
                 <i class="fas ${emptyState?.icon || "fa-plus-circle"}"></i>
             </div>
-            <div class="empty-state-message">
+            <div class="cell-empty-message">
                 ${emptyState?.message || "Add content here"}
             </div>
         </div>`;

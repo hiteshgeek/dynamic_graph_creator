@@ -128,16 +128,11 @@
                     <?php
                     endforeach;
                 else:
-                    ?>
-                    <!-- Empty state when no sections -->
-                    <div class="dashboard-empty-sections">
-                        <div class="empty-sections-content">
-                            <i class="fas fa-th-large"></i>
-                            <h3>This Dashboard is Empty</h3>
-                            <p>No sections have been added to this dashboard yet.<br>Use the "Edit Dashboard" button above to add sections.</p>
-                        </div>
-                    </div>
-                <?php
+                    echo Utility::renderEmptyState(
+                        'fa-th-large',
+                        'This Dashboard is Empty',
+                        'No sections have been added to this dashboard yet.<br>Use the "Edit Dashboard" button above to add sections.'
+                    );
                 endif;
                 ?>
             </div>

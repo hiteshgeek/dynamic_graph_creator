@@ -21,8 +21,6 @@
     }
   }
 
-  // Choose Template Card now uses shared .dashboard-empty-sections styles from _empty-state.scss
-
   // Dashboard sections - no vertical centering
   .dashboard-sections {
     position: relative;
@@ -308,7 +306,7 @@
   }
 
   .dashboard-name-input {
-    font-size: $font-size-h2;
+    // font-size: $font-size-h2;
     font-weight: 600;
     min-width: 250px;
   }
@@ -679,7 +677,6 @@
     color: white;
   }
 }
-
 
 // Show controls on hover (desktop)
 @media (min-width: 1024px) {

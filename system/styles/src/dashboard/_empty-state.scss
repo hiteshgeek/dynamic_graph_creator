@@ -1,7 +1,8 @@
-// Empty State Styles
+// Dashboard Cell Empty State Styles
+// Used inside grid areas when no content is assigned
 @use '../variables' as *;
 
-.empty-state {
+.dashboard-cell-empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -11,74 +12,25 @@
     color: #6c757d;
     text-align: center;
 
-    .empty-state-icon {
+    .cell-empty-icon {
         font-size: 3rem;
         color: #adb5bd;
         margin-bottom: 0.75rem;
         transition: all 0.3s;
     }
 
-    .empty-state-message {
+    .cell-empty-message {
         font-size: 1rem;
         font-weight: 500;
     }
 
     &:hover {
-        .empty-state-icon {
+        .cell-empty-icon {
             color: $primary;
         }
 
-        .empty-state-message {
+        .cell-empty-message {
             color: $primary;
-        }
-    }
-}
-
-// Empty sections state (when no sections exist in dashboard)
-.dashboard-empty-sections {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: calc(100vh - 300px);
-    padding: 2rem;
-
-    .empty-sections-content {
-        background: white;
-        border: 2px solid #e0e0e0;
-        border-radius: 12px;
-        padding: 3rem 2rem;
-        text-align: center;
-        max-width: 500px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-
-        i.fa-th-large {
-            font-size: 4rem;
-            color: $primary;
-            margin-bottom: 1.5rem;
-            display: block;
-        }
-
-        h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            color: #212529;
-        }
-
-        p {
-            font-size: 1rem;
-            color: #6c757d;
-            margin-bottom: 1.5rem;
-        }
-
-        .btn {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 500;
-
-            i {
-                margin-right: 0.5rem;
-            }
         }
     }
 }

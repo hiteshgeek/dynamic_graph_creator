@@ -83,16 +83,15 @@
                     <?php if ($dashboard && $dashboard->getId()): ?>
                         <div class="dashboard-sections"></div>
                     <?php else: ?>
-                        <div class="dashboard-empty-sections">
-                            <div class="empty-sections-content">
-                                <i class="fas fa-th-large"></i>
-                                <h3>Create Your Dashboard</h3>
-                                <p>Choose from our pre-designed templates to get started</p>
-                                <button class="btn btn-primary choose-template-btn">
-                                    <i class="fas fa-plus"></i> Choose Template
-                                </button>
-                            </div>
-                        </div>
+                        <?php echo Utility::renderEmptyState(
+                            'fa-th-large',
+                            'Create Your Dashboard',
+                            'Choose from our pre-designed templates to get started',
+                            'Choose Template',
+                            '#',
+                            'blue',
+                            'choose-template-btn'
+                        ); ?>
                     <?php endif; ?>
                 </div>
             </div>
