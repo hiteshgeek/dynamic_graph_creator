@@ -117,11 +117,36 @@ class DashboardBuilder {
     const modalElement = document.getElementById("template-modal");
     if (!modalElement) return;
 
-    // Clear dashboard name input and validation state
+    const nameInputWrapper = modalElement.querySelector(".dashboard-name-input");
     const nameInput = document.getElementById("new-dashboard-name");
-    if (nameInput) {
-      nameInput.value = "";
-      nameInput.classList.remove("is-invalid");
+    const modalTitle = modalElement.querySelector(".modal-title");
+    const hrDivider = modalElement.querySelector(".modal-body > hr");
+
+    // Check if dashboard already exists
+    const isAddingSection = this.dashboardId !== null;
+
+    if (isAddingSection) {
+      // Dashboard exists - hide name input and update title
+      if (nameInputWrapper) nameInputWrapper.style.display = "none";
+      if (hrDivider) hrDivider.style.display = "none";
+      if (modalTitle) modalTitle.textContent = "Add Section";
+
+      // Set mode to add-section
+      this.templateSelectorMode = "add-section";
+    } else {
+      // New dashboard - show name input
+      if (nameInputWrapper) nameInputWrapper.style.display = "block";
+      if (hrDivider) hrDivider.style.display = "block";
+      if (modalTitle) modalTitle.textContent = "Create New Dashboard";
+
+      // Clear input and validation state
+      if (nameInput) {
+        nameInput.value = "";
+        nameInput.classList.remove("is-invalid");
+      }
+
+      // Set mode to create-dashboard
+      this.templateSelectorMode = "create-dashboard";
     }
 
     // Get or create Bootstrap modal instance

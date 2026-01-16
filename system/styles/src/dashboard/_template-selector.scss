@@ -5,6 +5,24 @@
 // Template selector modal uses Bootstrap modal (modal-xl)
 // These styles enhance the Bootstrap modal content
 #template-modal {
+  .modal-header {
+    .modal-title-wrapper {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+
+      .modal-title {
+        margin: 0;
+      }
+
+      .modal-subtitle {
+        font-size: $font-size-sm;
+        font-weight: normal;
+        color: $text-hint;
+      }
+    }
+  }
+
   .modal-body {
     .template-category {
       margin-bottom: $spacing-lg;
