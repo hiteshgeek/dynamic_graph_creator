@@ -9,6 +9,7 @@ export default class QueryBuilder {
         this.onTest = options.onTest || (() => {});
         this.onError = options.onError || (() => {});
         this.onChange = options.onChange || (() => {});
+        this.getFilterValues = options.getFilterValues || (() => ({}));
 
         this.textarea = null;
         this.testBtn = null;
@@ -280,13 +281,16 @@ export default class QueryBuilder {
         }
 
         try {
-            const result = await Ajax.post('test_query', { query });
+            // Get filter values from sidebar
+            const filterValues = this.getFilterValues();
+            const result = await Ajax.post('test_query', { query, filters: filterValues });
 
             if (result.success) {
                 const columns = result.data.columns || [];
                 const rows = result.data.rows || [];
                 const rowCount = result.data.row_count || 0;
-                this.showSuccess(columns, rows, rowCount);
+                const debugQuery = result.data.debug_query || '';
+                this.showSuccess(columns, rows, rowCount, debugQuery);
                 this.onTest(columns);
             } else {
                 this.showError(result.message);
@@ -308,7 +312,7 @@ export default class QueryBuilder {
     /**
      * Show success result with columns and sample data
      */
-    showSuccess(columns, rows = [], rowCount = 0) {
+    showSuccess(columns, rows = [], rowCount = 0, debugQuery = '') {
         if (!this.resultContainer) return;
 
         let html = `
@@ -318,6 +322,16 @@ export default class QueryBuilder {
                 <span class="query-row-count">${rowCount} row${rowCount !== 1 ? 's' : ''} returned</span>
             </div>
         `;
+
+        // Add debug query if available
+        if (debugQuery) {
+            html += `
+                <div class="query-debug">
+                    <small class="text-muted">Test query (placeholders replaced):</small>
+                    <pre class="query-debug-sql">${this.escapeHtml(debugQuery)}</pre>
+                </div>
+            `;
+        }
 
         // Add sample data table if rows exist
         if (rows && rows.length > 0) {

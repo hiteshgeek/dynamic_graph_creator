@@ -167,19 +167,50 @@ function deleteGraph($data)
 function testQuery($data)
 {
     $query = isset($data['query']) ? trim($data['query']) : '';
+    $filters = isset($data['filters']) ? $data['filters'] : array();
+
+    // If filters is a JSON string, decode it
+    if (is_string($filters)) {
+        $filters = json_decode($filters, true);
+        if (!is_array($filters)) {
+            $filters = array();
+        }
+    }
 
     if (empty($query)) {
         Utility::ajaxResponseFalse('Please enter a SQL query');
     }
 
-    // Replace placeholders with dummy values for testing
-    $testQuery = preg_replace('/:([a-zA-Z_][a-zA-Z0-9_]*)/', "'test'", $query);
+    $db = Rapidkart::getInstance()->getDB();
+    $testQuery = $query;
+
+    // Replace placeholders with actual filter values or dummy values
+    $testQuery = preg_replace_callback('/::([a-zA-Z_][a-zA-Z0-9_]*)/', function($matches) use ($filters, $db) {
+        $placeholder = '::' . $matches[1];
+
+        if (isset($filters[$placeholder])) {
+            $value = $filters[$placeholder];
+
+            // Handle array values (multi-select, checkbox)
+            if (is_array($value)) {
+                $escaped = array_map(function($v) use ($db) {
+                    return "'" . $db->escapeString($v) . "'";
+                }, $value);
+                return implode(',', $escaped);
+            }
+
+            // Single value
+            return "'" . $db->escapeString($value) . "'";
+        }
+
+        // No filter value provided, use dummy value
+        return "'test'";
+    }, $testQuery);
 
     // Remove existing LIMIT and add our own for sample rows
     $testQuery = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $testQuery);
     $testQuery .= ' LIMIT 10';
 
-    $db = Rapidkart::getInstance()->getDB();
     $res = $db->query($testQuery);
 
     if (!$res) {
@@ -217,7 +248,8 @@ function testQuery($data)
     Utility::ajaxResponseTrue('Query is valid', array(
         'columns' => $columns,
         'rows' => $rows,
-        'row_count' => count($rows)
+        'row_count' => count($rows),
+        'debug_query' => $testQuery
     ));
 }
 

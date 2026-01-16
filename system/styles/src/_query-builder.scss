@@ -168,6 +168,32 @@
     }
 }
 
+.query-debug {
+    margin-top: $spacing-md;
+    padding: $spacing-sm;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: $border-radius;
+
+    small {
+        display: block;
+        margin-bottom: $spacing-xs;
+    }
+
+    .query-debug-sql {
+        margin: 0;
+        padding: $spacing-sm;
+        background: $bg-card;
+        border-radius: $border-radius;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 11px;
+        line-height: 1.5;
+        overflow-x: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+        color: $text-secondary;
+    }
+}
+
 .query-sample-data {
     margin-top: $spacing-md;
 
