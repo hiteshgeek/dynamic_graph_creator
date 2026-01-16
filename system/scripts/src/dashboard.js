@@ -632,16 +632,22 @@ class DashboardBuilder {
 
     // Grid size indicator - show column widths and row heights for nested areas
     // Format: "1fr | 2fr (2fr/1fr) | 1fr" where (2fr/1fr) shows row heights
+    // Each part is wrapped in a span with data-area-id to highlight when hovering over that area
+    // For nested areas, each row height is also wrapped with data-row-id for individual highlighting
     const gridIndicatorParts = section.areas.map((area, idx) => {
       const colWidth = columnWidths[idx];
+      const areaId = area.aid;
       if (area.hasSubRows && area.subRows && area.subRows.length > 0) {
-        const rowHeights = area.subRows.map(r => r.height || '1fr').join('/');
-        return `${colWidth} (${rowHeights})`;
+        const rowHeightParts = area.subRows.map((r) => {
+          const height = r.height || '1fr';
+          return `<span class="grid-size-row" data-row-id="${r.rowId}">${height}</span>`;
+        }).join('<span class="grid-size-row-sep">/</span>');
+        return `<span class="grid-size-part grid-size-part-nested" data-area-id="${areaId}">${colWidth} (${rowHeightParts})</span>`;
       }
-      return colWidth;
+      return `<span class="grid-size-part" data-area-id="${areaId}">${colWidth}</span>`;
     });
     const gridIndicator = `<div class="grid-size-indicator" data-section-id="${section.sid}">
-            ${gridIndicatorParts.join(" | ")}
+            ${gridIndicatorParts.join('<span class="grid-size-separator">|</span>')}
         </div>`;
 
     return `<div class="dashboard-section-wrapper" data-section-id="${section.sid}">
@@ -1264,6 +1270,75 @@ class DashboardBuilder {
         const areaIndex = parseInt(btn.dataset.areaIndex);
         const rowIndex = parseInt(btn.dataset.rowIndex);
         this.resizeRow(sectionId, areaIndex, rowIndex, "down");
+      }
+    });
+
+    // Hover event delegation - highlight grid-size-indicator part when hovering over area
+    // Helper function to highlight indicator part (for regular areas)
+    const highlightIndicatorPart = (areaId, sectionWrapper, add) => {
+      if (sectionWrapper && areaId) {
+        const indicator = sectionWrapper.querySelector(".grid-size-indicator");
+        if (indicator) {
+          const part = indicator.querySelector(`.grid-size-part[data-area-id="${areaId}"]`);
+          if (part) {
+            if (add) {
+              part.classList.add("active");
+            } else {
+              part.classList.remove("active");
+            }
+          }
+        }
+      }
+    };
+
+    // Helper function to highlight individual row in indicator (for nested sub-rows)
+    const highlightIndicatorRow = (rowId, sectionWrapper, add) => {
+      if (sectionWrapper && rowId) {
+        const indicator = sectionWrapper.querySelector(".grid-size-indicator");
+        if (indicator) {
+          const rowPart = indicator.querySelector(`.grid-size-row[data-row-id="${rowId}"]`);
+          if (rowPart) {
+            if (add) {
+              rowPart.classList.add("active");
+            } else {
+              rowPart.classList.remove("active");
+            }
+          }
+        }
+      }
+    };
+
+    this.container.addEventListener("mouseover", (e) => {
+      // Check for sub-row first (inside nested area) - highlight only the specific row
+      const subRow = e.target.closest(".dashboard-sub-row");
+      if (subRow) {
+        const rowId = subRow.dataset.rowId;
+        const sectionWrapper = subRow.closest(".dashboard-section-wrapper");
+        highlightIndicatorRow(rowId, sectionWrapper, true);
+        return;
+      }
+
+      // Regular dashboard-area (non-nested only)
+      const area = e.target.closest(".dashboard-area");
+      if (area && !area.classList.contains("dashboard-area-nested")) {
+        highlightIndicatorPart(area.dataset.areaId, area.closest(".dashboard-section-wrapper"), true);
+      }
+    });
+
+    this.container.addEventListener("mouseout", (e) => {
+      // Check for sub-row first (inside nested area)
+      const subRow = e.target.closest(".dashboard-sub-row");
+      if (subRow) {
+        const rowId = subRow.dataset.rowId;
+        const sectionWrapper = subRow.closest(".dashboard-section-wrapper");
+        highlightIndicatorRow(rowId, sectionWrapper, false);
+        return;
+      }
+
+      // Regular dashboard-area (non-nested only)
+      const area = e.target.closest(".dashboard-area");
+      if (area && !area.classList.contains("dashboard-area-nested")) {
+        highlightIndicatorPart(area.dataset.areaId, area.closest(".dashboard-section-wrapper"), false);
       }
     });
   }
