@@ -423,6 +423,52 @@ option[value="__new__"] {
   }
 }
 
+// Custom styled Bootstrap switch (matching config panel design)
+// Use with: <div class="form-check form-switch custom-switch">
+.custom-switch {
+  margin-bottom: 0;
+  padding-left: 0;
+  min-height: auto;
+
+  .form-check-input {
+    width: 44px;
+    height: 24px;
+    margin: 0;
+    cursor: pointer;
+    background-color: $gray-300;
+    border: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+    background-position: left center;
+    background-size: contain;
+    transition: background-color 0.15s ease, background-position 0.15s ease;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+
+    &:focus {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+      box-shadow: none;
+    }
+
+    &:checked {
+      background-color: $primary;
+      background-position: right center;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
+    }
+  }
+}
+
+// Toggle container with label (for use in page headers)
+.toggle-with-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .toggle-label {
+    font-size: 0.875rem;
+    color: $gray-600;
+    user-select: none;
+  }
+}
+
 // Responsive container
 @media (max-width: 576px) {
   .container {

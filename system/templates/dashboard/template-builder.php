@@ -52,6 +52,14 @@
                 title="View Mode">
                 <i class="fas fa-eye"></i> View Mode
             </a>
+            <?php if (!$template->getIsSystem()): ?>
+                <div class="toggle-with-label">
+                    <span class="toggle-label">Tweak</span>
+                    <div class="form-check form-switch custom-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch">
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -194,6 +202,31 @@
                 window.dashboardBuilderInstance.init();
             } else {
                 console.error('DashboardBuilder not loaded. Make sure dashboard.js is included.');
+            }
+
+            // Layout Edit Mode Toggle (Tweak Switch)
+            const tweakSwitch = document.getElementById('toggle-layout-edit-switch');
+            if (tweakSwitch && !isSystem) {
+                // Check localStorage for saved state (default: tweak mode off)
+                const tweakEnabled = localStorage.getItem('templateTweakEnabled') === 'true';
+
+                // Apply initial state
+                tweakSwitch.checked = tweakEnabled;
+                if (!tweakEnabled) {
+                    container.classList.add('layout-edit-disabled');
+                }
+
+                tweakSwitch.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Enable tweak mode (show layout controls)
+                        container.classList.remove('layout-edit-disabled');
+                        localStorage.setItem('templateTweakEnabled', 'true');
+                    } else {
+                        // Disable tweak mode (hide layout controls)
+                        container.classList.add('layout-edit-disabled');
+                        localStorage.setItem('templateTweakEnabled', 'false');
+                    }
+                });
             }
 
             // Edit template details - category select and new category fields

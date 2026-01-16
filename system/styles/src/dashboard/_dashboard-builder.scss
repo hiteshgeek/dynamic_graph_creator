@@ -1,4 +1,5 @@
 // Dashboard Builder Styles
+@use "sass:color";
 @use "../variables" as *;
 
 .dashboard-builder {
@@ -763,3 +764,29 @@
     opacity: 1;
   }
 }
+
+// Tweak Mode Toggle
+// When tweak mode is disabled, hide area-level layout controls but keep section-level controls visible
+// Section controls (add section, rearrange section, delete section) remain available in design mode
+.dashboard-builder.layout-edit-disabled {
+  // Hide area controls overlay (resize buttons, add row/col buttons within areas)
+  .area-controls-overlay {
+    display: none !important;
+  }
+
+  // Hide column and row drag handles (within sections)
+  .column-drag-handle,
+  .row-drag-handle {
+    display: none !important;
+  }
+
+  // Keep empty state visible and clickable
+  .dashboard-cell-empty {
+    cursor: pointer;
+
+    &:hover {
+      border-color: $primary;
+    }
+  }
+}
+

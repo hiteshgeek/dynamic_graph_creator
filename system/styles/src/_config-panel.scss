@@ -71,43 +71,6 @@
     gap: $spacing-sm;
 }
 
-// Toggle switch (reusable)
-.switch {
-    position: relative;
-    width: 44px;
-    height: 24px;
-    background: $gray-300;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background $transition-fast;
-
-    input {
-        display: none;
-    }
-
-    &::after {
-        content: '';
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 20px;
-        height: 20px;
-        background: white;
-        border-radius: 50%;
-        transition: transform $transition-fast;
-        box-shadow: $shadow-1;
-    }
-
-    &.active,
-    &:has(input:checked) {
-        background: $primary;
-
-        &::after {
-            transform: translateX(20px);
-        }
-    }
-}
-
 // Range slider
 .config-slider {
     display: flex;

@@ -10,6 +10,26 @@ export default class ConfigPanel {
 
         this.graphType = 'bar';
         this.config = this.getDefaultConfig();
+        this.switchIdCounter = 0;
+    }
+
+    /**
+     * Generate a Bootstrap switch HTML
+     * @param {string} configKey - The config key for this switch
+     * @param {boolean} isChecked - Whether the switch is checked
+     * @returns {string} HTML string
+     */
+    renderSwitch(configKey, isChecked) {
+        const switchId = `config-switch-${configKey}-${++this.switchIdCounter}`;
+        return `
+            <div class="form-check form-switch custom-switch">
+                <input class="form-check-input" type="checkbox" role="switch"
+                    id="${switchId}"
+                    data-config="${configKey}"
+                    data-type="toggle"
+                    ${isChecked ? 'checked' : ''}>
+            </div>
+        `;
     }
 
     /**
@@ -111,11 +131,7 @@ export default class ConfigPanel {
 
                 <div class="config-row">
                     <span class="config-row-label">Show Legend</span>
-                    <div
-                        class="switch ${this.config.showLegend ? 'active' : ''}"
-                        data-config="showLegend"
-                        data-type="toggle"
-                    ></div>
+                    ${this.renderSwitch('showLegend', this.config.showLegend)}
                 </div>
 
                 <div class="config-field">
@@ -130,11 +146,7 @@ export default class ConfigPanel {
 
                 <div class="config-row">
                     <span class="config-row-label">Show Tooltip</span>
-                    <div
-                        class="switch ${this.config.showTooltip ? 'active' : ''}"
-                        data-config="showTooltip"
-                        data-type="toggle"
-                    ></div>
+                    ${this.renderSwitch('showTooltip', this.config.showTooltip)}
                 </div>
             </div>
         `;
@@ -160,11 +172,7 @@ export default class ConfigPanel {
 
                 <div class="config-row">
                     <span class="config-row-label">Stacked</span>
-                    <div
-                        class="switch ${this.config.stacked ? 'active' : ''}"
-                        data-config="stacked"
-                        data-type="toggle"
-                    ></div>
+                    ${this.renderSwitch('stacked', this.config.stacked)}
                 </div>
 
                 <div class="config-field">
@@ -183,11 +191,7 @@ export default class ConfigPanel {
 
                 <div class="config-row">
                     <span class="config-row-label">Show Background</span>
-                    <div
-                        class="switch ${this.config.showBackground ? 'active' : ''}"
-                        data-config="showBackground"
-                        data-type="toggle"
-                    ></div>
+                    ${this.renderSwitch('showBackground', this.config.showBackground)}
                 </div>
 
                 <div class="config-field">
@@ -219,29 +223,17 @@ export default class ConfigPanel {
 
                 <div class="config-row">
                     <span class="config-row-label">Smooth Line</span>
-                    <div
-                        class="switch ${this.config.smooth ? 'active' : ''}"
-                        data-config="smooth"
-                        data-type="toggle"
-                    ></div>
+                    ${this.renderSwitch('smooth', this.config.smooth)}
                 </div>
 
                 <div class="config-row">
                     <span class="config-row-label">Show Area Fill</span>
-                    <div
-                        class="switch ${this.config.showArea ? 'active' : ''}"
-                        data-config="showArea"
-                        data-type="toggle"
-                    ></div>
+                    ${this.renderSwitch('showArea', this.config.showArea)}
                 </div>
 
                 <div class="config-row">
                     <span class="config-row-label">Show Markers</span>
-                    <div
-                        class="switch ${this.config.showSymbol ? 'active' : ''}"
-                        data-config="showSymbol"
-                        data-type="toggle"
-                    ></div>
+                    ${this.renderSwitch('showSymbol', this.config.showSymbol)}
                 </div>
 
                 <div class="config-field">
@@ -318,11 +310,7 @@ export default class ConfigPanel {
 
                 <div class="config-row">
                     <span class="config-row-label">Show Labels</span>
-                    <div
-                        class="switch ${this.config.showLabel ? 'active' : ''}"
-                        data-config="showLabel"
-                        data-type="toggle"
-                    ></div>
+                    ${this.renderSwitch('showLabel', this.config.showLabel)}
                 </div>
 
                 <div class="config-field">
@@ -340,12 +328,11 @@ export default class ConfigPanel {
      * Bind event handlers
      */
     bindEvents() {
-        // Toggle switches
-        this.container.querySelectorAll('[data-type="toggle"]').forEach(toggle => {
-            toggle.addEventListener('click', () => {
+        // Toggle switches (Bootstrap checkbox)
+        this.container.querySelectorAll('input[type="checkbox"][data-type="toggle"]').forEach(toggle => {
+            toggle.addEventListener('change', () => {
                 const key = toggle.dataset.config;
-                this.config[key] = !this.config[key];
-                toggle.classList.toggle('active');
+                this.config[key] = toggle.checked;
                 this.onChange();
             });
         });
