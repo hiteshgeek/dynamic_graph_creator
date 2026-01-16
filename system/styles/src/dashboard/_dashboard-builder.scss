@@ -44,14 +44,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.375rem;
-    padding: 0.375rem 1rem;
+    padding: 0.25rem 0.625rem;
     background: var(--dgc-bg-card);
     border: 2px solid var(--dgc-primary);
-    border-radius: 20px;
+    border-radius: 12px;
     color: var(--dgc-primary);
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: 0.65rem;
     font-weight: 500;
     transition: all 0.2s;
     opacity: 0;
@@ -60,8 +59,9 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     white-space: nowrap;
 
+    // Hide the + icon
     i {
-      font-size: 0.75rem;
+      display: none;
     }
 
     &:hover {
@@ -73,12 +73,12 @@
 
   // Top border button
   .add-section-top-btn {
-    top: -16px; // Half of button height to center on border
+    top: -12px; // Half of button height to center on border
   }
 
   // Bottom border button
   .add-section-bottom-btn {
-    bottom: -16px; // Half of button height to center on border
+    bottom: -12px; // Half of button height to center on border
   }
 
   // Section top border controls (reorder/delete)
@@ -450,61 +450,70 @@
   border-radius: 6px;
 }
 
-// Edge buttons (Add Row / Add Column) - consistent 12px from each edge
+// Edge buttons (Add Row / Add Column) - positioned on border edges like section buttons
 .edge-btn {
   position: absolute;
-  padding: 0.25rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
   background: var(--dgc-bg-card);
-  border: 1px solid var(--dgc-border-color);
-  border-radius: 4px;
-  font-size: 0.7rem;
+  border: 2px solid var(--dgc-primary);
+  border-radius: 12px;
+  font-size: 0.65rem;
   font-weight: 500;
-  color: var(--dgc-text-primary);
+  color: var(--dgc-primary);
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+
+  i {
+    font-size: 0.6rem;
+  }
 
   &:hover:not([disabled]) {
     background: var(--dgc-primary);
     color: var(--dgc-text-inverse);
-    border-color: var(--dgc-primary);
+    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
   }
 
   &[disabled] {
     opacity: 0.5;
     cursor: not-allowed;
     background: var(--dgc-bg-elevated);
+    border-color: var(--dgc-border-color);
+    color: var(--dgc-text-hint);
   }
 
-  // Top edge - 12px from top
+  // Top edge - centered on top border
   &.edge-top {
-    top: 12px;
+    top: -12px;
     left: 50%;
     transform: translateX(-50%);
   }
 
-  // Bottom edge - 12px from bottom
+  // Bottom edge - centered on bottom border
   &.edge-bottom {
-    bottom: 12px;
+    bottom: -12px;
     left: 50%;
     transform: translateX(-50%);
   }
 
-  // Left edge - visually same distance as top/bottom buttons
+  // Left edge - centered on left border (rotated text reads bottom-to-top)
   &.edge-left {
     left: 0;
     top: 50%;
-    transform: translateX(-50%) translateX(24px) translateY(-50%) rotate(-90deg);
-    transform-origin: center;
+    transform: translateX(-50%) translateY(-50%) rotate(-90deg);
   }
 
-  // Right edge - visually same distance as top/bottom buttons
+  // Right edge - centered on right border (rotated text reads top-to-bottom)
   &.edge-right {
     right: 0;
     top: 50%;
-    transform: translateX(50%) translateX(-24px) translateY(-50%) rotate(90deg);
-    transform-origin: center;
+    transform: translateX(50%) translateY(-50%) rotate(90deg);
   }
 }
 
@@ -517,13 +526,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
 }
 
 .center-row {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
 }
 
 .center-btn {
