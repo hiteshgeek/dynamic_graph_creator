@@ -222,6 +222,18 @@ $grid-gap: $spacing-md;
   }
 }
 
+// Template builder page - lighter section borders
+.template-builder-page {
+  .dashboard-section {
+    border: 1px solid rgba(0, 0, 0, 0.03);
+
+    &:hover {
+      border-color: rgba($primary, 0.3);
+      box-shadow: 0 0 12px rgba(0, 123, 255, 0.15);
+    }
+  }
+}
+
 // Edit mode only - translucent hover effects
 .dashboard-builder-page,
 .template-builder-page {

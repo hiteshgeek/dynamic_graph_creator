@@ -39,18 +39,18 @@
         </div>
         <div class="page-header-right">
             <?php if (!$template->getIsSystem()): ?>
-                <button class="btn btn-warning" id="edit-template-details-btn">
-                    <i class="fas fa-pencil"></i> Edit Details
-                </button>
                 <div class="save-indicator saved" style="display: flex;">
                     <i class="fas fa-check-circle"></i>
                     <span>Saved</span>
                 </div>
+                <button class="btn btn-warning" id="edit-template-details-btn">
+                    <i class="fas fa-pencil"></i> Edit Details
+                </button>
             <?php endif; ?>
             <a href="?urlq=dashboard/template/preview/<?php echo $template->getId(); ?>"
                 class="btn btn-primary"
-                title="Preview Template">
-                <i class="fas fa-eye"></i> Preview Template
+                title="View Mode">
+                <i class="fas fa-eye"></i> View Mode
             </a>
         </div>
     </div>

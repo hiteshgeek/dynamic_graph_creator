@@ -43,8 +43,8 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                 <i class="fas fa-copy"></i> Duplicate Template
             </button>
             <?php if (!$template->getIsSystem()): ?>
-            <a href="?urlq=dashboard/template/builder/<?php echo $template->getId(); ?>" class="btn btn-warning">
-                <i class="fas fa-pencil"></i> Edit Template
+            <a href="?urlq=dashboard/template/builder/<?php echo $template->getId(); ?>" class="btn btn-design">
+                <i class="fas fa-paint-brush"></i> Design Mode
             </a>
             <button class="btn btn-danger delete-template-btn" data-template-id="<?php echo $template->getId(); ?>">
                 <i class="fas fa-trash"></i> Delete Template

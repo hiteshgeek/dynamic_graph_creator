@@ -132,15 +132,15 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                             </div>
                             <div class="template-card-actions">
                                 <button class="btn-icon btn-primary"
-                                        title="Preview"
+                                        title="View Mode"
                                         onclick="window.location='?urlq=dashboard/template/preview/<?php echo $template['dtid']; ?>'">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <?php if (!$template['is_system']): ?>
-                                <button class="btn-icon btn-warning"
-                                        title="Edit Structure"
+                                <button class="btn-icon btn-design"
+                                        title="Design Mode"
                                         onclick="window.location='?urlq=dashboard/template/builder/<?php echo $template['dtid']; ?>'">
-                                    <i class="fas fa-pencil"></i>
+                                    <i class="fas fa-paint-brush"></i>
                                 </button>
                                 <?php endif; ?>
                                 <button class="btn-icon btn-success duplicate-template-btn"
