@@ -25,6 +25,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
+      cursor: pointer;
 
       &:hover {
         .category-drag-handle {

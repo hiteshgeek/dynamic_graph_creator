@@ -106,8 +106,8 @@
                             <?php echo ucfirst($graph->getGraphType()); ?> Chart
                         </span>
                     </div>
-                    <button type="button" class="btn btn-outline" id="export-chart" title="Save chart as PNG image">
-                        <i class="fas fa-image"></i> Save Image
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="export-chart" title="Save chart as PNG image">
+                        <i class="fas fa-download"></i> Save Image
                     </button>
                 </div>
                 <div class="graph-preview-container" style="height: 500px;"></div>

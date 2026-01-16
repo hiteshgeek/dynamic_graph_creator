@@ -109,7 +109,10 @@
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Create New Dashboard</h5>
+                    <div class="modal-title-wrapper">
+                        <h5 class="modal-title">Create New Dashboard</h5>
+                        <span class="modal-subtitle text-muted">Choose a Layout</span>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -119,7 +122,6 @@
                         <div class="invalid-feedback">Please enter a dashboard name</div>
                     </div>
                     <hr class="mb-4">
-                    <h6 class="mb-3">Choose a Layout</h6>
                     <div id="template-list">
                         <div class="loader">
                             <i class="fas fa-spinner fa-spin loader-spinner"></i>
