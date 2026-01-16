@@ -52,10 +52,12 @@ export class TemplateManager {
         TemplateManager.deleteCategory(categoryId, categoryName);
       }
 
-      // Check if category collapse toggle was clicked
-      if (e.target.closest(".category-collapse-toggle")) {
-        const btn = e.target.closest(".category-collapse-toggle");
-        const section = btn.closest(".template-category-section");
+      // Check if category header was clicked (but not action buttons)
+      if (e.target.closest(".category-header") &&
+          !e.target.closest(".category-actions") &&
+          !e.target.closest(".category-drag-handle")) {
+        const header = e.target.closest(".category-header");
+        const section = header.closest(".template-category-section");
         if (section) {
           TemplateManager.toggleCategory(section);
         }

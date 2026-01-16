@@ -67,7 +67,7 @@ a {
   align-items: center;
   justify-content: space-between;
   margin-bottom: $spacing-lg;
-  padding-bottom: $spacing-md;
+  // padding-bottom: $spacing-md;
   border-bottom: 1px solid $border-color;
 
   h2,
@@ -87,122 +87,103 @@ a {
   }
 }
 
-// Buttons
+// Button overrides (extends Bootstrap)
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: $spacing-sm;
-  padding: $spacing-sm $spacing-md;
-  font-family: $font-family;
-  font-size: $font-size-base;
-  font-weight: $font-weight-medium;
-  border: none;
-  border-radius: $border-radius;
-  cursor: pointer;
-  transition: all $transition-fast;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
+  font-weight: $font-weight-medium;
 
   i {
-    font-size: $font-size-lg;
+    font-size: 1.1em;
   }
 }
 
+// Color customizations using Bootstrap CSS variables
 .btn-primary {
-  background: $primary;
-  color: white;
-
-  &:hover:not(:disabled) {
-    background: $primary-dark;
-  }
+  --bs-btn-bg: #{$primary};
+  --bs-btn-border-color: #{$primary};
+  --bs-btn-hover-bg: #{$primary-dark};
+  --bs-btn-hover-border-color: #{$primary-dark};
+  --bs-btn-active-bg: #{$primary-dark};
+  --bs-btn-active-border-color: #{$primary-dark};
 }
 
 .btn-secondary {
-  background: $gray-200;
-  color: $text-primary;
-
-  &:hover:not(:disabled) {
-    background: $gray-400;
-    color: $gray-900;
-  }
+  --bs-btn-bg: #{$gray-200};
+  --bs-btn-border-color: #{$gray-200};
+  --bs-btn-color: #{$text-primary};
+  --bs-btn-hover-bg: #{$gray-400};
+  --bs-btn-hover-border-color: #{$gray-400};
+  --bs-btn-hover-color: #{$gray-900};
 }
 
 .btn-success {
-  background: $success;
-  color: white;
-
-  &:hover:not(:disabled) {
-    background: $success-dark;
-  }
+  --bs-btn-bg: #{$success};
+  --bs-btn-border-color: #{$success};
+  --bs-btn-hover-bg: #{$success-dark};
+  --bs-btn-hover-border-color: #{$success-dark};
 }
 
 .btn-danger {
-  background: $error;
-  color: white;
-
-  &:hover:not(:disabled) {
-    background: $error-dark;
-  }
-}
-
-.btn-outline {
-  background: $bg-card;
-  border: 1px solid $border-color;
-  color: $text-primary;
-
-  &:hover:not(:disabled) {
-    background: $gray-100;
-    border-color: $gray-400;
-  }
+  --bs-btn-bg: #{$error};
+  --bs-btn-border-color: #{$error};
+  --bs-btn-hover-bg: #{$error-dark};
+  --bs-btn-hover-border-color: #{$error-dark};
 }
 
 .btn-outline-primary {
-  background: transparent;
-  border: 1px solid $primary;
-  color: $primary;
-
-  &:hover:not(:disabled) {
-    background: $primary;
-    color: white;
-  }
+  --bs-btn-color: #{$primary};
+  --bs-btn-border-color: #{$primary};
+  --bs-btn-hover-bg: #{$primary};
+  --bs-btn-hover-border-color: #{$primary};
+  --bs-btn-active-bg: #{$primary};
+  --bs-btn-active-border-color: #{$primary};
 }
 
 .btn-outline-warning {
-  background: transparent;
-  border: 1px solid $warning;
-  color: $warning-dark;
-
-  &:hover:not(:disabled) {
-    background: $warning;
-    color: white;
-  }
+  --bs-btn-color: #{$warning-dark};
+  --bs-btn-border-color: #{$warning};
+  --bs-btn-hover-bg: #{$warning};
+  --bs-btn-hover-border-color: #{$warning};
+  --bs-btn-hover-color: #fff;
 }
 
 .btn-outline-danger {
-  background: transparent;
-  border: 1px solid $error;
-  color: $error;
-
-  &:hover:not(:disabled) {
-    background: $error;
-    color: white;
-  }
+  --bs-btn-color: #{$error};
+  --bs-btn-border-color: #{$error};
+  --bs-btn-hover-bg: #{$error};
+  --bs-btn-hover-border-color: #{$error};
 }
 
+.btn-outline-secondary {
+  --bs-btn-color: #{$text-secondary};
+  --bs-btn-border-color: #{$gray-300};
+  --bs-btn-hover-bg: #{$gray-100};
+  --bs-btn-hover-border-color: #{$gray-400};
+  --bs-btn-hover-color: #{$text-primary};
+}
+
+// Smaller btn-sm and form-control-sm
 .btn-sm {
-  padding: $spacing-xs $spacing-sm;
-  font-size: $font-size-sm;
+  --bs-btn-padding-y: 0.2rem;
+  --bs-btn-padding-x: 0.5rem;
+  --bs-btn-font-size: 0.75rem;
 }
 
-.btn-lg {
-  padding: $spacing-md $spacing-lg;
-  font-size: $font-size-lg;
+.form-control-sm {
+  padding: 0.2rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  min-height: calc(1.5em + 0.4rem + 2px) !important;
+}
+
+.form-select-sm {
+  padding: 0.2rem 1.75rem 0.2rem 0.5rem !important;
+  font-size: 0.75rem !important;
+  min-height: calc(1.5em + 0.4rem + 2px) !important;
 }
 
 // Form elements
