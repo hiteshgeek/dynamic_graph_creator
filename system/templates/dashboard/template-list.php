@@ -71,6 +71,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                         </button>
                         <div class="category-header-content">
                             <h2><?php echo htmlspecialchars($categoryData['category']['name']); ?></h2>
+                            <span class="category-template-count"><?php echo count($categoryData['templates']); ?></span>
                             <?php if (!empty($categoryData['category']['is_system'])): ?>
                             <span class="category-system-badge" title="System Category">
                                 <i class="fas fa-lock"></i>
