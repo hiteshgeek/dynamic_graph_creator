@@ -342,6 +342,35 @@ export default class GraphCreator {
         // Track selected filters
         this.selectedFilters = [];
 
+        // Storage key for this graph's selected filters
+        const storageKey = this.graphId ? `graphFilters_${this.graphId}` : null;
+
+        // Load saved filters from localStorage
+        if (storageKey) {
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
+                try {
+                    this.selectedFilters = JSON.parse(saved);
+                    // Check the saved checkboxes
+                    checkboxes.forEach(cb => {
+                        if (this.selectedFilters.includes(cb.value)) {
+                            cb.checked = true;
+                        }
+                    });
+                    // Update count display
+                    if (countDisplay) {
+                        countDisplay.textContent = `${this.selectedFilters.length} selected`;
+                    }
+                    // Auto-show active filters if we have saved selections
+                    if (this.selectedFilters.length > 0) {
+                        this.applySelectedFilters(selectorView, activeView);
+                    }
+                } catch (e) {
+                    // Invalid JSON, ignore
+                }
+            }
+        }
+
         // Update count and button state when checkboxes change
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', () => {
@@ -362,20 +391,12 @@ export default class GraphCreator {
         useBtn.addEventListener('click', () => {
             if (this.selectedFilters.length === 0) return;
 
-            // Show active filters view
-            selectorView.style.display = 'none';
-            activeView.style.display = 'flex';
+            // Save to localStorage
+            if (storageKey) {
+                localStorage.setItem(storageKey, JSON.stringify(this.selectedFilters));
+            }
 
-            // Show only selected filter inputs
-            const filterItems = this.container.querySelectorAll('#graph-filters .filter-input-item');
-            filterItems.forEach(item => {
-                const key = item.dataset.filterKey;
-                if (this.selectedFilters.includes(key)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
+            this.applySelectedFilters(selectorView, activeView);
         });
 
         // Handle "Change" button to go back to selector
@@ -386,6 +407,26 @@ export default class GraphCreator {
                 activeView.style.display = 'none';
             });
         }
+    }
+
+    /**
+     * Apply selected filters - show active view with selected filter inputs
+     */
+    applySelectedFilters(selectorView, activeView) {
+        // Show active filters view
+        selectorView.style.display = 'none';
+        activeView.style.display = 'flex';
+
+        // Show only selected filter inputs
+        const filterItems = this.container.querySelectorAll('#graph-filters .filter-input-item');
+        filterItems.forEach(item => {
+            const key = item.dataset.filterKey;
+            if (this.selectedFilters.includes(key)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
     }
 
     /**
