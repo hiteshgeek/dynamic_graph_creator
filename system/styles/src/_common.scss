@@ -425,6 +425,7 @@ option[value="__new__"] {
 
 // Custom styled Bootstrap switch (matching config panel design)
 // Use with: <div class="form-check form-switch custom-switch">
+// Contextual colors: custom-switch-success, custom-switch-warning, custom-switch-danger, custom-switch-info
 .custom-switch {
   margin-bottom: 0;
   padding-left: 0;
@@ -453,6 +454,23 @@ option[value="__new__"] {
       background-position: right center;
       background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
     }
+  }
+
+  // Contextual color variants
+  &.custom-switch-success .form-check-input:checked {
+    background-color: $success;
+  }
+
+  &.custom-switch-warning .form-check-input:checked {
+    background-color: $warning;
+  }
+
+  &.custom-switch-danger .form-check-input:checked {
+    background-color: $error;
+  }
+
+  &.custom-switch-info .form-check-input:checked {
+    background-color: #0dcaf0; // Bootstrap info color
   }
 }
 

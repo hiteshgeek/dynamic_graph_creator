@@ -55,7 +55,7 @@
             <?php if (!$template->getIsSystem()): ?>
                 <div class="toggle-with-label">
                     <span class="toggle-label">Tweak</span>
-                    <div class="form-check form-switch custom-switch">
+                    <div class="form-check form-switch custom-switch custom-switch-warning">
                         <input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch">
                     </div>
                 </div>

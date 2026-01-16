@@ -222,8 +222,9 @@ $grid-gap: $spacing-md;
   }
 }
 
-// Template builder page - lighter section borders
-.template-builder-page {
+// Edit mode - lighter section borders with hover highlight
+.template-builder-page,
+.dashboard-builder-page {
   .dashboard-section {
     border: 1px solid rgba(0, 0, 0, 0.03);
 

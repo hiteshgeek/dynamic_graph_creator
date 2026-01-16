@@ -63,6 +63,12 @@
                     class="btn btn-primary btn-sm">
                     <i class="fas fa-eye"></i> View Mode
                 </a>
+                <div class="toggle-with-label">
+                    <span class="toggle-label">Tweak</span>
+                    <div class="form-check form-switch custom-switch custom-switch-warning">
+                        <input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch">
+                    </div>
+                </div>
             <?php else: ?>
                 <div class="save-indicator" style="display: none;">
                     <i class="fas fa-check-circle"></i>
@@ -264,6 +270,31 @@
                     } else if (e.key === 'Escape') {
                         e.preventDefault();
                         cancelBtn.click();
+                    }
+                });
+            }
+
+            // Layout Edit Mode Toggle (Tweak Switch)
+            const tweakSwitch = document.getElementById('toggle-layout-edit-switch');
+            if (tweakSwitch) {
+                // Check localStorage for saved state (default: tweak mode off)
+                const tweakEnabled = localStorage.getItem('dashboardTweakEnabled') === 'true';
+
+                // Apply initial state
+                tweakSwitch.checked = tweakEnabled;
+                if (!tweakEnabled) {
+                    container.classList.add('layout-edit-disabled');
+                }
+
+                tweakSwitch.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Enable tweak mode (show layout controls)
+                        container.classList.remove('layout-edit-disabled');
+                        localStorage.setItem('dashboardTweakEnabled', 'true');
+                    } else {
+                        // Disable tweak mode (hide layout controls)
+                        container.classList.add('layout-edit-disabled');
+                        localStorage.setItem('dashboardTweakEnabled', 'false');
                     }
                 });
             }
