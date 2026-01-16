@@ -397,6 +397,15 @@ export class TemplateManager {
     const Ajax = window.Ajax;
     const scrollFn = TemplateManager.createScrollFn();
 
+    // Track source category for cross-category moves
+    let sourceCategoryId = null;
+    let sourceCategoryName = null;
+    let sourceGrid = null;
+    let draggedTemplateName = null;
+    let originalIndex = null;
+    let draggedItem = null;
+    let collapsedDropHandler = null;
+
     // Category sortable - drag entire category sections
     TemplateManager.categorySortable = Sortable.create(categoryList, {
       animation: 150,
@@ -432,42 +441,270 @@ export class TemplateManager {
     });
 
     // Template sortables - one for each category's template grid
+    // Using group to allow cross-list dragging
     const templateGrids = document.querySelectorAll(".template-grid");
     templateGrids.forEach(grid => {
-      // Skip grids that only contain empty state cards
-      const hasTemplates = grid.querySelector(".template-card:not(.template-card-empty)");
-      if (!hasTemplates) return;
-
       const sortable = Sortable.create(grid, {
+        group: "templates", // Allow dragging between grids
         animation: 150,
         handle: ".template-drag-handle",
         draggable: ".template-card:not(.template-card-empty)",
         ghostClass: "sortable-ghost",
         chosenClass: "sortable-chosen",
+        dragClass: "sortable-drag",
         forceFallback: true,
+        fallbackClass: "sortable-fallback",
+        fallbackOnBody: true,
+        fallbackTolerance: 0,
         scroll: true,
         scrollFn: scrollFn,
         scrollSensitivity: 150,
         bubbleScroll: true,
+
+        onStart: (evt) => {
+          // Store source category info
+          const section = evt.from.closest(".template-category-section");
+          sourceCategoryId = section ? section.dataset.categoryId : null;
+          sourceCategoryName = section ? section.querySelector(".category-header h2")?.textContent : null;
+          sourceGrid = evt.from;
+          draggedTemplateName = evt.item.querySelector(".template-info h4")?.textContent || "Template";
+          originalIndex = evt.oldIndex;
+          draggedItem = evt.item;
+
+          // Add class to body for cross-category drag styling
+          document.body.classList.add("template-dragging");
+
+          // Add drop zones for collapsed categories
+          document.querySelectorAll(".template-category-section.collapsed").forEach(collapsedSection => {
+            const header = collapsedSection.querySelector(".category-header");
+            if (header && collapsedSection.dataset.categoryId !== sourceCategoryId) {
+              header.classList.add("collapsed-drop-zone");
+              // Add drop indicator element
+              const dropIndicator = document.createElement("div");
+              dropIndicator.className = "collapsed-drop-indicator";
+              dropIndicator.innerHTML = '<i class="fas fa-plus-circle"></i> Drop here to add';
+              header.appendChild(dropIndicator);
+            }
+          });
+
+          // Track mouse position for collapsed category hover detection
+          collapsedDropHandler = (e) => {
+            const fallbackEl = document.querySelector(".sortable-fallback");
+            let hoveredCollapsedSection = null;
+
+            // Check if mouse is over any collapsed category header
+            document.querySelectorAll(".template-category-section.collapsed").forEach(collapsedSection => {
+              if (collapsedSection.dataset.categoryId === sourceCategoryId) return;
+
+              const header = collapsedSection.querySelector(".category-header");
+              if (!header) return;
+
+              const rect = header.getBoundingClientRect();
+              if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                  e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                hoveredCollapsedSection = collapsedSection;
+              }
+            });
+
+            // Update visual feedback
+            document.querySelectorAll(".template-category-section.collapsed").forEach(s => {
+              s.classList.remove("drag-target-different-category");
+            });
+
+            if (hoveredCollapsedSection) {
+              hoveredCollapsedSection.classList.add("drag-target-different-category");
+              if (fallbackEl) {
+                fallbackEl.classList.add("cross-category-drag");
+              }
+            }
+          };
+
+          document.addEventListener("mousemove", collapsedDropHandler);
+        },
+
+        onMove: (evt) => {
+          // Add visual feedback when hovering over different category
+          const targetSection = evt.to.closest(".template-category-section");
+          const targetCategoryId = targetSection ? targetSection.dataset.categoryId : null;
+
+          // Remove previous hover states
+          document.querySelectorAll(".template-category-section").forEach(s => {
+            s.classList.remove("drag-target-different-category");
+          });
+
+          // Get the fallback element (the clone following cursor)
+          const fallbackEl = document.querySelector(".sortable-fallback");
+
+          // Add hover state if different category
+          if (targetCategoryId && targetCategoryId !== sourceCategoryId) {
+            targetSection.classList.add("drag-target-different-category");
+            // Highlight the dragged item to indicate cross-category move
+            if (fallbackEl) {
+              fallbackEl.classList.add("cross-category-drag");
+            }
+          } else {
+            // Remove cross-category highlight
+            if (fallbackEl) {
+              fallbackEl.classList.remove("cross-category-drag");
+            }
+          }
+
+          return true; // Allow the move
+        },
+
         onEnd: async (evt) => {
-          if (evt.oldIndex === evt.newIndex) return;
+          // FIRST: Check if dropped on a collapsed category header BEFORE cleanup
+          const collapsedTarget = document.querySelector(".template-category-section.collapsed.drag-target-different-category");
 
-          const templates = grid.querySelectorAll(".template-card:not(.template-card-empty)");
-          const order = Array.from(templates).map(card => card.dataset.templateId);
+          // Clean up drag states
+          document.body.classList.remove("template-dragging");
+          document.querySelectorAll(".template-category-section").forEach(s => {
+            s.classList.remove("drag-target-different-category");
+          });
+          document.querySelectorAll(".category-header.collapsed-drop-zone").forEach(h => {
+            h.classList.remove("collapsed-drop-zone");
+            // Remove drop indicator elements
+            const indicator = h.querySelector(".collapsed-drop-indicator");
+            if (indicator) indicator.remove();
+          });
 
-          try {
-            const result = await Ajax.post("reorder_templates", { order: order });
-            if (result.success) {
-              Toast.success("Templates reordered");
-            } else {
-              Toast.error(result.message || "Failed to reorder templates");
+          // Remove mousemove listener
+          if (collapsedDropHandler) {
+            document.removeEventListener("mousemove", collapsedDropHandler);
+            collapsedDropHandler = null;
+          }
+          let targetSection = evt.to.closest(".template-category-section");
+          let targetCategoryId = targetSection ? targetSection.dataset.categoryId : null;
+          let droppedOnCollapsed = false;
+
+          if (collapsedTarget && collapsedTarget.dataset.categoryId !== sourceCategoryId) {
+            // Override target to be the collapsed category
+            targetSection = collapsedTarget;
+            targetCategoryId = collapsedTarget.dataset.categoryId;
+            droppedOnCollapsed = true;
+          }
+
+          const templateId = evt.item.dataset.templateId;
+
+          // Check if moved to different category (either via drag to expanded grid or drop on collapsed header)
+          if ((evt.from !== evt.to || droppedOnCollapsed) && sourceCategoryId !== targetCategoryId) {
+            // Cross-category move - show confirmation
+            const targetCategoryName = targetSection.querySelector(".category-header h2")?.textContent || "this category";
+
+            const ConfirmDialog = window.ConfirmDialog;
+            const confirmed = await ConfirmDialog.show({
+              message: `Move "<strong>${draggedTemplateName}</strong>" from "<strong>${sourceCategoryName}</strong>" to "<strong>${targetCategoryName}</strong>"?`,
+              title: "Move Template to Different Category",
+              confirmText: "Move",
+              confirmClass: "btn-primary"
+            });
+
+            if (!confirmed) {
+              // Revert: move template back to source at original position
+              // Remove the item from its current location first
+              evt.item.remove();
+
+              // Get fresh reference to children after removal
+              const children = Array.from(sourceGrid.children);
+
+              // Insert at original position
+              if (originalIndex < children.length) {
+                sourceGrid.insertBefore(evt.item, children[originalIndex]);
+              } else {
+                sourceGrid.appendChild(evt.item);
+              }
+
+              sourceCategoryId = null;
+              sourceGrid = null;
+              originalIndex = null;
+              return;
+            }
+
+            // Perform the category move via API
+            try {
+              const result = await Ajax.post("move_template_category", {
+                template_id: templateId,
+                category_id: targetCategoryId
+              });
+
+              if (result.success) {
+                Toast.success(result.message || "Template moved successfully");
+
+                // For collapsed category drops, move item to target grid (at end)
+                if (droppedOnCollapsed) {
+                  const targetGrid = targetSection.querySelector(".template-grid");
+                  if (targetGrid) {
+                    targetGrid.appendChild(evt.item);
+                  }
+                }
+
+                // Also reorder within new category
+                const targetGrid = droppedOnCollapsed
+                  ? targetSection.querySelector(".template-grid")
+                  : evt.to;
+                if (targetGrid) {
+                  const templates = targetGrid.querySelectorAll(".template-card:not(.template-card-empty)");
+                  const order = Array.from(templates).map(card => card.dataset.templateId);
+                  await Ajax.post("reorder_templates", { order: order });
+                }
+
+                // Check if source category is now empty (no templates left)
+                const sourceSection = document.querySelector(`.template-category-section[data-category-id="${sourceCategoryId}"]`);
+                if (sourceSection) {
+                  const remainingTemplates = sourceSection.querySelectorAll(".template-card:not(.template-card-empty)");
+                  if (remainingTemplates.length === 0) {
+                    // Reload to show empty state for category
+                    window.location.reload();
+                  }
+                }
+              } else {
+                Toast.error(result.message || "Failed to move template");
+                // Revert on error to original position
+                const children = sourceGrid.children;
+                if (originalIndex < children.length) {
+                  sourceGrid.insertBefore(evt.item, children[originalIndex]);
+                } else {
+                  sourceGrid.appendChild(evt.item);
+                }
+              }
+            } catch (error) {
+              console.error("Move template error:", error);
+              Toast.error("Failed to move template");
+              // Revert on error to original position
+              const children = sourceGrid.children;
+              if (originalIndex < children.length) {
+                sourceGrid.insertBefore(evt.item, children[originalIndex]);
+              } else {
+                sourceGrid.appendChild(evt.item);
+              }
+            }
+          } else if (evt.oldIndex !== evt.newIndex || evt.from !== evt.to) {
+            // Same category reorder
+            const templates = evt.to.querySelectorAll(".template-card:not(.template-card-empty)");
+            const order = Array.from(templates).map(card => card.dataset.templateId);
+
+            try {
+              const result = await Ajax.post("reorder_templates", { order: order });
+              if (result.success) {
+                Toast.success("Templates reordered");
+              } else {
+                Toast.error(result.message || "Failed to reorder templates");
+                window.location.reload();
+              }
+            } catch (error) {
+              console.error("Reorder templates error:", error);
+              Toast.error("Failed to reorder templates");
               window.location.reload();
             }
-          } catch (error) {
-            console.error("Reorder templates error:", error);
-            Toast.error("Failed to reorder templates");
-            window.location.reload();
           }
+
+          // Reset tracking
+          sourceCategoryId = null;
+          sourceCategoryName = null;
+          sourceGrid = null;
+          draggedTemplateName = null;
+          originalIndex = null;
+          draggedItem = null;
         }
       });
 

@@ -509,8 +509,219 @@
     }
   }
 
-  // Placeholder during drag
-  .sortable-fallback {
-    opacity: 0.9 !important;
+  // Drag class (on original element while dragging)
+  .sortable-drag {
+    opacity: 0 !important;
+  }
+
+  // Cross-category drag feedback
+  .template-category-section.drag-target-different-category {
+    .category-header {
+      border-left-color: $error;
+      background: linear-gradient(90deg, rgba($error, 0.08) 0%, white 50%);
+      box-shadow: 0 2px 8px rgba($error, 0.2);
+
+      h2 {
+        color: $error;
+      }
+    }
+
+    .template-grid {
+      background: rgba($error, 0.03);
+      border-radius: 8px;
+      outline: 2px dashed rgba($error, 0.3);
+      outline-offset: -2px;
+    }
+  }
+}
+
+// Global body state during template drag
+body.template-dragging {
+  .template-category-section {
+    transition: all 0.15s ease;
+  }
+
+  // Collapsed category drop zone indicator
+  .template-category-section.collapsed {
+    .category-header.collapsed-drop-zone {
+      cursor: copy;
+      flex-wrap: wrap;
+
+      // Drop indicator row
+      .collapsed-drop-indicator {
+        width: 100%;
+        margin-top: 0.5rem;
+        padding: 0.4rem 0.75rem;
+        background: rgba(0, 0, 0, 0.03);
+        border: 1px dashed rgba(0, 0, 0, 0.15);
+        border-radius: 4px;
+        font-size: 0.75rem;
+        color: $text-secondary;
+        text-align: center;
+
+        i {
+          margin-right: 0.35rem;
+        }
+      }
+    }
+
+    // When hovering over collapsed category
+    &.drag-target-different-category .category-header {
+      cursor: copy;
+
+      .collapsed-drop-indicator {
+        background: rgba($error, 0.08);
+        border-color: rgba($error, 0.3);
+        color: $error;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Fallback element (clone that follows cursor) - must be outside .template-list-page
+// because fallbackOnBody appends it to <body>, so we need to replicate the card styles here
+.sortable-fallback.template-card {
+  // Base card styles (since it's outside .template-list-page context)
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: $spacing-md;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  // Drag-specific enhancements
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25) !important;
+  transform: rotate(2deg);
+  z-index: 9999 !important;
+  cursor: grabbing !important;
+
+  // Template preview
+  .template-preview {
+    @include template-preview-small;
+    padding: 0;
+  }
+
+  // Template info
+  .template-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.25rem 0;
+      color: #212529;
+    }
+
+    p {
+      font-size: 0.875rem;
+      color: #6c757d;
+      margin: 0 0 0.5rem 0;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .template-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: auto;
+      padding-top: 0.5rem;
+      margin-bottom: 0.5rem;
+
+      .badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 500;
+
+        &.badge-system {
+          background: #e3f2fd;
+          color: #1976d2;
+
+          i {
+            margin-right: 0.25rem;
+          }
+        }
+      }
+    }
+  }
+
+  // Card actions (buttons at bottom)
+  .template-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: $spacing-md;
+    margin-top: auto;
+    border-top: 1px solid #e0e0e0;
+
+    .template-drag-handle {
+      margin-left: auto;
+      color: $primary;
+      font-size: 1rem;
+      padding: 0.25rem 0.5rem;
+      opacity: 1;
+    }
+
+    .btn-icon {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      min-height: 32px;
+      padding: 0 !important;
+      border-radius: 50% !important;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #dee2e6;
+      background: white;
+      color: #6c757d;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+
+      &.btn-primary {
+        border-color: $primary;
+        color: $primary;
+      }
+
+      &.btn-success {
+        border-color: #198754;
+        color: #198754;
+      }
+
+      &.btn-danger {
+        border-color: #dc3545;
+        color: #dc3545;
+      }
+    }
+  }
+
+  // Cross-category drag - highlight with danger color
+  &.cross-category-drag {
+    border-color: $error !important;
+    box-shadow: 0 12px 28px rgba($error, 0.3), 0 0 0 3px rgba($error, 0.2) !important;
+
+    &::after {
+      content: "Moving to different category";
+      position: absolute;
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      background: $error;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
   }
 }

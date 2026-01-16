@@ -75,6 +75,9 @@ if (isset($_POST['submit'])) {
         case 'reorder_categories':
             reorderCategories($_POST);
             break;
+        case 'move_template_category':
+            moveTemplateCategory($_POST);
+            break;
     }
 }
 
@@ -1115,4 +1118,57 @@ function reorderCategories($data)
     }
 
     Utility::ajaxResponseTrue('Categories reordered successfully');
+}
+
+/**
+ * Move template to a different category
+ */
+function moveTemplateCategory($data)
+{
+    $templateId = isset($data['template_id']) ? intval($data['template_id']) : 0;
+    $newCategoryId = isset($data['category_id']) ? $data['category_id'] : null;
+
+    if (!$templateId) {
+        Utility::ajaxResponseFalse('Template ID is required');
+    }
+
+    // Load the template
+    $template = new DashboardTemplate($templateId);
+    if (!$template->getId()) {
+        Utility::ajaxResponseFalse('Template not found');
+    }
+
+    // Check if template is system (cannot be moved)
+    if ($template->getIsSystem()) {
+        Utility::ajaxResponseFalse('System templates cannot be moved');
+    }
+
+    // Handle category ID - null/empty means uncategorized
+    $categoryId = null;
+    if (!empty($newCategoryId) && is_numeric($newCategoryId)) {
+        $categoryId = intval($newCategoryId);
+
+        // Verify category exists
+        $category = new DashboardTemplateCategory($categoryId);
+        if (!$category->getId()) {
+            Utility::ajaxResponseFalse('Target category not found');
+        }
+    }
+
+    // Update the template's category
+    $template->setDtcid($categoryId);
+    $template->update();
+
+    // Get category name for response
+    $categoryName = 'Uncategorized';
+    if ($categoryId) {
+        $category = new DashboardTemplateCategory($categoryId);
+        $categoryName = $category->getName();
+    }
+
+    Utility::ajaxResponseTrue('Template moved to ' . $categoryName, array(
+        'template_id' => $templateId,
+        'category_id' => $categoryId,
+        'category_name' => $categoryName
+    ));
 }

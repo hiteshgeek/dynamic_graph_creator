@@ -98,7 +98,7 @@ window.ConfirmDialog = {
 
         // Update modal content
         this.modalElement.querySelector('.modal-title').textContent = title;
-        this.modalElement.querySelector('.confirm-message').textContent = message;
+        this.modalElement.querySelector('.confirm-message').innerHTML = message;
         this.modalElement.querySelector('.confirm-delete').textContent = confirmText;
         this.modalElement.querySelector('.cancel-delete').textContent = cancelText;
 
