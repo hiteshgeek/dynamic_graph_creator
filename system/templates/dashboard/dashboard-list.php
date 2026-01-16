@@ -28,14 +28,14 @@
             <h1>Dashboards</h1>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=dashboard/templates" class="btn btn-secondary">
+            <a href="?urlq=dashboard/templates" class="btn btn-secondary btn-sm">
                 <i class="fas fa-clone"></i> Templates
             </a>
-            <a href="?urlq=graph" class="btn btn-secondary">
+            <a href="?urlq=graph" class="btn btn-secondary btn-sm">
                 <i class="fas fa-chart-line"></i> Graphs
             </a>
             <?php if (!empty($dashboards)): ?>
-            <a href="?urlq=dashboard/builder" class="btn btn-primary">
+            <a href="?urlq=dashboard/builder" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus"></i> Create Dashboard
             </a>
             <?php endif; ?>

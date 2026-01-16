@@ -36,7 +36,7 @@
             <h1><?php echo htmlspecialchars($graph->getName()); ?></h1>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=graph/edit/<?php echo $graph->getId(); ?>" class="btn btn-design">
+            <a href="?urlq=graph/edit/<?php echo $graph->getId(); ?>" class="btn btn-design btn-sm">
                 <i class="fas fa-paint-brush"></i> Design Mode
             </a>
         </div>

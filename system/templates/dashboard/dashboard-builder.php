@@ -60,7 +60,7 @@
                     <span>Saved</span>
                 </div>
                 <a href="?urlq=dashboard/preview/<?php echo $dashboard->getId(); ?>"
-                    class="btn btn-primary">
+                    class="btn btn-primary btn-sm">
                     <i class="fas fa-eye"></i> View Mode
                 </a>
             <?php else: ?>

@@ -36,14 +36,14 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
             <?php endif; ?>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=dashboard" class="btn btn-secondary">
+            <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
                 <i class="fas fa-th-large"></i> Dashboards
             </a>
-            <a href="?urlq=graph" class="btn btn-secondary">
+            <a href="?urlq=graph" class="btn btn-secondary btn-sm">
                 <i class="fas fa-chart-line"></i> Graphs
             </a>
             <?php if (!empty($templates)): ?>
-            <a href="?urlq=dashboard/template/create" class="btn btn-primary">
+            <a href="?urlq=dashboard/template/create" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus"></i> Create Template
             </a>
             <?php endif; ?>

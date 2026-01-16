@@ -43,12 +43,12 @@
                     <i class="fas fa-check-circle"></i>
                     <span>Saved</span>
                 </div>
-                <button class="btn btn-warning" id="edit-template-details-btn">
+                <button class="btn btn-warning btn-sm" id="edit-template-details-btn">
                     <i class="fas fa-pencil"></i> Edit Details
                 </button>
             <?php endif; ?>
             <a href="?urlq=dashboard/template/preview/<?php echo $template->getId(); ?>"
-                class="btn btn-primary"
+                class="btn btn-primary btn-sm"
                 title="View Mode">
                 <i class="fas fa-eye"></i> View Mode
             </a>

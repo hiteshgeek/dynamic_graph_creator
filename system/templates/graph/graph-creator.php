@@ -43,7 +43,7 @@
         </div>
         <?php if ($graph): ?>
         <div class="page-header-right">
-            <a href="?urlq=graph/view/<?php echo $graph->getId(); ?>" class="btn btn-primary">
+            <a href="?urlq=graph/view/<?php echo $graph->getId(); ?>" class="btn btn-primary btn-sm">
                 <i class="fas fa-eye"></i> View Mode
             </a>
         </div>

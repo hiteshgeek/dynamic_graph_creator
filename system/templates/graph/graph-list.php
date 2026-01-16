@@ -28,14 +28,14 @@
             <h1>Graphs</h1>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=dashboard" class="btn btn-secondary">
+            <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
                 <i class="fas fa-th-large"></i> Dashboards
             </a>
-            <a href="?urlq=filters" class="btn btn-secondary">
+            <a href="?urlq=filters" class="btn btn-secondary btn-sm">
                 <i class="fas fa-filter"></i> Filters
             </a>
             <?php if (!empty($graphs)): ?>
-            <a href="?urlq=graph/create" class="btn btn-primary">
+            <a href="?urlq=graph/create" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus"></i> Create Graph
             </a>
             <?php endif; ?>

@@ -28,14 +28,14 @@
             <h1>Filters</h1>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=dashboard" class="btn btn-secondary">
+            <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
                 <i class="fas fa-th-large"></i> Dashboards
             </a>
-            <a href="?urlq=graph" class="btn btn-secondary">
+            <a href="?urlq=graph" class="btn btn-secondary btn-sm">
                 <i class="fas fa-chart-bar"></i> Graphs
             </a>
             <?php if (!empty($filters)): ?>
-            <a href="?urlq=filters/add" class="btn btn-primary">
+            <a href="?urlq=filters/add" class="btn btn-primary btn-sm">
                 <i class="fas fa-plus"></i> Add Filter
             </a>
             <?php endif; ?>
