@@ -24,8 +24,14 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
     <?php if ($css = Utility::getCss('dashboard')): ?>
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endif; ?>
+
+    <!-- Apply collapsed state immediately to prevent flash -->
+    <script>
+    window.__collapsedCategories = JSON.parse(localStorage.getItem('collapsedTemplateCategories') || '[]');
+    window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'false'; ?>;
+    </script>
 </head>
-<body>
+<body class="<?php echo $allowTemplateOrdering ? 'template-ordering-enabled' : 'template-ordering-disabled'; ?>">
     <div class="page-header">
         <div class="page-header-left">
             <h1>Dashboard Templates</h1>
@@ -165,6 +171,14 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                         <?php endif; ?>
                     </div>
                 </div>
+                <script>
+                (function() {
+                    var id = '<?php echo $categoryData['category']['dtcid']; ?>';
+                    if (window.__collapsedCategories && window.__collapsedCategories.indexOf(id) !== -1) {
+                        document.querySelector('.template-category-section[data-category-id="' + id + '"]').classList.add('collapsed');
+                    }
+                })();
+                </script>
                 <?php endforeach; ?>
             </div>
             <?php endif; ?>

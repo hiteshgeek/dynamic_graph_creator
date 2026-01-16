@@ -758,3 +758,13 @@ body.template-dragging {
     }
   }
 }
+
+// Hide drag handles when ordering is disabled
+body.template-ordering-disabled {
+  .template-list-page {
+    .category-drag-handle,
+    .template-drag-handle {
+      display: none !important;
+    }
+  }
+}

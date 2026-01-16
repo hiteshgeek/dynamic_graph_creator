@@ -20,8 +20,10 @@ export class TemplateManager {
     }
     TemplateManager.initialized = true;
 
-    // Initialize sortables for template list page
-    TemplateManager.initSortables();
+    // Initialize sortables only if ordering is allowed
+    if (window.__allowTemplateOrdering) {
+      TemplateManager.initSortables();
+    }
 
     // Initialize collapse/expand functionality
     TemplateManager.initCollapseToggle();
@@ -70,14 +72,11 @@ export class TemplateManager {
    * Initialize collapse/expand toggle functionality
    */
   static initCollapseToggle() {
-    // Restore collapsed state from localStorage
-    const collapsedCategories = JSON.parse(localStorage.getItem("collapsedTemplateCategories") || "[]");
-    collapsedCategories.forEach(categoryId => {
-      const section = document.querySelector(`.template-category-section[data-category-id="${categoryId}"]`);
-      if (section) {
-        section.classList.add("collapsed");
-      }
-    });
+    // Collapsed state is now applied inline in PHP template to prevent flash
+    // Just clean up the global variable and update the toggle all button
+    if (window.__collapsedCategories) {
+      delete window.__collapsedCategories;
+    }
 
     // Update toggle all button text
     TemplateManager.updateToggleAllButton();

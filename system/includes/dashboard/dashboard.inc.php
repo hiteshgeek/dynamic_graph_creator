@@ -5,6 +5,10 @@
  * Handles dashboard builder actions
  */
 
+// Permission control for template ordering operations
+// Set to true to allow category reordering, template reordering, and moving templates between categories
+$allowTemplateOrdering = false;
+
 $url = Utility::parseUrl();
 $action = isset($url[1]) ? $url[1] : 'list';
 
@@ -549,6 +553,7 @@ function reorderSections($data)
  */
 function showTemplateList()
 {
+    global $allowTemplateOrdering;
     $templates = DashboardTemplate::getAllCategoriesWithTemplates();
     require_once SystemConfig::templatesPath() . 'dashboard/template-list.php';
 }
@@ -970,7 +975,7 @@ function removeTemplateSection($data)
     }
 
     // Filter out the section to remove
-    $structure['sections'] = array_values(array_filter($structure['sections'], function($section) use ($sectionId) {
+    $structure['sections'] = array_values(array_filter($structure['sections'], function ($section) use ($sectionId) {
         return $section['sid'] !== $sectionId;
     }));
 
@@ -1061,6 +1066,12 @@ function deleteCategory($data)
  */
 function reorderTemplates($data)
 {
+    global $allowTemplateOrdering;
+
+    if (!$allowTemplateOrdering) {
+        Utility::ajaxResponseFalse('Template reordering is not allowed');
+    }
+
     $order = isset($data['order']) ? $data['order'] : array();
 
     // Decode if it's a JSON string
@@ -1093,6 +1104,12 @@ function reorderTemplates($data)
  */
 function reorderCategories($data)
 {
+    global $allowTemplateOrdering;
+
+    if (!$allowTemplateOrdering) {
+        Utility::ajaxResponseFalse('Category reordering is not allowed');
+    }
+
     $order = isset($data['order']) ? $data['order'] : array();
 
     // Decode if it's a JSON string
@@ -1125,6 +1142,12 @@ function reorderCategories($data)
  */
 function moveTemplateCategory($data)
 {
+    global $allowTemplateOrdering;
+
+    if (!$allowTemplateOrdering) {
+        Utility::ajaxResponseFalse('Moving templates between categories is not allowed');
+    }
+
     $templateId = isset($data['template_id']) ? intval($data['template_id']) : 0;
     $newCategoryId = isset($data['category_id']) ? $data['category_id'] : null;
 
