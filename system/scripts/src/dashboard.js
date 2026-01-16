@@ -117,6 +117,13 @@ class DashboardBuilder {
     const modalElement = document.getElementById("template-modal");
     if (!modalElement) return;
 
+    // Clear dashboard name input and validation state
+    const nameInput = document.getElementById("new-dashboard-name");
+    if (nameInput) {
+      nameInput.value = "";
+      nameInput.classList.remove("is-invalid");
+    }
+
     // Get or create Bootstrap modal instance
     let modal = bootstrap.Modal.getInstance(modalElement);
     if (!modal) {
@@ -179,8 +186,8 @@ class DashboardBuilder {
   }
 
   renderTemplates(templates) {
-    const modal = document.getElementById("template-modal");
-    const body = modal.querySelector(".modal-body");
+    const templateList = document.getElementById("template-list");
+    if (!templateList) return;
 
     let html = "";
 
@@ -219,10 +226,10 @@ class DashboardBuilder {
       }
     }
 
-    body.innerHTML = html;
+    templateList.innerHTML = html;
 
     // Add click handlers
-    body.querySelectorAll(".template-card").forEach((card) => {
+    templateList.querySelectorAll(".template-card").forEach((card) => {
       card.addEventListener("click", () => {
         const templateId = parseInt(card.dataset.templateId);
         if (this.templateSelectorMode === "add-section") {
@@ -235,12 +242,30 @@ class DashboardBuilder {
   }
 
   async createFromTemplate(templateId) {
+    // Validate dashboard name
+    const nameInput = document.getElementById("new-dashboard-name");
+    const dashboardName = nameInput ? nameInput.value.trim() : "";
+
+    if (!dashboardName) {
+      if (nameInput) {
+        nameInput.classList.add("is-invalid");
+        nameInput.focus();
+      }
+      Toast.error("Please enter a dashboard name");
+      return;
+    }
+
+    // Clear validation state
+    if (nameInput) {
+      nameInput.classList.remove("is-invalid");
+    }
+
     Loading.show("Creating dashboard...");
 
     try {
       const result = await Ajax.post("create_from_template", {
         template_id: templateId,
-        name: "New Dashboard",
+        name: dashboardName,
       });
 
       if (result.success) {
@@ -254,12 +279,12 @@ class DashboardBuilder {
         this.container.dataset.dashboardId = this.dashboardId;
 
         // Update page title
-        document.title = "Edit Dashboard - Dynamic Graph Creator";
+        document.title = `${dashboardName} - Edit Dashboard`;
 
         // Update header title
         const headerTitle = document.querySelector(".page-header-left h1");
         if (headerTitle) {
-          headerTitle.textContent = "Edit Dashboard";
+          headerTitle.textContent = dashboardName;
         }
 
         // Show save indicator and View Dashboard button

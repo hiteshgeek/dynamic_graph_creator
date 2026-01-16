@@ -87,14 +87,14 @@
                     <div class="dashboard-card-actions">
                         <a href="?urlq=dashboard/preview/<?php echo $dashboard->getId(); ?>"
                            class="btn-icon btn-primary"
-                           title="View Dashboard">
+                           title="View Mode">
                             <i class="fas fa-eye"></i>
                         </a>
                         <?php if (!$dashboard->getIsSystem()): ?>
                         <a href="?urlq=dashboard/builder/<?php echo $dashboard->getId(); ?>"
-                           class="btn-icon btn-warning"
-                           title="Edit Dashboard">
-                            <i class="fas fa-pencil"></i>
+                           class="btn-icon btn-design"
+                           title="Design Mode">
+                            <i class="fas fa-paint-brush"></i>
                         </a>
                         <?php endif; ?>
                     </div>

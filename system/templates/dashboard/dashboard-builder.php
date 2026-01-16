@@ -61,7 +61,7 @@
                 </div>
                 <a href="?urlq=dashboard/preview/<?php echo $dashboard->getId(); ?>"
                     class="btn btn-primary">
-                    <i class="fas fa-eye"></i> View Dashboard
+                    <i class="fas fa-eye"></i> View Mode
                 </a>
             <?php else: ?>
                 <div class="save-indicator" style="display: none;">
@@ -103,13 +103,22 @@
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Choose a Dashboard Template</h5>
+                    <h5 class="modal-title">Create New Dashboard</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="loader">
-                        <i class="fas fa-spinner fa-spin loader-spinner"></i>
-                        <span class="loader-text">Loading templates...</span>
+                    <div class="dashboard-name-input mb-4">
+                        <label for="new-dashboard-name" class="form-label">Dashboard Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="new-dashboard-name" placeholder="Enter dashboard name" required>
+                        <div class="invalid-feedback">Please enter a dashboard name</div>
+                    </div>
+                    <hr class="mb-4">
+                    <h6 class="mb-3">Choose a Layout</h6>
+                    <div id="template-list">
+                        <div class="loader">
+                            <i class="fas fa-spinner fa-spin loader-spinner"></i>
+                            <span class="loader-text">Loading templates...</span>
+                        </div>
                     </div>
                 </div>
             </div>

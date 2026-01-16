@@ -39,8 +39,8 @@
         </div>
         <div class="page-header-right">
             <?php if (!$dashboard->getIsSystem()): ?>
-                <a href="?urlq=dashboard/builder/<?php echo $dashboard->getId(); ?>" class="btn btn-warning">
-                    <i class="fas fa-pencil"></i> Edit Dashboard
+                <a href="?urlq=dashboard/builder/<?php echo $dashboard->getId(); ?>" class="btn btn-design">
+                    <i class="fas fa-paint-brush"></i> Design Mode
                 </a>
                 <button class="btn btn-danger delete-dashboard-btn" data-dashboard-id="<?php echo $dashboard->getId(); ?>">
                     <i class="fas fa-trash"></i> Delete Dashboard

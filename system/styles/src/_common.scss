@@ -383,6 +383,25 @@ option[value="__new__"] {
   }
 }
 
+// Custom button - Design Mode (purple)
+.btn.btn-design {
+  background-color: #6f42c1;
+  border-color: #6f42c1;
+  color: white;
+
+  &:hover,
+  &:focus {
+    background-color: #5a32a3;
+    border-color: #5a32a3;
+    color: white;
+  }
+
+  &:active {
+    background-color: #4e2a8e;
+    border-color: #4e2a8e;
+  }
+}
+
 // Responsive container
 @media (max-width: 576px) {
   .container {

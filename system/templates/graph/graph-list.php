@@ -72,8 +72,8 @@
                         <?php endif; ?>
                         <div class="graph-meta">
                             <span class="meta-item">
-                                <i class="far fa-clock"></i>
-                                <?php echo date('M j, Y', strtotime($g->getUpdatedTs())); ?>
+                                <i class="fas fa-clock"></i>
+                                <?php echo date('M d, Y', strtotime($g->getUpdatedTs())); ?>
                             </span>
                         </div>
                     </div>
