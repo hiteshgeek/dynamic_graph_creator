@@ -497,8 +497,6 @@ export default class GraphCreator {
                 if (this.filterManager && graph.filters) {
                     this.filterManager.setFilters(graph.filters);
                 }
-
-                Toast.success('Graph loaded successfully');
             } else {
                 Toast.error(result.message || 'Failed to load graph');
             }

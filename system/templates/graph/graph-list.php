@@ -81,8 +81,8 @@
                         <a href="?urlq=graph/view/<?php echo $g->getId(); ?>" class="btn-icon btn-primary" title="View">
                             <i class="fas fa-eye"></i>
                         </a>
-                        <a href="?urlq=graph/edit/<?php echo $g->getId(); ?>" class="btn-icon btn-warning" title="Edit">
-                            <i class="fas fa-pencil"></i>
+                        <a href="?urlq=graph/edit/<?php echo $g->getId(); ?>" class="btn-icon btn-design" title="Design Mode">
+                            <i class="fas fa-paint-brush"></i>
                         </a>
                         <button type="button" class="btn-icon btn-danger delete-graph-btn"
                                 data-id="<?php echo $g->getId(); ?>"

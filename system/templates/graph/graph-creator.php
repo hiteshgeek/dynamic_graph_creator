@@ -39,8 +39,15 @@
             <a href="?urlq=graph" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <h1><?php echo $graph ? 'Edit: ' . htmlspecialchars($graph->getName()) : 'Create Graph'; ?></h1>
+            <h1><?php echo $graph ? htmlspecialchars($graph->getName()) : 'Create Graph'; ?></h1>
         </div>
+        <?php if ($graph): ?>
+        <div class="page-header-right">
+            <a href="?urlq=graph/view/<?php echo $graph->getId(); ?>" class="btn btn-primary">
+                <i class="fas fa-eye"></i> View Mode
+            </a>
+        </div>
+        <?php endif; ?>
     </div>
 
     <div class="container container-full">

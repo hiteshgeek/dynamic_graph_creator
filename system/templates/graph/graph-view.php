@@ -33,11 +33,11 @@
             <a href="?urlq=graph" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <h1>Graphs</h1>
+            <h1><?php echo htmlspecialchars($graph->getName()); ?></h1>
         </div>
         <div class="page-header-right">
-            <a href="?urlq=graph/edit/<?php echo $graph->getId(); ?>" class="btn btn-warning">
-                <i class="fas fa-pencil"></i> Edit
+            <a href="?urlq=graph/edit/<?php echo $graph->getId(); ?>" class="btn btn-design">
+                <i class="fas fa-paint-brush"></i> Design Mode
             </a>
         </div>
     </div>
@@ -101,7 +101,6 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-header-left">
-                        <h2><?php echo htmlspecialchars($graph->getName()); ?></h2>
                         <span class="text-muted">
                             <i class="fas fa-chart-<?php echo $graph->getGraphType(); ?>"></i>
                             <?php echo ucfirst($graph->getGraphType()); ?> Chart
