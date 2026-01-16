@@ -89,9 +89,9 @@ function saveFilter($data)
         Utility::ajaxResponseFalse('Filter label is required');
     }
 
-    // Ensure filter key starts with :
-    if (strpos($filterKey, ':') !== 0) {
-        $filterKey = ':' . $filterKey;
+    // Ensure filter key starts with ::
+    if (strpos($filterKey, '::') !== 0) {
+        $filterKey = (strpos($filterKey, ':') === 0) ? ':' . $filterKey : '::' . $filterKey;
     }
 
     $filter = $filterId ? new Filter($filterId) : new Filter();

@@ -50,8 +50,8 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label">Filter Key <span class="required">*</span></label>
-                                <input type="text" id="filter-key" class="form-control" placeholder=":placeholder_name" value="<?php echo $filter ? htmlspecialchars($filter->getFilterKey()) : ''; ?>" required>
-                                <small class="form-hint">Placeholder used in SQL queries (e.g., :year, :date_from, :status)</small>
+                                <input type="text" id="filter-key" class="form-control" placeholder="::placeholder_name" value="<?php echo $filter ? htmlspecialchars($filter->getFilterKey()) : ''; ?>" required>
+                                <small class="form-hint">Placeholder used in SQL queries (e.g., ::year, ::date_from, ::status)</small>
                             </div>
 
                             <div class="form-group">

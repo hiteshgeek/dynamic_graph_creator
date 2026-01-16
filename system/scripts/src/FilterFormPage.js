@@ -505,9 +505,9 @@ export default class FilterFormPage {
             return;
         }
 
-        // Ensure filter key starts with :
-        if (filterKey.charAt(0) !== ':') {
-            filterKey = ':' + filterKey;
+        // Ensure filter key starts with ::
+        if (!filterKey.startsWith('::')) {
+            filterKey = filterKey.startsWith(':') ? ':' + filterKey : '::' + filterKey;
         }
 
         // Handle select with multiple option

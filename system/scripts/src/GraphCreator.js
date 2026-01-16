@@ -29,6 +29,11 @@ export default class GraphCreator {
         // State
         this.columns = [];
         this.isLoading = false;
+        this.activeSidebarTab = 'config'; // Default to config tab
+
+        // Unsaved changes tracking
+        this.hasUnsavedChanges = false;
+        this.savedState = null;
     }
 
     /**
@@ -55,7 +60,12 @@ export default class GraphCreator {
         } else {
             // Show dummy data for new graph
             this.preview.showDummyData(this.graphType);
+            // Capture initial state for new graph
+            this.captureState();
         }
+
+        // Initialize change tracking
+        this.initChangeTracking();
     }
 
     /**
@@ -97,7 +107,8 @@ export default class GraphCreator {
         if (queryContainer) {
             this.queryBuilder = new QueryBuilder(queryContainer, {
                 onTest: (columns) => this.onQueryTest(columns),
-                onError: (error) => this.onQueryError(error)
+                onError: (error) => this.onQueryError(error),
+                onChange: () => this.checkForChanges()
             });
         }
     }
@@ -109,7 +120,10 @@ export default class GraphCreator {
         const mapperContainer = this.container.querySelector('.data-mapper');
         if (mapperContainer) {
             this.dataMapper = new DataMapper(mapperContainer, {
-                onChange: () => this.updatePreview()
+                onChange: () => {
+                    this.updatePreview();
+                    this.checkForChanges();
+                }
             });
             this.dataMapper.setGraphType(this.graphType);
         }
@@ -124,7 +138,10 @@ export default class GraphCreator {
             this.filterManager = new FilterManager(filterContainer, {
                 entityType: 'graph',
                 entityId: this.graphId,
-                onChange: () => this.onFiltersChanged()
+                onChange: () => {
+                    this.onFiltersChanged();
+                    this.checkForChanges();
+                }
             });
             this.filterManager.init();
         }
@@ -137,7 +154,10 @@ export default class GraphCreator {
         const configContainer = this.container.querySelector('.graph-config-panel');
         if (configContainer) {
             this.configPanel = new ConfigPanel(configContainer, {
-                onChange: () => this.updatePreview()
+                onChange: () => {
+                    this.updatePreview();
+                    this.checkForChanges();
+                }
             });
             this.configPanel.setGraphType(this.graphType);
         }
@@ -220,25 +240,48 @@ export default class GraphCreator {
         const tabs = this.container.querySelectorAll('.sidebar-tab');
         tabs.forEach(tab => {
             tab.addEventListener('click', () => {
-                // Remove active from all sidebar tabs
-                tabs.forEach(t => t.classList.remove('active'));
-
-                // Remove active from all sidebar tab contents
-                this.container.querySelectorAll('.sidebar-tab-content').forEach(c => {
-                    c.classList.remove('active');
-                });
-
-                // Set active on clicked tab
-                tab.classList.add('active');
-
-                // Show corresponding content
-                const targetId = 'sidebar-tab-' + tab.dataset.tab;
-                const targetContent = document.getElementById(targetId);
-                if (targetContent) {
-                    targetContent.classList.add('active');
-                }
+                this.setActiveSidebarTab(tab.dataset.tab);
             });
         });
+
+        // Restore saved tab from localStorage
+        const savedTab = localStorage.getItem('graphCreatorSidebarTab');
+        if (savedTab && (savedTab === 'config' || savedTab === 'filters')) {
+            this.setActiveSidebarTab(savedTab);
+        }
+    }
+
+    /**
+     * Set active sidebar tab
+     */
+    setActiveSidebarTab(tabName) {
+        this.activeSidebarTab = tabName;
+
+        // Save to localStorage for persistence across page refreshes
+        localStorage.setItem('graphCreatorSidebarTab', tabName);
+
+        const tabs = this.container.querySelectorAll('.sidebar-tab');
+
+        // Remove active from all sidebar tabs
+        tabs.forEach(t => t.classList.remove('active'));
+
+        // Remove active from all sidebar tab contents
+        this.container.querySelectorAll('.sidebar-tab-content').forEach(c => {
+            c.classList.remove('active');
+        });
+
+        // Set active on target tab
+        const targetTab = this.container.querySelector(`.sidebar-tab[data-tab="${tabName}"]`);
+        if (targetTab) {
+            targetTab.classList.add('active');
+        }
+
+        // Show corresponding content
+        const targetId = 'sidebar-tab-' + tabName;
+        const targetContent = document.getElementById(targetId);
+        if (targetContent) {
+            targetContent.classList.add('active');
+        }
     }
 
     /**
@@ -462,6 +505,9 @@ export default class GraphCreator {
                 this.updatePreview();
             }
         }
+
+        // Check for unsaved changes
+        this.checkForChanges();
     }
 
     /**
@@ -580,8 +626,18 @@ export default class GraphCreator {
                 }
 
                 // Set config
-                if (this.configPanel && graph.config) {
-                    this.configPanel.setConfig(JSON.parse(graph.config));
+                if (graph.config) {
+                    const config = JSON.parse(graph.config);
+
+                    // Restore active sidebar tab
+                    if (config.activeSidebarTab) {
+                        this.setActiveSidebarTab(config.activeSidebarTab);
+                    }
+
+                    // Set config panel values
+                    if (this.configPanel) {
+                        this.configPanel.setConfig(config);
+                    }
                 }
 
                 // Set mapping
@@ -598,6 +654,10 @@ export default class GraphCreator {
                 if (this.filterManager && graph.filters) {
                     this.filterManager.setFilters(graph.filters);
                 }
+
+                // Capture initial state after loading
+                this.captureState();
+                this.setUnsavedChanges(false);
             } else {
                 Toast.error(result.message || 'Failed to load graph');
             }
@@ -644,6 +704,10 @@ export default class GraphCreator {
         Loading.show('Saving graph...');
 
         try {
+            // Include activeSidebarTab in config
+            const config = this.configPanel ? this.configPanel.getConfig() : {};
+            config.activeSidebarTab = this.activeSidebarTab;
+
             const data = {
                 id: this.graphId,
                 name: this.graphName,
@@ -651,7 +715,7 @@ export default class GraphCreator {
                 graph_type: this.graphType,
                 query: query,
                 data_mapping: mapping,
-                config: this.configPanel ? this.configPanel.getConfig() : {},
+                config: config,
                 filters: this.filterManager ? this.filterManager.getFilters() : []
             };
 
@@ -659,6 +723,10 @@ export default class GraphCreator {
 
             if (result.success) {
                 Toast.success(result.message);
+
+                // Mark as saved
+                this.captureState();
+                this.setUnsavedChanges(false);
 
                 // Redirect to list or update URL
                 if (!this.graphId && result.data && result.data.id) {
@@ -694,5 +762,119 @@ export default class GraphCreator {
         if (nameInput) {
             nameInput.classList.remove('error');
         }
+    }
+
+    /**
+     * Initialize change tracking
+     */
+    initChangeTracking() {
+        // Track changes on name input
+        const nameInput = this.container.querySelector('.graph-name-input');
+        if (nameInput) {
+            nameInput.addEventListener('input', () => this.checkForChanges());
+        }
+
+        // Warn before leaving page with unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (this.hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        });
+
+        // Track link clicks for internal navigation
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (this.hasUnsavedChanges && !link.classList.contains('no-unsaved-warning')) {
+                    if (!confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Capture current state as the saved state
+     */
+    captureState() {
+        this.savedState = this.getCurrentState();
+    }
+
+    /**
+     * Get current form state
+     */
+    getCurrentState() {
+        return {
+            name: this.graphName,
+            graphType: this.graphType,
+            query: this.queryBuilder ? this.queryBuilder.getQuery() : '',
+            mapping: this.dataMapper ? JSON.stringify(this.dataMapper.getMapping()) : '{}',
+            config: this.configPanel ? JSON.stringify(this.configPanel.getConfig()) : '{}',
+            filters: this.filterManager ? JSON.stringify(this.filterManager.getFilters()) : '[]'
+        };
+    }
+
+    /**
+     * Check if current state differs from saved state
+     */
+    checkForChanges() {
+        if (!this.savedState) {
+            this.setUnsavedChanges(false);
+            return;
+        }
+
+        const currentState = this.getCurrentState();
+        const hasChanges =
+            currentState.name !== this.savedState.name ||
+            currentState.graphType !== this.savedState.graphType ||
+            currentState.query !== this.savedState.query ||
+            currentState.mapping !== this.savedState.mapping ||
+            currentState.config !== this.savedState.config ||
+            currentState.filters !== this.savedState.filters;
+
+        this.setUnsavedChanges(hasChanges);
+    }
+
+    /**
+     * Set unsaved changes state and update UI
+     */
+    setUnsavedChanges(hasChanges) {
+        this.hasUnsavedChanges = hasChanges;
+        this.updateUnsavedIndicator();
+    }
+
+    /**
+     * Update the unsaved changes indicator in the UI
+     */
+    updateUnsavedIndicator() {
+        let indicator = this.container.querySelector('.save-indicator');
+
+        if (!indicator) {
+            indicator = document.createElement('span');
+            indicator.className = 'save-indicator';
+
+            // Add before the Cancel button in .save-buttons
+            const saveButtons = this.container.querySelector('.save-buttons');
+            if (saveButtons && saveButtons.firstChild) {
+                saveButtons.insertBefore(indicator, saveButtons.firstChild);
+            }
+        }
+
+        if (this.hasUnsavedChanges) {
+            indicator.className = 'save-indicator unsaved';
+            indicator.innerHTML = '<i class="fas fa-circle"></i> Unsaved';
+        } else {
+            indicator.className = 'save-indicator saved';
+            indicator.innerHTML = '<i class="fas fa-check"></i> Saved';
+        }
+    }
+
+    /**
+     * Mark state as changed (call from components when they change)
+     */
+    markAsChanged() {
+        this.checkForChanges();
     }
 }

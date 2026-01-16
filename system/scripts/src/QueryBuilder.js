@@ -8,6 +8,7 @@ export default class QueryBuilder {
         this.container = container;
         this.onTest = options.onTest || (() => {});
         this.onError = options.onError || (() => {});
+        this.onChange = options.onChange || (() => {});
 
         this.textarea = null;
         this.testBtn = null;
@@ -67,9 +68,10 @@ export default class QueryBuilder {
             }
         });
 
-        // Sync CodeMirror with textarea
+        // Sync CodeMirror with textarea and trigger onChange
         this.editor.on('change', () => {
             this.editor.save();
+            this.onChange();
         });
 
         // Set height
@@ -84,8 +86,8 @@ export default class QueryBuilder {
         if (!hint) return;
 
         hint.innerHTML = `
-            Use <code>:placeholder_name</code> for filter values.
-            Example: <code>WHERE date >= :date_from AND status IN (:status_ids)</code>
+            Use <code>::placeholder_name</code> for filter values.
+            Example: <code>WHERE date >= ::date_from AND status IN (::status_ids)</code>
         `;
     }
 
@@ -381,11 +383,11 @@ export default class QueryBuilder {
     }
 
     /**
-     * Extract placeholders from query
+     * Extract placeholders from query (::placeholder_name syntax)
      */
     getPlaceholders() {
         const query = this.getQuery();
-        const regex = /:([a-zA-Z_][a-zA-Z0-9_]*)/g;
+        const regex = /::([a-zA-Z_][a-zA-Z0-9_]*)/g;
         const placeholders = [];
         let match;
 
