@@ -51,144 +51,202 @@
     </div>
 
     <div class="container container-full">
-        <div id="graph-creator" class="graph-creator" data-graph-id="<?php echo $graph ? $graph->getId() : ''; ?>">
+        <div id="graph-creator" class="graph-creator graph-creator-single-sidebar" data-graph-id="<?php echo $graph ? $graph->getId() : ''; ?>">
 
-            <!-- Left Sidebar -->
-            <div class="graph-sidebar graph-sidebar-left">
-                <div class="collapsible-panel">
+            <!-- Left Sidebar - Chart Type, Config & Filters -->
+            <div class="graph-sidebar graph-sidebar-left" id="graph-sidebar-left">
+                <div class="collapsible-panel" id="graph-collapsible-panel">
+                    <!-- Immediately apply saved collapse state to prevent flash -->
+                    <script>
+                        (function() {
+                            if (localStorage.getItem('graphCreatorSidebarCollapsed') === 'true') {
+                                document.getElementById('graph-sidebar-left').classList.add('collapsed');
+                                document.getElementById('graph-collapsible-panel').classList.add('collapsed');
+                            }
+                        })();
+                    </script>
                     <div class="collapsible-header" data-toggle="collapse" data-target="left-panel">
-                        <h3><i class="fas fa-cog"></i> Options</h3>
+                        <h3><i class="fas fa-sliders-h"></i> Options</h3>
                         <button type="button" class="collapse-btn">
                             <i class="fas fa-chevron-left"></i>
                         </button>
                     </div>
                     <div class="collapsible-content" id="left-panel">
-                        <!-- Chart Type Section -->
-                        <div class="sidebar-section graph-type-selector">
-                            <h4><i class="fas fa-chart-bar"></i> Chart Type</h4>
-                            <div class="graph-type-list">
-                                <div class="graph-type-item <?php echo (!$graph || $graph->getGraphType() === 'bar') ? 'active' : ''; ?>" data-type="bar">
-                                    <span class="graph-type-icon"><i class="fas fa-chart-bar"></i></span>
-                                    <span class="graph-type-label">Bar Chart</span>
-                                </div>
-                                <div class="graph-type-item <?php echo ($graph && $graph->getGraphType() === 'line') ? 'active' : ''; ?>" data-type="line">
-                                    <span class="graph-type-icon"><i class="fas fa-chart-line"></i></span>
-                                    <span class="graph-type-label">Line Chart</span>
-                                </div>
-                                <div class="graph-type-item <?php echo ($graph && $graph->getGraphType() === 'pie') ? 'active' : ''; ?>" data-type="pie">
-                                    <span class="graph-type-icon"><i class="fas fa-chart-pie"></i></span>
-                                    <span class="graph-type-label">Pie Chart</span>
-                                </div>
-                            </div>
+                        <!-- Sidebar Tabs -->
+                        <div class="sidebar-tabs">
+                            <button class="sidebar-tab active" data-tab="config">
+                                <i class="fas fa-chart-bar"></i> Chart
+                            </button>
+                            <button class="sidebar-tab" data-tab="filters">
+                                <i class="fas fa-filter"></i> Filters
+                            </button>
                         </div>
 
-                        <!-- Filters Section -->
-                        <div class="sidebar-section filters-panel">
-                            <h4><i class="fas fa-filter"></i> Filters</h4>
-                            <?php if (!empty($allFilters)): ?>
-                                <div class="filters-list" id="graph-filters">
-                                    <?php foreach ($allFilters as $filter): ?>
-                                        <?php
-                                        // Get filter options
-                                        $filterObj = new Filter($filter['fid']);
-                                        $options = $filterObj->getOptions();
-                                        $filterType = $filter['filter_type'];
-                                        // Filter key already includes colon prefix (e.g., ":category")
-                                        $filterKey = $filter['filter_key'];
-                                        $filterKeyClean = ltrim($filterKey, ':');
-                                        $defaultValue = $filter['default_value'];
-                                        ?>
-                                        <div class="filter-input-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>">
-                                            <div class="filter-input-header">
-                                                <label class="filter-input-label"><?php echo htmlspecialchars($filter['filter_label']); ?></label>
-                                                <code class="filter-placeholder" title="Use in query"><?php echo htmlspecialchars($filterKey); ?></code>
-                                            </div>
+                        <!-- Chart Tab Content -->
+                        <div class="sidebar-tab-content active" id="sidebar-tab-config">
+                            <!-- Chart Type Selector - Horizontal Scroll -->
+                            <div class="chart-type-selector">
+                                <div class="chart-type-scroll">
+                                    <div class="chart-type-item <?php echo (!$graph || $graph->getGraphType() === 'bar') ? 'active' : ''; ?>" data-type="bar" title="Bar Chart">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <span>Bar</span>
+                                    </div>
+                                    <div class="chart-type-item <?php echo ($graph && $graph->getGraphType() === 'line') ? 'active' : ''; ?>" data-type="line" title="Line Chart">
+                                        <i class="fas fa-chart-line"></i>
+                                        <span>Line</span>
+                                    </div>
+                                    <div class="chart-type-item <?php echo ($graph && $graph->getGraphType() === 'pie') ? 'active' : ''; ?>" data-type="pie" title="Pie Chart">
+                                        <i class="fas fa-chart-pie"></i>
+                                        <span>Pie</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Config Panel -->
+                            <div class="graph-config-panel"></div>
+                        </div>
 
-                                            <?php if ($filterType === 'select'): ?>
-                                                <select class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>">
-                                                    <option value="">-- Select --</option>
-                                                    <?php foreach ($options as $opt):
-                                                        $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
-                                                        $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
-                                                        $selected = ($value == $defaultValue) ? 'selected' : '';
-                                                    ?>
-                                                        <option value="<?php echo htmlspecialchars($value); ?>" <?php echo $selected; ?>><?php echo htmlspecialchars($label); ?></option>
-                                                    <?php endforeach; ?>
-                                                </select>
-
-                                            <?php elseif ($filterType === 'multi_select'): ?>
-                                                <div class="filter-multiselect-dropdown" data-filter-name="<?php echo htmlspecialchars($filterKeyClean); ?>">
-                                                    <div class="filter-multiselect-trigger">
-                                                        <span class="filter-multiselect-placeholder">-- Select multiple --</span>
-                                                        <i class="fas fa-chevron-down"></i>
-                                                    </div>
-                                                    <div class="filter-multiselect-options">
-                                                        <?php foreach ($options as $opt):
-                                                            $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
-                                                            $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
-                                                        ?>
-                                                            <label class="filter-multiselect-option">
-                                                                <input type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>">
-                                                                <span><?php echo htmlspecialchars($label); ?></span>
-                                                            </label>
-                                                        <?php endforeach; ?>
-                                                    </div>
-                                                </div>
-
-                                            <?php elseif ($filterType === 'checkbox'): ?>
-                                                <div class="filter-checkbox-group">
-                                                    <?php foreach ($options as $opt):
-                                                        $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
-                                                        $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
-                                                    ?>
-                                                        <label class="filter-checkbox">
-                                                            <input type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>">
-                                                            <span><?php echo htmlspecialchars($label); ?></span>
-                                                        </label>
-                                                    <?php endforeach; ?>
-                                                </div>
-
-                                            <?php elseif ($filterType === 'radio'): ?>
-                                                <div class="filter-radio-group">
-                                                    <?php foreach ($options as $opt):
-                                                        $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
-                                                        $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
-                                                        $checked = ($value == $defaultValue) ? 'checked' : '';
-                                                    ?>
-                                                        <label class="filter-radio">
-                                                            <input type="radio" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($value); ?>" <?php echo $checked; ?>>
-                                                            <span><?php echo htmlspecialchars($label); ?></span>
-                                                        </label>
-                                                    <?php endforeach; ?>
-                                                </div>
-
-                                            <?php elseif ($filterType === 'date'): ?>
-                                                <input type="date" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($defaultValue); ?>">
-
-                                            <?php elseif ($filterType === 'date_range'): ?>
-                                                <div class="filter-date-range">
-                                                    <input type="date" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>_from" placeholder="From">
-                                                    <span class="date-range-separator">to</span>
-                                                    <input type="date" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>_to" placeholder="To">
-                                                </div>
-
-                                            <?php elseif ($filterType === 'number'): ?>
-                                                <input type="number" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($defaultValue); ?>" placeholder="Enter number">
-
-                                            <?php else: /* text */ ?>
-                                                <input type="text" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($defaultValue); ?>" placeholder="Enter value">
-                                            <?php endif; ?>
+                        <!-- Filters Tab Content -->
+                        <div class="sidebar-tab-content" id="sidebar-tab-filters">
+                            <div class="sidebar-section filters-panel no-border">
+                                <?php if (!empty($allFilters)): ?>
+                                    <!-- Filter Selection View -->
+                                    <div class="filter-selector-view" id="filter-selector-view">
+                                        <div class="filter-selector-header">
+                                            <span class="filter-selector-title">Available Filters</span>
+                                            <span class="filter-selector-count">0 selected</span>
                                         </div>
-                                    <?php endforeach; ?>
-                                </div>
-                            <?php else: ?>
-                                <div class="filters-empty">
-                                    <p>No filters available</p>
-                                </div>
-                            <?php endif; ?>
-                            <a href="?urlq=filter/add" class="btn btn-sm btn-outline filters-manage-btn">
-                                <i class="fas fa-plus"></i> Create Filter
-                            </a>
+                                        <div class="filter-selector-list">
+                                            <?php foreach ($allFilters as $filter): ?>
+                                                <?php
+                                                $filterKey = $filter['filter_key'];
+                                                $filterKeyClean = ltrim($filterKey, ':');
+                                                ?>
+                                                <label class="filter-selector-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                    <input type="checkbox" class="filter-selector-checkbox" value="<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                    <div class="filter-selector-info">
+                                                        <span class="filter-selector-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
+                                                        <code class="filter-selector-key"><?php echo htmlspecialchars($filterKey); ?></code>
+                                                    </div>
+                                                </label>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-primary filter-use-btn" id="filter-use-btn" disabled>
+                                            <i class="fas fa-check"></i> Use Selected Filters
+                                        </button>
+                                    </div>
+
+                                    <!-- Active Filters View (hidden initially) -->
+                                    <div class="filter-active-view" id="filter-active-view" style="display: none;">
+                                        <div class="filter-active-header">
+                                            <span class="filter-active-title">Active Filters</span>
+                                            <button type="button" class="btn btn-sm btn-outline filter-change-btn" id="filter-change-btn">
+                                                <i class="fas fa-exchange-alt"></i> Change
+                                            </button>
+                                        </div>
+                                        <div class="filters-list" id="graph-filters">
+                                            <?php foreach ($allFilters as $filter): ?>
+                                                <?php
+                                                // Get filter options
+                                                $filterObj = new Filter($filter['fid']);
+                                                $options = $filterObj->getOptions();
+                                                $filterType = $filter['filter_type'];
+                                                $filterKey = $filter['filter_key'];
+                                                $filterKeyClean = ltrim($filterKey, ':');
+                                                $defaultValue = $filter['default_value'];
+                                                ?>
+                                                <div class="filter-input-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" style="display: none;">
+                                                    <div class="filter-input-header">
+                                                        <label class="filter-input-label"><?php echo htmlspecialchars($filter['filter_label']); ?></label>
+                                                        <code class="filter-placeholder" title="Use in query"><?php echo htmlspecialchars($filterKey); ?></code>
+                                                    </div>
+
+                                                    <?php if ($filterType === 'select'): ?>
+                                                        <select class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                            <option value="">-- Select --</option>
+                                                            <?php foreach ($options as $opt):
+                                                                $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
+                                                                $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                                                $selected = ($value == $defaultValue) ? 'selected' : '';
+                                                            ?>
+                                                                <option value="<?php echo htmlspecialchars($value); ?>" <?php echo $selected; ?>><?php echo htmlspecialchars($label); ?></option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+
+                                                    <?php elseif ($filterType === 'multi_select'): ?>
+                                                        <div class="filter-multiselect-dropdown" data-filter-name="<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                            <div class="filter-multiselect-trigger">
+                                                                <span class="filter-multiselect-placeholder">-- Select multiple --</span>
+                                                                <i class="fas fa-chevron-down"></i>
+                                                            </div>
+                                                            <div class="filter-multiselect-options">
+                                                                <?php foreach ($options as $opt):
+                                                                    $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
+                                                                    $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                                                ?>
+                                                                    <label class="filter-multiselect-option">
+                                                                        <input type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>">
+                                                                        <span><?php echo htmlspecialchars($label); ?></span>
+                                                                    </label>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        </div>
+
+                                                    <?php elseif ($filterType === 'checkbox'): ?>
+                                                        <div class="filter-checkbox-group">
+                                                            <?php foreach ($options as $opt):
+                                                                $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
+                                                                $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                                            ?>
+                                                                <label class="filter-checkbox">
+                                                                    <input type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>">
+                                                                    <span><?php echo htmlspecialchars($label); ?></span>
+                                                                </label>
+                                                            <?php endforeach; ?>
+                                                        </div>
+
+                                                    <?php elseif ($filterType === 'radio'): ?>
+                                                        <div class="filter-radio-group">
+                                                            <?php foreach ($options as $opt):
+                                                                $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
+                                                                $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                                                $checked = ($value == $defaultValue) ? 'checked' : '';
+                                                            ?>
+                                                                <label class="filter-radio">
+                                                                    <input type="radio" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($value); ?>" <?php echo $checked; ?>>
+                                                                    <span><?php echo htmlspecialchars($label); ?></span>
+                                                                </label>
+                                                            <?php endforeach; ?>
+                                                        </div>
+
+                                                    <?php elseif ($filterType === 'date'): ?>
+                                                        <input type="date" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($defaultValue); ?>">
+
+                                                    <?php elseif ($filterType === 'date_range'): ?>
+                                                        <div class="filter-date-range">
+                                                            <input type="date" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>_from" placeholder="From">
+                                                            <span class="date-range-separator">to</span>
+                                                            <input type="date" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>_to" placeholder="To">
+                                                        </div>
+
+                                                    <?php elseif ($filterType === 'number'): ?>
+                                                        <input type="number" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($defaultValue); ?>" placeholder="Enter number">
+
+                                                    <?php else: /* text */ ?>
+                                                        <input type="text" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($defaultValue); ?>" placeholder="Enter value">
+                                                    <?php endif; ?>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="filters-empty">
+                                        <p>No filters available</p>
+                                    </div>
+                                <?php endif; ?>
+                                <a href="?urlq=filters/add" class="btn btn-sm btn-outline filters-manage-btn">
+                                    <i class="fas fa-plus"></i> Create Filter
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -196,6 +254,20 @@
 
             <!-- Center: Preview and Query -->
             <div class="graph-main">
+                <!-- Save Bar (at top) -->
+                <div class="graph-save-bar">
+                    <div class="graph-name-wrapper">
+                        <label class="graph-name-label">Graph Name <span class="required">*</span></label>
+                        <input type="text" class="form-control form-control-sm graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
+                    </div>
+                    <div class="save-buttons">
+                        <a href="?urlq=graph" class="btn btn-secondary btn-sm">Cancel</a>
+                        <button type="button" class="btn btn-primary btn-sm save-graph-btn">
+                            <i class="fas fa-save"></i> Save Graph
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Preview Card -->
                 <div class="graph-preview-card">
                     <div class="graph-preview-header">
@@ -250,36 +322,8 @@
                         <div class="data-mapper"></div>
                     </div>
                 </div>
-
-                <!-- Save Bar -->
-                <div class="graph-save-bar">
-                    <div class="graph-name-wrapper">
-                        <label class="graph-name-label">Graph Name <span class="required">*</span></label>
-                        <input type="text" class="form-control graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
-                    </div>
-                    <div class="save-buttons">
-                        <a href="?urlq=graph" class="btn btn-secondary">Cancel</a>
-                        <button type="button" class="btn btn-primary save-graph-btn">
-                            <i class="fas fa-save"></i> Save Graph
-                        </button>
-                    </div>
-                </div>
             </div>
 
-            <!-- Right: Config Panel (Collapsible) -->
-            <div class="graph-sidebar graph-sidebar-right">
-                <div class="collapsible-panel">
-                    <div class="collapsible-header" data-toggle="collapse" data-target="config-panel">
-                        <button type="button" class="collapse-btn">
-                            <i class="fas fa-chevron-right"></i>
-                        </button>
-                        <h3><i class="fas fa-sliders-h"></i> Configuration</h3>
-                    </div>
-                    <div class="collapsible-content" id="config-panel">
-                        <div class="graph-config-panel"></div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 

@@ -44,7 +44,9 @@ export default class GraphCreator {
         this.initGraphTypeSelector();
         this.initSaveHandler();
         this.initTabs();
+        this.initSidebarTabs();
         this.initCollapsiblePanels();
+        this.initFilterSelector();
         this.initSidebarFilters();
 
         // Load existing graph if editing
@@ -142,10 +144,11 @@ export default class GraphCreator {
     }
 
     /**
-     * Initialize graph type selector
+     * Initialize graph type selector (supports both old and new class names)
      */
     initGraphTypeSelector() {
-        const typeItems = this.container.querySelectorAll('.graph-type-item');
+        // Support both .graph-type-item (old) and .chart-type-item (new single sidebar)
+        const typeItems = this.container.querySelectorAll('.graph-type-item, .chart-type-item');
         typeItems.forEach(item => {
             item.addEventListener('click', () => {
                 const type = item.dataset.type;
@@ -165,22 +168,16 @@ export default class GraphCreator {
         const saveBtn = this.container.querySelector('.save-graph-btn');
         const nameInput = this.container.querySelector('.graph-name-input');
 
-        console.log('initSaveHandler called, saveBtn:', saveBtn, 'nameInput:', nameInput);
-
         if (saveBtn) {
             saveBtn.addEventListener('click', (e) => {
-                console.log('Save button clicked');
                 e.preventDefault();
                 this.save();
             });
-        } else {
-            console.error('Save button not found!');
         }
 
         if (nameInput) {
             // Read initial value from input (for edit mode where value is pre-filled)
             this.graphName = nameInput.value || '';
-            console.log('Initial graph name:', this.graphName);
 
             nameInput.addEventListener('input', (e) => {
                 this.graphName = e.target.value;
@@ -217,10 +214,49 @@ export default class GraphCreator {
     }
 
     /**
+     * Initialize sidebar tabs (Chart/Filters)
+     */
+    initSidebarTabs() {
+        const tabs = this.container.querySelectorAll('.sidebar-tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active from all sidebar tabs
+                tabs.forEach(t => t.classList.remove('active'));
+
+                // Remove active from all sidebar tab contents
+                this.container.querySelectorAll('.sidebar-tab-content').forEach(c => {
+                    c.classList.remove('active');
+                });
+
+                // Set active on clicked tab
+                tab.classList.add('active');
+
+                // Show corresponding content
+                const targetId = 'sidebar-tab-' + tab.dataset.tab;
+                const targetContent = document.getElementById(targetId);
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+            });
+        });
+    }
+
+    /**
      * Initialize collapsible panels
      */
     initCollapsiblePanels() {
         const headers = this.container.querySelectorAll('.collapsible-header');
+
+        // Check if sidebar is already collapsed (by inline script) and resize chart accordingly
+        const sidebar = this.container.querySelector('.graph-sidebar');
+        if (sidebar && sidebar.classList.contains('collapsed')) {
+            setTimeout(() => {
+                if (this.preview) {
+                    this.preview.resize();
+                }
+            }, 100);
+        }
+
         headers.forEach(header => {
             header.addEventListener('click', () => {
                 const panel = header.closest('.collapsible-panel');
@@ -231,6 +267,9 @@ export default class GraphCreator {
                 }
                 if (sidebar) {
                     sidebar.classList.toggle('collapsed');
+                    // Save collapse state to localStorage
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('graphCreatorSidebarCollapsed', isCollapsed ? 'true' : 'false');
                 }
 
                 // Trigger chart resize after animation
@@ -241,6 +280,68 @@ export default class GraphCreator {
                 }, 350);
             });
         });
+    }
+
+    /**
+     * Initialize filter selector (choose which filters to use)
+     */
+    initFilterSelector() {
+        const selectorView = this.container.querySelector('#filter-selector-view');
+        const activeView = this.container.querySelector('#filter-active-view');
+        const useBtn = this.container.querySelector('#filter-use-btn');
+        const changeBtn = this.container.querySelector('#filter-change-btn');
+        const countDisplay = this.container.querySelector('.filter-selector-count');
+        const checkboxes = this.container.querySelectorAll('.filter-selector-checkbox');
+
+        if (!selectorView || !activeView || !useBtn) return;
+
+        // Track selected filters
+        this.selectedFilters = [];
+
+        // Update count and button state when checkboxes change
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const selected = Array.from(checkboxes).filter(cb => cb.checked);
+                this.selectedFilters = selected.map(cb => cb.value);
+
+                // Update count display
+                if (countDisplay) {
+                    countDisplay.textContent = `${this.selectedFilters.length} selected`;
+                }
+
+                // Enable/disable use button
+                useBtn.disabled = this.selectedFilters.length === 0;
+            });
+        });
+
+        // Handle "Use Selected Filters" button
+        useBtn.addEventListener('click', () => {
+            if (this.selectedFilters.length === 0) return;
+
+            // Show active filters view
+            selectorView.style.display = 'none';
+            activeView.style.display = 'flex';
+
+            // Show only selected filter inputs
+            const filterItems = this.container.querySelectorAll('#graph-filters .filter-input-item');
+            filterItems.forEach(item => {
+                const key = item.dataset.filterKey;
+                if (this.selectedFilters.includes(key)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // Handle "Change" button to go back to selector
+        if (changeBtn) {
+            changeBtn.addEventListener('click', () => {
+                // Show selector view
+                selectorView.style.display = 'flex';
+                activeView.style.display = 'none';
+            });
+        }
     }
 
     /**
@@ -464,8 +565,8 @@ export default class GraphCreator {
                 const nameInput = this.container.querySelector('.graph-name-input');
                 if (nameInput) nameInput.value = graph.name;
 
-                // Update type selector
-                const typeItems = this.container.querySelectorAll('.graph-type-item');
+                // Update type selector (supports both old and new class names)
+                const typeItems = this.container.querySelectorAll('.graph-type-item, .chart-type-item');
                 typeItems.forEach(item => {
                     item.classList.toggle('active', item.dataset.type === graph.graph_type);
                 });

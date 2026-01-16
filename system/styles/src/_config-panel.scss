@@ -1,209 +1,208 @@
 // Config Panel Styles
-@use 'variables' as *;
+@use "variables" as *;
 
 .config-panel {
-    background: $bg-card;
-    border-radius: $border-radius-lg;
-    box-shadow: $shadow-1;
-    padding: $spacing-md;
+  background: $bg-card;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-1;
+  padding: $spacing-md;
 }
 
 .config-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: $spacing-md;
-    padding-bottom: $spacing-sm;
-    border-bottom: 1px solid $border-color;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+  border-bottom: 1px solid $border-color;
 
-    h3 {
-        margin: 0;
-        font-size: $font-size-base;
-    }
+  h3 {
+    margin: 0;
+    font-size: $font-size-base;
+  }
 }
 
 // Config sections
 .config-section {
-    margin-bottom: $spacing-md;
+  //   margin-bottom: $spacing-md;
 
-    &:last-child {
-        margin-bottom: 0;
-    }
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .config-section-title {
-    font-size: $font-size-sm;
-    font-weight: $font-weight-medium;
-    color: $text-secondary;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: $spacing-sm;
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
 
-    i {
-        font-size: 12px;
-    }
+  i {
+    font-size: 12px;
+  }
 }
 
 // Config rows
 .config-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: $spacing-sm 0;
-    border-bottom: 1px solid $gray-100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-sm 0;
+  border-bottom: 1px solid $gray-100;
 
-    &:last-child {
-        border-bottom: none;
-    }
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .config-row-label {
-    font-size: $font-size-sm;
-    color: $text-primary;
+  font-size: $font-size-sm;
+  color: $text-primary;
 }
 
 .config-row-control {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
 }
 
 // Range slider
 .config-slider {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
 
-    input[type="range"] {
-        flex: 1;
-        height: 4px;
-        background: $gray-200;
-        border-radius: 2px;
-        -webkit-appearance: none;
-        cursor: pointer;
+  input[type="range"] {
+    flex: 1;
+    height: 4px;
+    background: $gray-200;
+    border-radius: 2px;
+    -webkit-appearance: none;
+    cursor: pointer;
 
-        &::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: $primary;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: $shadow-1;
-        }
-
-        &::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: $primary;
-            border-radius: 50%;
-            cursor: pointer;
-            border: none;
-        }
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: $primary;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: $shadow-1;
     }
 
-    .slider-value {
-        min-width: 40px;
-        text-align: right;
-        font-size: $font-size-sm;
-        color: $text-secondary;
+    &::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: $primary;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
     }
+  }
+
+  .slider-value {
+    min-width: 40px;
+    text-align: right;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
 }
 
 // Select dropdown
 .config-select {
-    padding: $spacing-xs $spacing-sm;
-    font-size: $font-size-sm;
-    border: 1px solid $border-color;
-    border-radius: $border-radius;
-    background: $bg-card;
-    cursor: pointer;
-    min-width: 100px;
+  padding: $spacing-xs $spacing-sm;
+  font-size: $font-size-sm;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  background: $bg-card;
+  cursor: pointer;
+  min-width: 100px;
 
-    &:focus {
-        outline: none;
-        border-color: $primary;
-    }
+  &:focus {
+    outline: none;
+    border-color: $primary;
+  }
 }
 
 // Color picker
 .config-color-picker {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
 }
 
 .color-swatch {
-    width: 24px;
-    height: 24px;
-    border-radius: $border-radius;
-    border: 2px solid $border-color;
-    cursor: pointer;
+  width: 24px;
+  height: 24px;
+  border-radius: $border-radius;
+  border: 2px solid $border-color;
+  cursor: pointer;
 
-    &:hover {
-        border-color: $gray-400;
-    }
+  &:hover {
+    border-color: $gray-400;
+  }
 
-    &.active {
-        border-color: $primary;
-        box-shadow: 0 0 0 2px rgba($primary, 0.2);
-    }
+  &.active {
+    border-color: $primary;
+    box-shadow: 0 0 0 2px rgba($primary, 0.2);
+  }
 }
 
 // Number input
 .config-number {
-    width: 70px;
-    padding: $spacing-xs $spacing-sm;
-    font-size: $font-size-sm;
-    border: 1px solid $border-color;
-    border-radius: $border-radius;
-    text-align: center;
+  width: 70px;
+  padding: $spacing-xs $spacing-sm;
+  font-size: $font-size-sm;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  text-align: center;
 
-    &:focus {
-        outline: none;
-        border-color: $primary;
-    }
+  &:focus {
+    outline: none;
+    border-color: $primary;
+  }
 }
 
 // Config preview (mini chart icons)
 .config-preview {
-    display: flex;
-    gap: $spacing-xs;
-    padding: $spacing-sm;
-    background: $gray-50;
-    border-radius: $border-radius;
-    margin-top: $spacing-sm;
+  display: flex;
+  gap: $spacing-xs;
+  padding: $spacing-sm;
+  background: $gray-50;
+  border-radius: $border-radius;
+  margin-top: $spacing-sm;
 }
 
 .config-preview-option {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border: 2px solid $border-color;
-    border-radius: $border-radius;
-    cursor: pointer;
-    transition: all $transition-fast;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid $border-color;
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: all $transition-fast;
 
-    &:hover {
-        border-color: $primary-light;
-    }
+  &:hover {
+    border-color: $primary-light;
+  }
 
-    &.active {
-        border-color: $primary;
-        background: rgba($primary, 0.05);
-    }
+  &.active {
+    border-color: $primary;
+    background: rgba($primary, 0.05);
+  }
 
-    i {
-        font-size: 18px;
-        color: $text-secondary;
-    }
+  i {
+    font-size: 18px;
+    color: $text-secondary;
+  }
 
-    &.active i {
-        color: $primary;
-    }
+  &.active i {
+    color: $primary;
+  }
 }

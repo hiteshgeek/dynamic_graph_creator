@@ -260,6 +260,9 @@ export default class QueryBuilder {
      * Test query and get columns
      */
     async testQuery() {
+        // Auto-format query before testing
+        this.formatQuery();
+
         const query = this.getQuery();
 
         if (!query.trim()) {

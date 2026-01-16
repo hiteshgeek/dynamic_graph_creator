@@ -109,8 +109,6 @@
                             </label>
                         </div>
 
-                        <hr>
-
                         <?php
                         $dataSource = $filter ? $filter->getDataSource() : 'static';
                         $typesWithOptions = array('select', 'checkbox', 'radio', 'tokeninput');
@@ -205,10 +203,7 @@
                 </div>
 
                 <div class="card-footer">
-                    <a href="?urlq=filters" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Cancel
-                    </a>
-                    <button type="button" class="btn btn-primary save-filter-btn">
+                    <button type="button" class="btn btn-primary btn-sm save-filter-btn">
                         <i class="fas fa-save"></i> Save Filter
                     </button>
                 </div>

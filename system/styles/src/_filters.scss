@@ -207,14 +207,18 @@
   margin: 0 auto;
 
   .card-body {
+    padding: 0;
+  }
+
+  form {
     padding: $spacing-lg;
   }
 
   .card-footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     padding: $spacing-md $spacing-lg;
-    background: $gray-50;
+    background: transparent;
     border-top: 1px solid $border-color;
   }
 }

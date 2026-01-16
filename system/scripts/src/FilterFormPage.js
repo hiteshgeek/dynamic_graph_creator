@@ -409,6 +409,9 @@ export default class FilterFormPage {
      * Test the SQL query
      */
     testQuery() {
+        // Auto-format query before testing
+        this.formatQuery();
+
         const query = this.queryEditor ? this.queryEditor.getValue() : document.getElementById('data-query').value;
 
         if (!query.trim()) {

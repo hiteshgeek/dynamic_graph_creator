@@ -5,7 +5,7 @@
 // Top spacing handled by body > .container-full rule in _common.scss
 .container-full {
   max-width: 100%;
-  padding: 0 $spacing-lg $spacing-xl;
+  padding: 0 $spacing-lg $spacing-lg;
 }
 
 .graph-creator {
@@ -13,7 +13,11 @@
   grid-template-columns: auto 1fr auto;
   gap: $spacing-lg;
   min-height: calc(100vh - 100px);
-  padding-bottom: $spacing-xl;
+
+  // Single sidebar layout (no right sidebar)
+  &.graph-creator-single-sidebar {
+    grid-template-columns: auto 1fr;
+  }
 }
 
 // Collapsible sidebars
@@ -26,6 +30,15 @@
 
     &.collapsed {
       width: 48px;
+    }
+
+    // Wider sidebar for single sidebar layout
+    .graph-creator-single-sidebar & {
+      width: 320px;
+
+      &.collapsed {
+        width: 48px;
+      }
     }
   }
 
@@ -42,7 +55,7 @@
 .collapsible-panel {
   background: $bg-card;
   border-radius: $border-radius-lg;
-  box-shadow: $shadow-1;
+  box-shadow: $shadow-subtle;
   height: fit-content;
   overflow: visible;
   transition: all $transition-normal;
@@ -101,6 +114,40 @@
         }
       }
     }
+
+    // Compact collapsed state for single sidebar layout
+    .graph-creator-single-sidebar & {
+      .collapsible-header {
+        min-height: auto;
+        padding: $spacing-md $spacing-sm;
+        align-items: center;
+        gap: $spacing-lg;
+        border-radius: $border-radius-lg; // Match parent panel border-radius to prevent clipping on hover
+
+        h3 {
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          transform: rotate(180deg);
+          flex-direction: row; // Icon before text (after rotation: icon on top)
+          order: 2; // h3 (icon + Options) comes after collapse button
+          gap: $spacing-sm;
+
+          i {
+            transform: rotate(90deg);
+          }
+        }
+
+        .collapse-btn {
+          order: 1; // Collapse button at top
+          margin-top: 0;
+          margin-bottom: 0;
+
+          i {
+            transform: rotate(180deg); // Point right to indicate expand
+          }
+        }
+      }
+    }
   }
 }
 
@@ -112,6 +159,7 @@
   cursor: pointer;
   user-select: none;
   border-bottom: 1px solid $border-color;
+  border-radius: $border-radius-lg $border-radius-lg 0 0; // Match parent panel top corners
   transition: all $transition-normal;
 
   &:hover {
@@ -152,8 +200,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: $gray-100;
-  border: none;
+  background: white;
+  border: 1px solid $gray-300;
   border-radius: 50%;
   color: $text-secondary;
   cursor: pointer;
@@ -162,6 +210,7 @@
 
   &:hover {
     background: $primary;
+    border-color: $primary;
     color: white;
   }
 
@@ -253,21 +302,21 @@
   font-weight: $font-weight-medium;
 }
 
-// Center - Preview and Query
+// Center - Preview and Query (single unified card)
 .graph-main {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
   min-width: 0; // Prevent overflow
+  background: $bg-card;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-subtle;
 }
 
 .graph-preview-card {
-  background: $bg-card;
-  border-radius: $border-radius-lg;
-  box-shadow: $shadow-1;
   padding: $spacing-lg;
   flex: 1;
   min-height: 400px;
+  border-bottom: 1px solid $border-color;
 }
 
 .graph-preview-header {
@@ -297,9 +346,6 @@
 
 // Query section
 .graph-query-section {
-  background: $bg-card;
-  border-radius: $border-radius-lg;
-  box-shadow: $shadow-1;
   padding: $spacing-lg;
 }
 
@@ -351,13 +397,16 @@
 }
 
 .config-section {
-  margin-bottom: $spacing-lg;
   padding-bottom: $spacing-md;
   border-bottom: 1px solid $border-color;
 
+  & + .config-section {
+    padding-top: $spacing-md;
+  }
+
   &:last-child {
     border-bottom: none;
-    margin-bottom: 0;
+    padding-bottom: 0;
   }
 
   h4 {
@@ -370,18 +419,45 @@
   }
 }
 
+.config-section-title {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+  margin-bottom: $spacing-md;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  i {
+    font-size: 12px;
+  }
+}
+
+.config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-sm 0;
+
+  .config-row-label {
+    font-size: $font-size-sm;
+    color: $text-primary;
+  }
+}
+
 .config-field {
-  margin-bottom: $spacing-sm;
+  padding: $spacing-sm 0;
 
   &:last-child {
-    margin-bottom: 0;
+    padding-bottom: 0;
   }
 
   label {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: block;
     font-size: $font-size-sm;
+    color: $text-primary;
     margin-bottom: $spacing-xs;
   }
 }
@@ -502,9 +578,7 @@
   align-items: flex-end;
   justify-content: space-between;
   padding: $spacing-md $spacing-lg;
-  background: $bg-card;
-  border-radius: $border-radius-lg;
-  box-shadow: $shadow-1;
+  border-bottom: 1px solid $border-color;
 }
 
 .graph-name-wrapper {
@@ -527,7 +601,6 @@
 
 .graph-name-input {
   width: 100%;
-  height: 38px; // Match button height
 
   &.error {
     border-color: $error;
@@ -542,10 +615,6 @@
 .save-buttons {
   display: flex;
   gap: $spacing-sm;
-
-  .btn {
-    height: 38px;
-  }
 }
 
 // Filters panel in sidebar
@@ -573,6 +642,134 @@
 
   .filters-manage-btn {
     width: 100%;
+    margin-top: $spacing-sm;
+  }
+}
+
+// Filter Selector View (choose which filters to use)
+.filter-selector-view {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.filter-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: $spacing-xs;
+  border-bottom: 1px solid $border-color;
+}
+
+.filter-selector-title {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+}
+
+.filter-selector-count {
+  font-size: $font-size-sm;
+  color: $text-hint;
+}
+
+.filter-selector-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.filter-selector-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm;
+  background: $gray-50;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover {
+    border-color: $primary-light;
+    background: white;
+  }
+
+  input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+    accent-color: $primary;
+  }
+
+  &:has(input:checked) {
+    border-color: $primary;
+    background: rgba($primary, 0.05);
+  }
+}
+
+.filter-selector-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-selector-label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+}
+
+.filter-selector-key {
+  font-size: 11px;
+  color: white;
+  background: $primary;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-weight: $font-weight-medium;
+  width: fit-content;
+}
+
+.filter-use-btn {
+  width: 100%;
+  margin-top: $spacing-xs;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Active Filters View
+.filter-active-view {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.filter-active-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: $spacing-xs;
+  border-bottom: 1px solid $border-color;
+}
+
+.filter-active-title {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+}
+
+.filter-change-btn {
+  padding: $spacing-xs $spacing-sm;
+  font-size: $font-size-sm;
+
+  i {
+    font-size: 10px;
   }
 }
 
@@ -609,7 +806,7 @@
 .filter-placeholder {
   font-size: 11px;
   padding: 3px 8px;
-  background: $warning;
+  background: $primary;
   color: white;
   border-radius: 4px;
   font-family: monospace;
@@ -619,7 +816,7 @@
   flex-shrink: 0;
 
   &:hover {
-    background: #e67e00;
+    background: $primary-dark;
     color: white;
   }
 }
@@ -760,4 +957,141 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+}
+
+// Sidebar Tabs (for single sidebar layout)
+.sidebar-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 0 $spacing-md 0;
+  margin-bottom: $spacing-md;
+  border-bottom: 1px solid $border-color;
+}
+
+.sidebar-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $text-secondary;
+  background: $gray-50;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  i {
+    font-size: 12px;
+  }
+
+  &:hover {
+    color: $text-primary;
+    background: $gray-100;
+  }
+
+  &.active {
+    color: $primary;
+    background: rgba($primary, 0.08);
+    border-color: $primary;
+  }
+}
+
+.sidebar-tab-content {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
+
+// Chart Type Selector (horizontal scroll)
+.chart-type-selector {
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 1px solid $border-color;
+}
+
+.chart-type-scroll {
+  display: flex;
+  gap: $spacing-sm;
+  overflow-x: auto;
+  padding-bottom: 4px;
+
+  // Hide scrollbar but allow scrolling
+  scrollbar-width: thin;
+  scrollbar-color: $gray-300 transparent;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $gray-300;
+    border-radius: 2px;
+  }
+}
+
+.chart-type-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: $spacing-sm $spacing-md;
+  min-width: 70px;
+  background: $gray-50;
+  border: 2px solid $border-color;
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: all $transition-fast;
+  flex-shrink: 0;
+
+  i {
+    font-size: 20px;
+    color: $text-secondary;
+  }
+
+  span {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $text-secondary;
+    white-space: nowrap;
+  }
+
+  &:hover {
+    border-color: $primary-light;
+    background: rgba($primary, 0.02);
+
+    i,
+    span {
+      color: $text-primary;
+    }
+  }
+
+  &.active {
+    border-color: $primary;
+    background: rgba($primary, 0.08);
+
+    i {
+      color: $primary;
+    }
+
+    span {
+      color: $primary;
+    }
+  }
+}
+
+// No border utility for sidebar sections
+.sidebar-section.no-border {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
