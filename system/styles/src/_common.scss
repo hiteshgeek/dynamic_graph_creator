@@ -411,6 +411,68 @@ option[value="__new__"] {
     }
 }
 
+// Common Empty State
+.empty-state {
+  padding: 4rem 2rem;
+  text-align: center;
+
+  .empty-state-content {
+    max-width: 400px;
+    margin: 0 auto;
+
+    .empty-state-icon {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+
+      i {
+        font-size: 2.5rem;
+        color: $primary;
+      }
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #495057;
+      margin: 0 0 0.5rem 0;
+    }
+
+    p {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin: 0 0 1.5rem 0;
+      line-height: 1.5;
+    }
+  }
+
+  // Color variations
+  &.empty-state-blue .empty-state-icon {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    i { color: #1976d2; }
+  }
+
+  &.empty-state-green .empty-state-icon {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    i { color: #4caf50; }
+  }
+
+  &.empty-state-orange .empty-state-icon {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    i { color: #ff9800; }
+  }
+
+  &.empty-state-purple .empty-state-icon {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+    i { color: #9c27b0; }
+  }
+}
+
 // Responsive container
 @media (max-width: 576px) {
   .container {

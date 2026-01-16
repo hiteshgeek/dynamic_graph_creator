@@ -34,9 +34,11 @@
             <a href="?urlq=graph" class="btn btn-secondary">
                 <i class="fas fa-chart-line"></i> Graphs
             </a>
+            <?php if (!empty($dashboards)): ?>
             <a href="?urlq=dashboard/builder" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create Dashboard
             </a>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -54,11 +56,14 @@
             -->
 
             <?php if (empty($dashboards)): ?>
-            <div class="dashboard-empty-state">
-                <i class="fas fa-th-large"></i>
-                <p>No dashboards created yet</p>
-                <span>Click "Create Dashboard" to build your first dashboard</span>
-            </div>
+            <?php echo Utility::renderEmptyState(
+                'fa-th-large',
+                'No Dashboards Yet',
+                'Create your first dashboard to visualize your data',
+                'Create Dashboard',
+                '?urlq=dashboard/builder',
+                'blue'
+            ); ?>
             <?php else: ?>
             <div class="dashboard-grid">
                 <?php foreach ($dashboards as $dashboard): ?>
@@ -71,15 +76,13 @@
                                 <?php echo date('M d, Y', strtotime($dashboard->getUpdatedTs())); ?>
                             </span>
                         </div>
+                        <?php if ($dashboard->getIsSystem()): ?>
                         <div class="dashboard-tags">
-                            <?php if ($dashboard->getIsSystem()): ?>
                             <span class="badge badge-system">
                                 <i class="fas fa-lock"></i> System
                             </span>
-                            <?php else: ?>
-                            <span class="badge badge-custom">Custom</span>
-                            <?php endif; ?>
                         </div>
+                        <?php endif; ?>
                     </div>
                     <div class="dashboard-card-actions">
                         <a href="?urlq=dashboard/preview/<?php echo $dashboard->getId(); ?>"

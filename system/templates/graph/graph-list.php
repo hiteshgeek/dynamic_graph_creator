@@ -34,27 +34,25 @@
             <a href="?urlq=filters" class="btn btn-secondary">
                 <i class="fas fa-filter"></i> Filters
             </a>
+            <?php if (!empty($graphs)): ?>
             <a href="?urlq=graph/create" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create Graph
             </a>
+            <?php endif; ?>
         </div>
     </div>
 
     <div class="container">
         <div id="graph-list" class="graph-list-page">
             <?php if (empty($graphs)): ?>
-            <div class="graph-empty-state">
-                <div class="empty-state-content">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-chart-bar"></i>
-                    </div>
-                    <h3>No Graphs Yet</h3>
-                    <p>Create your first graph to visualize your data</p>
-                    <a href="?urlq=graph/create" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create Graph
-                    </a>
-                </div>
-            </div>
+            <?php echo Utility::renderEmptyState(
+                'fa-chart-bar',
+                'No Graphs Yet',
+                'Create your first graph to visualize your data',
+                'Create Graph',
+                '?urlq=graph/create',
+                'orange'
+            ); ?>
             <?php else: ?>
             <div class="graph-grid">
                 <?php foreach ($graphs as $g): ?>

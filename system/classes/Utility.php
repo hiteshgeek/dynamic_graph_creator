@@ -139,4 +139,34 @@ class Utility
         return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
             strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
+
+    /**
+     * Render an empty state component
+     *
+     * @param string $icon FontAwesome icon class (e.g., 'fa-chart-bar', 'fa-th-large')
+     * @param string $title The main heading text
+     * @param string $description The description text
+     * @param string $buttonText The button label
+     * @param string $buttonUrl The button URL
+     * @param string $color Color theme: 'blue' (default), 'green', 'orange', 'purple'
+     * @return string HTML markup for the empty state
+     */
+    public static function renderEmptyState($icon, $title, $description, $buttonText, $buttonUrl, $color = 'blue')
+    {
+        $colorClass = ' empty-state-' . htmlspecialchars($color);
+        $html = '<div class="empty-state' . $colorClass . '">';
+        $html .= '<div class="empty-state-content">';
+        $html .= '<div class="empty-state-icon">';
+        $html .= '<i class="fas ' . htmlspecialchars($icon) . '"></i>';
+        $html .= '</div>';
+        $html .= '<h3>' . htmlspecialchars($title) . '</h3>';
+        $html .= '<p>' . htmlspecialchars($description) . '</p>';
+        $html .= '<a href="' . htmlspecialchars($buttonUrl) . '" class="btn btn-primary">';
+        $html .= '<i class="fas fa-plus"></i> ' . htmlspecialchars($buttonText);
+        $html .= '</a>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
 }

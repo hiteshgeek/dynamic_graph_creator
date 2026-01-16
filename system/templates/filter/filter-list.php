@@ -34,27 +34,25 @@
             <a href="?urlq=graph" class="btn btn-secondary">
                 <i class="fas fa-chart-bar"></i> Graphs
             </a>
+            <?php if (!empty($filters)): ?>
             <a href="?urlq=filters/add" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add Filter
             </a>
+            <?php endif; ?>
         </div>
     </div>
 
     <div class="container">
         <div id="filter-list" class="filter-list-page">
             <?php if (empty($filters)): ?>
-            <div class="filter-empty-state">
-                <div class="empty-state-content">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-filter"></i>
-                    </div>
-                    <h3>No Filters Yet</h3>
-                    <p>Create reusable filters for your graphs and dashboards</p>
-                    <a href="?urlq=filters/add" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Add Filter
-                    </a>
-                </div>
-            </div>
+            <?php echo Utility::renderEmptyState(
+                'fa-filter',
+                'No Filters Yet',
+                'Create reusable filters for your graphs and dashboards',
+                'Add Filter',
+                '?urlq=filters/add',
+                'green'
+            ); ?>
             <?php else: ?>
             <div class="filter-grid">
                 <?php foreach ($filters as $filter): ?>

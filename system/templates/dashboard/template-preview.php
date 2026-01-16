@@ -36,8 +36,6 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
             <span class="badge badge-system">
                 <i class="fas fa-lock"></i> System
             </span>
-            <?php else: ?>
-            <span class="badge badge-custom">Custom</span>
             <?php endif; ?>
         </div>
         <div class="page-header-right">

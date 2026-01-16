@@ -37,34 +37,34 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
             <a href="?urlq=graph" class="btn btn-secondary">
                 <i class="fas fa-chart-line"></i> Graphs
             </a>
+            <?php if (!empty($templates)): ?>
             <a href="?urlq=dashboard/template/create" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Create Template
             </a>
+            <?php endif; ?>
         </div>
     </div>
 
     <div class="container-fluid">
         <div class="template-list-page">
             <?php if (empty($templates)): ?>
-            <div class="dashboard-empty-sections">
-                <div class="empty-sections-content">
-                    <i class="fas fa-th-large"></i>
-                    <h3>No Templates Found</h3>
-                    <p>Start by creating your first custom template</p>
-                    <a href="?urlq=dashboard/template/create" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create Template
-                    </a>
-                </div>
-            </div>
+            <?php echo Utility::renderEmptyState(
+                'fa-clone',
+                'No Templates Yet',
+                'Create your first template to get started',
+                'Create Template',
+                '?urlq=dashboard/template/create',
+                'purple'
+            ); ?>
             <?php else: ?>
                 <?php foreach ($templates as $categorySlug => $categoryData): ?>
                 <div class="template-category-section">
-                    <h2>
-                        <?php echo htmlspecialchars($categoryData['category']['name']); ?>
-                    </h2>
-                    <?php if (!empty($categoryData['category']['description'])): ?>
-                    <p class="category-description"><?php echo htmlspecialchars($categoryData['category']['description']); ?></p>
-                    <?php endif; ?>
+                    <div class="category-header">
+                        <h2><?php echo htmlspecialchars($categoryData['category']['name']); ?></h2>
+                        <?php if (!empty($categoryData['category']['description'])): ?>
+                        <p class="category-description"><?php echo htmlspecialchars($categoryData['category']['description']); ?></p>
+                        <?php endif; ?>
+                    </div>
                     <div class="template-grid">
                         <?php if (empty($categoryData['templates'])): ?>
                         <!-- Empty Category State -->
@@ -101,15 +101,13 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                                 <?php if (!empty($template['description'])): ?>
                                 <p><?php echo htmlspecialchars($template['description']); ?></p>
                                 <?php endif; ?>
+                                <?php if ($template['is_system']): ?>
                                 <div class="template-meta">
-                                    <?php if ($template['is_system']): ?>
                                     <span class="badge badge-system">
                                         <i class="fas fa-lock"></i> System
                                     </span>
-                                    <?php else: ?>
-                                    <span class="badge badge-custom">Custom</span>
-                                    <?php endif; ?>
                                 </div>
+                                <?php endif; ?>
                             </div>
                             <div class="template-card-actions">
                                 <button class="btn-icon btn-primary"

@@ -6,8 +6,8 @@
   // Padding handled by body > .container rule in _common.scss
 
   .template-category-section {
-    margin-bottom: 1rem;
-    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
     border-bottom: 2px solid #e0e0e0;
 
     &:last-child {
@@ -15,19 +15,29 @@
       padding-bottom: 0;
     }
 
-    h2 {
-      font-size: 1.125rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-      color: #495057;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 0.5rem 1rem;
+    .category-header {
       background: white;
       border-left: 4px solid $primary;
-      border-radius: 0 4px 4px 0;
-      display: inline-block;
+      border-radius: 0 8px 8px 0;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+
+      h2 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin: 0;
+        color: #495057;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .category-description {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin: 0.5rem 0 0 0;
+        line-height: 1.5;
+      }
     }
 
     .template-grid {
