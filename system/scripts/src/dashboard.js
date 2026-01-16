@@ -494,8 +494,6 @@ class DashboardBuilder {
     section.areas.forEach((area, areaIndex) => {
       const hasSubRows =
         area.hasSubRows && area.subRows && area.subRows.length > 0;
-      const isFirstColumn = areaIndex === 0;
-      const isLastColumn = areaIndex === numColumns - 1;
 
       // Calculate total fr - max is always MAX_COLUMNS (4fr) regardless of column count
       const totalFr = widths.reduce((sum, w) => sum + w, 0);
@@ -503,16 +501,11 @@ class DashboardBuilder {
       const hasRoomToGrowResize = totalFr < maxTotalFr;
 
       // Calculate resize options for this column
-      // Resize allowed if: this column can receive (< MAX) AND either:
-      // 1. There's room to grow (total fr < max), OR
-      // 2. The neighbor can give (> MIN)
-      const canResizeLeft = !isFirstColumn &&
-        widths[areaIndex] < GRID_CONFIG.MAX_FR_UNITS &&
-        (hasRoomToGrowResize || widths[areaIndex - 1] > GRID_CONFIG.MIN_FR_UNITS);
-      const canResizeRight = !isLastColumn &&
-        widths[areaIndex] < GRID_CONFIG.MAX_FR_UNITS &&
-        (hasRoomToGrowResize || widths[areaIndex + 1] > GRID_CONFIG.MIN_FR_UNITS);
-      const hasResizeOptions = canResizeLeft || canResizeRight;
+      // Shrink (minus): can decrease if current size > MIN
+      // Expand (plus): can increase if current size < MAX AND total has room
+      const canShrinkCol = widths[areaIndex] > GRID_CONFIG.MIN_FR_UNITS;
+      const canExpandCol = widths[areaIndex] < GRID_CONFIG.MAX_FR_UNITS && hasRoomToGrowResize;
+      const hasResizeOptions = canShrinkCol || canExpandCol;
 
       // Calculate add column options
       // Can add if: under max columns AND (there's room to grow OR ANY column can give 1fr)
@@ -551,16 +544,16 @@ class DashboardBuilder {
                 <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColRight ? 'disabled' : ''}>
                     Add Column Right
                 </button>
-                <!-- Center: Resize arrows + Delete -->
+                <!-- Center: Resize buttons + Delete -->
                 <div class="center-controls">
                     <div class="center-row">
-                        <button class="center-btn resize-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand left" ${!canResizeLeft ? 'disabled' : ''}>
+                        <button class="center-btn resize-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-left"></i>
                         </button>
                         <button class="center-btn delete-btn remove-col-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Remove column" ${!canRemoveColumn ? 'disabled' : ''}>
                             <i class="fas fa-trash"></i>
                         </button>
-                        <button class="center-btn resize-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand right" ${!canResizeRight ? 'disabled' : ''}>
+                        <button class="center-btn resize-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-right"></i>
                         </button>
                     </div>
@@ -576,8 +569,8 @@ class DashboardBuilder {
           canRemoveColumn,
           canAddColLeft,
           canAddColRight,
-          canResizeLeft,
-          canResizeRight,
+          canShrinkCol,
+          canExpandCol,
           numColumns
         );
       } else {
@@ -670,8 +663,8 @@ class DashboardBuilder {
     canRemoveColumn,
     canAddColLeft = false,
     canAddColRight = false,
-    canResizeLeft = false,
-    canResizeRight = false,
+    canShrinkCol = false,
+    canExpandCol = false,
     numColumns = 1
   ) {
     // Build grid-template-rows from sub-row heights
@@ -703,16 +696,12 @@ class DashboardBuilder {
 
     area.subRows.forEach((subRow, rowIndex) => {
       const isFirstRow = rowIndex === 0;
-      const isLastRow = rowIndex === numRows - 1;
 
-      // Row resize conditions - same logic as columns
-      // Can resize if: this row can receive (< MAX) AND either room to grow OR neighbor can give
-      const canResizeUp = !isFirstRow &&
-        heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS &&
-        (hasRoomToGrowRows || heights[rowIndex - 1] > GRID_CONFIG.MIN_FR_UNITS);
-      const canResizeDown = !isLastRow &&
-        heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS &&
-        (hasRoomToGrowRows || heights[rowIndex + 1] > GRID_CONFIG.MIN_FR_UNITS);
+      // Row resize conditions
+      // Expand (plus on top): can increase if current size < MAX AND total has room
+      // Shrink (minus on bottom): can decrease if current size > MIN
+      const canExpandRow = heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS && hasRoomToGrowRows;
+      const canShrinkRow = heights[rowIndex] > GRID_CONFIG.MIN_FR_UNITS;
 
       // Row drag handle - only show when more than one row
       const rowDragHandle = numRows > 1
@@ -741,23 +730,23 @@ class DashboardBuilder {
                 <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Add row below" ${!canAddRow ? 'disabled' : ''}>
                     Add Row Below
                 </button>
-                <!-- Center: All resize arrows + Delete buttons -->
+                <!-- Center: All resize buttons + Delete buttons -->
                 <div class="center-controls">
-                    <button class="center-btn resize-row-up-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Expand up" ${!canResizeUp ? 'disabled' : ''}>
+                    <button class="center-btn resize-row-up-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Expand row" ${!canExpandRow ? 'disabled' : ''}>
                         <i class="fas fa-caret-up"></i>
                     </button>
                     <div class="center-row">
-                        <button class="center-btn resize-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Expand left" ${!canResizeLeft ? 'disabled' : ''}>
+                        <button class="center-btn resize-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-left"></i>
                         </button>
                         <button class="center-btn delete-btn remove-row-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Remove row" ${!canRemoveRow ? 'disabled' : ''}>
                             <i class="fas fa-trash"></i>
                         </button>
-                        <button class="center-btn resize-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Expand right" ${!canResizeRight ? 'disabled' : ''}>
+                        <button class="center-btn resize-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-right"></i>
                         </button>
                     </div>
-                    <button class="center-btn resize-row-down-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Expand down" ${!canResizeDown ? 'disabled' : ''}>
+                    <button class="center-btn resize-row-down-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Shrink row" ${!canShrinkRow ? 'disabled' : ''}>
                         <i class="fas fa-caret-down"></i>
                     </button>
                 </div>
@@ -1230,46 +1219,42 @@ class DashboardBuilder {
         this.removeRow(sectionId, areaIndex, rowIndex);
       }
 
-      // Resize column left (expand this column by shrinking left neighbor)
+      // Resize column - decrease (minus button on left)
       if (e.target.closest(".resize-col-left-btn")) {
         const btn = e.target.closest(".resize-col-left-btn");
         if (btn.hasAttribute("disabled")) return;
         const sectionId = btn.dataset.sectionId;
         const areaIndex = parseInt(btn.dataset.areaIndex);
-        // Expand this column (areaIndex), shrink left neighbor (areaIndex - 1)
-        // colIndex is the LEFT column of the pair, direction "left" = expand right col
-        this.resizeColumn(sectionId, areaIndex - 1, "left");
+        this.resizeColumn(sectionId, areaIndex, "decrease");
       }
 
-      // Resize column right (expand this column by shrinking right neighbor)
+      // Resize column - increase (plus button on right)
       if (e.target.closest(".resize-col-right-btn")) {
         const btn = e.target.closest(".resize-col-right-btn");
         if (btn.hasAttribute("disabled")) return;
         const sectionId = btn.dataset.sectionId;
         const areaIndex = parseInt(btn.dataset.areaIndex);
-        // Expand this column (areaIndex), shrink right neighbor (areaIndex + 1)
-        // colIndex is the LEFT column of the pair, direction "right" = expand left col
-        this.resizeColumn(sectionId, areaIndex, "right");
+        this.resizeColumn(sectionId, areaIndex, "increase");
       }
 
-      // Resize row up (increase top row by 1fr)
+      // Resize row - increase (plus button on top)
       if (e.target.closest(".resize-row-up-btn")) {
         const btn = e.target.closest(".resize-row-up-btn");
         if (btn.hasAttribute("disabled")) return;
         const sectionId = btn.dataset.sectionId;
         const areaIndex = parseInt(btn.dataset.areaIndex);
         const rowIndex = parseInt(btn.dataset.rowIndex);
-        this.resizeRow(sectionId, areaIndex, rowIndex, "up");
+        this.resizeRow(sectionId, areaIndex, rowIndex, "increase");
       }
 
-      // Resize row down (increase bottom row by 1fr)
+      // Resize row - decrease (minus button on bottom)
       if (e.target.closest(".resize-row-down-btn")) {
         const btn = e.target.closest(".resize-row-down-btn");
         if (btn.hasAttribute("disabled")) return;
         const sectionId = btn.dataset.sectionId;
         const areaIndex = parseInt(btn.dataset.areaIndex);
         const rowIndex = parseInt(btn.dataset.rowIndex);
-        this.resizeRow(sectionId, areaIndex, rowIndex, "down");
+        this.resizeRow(sectionId, areaIndex, rowIndex, "decrease");
       }
     });
 
@@ -1343,9 +1328,9 @@ class DashboardBuilder {
     });
   }
 
-  // Click-based column resize: increase one column, optionally decrease the other
-  // If total fr < max, can grow without taking. Otherwise, must take from neighbor.
-  async resizeColumn(sectionId, colIndex, direction) {
+  // Click-based column resize: increase or decrease a column's width
+  // direction: "increase" (+) or "decrease" (-)
+  async resizeColumn(sectionId, areaIndex, direction) {
     if (this.isReadOnly) return;
 
     const structure = JSON.parse(this.currentDashboard.structure);
@@ -1354,41 +1339,21 @@ class DashboardBuilder {
     if (!section) return;
 
     const widths = section.gridTemplate.split(" ").map((w) => parseInt(w) || 1);
-    const leftIdx = colIndex;
-    const rightIdx = colIndex + 1;
-    // Max total is always MAX_COLUMNS (4fr) regardless of column count
     const totalFr = widths.reduce((sum, w) => sum + w, 0);
     const maxTotalFr = GRID_CONFIG.MAX_COLUMNS;
-    const hasRoomToGrow = totalFr < maxTotalFr;
 
     let changed = false;
-    if (direction === "left") {
-      // Increase right column (arrow points left = right col expands left)
-      if (widths[rightIdx] < GRID_CONFIG.MAX_FR_UNITS) {
-        if (hasRoomToGrow) {
-          // Room to grow - just increase without taking
-          widths[rightIdx]++;
-          changed = true;
-        } else if (widths[leftIdx] > GRID_CONFIG.MIN_FR_UNITS) {
-          // At max total - must take from left neighbor
-          widths[rightIdx]++;
-          widths[leftIdx]--;
-          changed = true;
-        }
+    if (direction === "increase") {
+      // Increase this column's width by 1fr
+      if (widths[areaIndex] < GRID_CONFIG.MAX_FR_UNITS && totalFr < maxTotalFr) {
+        widths[areaIndex]++;
+        changed = true;
       }
     } else {
-      // Increase left column (arrow points right = left col expands right)
-      if (widths[leftIdx] < GRID_CONFIG.MAX_FR_UNITS) {
-        if (hasRoomToGrow) {
-          // Room to grow - just increase without taking
-          widths[leftIdx]++;
-          changed = true;
-        } else if (widths[rightIdx] > GRID_CONFIG.MIN_FR_UNITS) {
-          // At max total - must take from right neighbor
-          widths[leftIdx]++;
-          widths[rightIdx]--;
-          changed = true;
-        }
+      // Decrease this column's width by 1fr
+      if (widths[areaIndex] > GRID_CONFIG.MIN_FR_UNITS) {
+        widths[areaIndex]--;
+        changed = true;
       }
     }
 
@@ -1412,8 +1377,8 @@ class DashboardBuilder {
     await this.saveDashboard(false);
   }
 
-  // Click-based row resize: increase one row, optionally decrease the other
-  // If total fr < max, can grow without taking. Otherwise, must take from neighbor.
+  // Click-based row resize: increase or decrease a row's height
+  // direction: "increase" (+) or "decrease" (-)
   async resizeRow(sectionId, areaIndex, rowIndex, direction) {
     if (this.isReadOnly) return;
 
@@ -1427,35 +1392,21 @@ class DashboardBuilder {
     if (!area.hasSubRows || !area.subRows) return;
 
     const heights = area.subRows.map((r) => parseInt(r.height) || 1);
-    // Max total is always MAX_ROWS_PER_COLUMN (4fr) regardless of row count
     const totalFr = heights.reduce((sum, h) => sum + h, 0);
     const maxTotalFr = GRID_CONFIG.MAX_ROWS_PER_COLUMN;
-    const hasRoomToGrow = totalFr < maxTotalFr;
 
     let changed = false;
-    if (direction === "up") {
-      // Increase this row (expand up takes from row above)
-      if (heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS) {
-        if (hasRoomToGrow) {
-          heights[rowIndex]++;
-          changed = true;
-        } else if (heights[rowIndex - 1] > GRID_CONFIG.MIN_FR_UNITS) {
-          heights[rowIndex]++;
-          heights[rowIndex - 1]--;
-          changed = true;
-        }
+    if (direction === "increase") {
+      // Increase this row's height by 1fr
+      if (heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS && totalFr < maxTotalFr) {
+        heights[rowIndex]++;
+        changed = true;
       }
     } else {
-      // Increase this row (expand down takes from row below)
-      if (heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS) {
-        if (hasRoomToGrow) {
-          heights[rowIndex]++;
-          changed = true;
-        } else if (heights[rowIndex + 1] > GRID_CONFIG.MIN_FR_UNITS) {
-          heights[rowIndex]++;
-          heights[rowIndex + 1]--;
-          changed = true;
-        }
+      // Decrease this row's height by 1fr
+      if (heights[rowIndex] > GRID_CONFIG.MIN_FR_UNITS) {
+        heights[rowIndex]--;
+        changed = true;
       }
     }
 
