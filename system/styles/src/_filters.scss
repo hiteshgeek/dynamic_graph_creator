@@ -15,17 +15,17 @@
 
 // Filter card style (matching graph/dashboard cards)
 .filter-card {
-  background: white;
-  border: 2px solid #e0e0e0;
+  background: var(--dgc-bg-card);
+  border: 2px solid var(--dgc-border-color);
   border-radius: 8px;
   overflow: hidden;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
   display: flex;
   flex-direction: column;
   padding: 1rem;
 
   &:hover {
-    border-color: $primary;
+    border-color: var(--dgc-primary);
   }
 
   .filter-card-content {
@@ -43,18 +43,18 @@
       font-size: 1rem;
       font-weight: 600;
       margin-bottom: 0.25rem;
-      color: #212529;
+      color: var(--dgc-text-primary);
     }
 
     .filter-key {
       margin-bottom: 0.5rem;
 
       code {
-        background: $gray-100;
+        background: var(--dgc-gray-100);
         padding: 2px 8px;
         border-radius: 4px;
         font-size: 0.8rem;
-        color: $text-secondary;
+        color: var(--dgc-text-secondary);
       }
     }
 
@@ -62,7 +62,7 @@
       display: flex;
       gap: 1rem;
       font-size: 0.8rem;
-      color: #6c757d;
+      color: var(--dgc-text-secondary);
       margin-top: 0.5rem;
 
       .meta-item {
@@ -71,7 +71,7 @@
         gap: 0.25rem;
 
         &.required {
-          color: $error;
+          color: var(--dgc-error);
         }
       }
     }
@@ -82,7 +82,7 @@
     gap: 0.5rem;
     justify-content: center;
     padding-top: 0.75rem;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--dgc-border-color);
 
     .btn-icon {
       width: 32px;
@@ -91,31 +91,31 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid #dee2e6;
-      background: white;
-      color: #6c757d;
+      border: 1px solid var(--dgc-border-color);
+      background: var(--dgc-bg-card);
+      color: var(--dgc-text-secondary);
       cursor: pointer;
       transition: all 0.2s;
       font-size: 0.875rem;
       text-decoration: none;
 
       &.btn-warning {
-        border-color: #ffc107;
-        color: #ffc107;
+        border-color: var(--dgc-warning);
+        color: var(--dgc-warning);
 
         &:hover {
-          background: #ffc107;
-          color: white;
+          background: var(--dgc-warning);
+          color: var(--dgc-text-inverse);
         }
       }
 
       &.btn-danger {
-        border-color: #dc3545;
-        color: #dc3545;
+        border-color: var(--dgc-error);
+        color: var(--dgc-error);
 
         &:hover {
-          background: #dc3545;
-          color: white;
+          background: var(--dgc-error);
+          color: var(--dgc-text-inverse);
         }
       }
     }
@@ -219,7 +219,7 @@
     justify-content: flex-end;
     padding: $spacing-md $spacing-lg;
     background: transparent;
-    border-top: 1px solid $border-color;
+    border-top: 1px solid var(--dgc-border-color);
   }
 }
 
@@ -230,14 +230,14 @@
 }
 
 .filter-item {
-  background: $bg-card;
-  border: 1px solid $border-color;
+  background: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
   border-radius: $border-radius;
   transition: all $transition-fast;
 
   &:hover {
-    border-color: $gray-400;
-    box-shadow: $shadow-1;
+    border-color: var(--dgc-gray-400);
+    box-shadow: var(--dgc-shadow-1);
   }
 }
 
@@ -249,7 +249,7 @@
 }
 
 .filter-item-drag {
-  color: $text-hint;
+  color: var(--dgc-text-hint);
   cursor: grab;
 
   &:active {
@@ -266,12 +266,12 @@
 
 .filter-item-label {
   font-weight: $font-weight-medium;
-  color: $text-primary;
+  color: var(--dgc-text-primary);
 }
 
 .filter-item-key {
   font-size: $font-size-sm;
-  color: $text-hint;
+  color: var(--dgc-text-hint);
   font-family: monospace;
 }
 
@@ -342,11 +342,11 @@
   display: block;
   margin-bottom: $spacing-xs;
   font-weight: $font-weight-medium;
-  color: $text-secondary;
+  color: var(--dgc-text-secondary);
   font-size: $font-size-sm;
 
   .required {
-    color: $error;
+    color: var(--dgc-error);
   }
 
   // Checkbox labels - align checkbox with text
@@ -361,7 +361,7 @@
   display: block;
   margin-top: $spacing-xs;
   font-size: 12px;
-  color: $text-hint;
+  color: var(--dgc-text-hint);
 }
 
 // Filter options list in modal
@@ -385,10 +385,10 @@
 
   .remove-option-btn {
     padding: $spacing-xs;
-    color: $error;
+    color: var(--dgc-error);
 
     &:hover {
-      background: $error-bg;
+      background: var(--dgc-error-bg);
     }
   }
 }
@@ -413,13 +413,13 @@
   display: flex;
   flex-direction: column;
   padding: $spacing-sm;
-  background: $gray-50;
+  background: var(--dgc-gray-50);
   border-radius: $border-radius;
-  border: 1px solid $border-color;
+  border: 1px solid var(--dgc-border-color);
   gap: $spacing-xs;
 
   &:hover {
-    border-color: $primary-light;
+    border-color: var(--dgc-primary);
   }
 }
 
@@ -433,15 +433,15 @@
 .filter-input-label {
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
-  color: $text-primary;
+  color: var(--dgc-text-primary);
   margin: 0;
 }
 
 .filter-placeholder {
   font-size: 10px;
   padding: 2px 6px;
-  background: $gray-200;
-  color: $text-hint;
+  background: var(--dgc-gray-200);
+  color: var(--dgc-text-hint);
   border-radius: 4px;
   font-family: monospace;
   flex-shrink: 0;
@@ -449,7 +449,7 @@
   transition: all $transition-fast;
 
   &:hover {
-    background: $primary;
+    background: var(--dgc-primary);
     color: white;
   }
 }
@@ -466,8 +466,8 @@
   max-height: 120px;
   overflow-y: auto;
   padding: $spacing-xs;
-  background: white;
-  border: 1px solid $border-color;
+  background: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
   border-radius: $border-radius;
 }
 
@@ -478,7 +478,7 @@
   gap: $spacing-xs;
   cursor: pointer;
   font-size: $font-size-sm;
-  color: $text-secondary;
+  color: var(--dgc-text-secondary);
   padding: 2px 0;
 
   input {
@@ -487,7 +487,7 @@
   }
 
   &:hover {
-    color: $text-primary;
+    color: var(--dgc-text-primary);
   }
 }
 
@@ -503,7 +503,7 @@
 
   .date-range-separator {
     font-size: $font-size-sm;
-    color: $text-hint;
+    color: var(--dgc-text-hint);
     flex-shrink: 0;
   }
 }
@@ -513,15 +513,15 @@
   display: flex;
   flex-direction: column;
   padding: $spacing-sm;
-  background: $gray-50;
+  background: var(--dgc-gray-50);
   border-radius: $border-radius;
-  border: 1px solid $border-color;
+  border: 1px solid var(--dgc-border-color);
   gap: $spacing-xs;
   transition: all $transition-fast;
 
   &:hover {
-    border-color: $primary-light;
-    background: rgba($primary, 0.02);
+    border-color: var(--dgc-primary);
+    background: rgba(0, 123, 255, 0.02);
   }
 }
 
@@ -543,7 +543,7 @@
 .filter-display-label {
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
-  color: $text-primary;
+  color: var(--dgc-text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -551,7 +551,7 @@
 
 .filter-display-type {
   font-size: 10px;
-  color: $text-hint;
+  color: var(--dgc-text-hint);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -566,10 +566,10 @@
 .filter-value-tag {
   font-size: 10px;
   padding: 2px 6px;
-  background: white;
-  border: 1px solid $border-color;
+  background: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
   border-radius: 10px;
-  color: $text-secondary;
+  color: var(--dgc-text-secondary);
   white-space: nowrap;
   max-width: 100px;
   overflow: hidden;
@@ -579,15 +579,15 @@
 .filter-value-more {
   font-size: 10px;
   padding: 2px 6px;
-  background: $gray-200;
+  background: var(--dgc-gray-200);
   border-radius: 10px;
-  color: $text-hint;
+  color: var(--dgc-text-hint);
   font-style: italic;
 }
 
 .filter-display-hint {
   font-size: 10px;
-  color: $text-hint;
+  color: var(--dgc-text-hint);
   font-style: italic;
   margin-top: 2px;
 }
@@ -599,7 +599,7 @@
   p {
     margin: 0;
     font-size: $font-size-sm;
-    color: $text-hint;
+    color: var(--dgc-text-hint);
   }
 }
 
@@ -614,9 +614,10 @@
   flex-wrap: wrap;
   gap: $spacing-md;
   padding: $spacing-md;
-  background: $gray-50;
+  background: var(--dgc-gray-50);
   border-radius: $border-radius;
   margin-bottom: $spacing-lg;
+  border: 1px solid var(--dgc-border-color);
 }
 
 .filter-input-group {
@@ -629,22 +630,23 @@
     margin-bottom: $spacing-xs;
     font-size: $font-size-sm;
     font-weight: $font-weight-medium;
-    color: $text-secondary;
+    color: var(--dgc-text-secondary);
   }
 
   input,
   select {
     width: 100%;
     padding: $spacing-sm;
-    border: 1px solid $border-color;
+    border: 1px solid var(--dgc-border-color);
     border-radius: $border-radius;
     font-size: $font-size-base;
-    background: $bg-card;
+    background: var(--dgc-bg-input);
+    color: var(--dgc-text-primary);
 
     &:focus {
       outline: none;
-      border-color: $primary;
-      box-shadow: 0 0 0 3px rgba($primary, 0.1);
+      border-color: var(--dgc-primary);
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
     }
   }
 }
@@ -674,6 +676,14 @@
     }
   }
 
+  // Section headings (Data Source, etc.)
+  h4 {
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    color: var(--dgc-text-primary);
+    margin: $spacing-lg 0 $spacing-xs 0;
+  }
+
   .data-source-tabs {
     display: flex;
     gap: $spacing-sm;
@@ -687,20 +697,21 @@
     justify-content: center;
     gap: $spacing-sm;
     padding: $spacing-sm $spacing-md;
-    border: 2px solid $border-color;
+    border: 2px solid var(--dgc-border-color);
     border-radius: $border-radius;
-    background: $bg-card;
+    background: var(--dgc-bg-card);
+    color: var(--dgc-text-primary);
     cursor: pointer;
     transition: all $transition-fast;
 
     &:hover {
-      border-color: $primary;
+      border-color: var(--dgc-primary);
     }
 
     &.active {
-      border-color: $primary;
-      background: rgba($primary, 0.05);
-      color: $primary;
+      border-color: var(--dgc-primary);
+      background: rgba(0, 123, 255, 0.1);
+      color: var(--dgc-primary);
     }
 
     i {
@@ -714,11 +725,12 @@
 
   // CodeMirror styling for filter form - auto-grow without scrolling
   .CodeMirror {
-    border: 1px solid $border-color;
+    border: 1px solid var(--dgc-border-color);
     border-radius: $border-radius;
     height: auto;
     min-height: 100px;
-    background: $gray-50;
+    background: var(--dgc-code-bg);
+    color: var(--dgc-text-primary);
     font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
     font-size: 13px;
     line-height: 1.6;
@@ -734,49 +746,57 @@
   }
 
   .CodeMirror-focused {
-    background: $bg-card;
+    background: var(--dgc-bg-input);
   }
 
   .CodeMirror-gutters {
-    background: $gray-100;
-    border-right: 1px solid $border-color;
+    background: var(--dgc-gray-100);
+    border-right: 1px solid var(--dgc-border-color);
   }
 
   .CodeMirror-linenumber {
-    color: $text-hint;
+    color: var(--dgc-text-hint);
     padding: 0 $spacing-sm;
   }
 
-  // SQL Syntax highlighting
+  .CodeMirror-cursor {
+    border-left-color: var(--dgc-text-primary);
+  }
+
+  .CodeMirror-selected {
+    background: var(--dgc-gray-200);
+  }
+
+  // SQL Syntax highlighting - use CSS variables for dark mode
   .cm-keyword {
-    color: #7c3aed;
+    color: var(--dgc-cm-keyword, #7c3aed);
     font-weight: 500;
   }
 
   .cm-def,
   .cm-variable-2 {
-    color: #0891b2;
+    color: var(--dgc-cm-variable, #0891b2);
   }
 
   .cm-string {
-    color: #059669;
+    color: var(--dgc-cm-string, #059669);
   }
 
   .cm-number {
-    color: #d97706;
+    color: var(--dgc-cm-number, #d97706);
   }
 
   .cm-comment {
-    color: $text-hint;
+    color: var(--dgc-text-hint);
     font-style: italic;
   }
 
   .cm-operator {
-    color: $text-primary;
+    color: var(--dgc-text-primary);
   }
 
   .cm-builtin {
-    color: #dc2626;
+    color: var(--dgc-cm-builtin, #dc2626);
   }
 
   // Filter options styling
@@ -798,11 +818,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: $error;
-      border-color: $error;
+      color: var(--dgc-error);
+      border-color: var(--dgc-error);
 
       &:hover {
-        background: $error-bg;
+        background: var(--dgc-error-bg);
       }
     }
   }
@@ -821,15 +841,15 @@
     font-size: $font-size-sm;
 
     &.success {
-      background: $success-bg;
-      border: 1px solid $success-border;
-      color: $success-dark;
+      background: var(--dgc-success-bg);
+      border: 1px solid var(--dgc-success-border);
+      color: var(--dgc-success-dark);
     }
 
     &.error {
-      background: $error-bg;
-      border: 1px solid $error-border;
-      color: $error-dark;
+      background: var(--dgc-error-bg);
+      border: 1px solid var(--dgc-error-border);
+      color: var(--dgc-error-dark);
 
       i {
         margin-right: $spacing-xs;
@@ -856,10 +876,10 @@
   .query-warnings {
     margin-top: $spacing-sm;
     padding: $spacing-sm;
-    background: rgba(#f59e0b, 0.1);
-    border: 1px solid rgba(#f59e0b, 0.3);
+    background: var(--dgc-warning-bg);
+    border: 1px solid var(--dgc-warning-border);
     border-radius: $border-radius;
-    color: #92400e;
+    color: var(--dgc-warning-dark);
 
     ul {
       margin: 0;
@@ -875,20 +895,20 @@
     max-height: 250px;
     overflow: auto;
     border-radius: $border-radius;
-    border: 1px solid $success-border;
+    border: 1px solid var(--dgc-success-border);
   }
 
   .query-result-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 12px;
-    background: $bg-card;
+    background: var(--dgc-bg-card);
 
     th,
     td {
       padding: $spacing-xs $spacing-sm;
       text-align: left;
-      border-bottom: 1px solid $border-color;
+      border-bottom: 1px solid var(--dgc-border-color);
       white-space: nowrap;
       max-width: 200px;
       overflow: hidden;
@@ -896,20 +916,20 @@
     }
 
     th {
-      background: $gray-100;
+      background: var(--dgc-gray-100);
       font-weight: $font-weight-medium;
-      color: $text-primary;
+      color: var(--dgc-text-primary);
       position: sticky;
       top: 0;
       z-index: 1;
     }
 
     td {
-      color: $text-secondary;
+      color: var(--dgc-text-secondary);
     }
 
     tbody tr:hover {
-      background: $gray-50;
+      background: var(--dgc-bg-hover);
     }
 
     tbody tr:last-child td {
@@ -921,8 +941,8 @@
   .filter-preview {
     margin-top: $spacing-md;
     padding: $spacing-md;
-    background: $gray-50;
-    border: 1px solid $border-color;
+    background: var(--dgc-gray-50);
+    border: 1px solid var(--dgc-border-color);
     border-radius: $border-radius;
   }
 
@@ -931,27 +951,27 @@
     align-items: center;
     gap: $spacing-xs;
     font-weight: $font-weight-medium;
-    color: $text-secondary;
+    color: var(--dgc-text-secondary);
     margin-bottom: $spacing-md;
     padding-bottom: $spacing-sm;
-    border-bottom: 1px solid $border-color;
+    border-bottom: 1px solid var(--dgc-border-color);
 
     i {
-      color: $primary;
+      color: var(--dgc-primary);
     }
   }
 
   .filter-preview-content {
-    background: $bg-card;
+    background: var(--dgc-bg-card);
     padding: $spacing-md;
     border-radius: $border-radius;
-    border: 1px solid $border-color;
+    border: 1px solid var(--dgc-border-color);
   }
 
   .filter-preview-label {
     display: block;
     font-weight: $font-weight-medium;
-    color: $text-primary;
+    color: var(--dgc-text-primary);
     margin-bottom: $spacing-sm;
   }
 
@@ -970,24 +990,24 @@
     align-items: center;
     justify-content: space-between;
     padding: $spacing-sm $spacing-md;
-    border: 1px solid $border-color;
+    border: 1px solid var(--dgc-border-color);
     border-radius: $border-radius;
-    background: $bg-card;
+    background: var(--dgc-bg-card);
     cursor: pointer;
     transition: border-color $transition-fast;
 
     &:hover {
-      border-color: $gray-400;
+      border-color: var(--dgc-gray-400);
     }
 
     i {
-      color: $text-hint;
+      color: var(--dgc-text-hint);
       font-size: 12px;
     }
   }
 
   .filter-multiselect-placeholder {
-    color: $text-hint;
+    color: var(--dgc-text-hint);
   }
 
   .filter-multiselect-options {
@@ -997,10 +1017,10 @@
     right: 0;
     margin-top: 4px;
     padding: $spacing-xs 0;
-    background: $bg-card;
-    border: 1px solid $border-color;
+    background: var(--dgc-bg-card);
+    border: 1px solid var(--dgc-border-color);
     border-radius: $border-radius;
-    box-shadow: $shadow-2;
+    box-shadow: var(--dgc-shadow-2);
     max-height: 200px;
     overflow-y: auto;
     z-index: 10;
@@ -1018,10 +1038,10 @@
     padding: $spacing-xs $spacing-md;
     cursor: pointer;
     transition: background $transition-fast;
-    color: $text-secondary;
+    color: var(--dgc-text-secondary);
 
     &:hover {
-      background: $gray-50;
+      background: var(--dgc-bg-hover);
     }
 
     input {
@@ -1048,14 +1068,14 @@
     display: flex;
     align-items: center;
     gap: $spacing-sm;
-    color: $text-secondary;
+    color: var(--dgc-text-secondary);
     cursor: pointer;
     padding: $spacing-xs;
     border-radius: $border-radius;
     transition: background $transition-fast;
 
     &:hover {
-      background: $gray-50;
+      background: var(--dgc-bg-hover);
     }
 
     input {

@@ -25,29 +25,25 @@
 </head>
 
 <body class="dashboard-preview-page">
-    <div class="page-header">
-        <div class="page-header-left">
-            <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-            <h1><?php echo htmlspecialchars($dashboard->getName()); ?></h1>
-            <?php if ($dashboard->getIsSystem()): ?>
-                <span class="badge badge-system">
-                    <i class="fas fa-lock"></i> System
-                </span>
-            <?php endif; ?>
-        </div>
-        <div class="page-header-right">
-            <?php if (!$dashboard->getIsSystem()): ?>
-                <a href="?urlq=dashboard/builder/<?php echo $dashboard->getId(); ?>" class="btn btn-design btn-sm">
-                    <i class="fas fa-paint-brush"></i> Design Mode
-                </a>
-                <button class="btn btn-danger btn-sm delete-dashboard-btn" data-dashboard-id="<?php echo $dashboard->getId(); ?>">
-                    <i class="fas fa-trash"></i> Delete Dashboard
-                </button>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php
+    $badges = [];
+    if ($dashboard->getIsSystem()) {
+        $badges[] = ['label' => 'System', 'icon' => 'fa-lock', 'class' => 'badge-system'];
+    }
+
+    $rightContent = '';
+    if (!$dashboard->getIsSystem()) {
+        $rightContent .= '<a href="?urlq=dashboard/builder/' . $dashboard->getId() . '" class="btn btn-design btn-sm btn-design-mode"><i class="fas fa-paint-brush"></i> Design Mode</a>';
+        $rightContent .= '<button class="btn btn-danger btn-sm delete-dashboard-btn" data-dashboard-id="' . $dashboard->getId() . '"><i class="fas fa-trash"></i> Delete Dashboard</button>';
+    }
+
+    echo Utility::renderPageHeader([
+        'title' => $dashboard->getName(),
+        'backUrl' => '?urlq=dashboard',
+        'badges' => $badges,
+        'rightContent' => $rightContent
+    ]);
+    ?>
 
     <div class="container-fluid">
         <div id="dashboard-preview" class="dashboard-preview" data-dashboard-id="<?php echo $dashboard->getId(); ?>">
@@ -140,6 +136,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
+    <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('dashboard')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>

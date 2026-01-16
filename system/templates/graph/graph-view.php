@@ -28,19 +28,13 @@
 </head>
 
 <body>
-    <div class="page-header">
-        <div class="page-header-left">
-            <a href="?urlq=graph" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-            <h1><?php echo htmlspecialchars($graph->getName()); ?></h1>
-        </div>
-        <div class="page-header-right">
-            <a href="?urlq=graph/edit/<?php echo $graph->getId(); ?>" class="btn btn-design btn-sm">
-                <i class="fas fa-paint-brush"></i> Design Mode
-            </a>
-        </div>
-    </div>
+    <?php
+    echo Utility::renderPageHeader([
+        'title' => $graph->getName(),
+        'backUrl' => '?urlq=graph',
+        'rightContent' => '<a href="?urlq=graph/edit/' . $graph->getId() . '" class="btn btn-design btn-sm btn-design-mode"><i class="fas fa-paint-brush"></i> Design Mode</a>'
+    ]);
+    ?>
 
     <div class="container">
         <div id="graph-view" data-graph-id="<?php echo $graph->getId(); ?>" data-graph-type="<?php echo $graph->getGraphType(); ?>" data-graph-name="<?php echo htmlspecialchars($graph->getName()); ?>" data-config="<?php echo htmlspecialchars($graph->getConfig()); ?>">
@@ -106,8 +100,8 @@
                             <?php echo ucfirst($graph->getGraphType()); ?> Chart
                         </span>
                     </div>
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="export-chart" title="Save chart as PNG image">
-                        <i class="fas fa-download"></i> Save Image
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="export-chart" title="Save chart as PNG image">
+                        <i class="fas fa-image"></i> Save Image
                     </button>
                 </div>
                 <div class="graph-preview-container" style="height: 500px;"></div>
@@ -122,6 +116,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
+    <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('graph')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>

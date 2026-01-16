@@ -23,24 +23,17 @@
     <?php endif; ?>
 </head>
 <body>
-    <div class="page-header">
-        <div class="page-header-left">
-            <h1>Dashboards</h1>
-        </div>
-        <div class="page-header-right">
-            <a href="?urlq=dashboard/templates" class="btn btn-secondary btn-sm">
-                <i class="fas fa-clone"></i> Templates
-            </a>
-            <a href="?urlq=graph" class="btn btn-secondary btn-sm">
-                <i class="fas fa-chart-line"></i> Graphs
-            </a>
-            <?php if (!empty($dashboards)): ?>
-            <a href="?urlq=dashboard/builder" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Create Dashboard
-            </a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php
+    $rightContent = '<a href="?urlq=dashboard/templates" class="btn btn-secondary btn-sm"><i class="fas fa-clone"></i> Templates</a>';
+    $rightContent .= '<a href="?urlq=graph" class="btn btn-secondary btn-sm"><i class="fas fa-chart-line"></i> Graphs</a>';
+    if (!empty($dashboards)) {
+        $rightContent .= '<a href="?urlq=dashboard/builder" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Dashboard</a>';
+    }
+    echo Utility::renderPageHeader([
+        'title' => 'Dashboards',
+        'rightContent' => $rightContent
+    ]);
+    ?>
 
     <div class="container">
         <div id="dashboard-list" class="dashboard-list-page">
@@ -112,6 +105,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
+    <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('dashboard')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>

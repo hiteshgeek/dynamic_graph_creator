@@ -25,43 +25,32 @@
 </head>
 
 <body class="template-builder-page">
-    <div class="page-header">
-        <div class="page-header-left">
-            <a href="?urlq=dashboard/templates" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-            <h1><?php $name = $template->getName(); echo htmlspecialchars($name ? $name : 'Template'); ?></h1>
-            <?php if ($template->getIsSystem()): ?>
-                <span class="badge badge-system">
-                    <i class="fas fa-lock"></i> System Template (Read-Only)
-                </span>
-            <?php endif; ?>
-        </div>
-        <div class="page-header-right">
-            <?php if (!$template->getIsSystem()): ?>
-                <div class="save-indicator saved" style="display: flex;">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Saved</span>
-                </div>
-                <button class="btn btn-warning btn-sm" id="edit-template-details-btn">
-                    <i class="fas fa-pencil"></i> Edit Details
-                </button>
-            <?php endif; ?>
-            <a href="?urlq=dashboard/template/preview/<?php echo $template->getId(); ?>"
-                class="btn btn-primary btn-sm"
-                title="View Mode">
-                <i class="fas fa-eye"></i> View Mode
-            </a>
-            <?php if (!$template->getIsSystem()): ?>
-                <div class="toggle-with-label">
-                    <span class="toggle-label">Tweak</span>
-                    <div class="form-check form-switch custom-switch custom-switch-warning">
-                        <input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch">
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php
+    $templateName = $template->getName();
+    $templateName = $templateName ? $templateName : 'Template';
+
+    $badges = [];
+    if ($template->getIsSystem()) {
+        $badges[] = ['label' => 'System Template (Read-Only)', 'icon' => 'fa-lock', 'class' => 'badge-system'];
+    }
+
+    $rightContent = '';
+    if (!$template->getIsSystem()) {
+        $rightContent .= '<div class="save-indicator saved" style="display: flex;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
+        $rightContent .= '<button class="btn btn-warning btn-sm" id="edit-template-details-btn"><i class="fas fa-pencil"></i> Edit Details</button>';
+    }
+    $rightContent .= '<a href="?urlq=dashboard/template/preview/' . $template->getId() . '" class="btn btn-primary btn-sm btn-view-mode" title="View Mode"><i class="fas fa-eye"></i> View Mode</a>';
+    if (!$template->getIsSystem()) {
+        $rightContent .= '<div class="toggle-with-label"><span class="toggle-label">Tweak</span><div class="form-check form-switch custom-switch custom-switch-warning"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"></div></div>';
+    }
+
+    echo Utility::renderPageHeader([
+        'title' => $templateName,
+        'backUrl' => '?urlq=dashboard/templates',
+        'badges' => $badges,
+        'rightContent' => $rightContent
+    ]);
+    ?>
 
     <div id="dashboard-builder"
         class="dashboard-builder"
@@ -181,6 +170,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
+    <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('dashboard')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>

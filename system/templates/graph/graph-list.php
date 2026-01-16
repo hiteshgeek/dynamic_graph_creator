@@ -23,24 +23,18 @@
     <?php endif; ?>
 </head>
 <body>
-    <div class="page-header">
-        <div class="page-header-left">
-            <h1>Graphs</h1>
-        </div>
-        <div class="page-header-right">
-            <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
-                <i class="fas fa-th-large"></i> Dashboards
-            </a>
-            <a href="?urlq=filters" class="btn btn-secondary btn-sm">
-                <i class="fas fa-filter"></i> Filters
-            </a>
-            <?php if (!empty($graphs)): ?>
-            <a href="?urlq=graph/create" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Create Graph
-            </a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php
+    // Build right content
+    $rightContent = '<a href="?urlq=dashboard" class="btn btn-secondary btn-sm"><i class="fas fa-th-large"></i> Dashboards</a>';
+    $rightContent .= '<a href="?urlq=filters" class="btn btn-secondary btn-sm"><i class="fas fa-filter"></i> Filters</a>';
+    if (!empty($graphs)) {
+        $rightContent .= '<a href="?urlq=graph/create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Graph</a>';
+    }
+    echo Utility::renderPageHeader([
+        'title' => 'Graphs',
+        'rightContent' => $rightContent
+    ]);
+    ?>
 
     <div class="container">
         <div id="graph-list" class="graph-list-page">
@@ -125,6 +119,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
+    <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('graph')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>

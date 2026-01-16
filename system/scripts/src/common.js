@@ -489,4 +489,130 @@ window.IdGenerator = {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => Toast.init());
+/**
+ * KeyboardShortcuts - Global keyboard shortcut handler
+ * Provides application-wide keyboard shortcuts
+ */
+window.KeyboardShortcuts = {
+    shortcuts: new Map(),
+    enabled: true,
+    initialized: false,
+
+    init() {
+        if (this.initialized) return this;
+        this.initialized = true;
+        document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        this.registerGlobalShortcuts();
+        return this;
+    },
+
+    register(key, callback, options = {}) {
+        const normalizedKey = this.normalizeKey(key);
+        const shortcut = {
+            key: normalizedKey,
+            callback,
+            description: options.description || '',
+            preventDefault: options.preventDefault !== false,
+            scope: options.scope || 'global',
+            enabled: true
+        };
+
+        if (!this.shortcuts.has(normalizedKey)) {
+            this.shortcuts.set(normalizedKey, []);
+        }
+        this.shortcuts.get(normalizedKey).push(shortcut);
+        return this;
+    },
+
+    unregister(key, callback = null) {
+        const normalizedKey = this.normalizeKey(key);
+        if (!this.shortcuts.has(normalizedKey)) return this;
+
+        if (callback) {
+            const shortcuts = this.shortcuts.get(normalizedKey);
+            const filtered = shortcuts.filter(s => s.callback !== callback);
+            if (filtered.length > 0) {
+                this.shortcuts.set(normalizedKey, filtered);
+            } else {
+                this.shortcuts.delete(normalizedKey);
+            }
+        } else {
+            this.shortcuts.delete(normalizedKey);
+        }
+        return this;
+    },
+
+    normalizeKey(key) {
+        const parts = key.toLowerCase().split('+').map(p => p.trim());
+        const modifiers = [];
+        let mainKey = '';
+
+        parts.forEach(part => {
+            if (['ctrl', 'control'].includes(part)) modifiers.push('ctrl');
+            else if (['alt', 'option'].includes(part)) modifiers.push('alt');
+            else if (['shift'].includes(part)) modifiers.push('shift');
+            else if (['meta', 'cmd', 'command'].includes(part)) modifiers.push('meta');
+            else mainKey = part;
+        });
+
+        modifiers.sort();
+        return [...modifiers, mainKey].join('+');
+    },
+
+    getKeyFromEvent(event) {
+        const modifiers = [];
+        if (event.ctrlKey) modifiers.push('ctrl');
+        if (event.altKey) modifiers.push('alt');
+        if (event.shiftKey) modifiers.push('shift');
+        if (event.metaKey) modifiers.push('meta');
+        modifiers.sort();
+
+        let key = event.key.toLowerCase();
+        const keyMap = {
+            'escape': 'escape', 'esc': 'escape',
+            'enter': 'enter', 'return': 'enter',
+            ' ': 'space'
+        };
+        key = keyMap[key] || key;
+
+        return [...modifiers, key].join('+');
+    },
+
+    handleKeyDown(event) {
+        if (!this.enabled) return;
+
+        const target = event.target;
+        const isInput = target.tagName === 'INPUT' ||
+                       target.tagName === 'TEXTAREA' ||
+                       target.tagName === 'SELECT' ||
+                       target.isContentEditable;
+
+        const keyCombo = this.getKeyFromEvent(event);
+        const shortcuts = this.shortcuts.get(keyCombo);
+
+        if (!shortcuts || shortcuts.length === 0) return;
+
+        for (const shortcut of shortcuts) {
+            if (!shortcut.enabled) continue;
+
+            // Allow Escape and shortcuts with Ctrl/Meta even in inputs
+            const hasModifier = keyCombo.includes('ctrl+') || keyCombo.includes('meta+');
+            if (isInput && keyCombo !== 'escape' && !hasModifier) continue;
+
+            if (shortcut.preventDefault) {
+                event.preventDefault();
+            }
+            shortcut.callback(event);
+        }
+    },
+
+    registerGlobalShortcuts() {
+        // Add global shortcuts here as needed
+        return this;
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    Toast.init();
+    KeyboardShortcuts.init();
+});

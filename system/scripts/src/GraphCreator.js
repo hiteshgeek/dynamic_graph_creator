@@ -66,6 +66,9 @@ export default class GraphCreator {
 
         // Initialize change tracking
         this.initChangeTracking();
+
+        // Initialize keyboard shortcuts
+        this.initKeyboardShortcuts();
     }
 
     /**
@@ -324,6 +327,47 @@ export default class GraphCreator {
                 }, 350);
             });
         });
+    }
+
+    /**
+     * Initialize keyboard shortcuts
+     */
+    initKeyboardShortcuts() {
+        // Use the global KeyboardShortcuts from common.js
+        if (window.KeyboardShortcuts) {
+            // ESC key to toggle sidebar collapse
+            window.KeyboardShortcuts.register('Escape', () => {
+                this.toggleSidebar();
+            }, {
+                description: 'Toggle options panel',
+                scope: 'graph-creator'
+            });
+        }
+    }
+
+    /**
+     * Toggle the sidebar collapse state
+     */
+    toggleSidebar() {
+        const sidebar = this.container.querySelector('.graph-sidebar');
+        const panel = sidebar?.querySelector('.collapsible-panel');
+
+        if (panel) {
+            panel.classList.toggle('collapsed');
+        }
+        if (sidebar) {
+            sidebar.classList.toggle('collapsed');
+            // Save collapse state to localStorage
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem('graphCreatorSidebarCollapsed', isCollapsed ? 'true' : 'false');
+        }
+
+        // Trigger chart resize after animation
+        setTimeout(() => {
+            if (this.preview) {
+                this.preview.resize();
+            }
+        }, 350);
     }
 
     /**

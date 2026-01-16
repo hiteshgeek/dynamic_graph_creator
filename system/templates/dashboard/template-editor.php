@@ -23,14 +23,12 @@
     <?php endif; ?>
 </head>
 <body>
-    <div class="page-header">
-        <div class="page-header-left">
-            <a href="?urlq=dashboard/templates" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-            <h1><?php echo htmlspecialchars($pageTitle); ?></h1>
-        </div>
-    </div>
+    <?php
+    echo Utility::renderPageHeader([
+        'title' => $pageTitle,
+        'backUrl' => '?urlq=dashboard/templates'
+    ]);
+    ?>
 
     <div class="container">
         <div class="row justify-content-center">
@@ -118,6 +116,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
+    <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('dashboard')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>

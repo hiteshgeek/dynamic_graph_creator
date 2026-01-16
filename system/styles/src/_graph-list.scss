@@ -14,17 +14,17 @@
 
 // Graph card style (matching dashboard cards)
 .graph-card {
-  background: white;
-  border: 2px solid #e0e0e0;
+  background: var(--dgc-bg-card);
+  border: 2px solid var(--dgc-border-color);
   border-radius: 8px;
   overflow: hidden;
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
   display: flex;
   flex-direction: column;
   padding: 1rem;
 
   &:hover {
-    border-color: $primary;
+    border-color: var(--dgc-primary);
   }
 
   .graph-card-content {
@@ -42,12 +42,12 @@
       font-size: 1rem;
       font-weight: 600;
       margin-bottom: 0.25rem;
-      color: #212529;
+      color: var(--dgc-text-primary);
     }
 
     .graph-description {
       font-size: 0.85rem;
-      color: #6c757d;
+      color: var(--dgc-text-secondary);
       margin-bottom: 0.5rem;
       line-height: 1.4;
       display: -webkit-box;
@@ -60,7 +60,7 @@
       display: flex;
       gap: 1rem;
       font-size: 0.8rem;
-      color: #6c757d;
+      color: var(--dgc-text-secondary);
       margin-top: 0.5rem;
 
       .meta-item {
@@ -76,7 +76,7 @@
     gap: 0.5rem;
     justify-content: center;
     padding-top: 0.75rem;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid var(--dgc-border-color);
 
     .btn-icon {
       width: 32px;
@@ -85,41 +85,51 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid #dee2e6;
-      background: white;
-      color: #6c757d;
+      border: 1px solid var(--dgc-border-color);
+      background: var(--dgc-bg-card);
+      color: var(--dgc-text-secondary);
       cursor: pointer;
       transition: all 0.2s;
       font-size: 0.875rem;
       text-decoration: none;
 
       &.btn-primary {
-        border-color: $primary;
-        color: $primary;
+        border-color: var(--dgc-primary);
+        color: var(--dgc-primary);
 
         &:hover {
-          background: $primary;
-          color: white;
+          background: var(--dgc-primary);
+          color: var(--dgc-text-inverse);
+        }
+      }
+
+      &.btn-design {
+        border-color: var(--dgc-warning);
+        color: var(--dgc-warning);
+
+        &:hover {
+          background: var(--dgc-warning);
+          color: var(--dgc-text-inverse);
         }
       }
 
       &.btn-warning {
-        border-color: #ffc107;
-        color: #ffc107;
+        border-color: var(--dgc-warning);
+        color: var(--dgc-warning);
 
         &:hover {
-          background: #ffc107;
-          color: white;
+          background: var(--dgc-warning);
+          color: var(--dgc-text-inverse);
         }
       }
 
       &.btn-danger {
-        border-color: #dc3545;
-        color: #dc3545;
+        border-color: var(--dgc-error);
+        color: var(--dgc-error);
 
         &:hover {
-          background: #dc3545;
-          color: white;
+          background: var(--dgc-error);
+          color: var(--dgc-text-inverse);
         }
       }
     }
@@ -200,19 +210,20 @@
 }
 
 .delete-modal-content {
-  background: $bg-card;
+  background: var(--dgc-bg-card);
   border-radius: $border-radius-lg;
   padding: $spacing-lg;
   max-width: 400px;
   width: 90%;
-  box-shadow: $shadow-3;
+  box-shadow: var(--dgc-shadow-3);
 
   h3 {
     margin-bottom: $spacing-md;
+    color: var(--dgc-text-primary);
   }
 
   p {
-    color: $text-secondary;
+    color: var(--dgc-text-secondary);
   }
 }
 

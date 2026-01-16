@@ -28,9 +28,62 @@ export default class GraphPreview {
                     this.chart.resize();
                 }
             });
+
+            // Listen for theme changes
+            this.observeThemeChanges();
         } else {
             console.error('ECharts not loaded');
         }
+    }
+
+    /**
+     * Observe theme changes and re-render chart
+     */
+    observeThemeChanges() {
+        // Watch for class changes on html element
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    // Re-render chart when theme changes
+                    if (this.data) {
+                        this.render();
+                    }
+                }
+            });
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    }
+
+    /**
+     * Check if dark mode is active
+     */
+    isDarkMode() {
+        return document.documentElement.classList.contains('theme-dark');
+    }
+
+    /**
+     * Get text color based on current theme
+     */
+    getTextColor() {
+        return this.isDarkMode() ? 'rgba(255, 255, 255, 0.87)' : '#333333';
+    }
+
+    /**
+     * Get secondary text color based on current theme
+     */
+    getSecondaryTextColor() {
+        return this.isDarkMode() ? 'rgba(255, 255, 255, 0.6)' : '#666666';
+    }
+
+    /**
+     * Get border/line color based on current theme
+     */
+    getBorderColor() {
+        return this.isDarkMode() ? '#3d3d3d' : '#ccc';
     }
 
     /**
@@ -110,9 +163,18 @@ export default class GraphPreview {
      * Build ECharts option based on type and config
      */
     buildOption() {
+        const textColor = this.getTextColor();
+        const secondaryTextColor = this.getSecondaryTextColor();
+        const borderColor = this.getBorderColor();
+
         const baseOption = {
             tooltip: {
-                trigger: this.type === 'pie' ? 'item' : 'axis'
+                trigger: this.type === 'pie' ? 'item' : 'axis',
+                backgroundColor: this.isDarkMode() ? '#2d2d2d' : '#fff',
+                borderColor: borderColor,
+                textStyle: {
+                    color: textColor
+                }
             },
             color: this.getColors()
         };
@@ -121,7 +183,10 @@ export default class GraphPreview {
         if (this.config.title) {
             baseOption.title = {
                 text: this.config.title,
-                left: 'center'
+                left: 'center',
+                textStyle: {
+                    color: textColor
+                }
             };
         }
 
@@ -129,7 +194,10 @@ export default class GraphPreview {
         if (this.config.showLegend !== false) {
             const legendPosition = this.config.legendPosition || 'top';
             const legendConfig = {
-                show: true
+                show: true,
+                textStyle: {
+                    color: textColor
+                }
             };
 
             // Set legend orientation and position
@@ -166,13 +234,27 @@ export default class GraphPreview {
         const isHorizontal = this.config.orientation === 'horizontal';
         const xAxisTitle = this.mapping.x_axis_title || '';
         const yAxisTitle = this.mapping.y_axis_title || '';
+        const textColor = this.getTextColor();
+        const secondaryTextColor = this.getSecondaryTextColor();
+        const borderColor = this.getBorderColor();
 
         const categoryAxis = {
             type: 'category',
             data: this.data.categories || [],
             name: isHorizontal ? yAxisTitle : xAxisTitle,
             nameLocation: 'middle',
-            nameGap: 25
+            nameGap: 25,
+            nameTextStyle: {
+                color: textColor
+            },
+            axisLabel: {
+                color: secondaryTextColor
+            },
+            axisLine: {
+                lineStyle: {
+                    color: borderColor
+                }
+            }
         };
 
         const valueAxis = {
@@ -180,7 +262,23 @@ export default class GraphPreview {
             name: isHorizontal ? xAxisTitle : yAxisTitle,
             nameLocation: 'middle',
             nameGap: 50,
-            nameRotate: 90
+            nameRotate: 90,
+            nameTextStyle: {
+                color: textColor
+            },
+            axisLabel: {
+                color: secondaryTextColor
+            },
+            axisLine: {
+                lineStyle: {
+                    color: borderColor
+                }
+            },
+            splitLine: {
+                lineStyle: {
+                    color: borderColor
+                }
+            }
         };
 
         return {
@@ -215,6 +313,9 @@ export default class GraphPreview {
     buildLineOption(baseOption) {
         const xAxisTitle = this.mapping.x_axis_title || '';
         const yAxisTitle = this.mapping.y_axis_title || '';
+        const textColor = this.getTextColor();
+        const secondaryTextColor = this.getSecondaryTextColor();
+        const borderColor = this.getBorderColor();
 
         return {
             ...baseOption,
@@ -230,14 +331,41 @@ export default class GraphPreview {
                 boundaryGap: false,
                 name: xAxisTitle,
                 nameLocation: 'middle',
-                nameGap: 25
+                nameGap: 25,
+                nameTextStyle: {
+                    color: textColor
+                },
+                axisLabel: {
+                    color: secondaryTextColor
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: borderColor
+                    }
+                }
             },
             yAxis: {
                 type: 'value',
                 name: yAxisTitle,
                 nameLocation: 'middle',
                 nameGap: 50,
-                nameRotate: 90
+                nameRotate: 90,
+                nameTextStyle: {
+                    color: textColor
+                },
+                axisLabel: {
+                    color: secondaryTextColor
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: borderColor
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: borderColor
+                    }
+                }
             },
             series: [{
                 type: 'line',
@@ -264,6 +392,8 @@ export default class GraphPreview {
         const isDonut = this.config.pieType === 'donut';
         const innerRadius = isDonut ? (this.config.innerRadius || 40) : 0;
         const outerRadius = this.config.outerRadius || 70;
+        const textColor = this.getTextColor();
+        const borderColor = this.getBorderColor();
 
         return {
             ...baseOption,
@@ -275,11 +405,15 @@ export default class GraphPreview {
                 label: {
                     show: this.config.showLabel !== false,
                     position: this.config.labelPosition || 'outside',
-                    formatter: '{b}: {d}%'
+                    formatter: '{b}: {d}%',
+                    color: textColor
                 },
                 labelLine: {
                     show: this.config.showLabel !== false &&
-                          this.config.labelPosition !== 'inside'
+                          this.config.labelPosition !== 'inside',
+                    lineStyle: {
+                        color: borderColor
+                    }
                 },
                 emphasis: {
                     itemStyle: {

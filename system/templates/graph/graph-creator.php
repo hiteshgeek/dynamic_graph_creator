@@ -34,21 +34,17 @@
 </head>
 
 <body>
-    <div class="page-header">
-        <div class="page-header-left">
-            <a href="?urlq=graph" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-            <h1><?php echo $graph ? htmlspecialchars($graph->getName()) : 'Create Graph'; ?></h1>
-        </div>
-        <?php if ($graph): ?>
-        <div class="page-header-right">
-            <a href="?urlq=graph/view/<?php echo $graph->getId(); ?>" class="btn btn-primary btn-sm">
-                <i class="fas fa-eye"></i> View Mode
-            </a>
-        </div>
-        <?php endif; ?>
-    </div>
+    <?php
+    $rightContent = '';
+    if ($graph) {
+        $rightContent = '<a href="?urlq=graph/view/' . $graph->getId() . '" class="btn btn-primary btn-sm btn-view-mode"><i class="fas fa-eye"></i> View Mode</a>';
+    }
+    echo Utility::renderPageHeader([
+        'title' => $graph ? $graph->getName() : 'Create Graph',
+        'backUrl' => '?urlq=graph',
+        'rightContent' => $rightContent
+    ]);
+    ?>
 
     <div class="container container-full">
         <div id="graph-creator" class="graph-creator graph-creator-single-sidebar" data-graph-id="<?php echo $graph ? $graph->getId() : ''; ?>">
@@ -139,7 +135,7 @@
                                     <div class="filter-active-view" id="filter-active-view" style="display: none;">
                                         <div class="filter-active-header">
                                             <span class="filter-active-title">Active Filters</span>
-                                            <button type="button" class="btn btn-sm btn-outline filter-change-btn" id="filter-change-btn">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary filter-change-btn" id="filter-change-btn">
                                                 <i class="fas fa-exchange-alt"></i> Change
                                             </button>
                                         </div>
@@ -243,7 +239,7 @@
                                         <p>No filters available</p>
                                     </div>
                                 <?php endif; ?>
-                                <a href="?urlq=filters/add" class="btn btn-sm btn-outline filters-manage-btn">
+                                <a href="?urlq=filters/add" class="btn btn-sm btn-outline-secondary filters-manage-btn">
                                     <i class="fas fa-plus"></i> Create Filter
                                 </a>
                             </div>
@@ -273,10 +269,10 @@
                     <div class="graph-preview-header">
                         <h3>Preview</h3>
                         <div class="graph-preview-actions">
-                            <button type="button" class="btn btn-sm btn-outline" id="export-chart" title="Save chart as PNG image">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="export-chart" title="Save chart as PNG image">
                                 <i class="fas fa-image"></i> Save Image
                             </button>
-                            <button type="button" class="btn btn-sm btn-outline" id="refresh-preview">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-preview">
                                 <i class="fas fa-sync-alt"></i> Refresh
                             </button>
                         </div>
@@ -302,10 +298,10 @@
                                     <span class="query-hint">Use <code>:placeholder</code> for filter values</span>
                                 </div>
                                 <div class="query-toolbar-right">
-                                    <button type="button" class="btn btn-sm btn-outline copy-query-btn" title="Copy SQL">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary copy-query-btn" title="Copy SQL">
                                         <i class="fas fa-copy"></i> Copy
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline format-query-btn" title="Format SQL">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary format-query-btn" title="Format SQL">
                                         <i class="fas fa-align-left"></i> Format SQL
                                     </button>
                                     <button type="button" class="btn btn-sm btn-primary test-query-btn">
@@ -334,6 +330,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
+    <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('graph')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>

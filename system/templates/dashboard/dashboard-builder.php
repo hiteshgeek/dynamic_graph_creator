@@ -25,58 +25,24 @@
 </head>
 
 <body class="dashboard-builder-page">
-    <div class="page-header">
-        <div class="page-header-left">
-            <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-            <?php if ($dashboard && $dashboard->getId()): ?>
-                <div class="dashboard-name-editor">
-                    <h1 id="dashboard-name-display"><?php echo htmlspecialchars($dashboard->getName()); ?></h1>
-                    <input type="text"
-                        id="dashboard-name-input"
-                        class="form-control dashboard-name-input"
-                        value="<?php echo htmlspecialchars($dashboard->getName()); ?>"
-                        placeholder="Dashboard Name"
-                        style="display: none;">
-                    <button id="edit-name-btn" class="btn-icon btn-warning" title="Edit Name">
-                        <i class="fas fa-pencil"></i>
-                    </button>
-                    <button id="save-name-btn" class="btn-icon btn-success" title="Save Name" style="display: none;">
-                        <i class="fas fa-check"></i>
-                    </button>
-                    <button id="cancel-name-btn" class="btn-icon btn-secondary" title="Cancel" style="display: none;">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            <?php else: ?>
-                <h1>Create Dashboard</h1>
-            <?php endif; ?>
-        </div>
-        <div class="page-header-right">
-            <?php if ($dashboard && $dashboard->getId()): ?>
-                <div class="save-indicator saved" style="display: flex;">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Saved</span>
-                </div>
-                <a href="?urlq=dashboard/preview/<?php echo $dashboard->getId(); ?>"
-                    class="btn btn-primary btn-sm">
-                    <i class="fas fa-eye"></i> View Mode
-                </a>
-                <div class="toggle-with-label">
-                    <span class="toggle-label">Tweak</span>
-                    <div class="form-check form-switch custom-switch custom-switch-warning">
-                        <input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch">
-                    </div>
-                </div>
-            <?php else: ?>
-                <div class="save-indicator" style="display: none;">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Saved</span>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php
+    $rightContent = '';
+    if ($dashboard && $dashboard->getId()) {
+        $rightContent .= '<div class="save-indicator saved" style="display: flex;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
+        $rightContent .= '<a href="?urlq=dashboard/preview/' . $dashboard->getId() . '" class="btn btn-primary btn-sm btn-view-mode"><i class="fas fa-eye"></i> View Mode</a>';
+        $rightContent .= '<div class="toggle-with-label"><span class="toggle-label">Tweak</span><div class="form-check form-switch custom-switch custom-switch-warning"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"></div></div>';
+    } else {
+        $rightContent .= '<div class="save-indicator" style="display: none;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
+    }
+
+    echo Utility::renderPageHeader([
+        'title' => ($dashboard && $dashboard->getId()) ? $dashboard->getName() : 'Create Dashboard',
+        'backUrl' => '?urlq=dashboard',
+        'titleEditable' => ($dashboard && $dashboard->getId()) ? true : false,
+        'titleId' => 'dashboard-name-display',
+        'rightContent' => $rightContent
+    ]);
+    ?>
 
     <div id="dashboard-builder"
         class="dashboard-builder"
@@ -167,6 +133,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
+    <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('dashboard')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>

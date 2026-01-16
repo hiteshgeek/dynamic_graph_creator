@@ -28,16 +28,17 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 $spacing-lg;
-  background: $bg-card;
-  box-shadow: $shadow-1;
+  background: var(--dgc-bg-card);
+  box-shadow: var(--dgc-shadow-1);
   height: 60px;
   z-index: 100;
-  // margin-bottom: $spacing-lg;
+  transition: background-color 0.2s ease;
 
   h1 {
     margin: 0;
     font-size: $font-size-h2;
     line-height: 1;
+    color: var(--dgc-text-primary);
   }
 
   .page-header-left {
@@ -50,8 +51,8 @@ body {
       padding: 0.35rem 0.75rem;
       border-radius: 4px;
       font-weight: 500;
-      background: #e3f2fd;
-      color: #1976d2;
+      background: rgba(25, 118, 210, 0.15);
+      color: #64b5f6;
       display: inline-flex;
       align-items: center;
       gap: 0.25rem;
@@ -73,29 +74,35 @@ body {
     align-items: center;
     gap: $spacing-sm;
     font-size: $font-size-sm;
-    color: $text-secondary;
+    color: var(--dgc-text-secondary);
     margin: 0;
     padding: 0;
     background: none;
     line-height: 1;
 
     a {
-      color: $text-secondary;
+      color: var(--dgc-text-secondary);
 
       &:hover {
-        color: $primary;
+        color: var(--dgc-primary);
       }
     }
 
     i {
       font-size: 10px;
-      color: $text-hint;
+      color: var(--dgc-text-hint);
     }
 
     span {
-      color: $text-primary;
+      color: var(--dgc-text-primary);
     }
   }
+}
+
+// Light theme badge-system override
+:root:not(.theme-dark) .page-header .badge-system {
+  background: #e3f2fd;
+  color: #1976d2;
 }
 
 // Loading overlay

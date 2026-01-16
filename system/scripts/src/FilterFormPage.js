@@ -215,7 +215,7 @@ export default class FilterFormPage {
         row.innerHTML = `
             <input type="text" class="form-control option-value" placeholder="Value" value="${this.escapeHtml(value)}">
             <input type="text" class="form-control option-label" placeholder="Label" value="${this.escapeHtml(label)}">
-            <button type="button" class="btn btn-sm btn-outline remove-option-btn">
+            <button type="button" class="btn btn-sm btn-outline-secondary remove-option-btn">
                 <i class="fas fa-times"></i>
             </button>
         `;

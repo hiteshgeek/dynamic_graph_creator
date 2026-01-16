@@ -32,29 +32,24 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
     </script>
 </head>
 <body class="<?php echo $allowTemplateOrdering ? 'template-ordering-enabled' : 'template-ordering-disabled'; ?>">
-    <div class="page-header">
-        <div class="page-header-left">
-            <h1>Dashboard Templates</h1>
-            <?php if (!empty($templates)): ?>
-            <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-all-categories" title="Collapse All">
-                <i class="fas fa-compress-alt"></i> <span>Collapse All</span>
-            </button>
-            <?php endif; ?>
-        </div>
-        <div class="page-header-right">
-            <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
-                <i class="fas fa-th-large"></i> Dashboards
-            </a>
-            <a href="?urlq=graph" class="btn btn-secondary btn-sm">
-                <i class="fas fa-chart-line"></i> Graphs
-            </a>
-            <?php if (!empty($templates)): ?>
-            <a href="?urlq=dashboard/template/create" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Create Template
-            </a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php
+    $leftContent = '';
+    if (!empty($templates)) {
+        $leftContent = '<button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-all-categories" title="Collapse All"><i class="fas fa-compress-alt"></i> <span>Collapse All</span></button>';
+    }
+
+    $rightContent = '<a href="?urlq=dashboard" class="btn btn-secondary btn-sm"><i class="fas fa-th-large"></i> Dashboards</a>';
+    $rightContent .= '<a href="?urlq=graph" class="btn btn-secondary btn-sm"><i class="fas fa-chart-line"></i> Graphs</a>';
+    if (!empty($templates)) {
+        $rightContent .= '<a href="?urlq=dashboard/template/create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Template</a>';
+    }
+
+    echo Utility::renderPageHeader([
+        'title' => 'Dashboard Templates',
+        'leftContent' => $leftContent,
+        'rightContent' => $rightContent
+    ]);
+    ?>
 
     <div class="container-fluid">
         <div class="template-list-page">
@@ -192,6 +187,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
     <?php if ($js = Utility::getJs('common')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
+    <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('dashboard')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>

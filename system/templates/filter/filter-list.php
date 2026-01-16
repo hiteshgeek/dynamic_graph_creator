@@ -23,24 +23,17 @@
     <?php endif; ?>
 </head>
 <body>
-    <div class="page-header">
-        <div class="page-header-left">
-            <h1>Filters</h1>
-        </div>
-        <div class="page-header-right">
-            <a href="?urlq=dashboard" class="btn btn-secondary btn-sm">
-                <i class="fas fa-th-large"></i> Dashboards
-            </a>
-            <a href="?urlq=graph" class="btn btn-secondary btn-sm">
-                <i class="fas fa-chart-bar"></i> Graphs
-            </a>
-            <?php if (!empty($filters)): ?>
-            <a href="?urlq=filters/add" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus"></i> Add Filter
-            </a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php
+    $rightContent = '<a href="?urlq=dashboard" class="btn btn-secondary btn-sm"><i class="fas fa-th-large"></i> Dashboards</a>';
+    $rightContent .= '<a href="?urlq=graph" class="btn btn-secondary btn-sm"><i class="fas fa-chart-bar"></i> Graphs</a>';
+    if (!empty($filters)) {
+        $rightContent .= '<a href="?urlq=filters/add" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Filter</a>';
+    }
+    echo Utility::renderPageHeader([
+        'title' => 'Filters',
+        'rightContent' => $rightContent
+    ]);
+    ?>
 
     <div class="container">
         <div id="filter-list" class="filter-list-page">
@@ -144,6 +137,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
+    <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('filter')): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>

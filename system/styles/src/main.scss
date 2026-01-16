@@ -4,6 +4,7 @@
 // Use modern @use syntax instead of @import
 @use "variables" as *;
 @use "base";
+@use "theme";
 @use "filters";
 @use "query-builder";
 @use "config-panel";
@@ -16,15 +17,17 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 $spacing-lg;
-  background: $bg-card;
-  box-shadow: $shadow-1;
+  background: var(--dgc-bg-card);
+  box-shadow: var(--dgc-shadow-1);
   height: 60px;
   margin-bottom: $spacing-lg;
+  transition: background-color 0.2s ease;
 
   h1 {
     margin: 0;
     font-size: $font-size-h2;
     line-height: 1;
+    color: var(--dgc-text-primary);
   }
 
   .page-header-left {
@@ -44,27 +47,27 @@
     align-items: center;
     gap: $spacing-sm;
     font-size: $font-size-sm;
-    color: $text-secondary;
+    color: var(--dgc-text-secondary);
     margin: 0;
     padding: 0;
     background: none;
     line-height: 1;
 
     a {
-      color: $text-secondary;
+      color: var(--dgc-text-secondary);
 
       &:hover {
-        color: $primary;
+        color: var(--dgc-primary);
       }
     }
 
     i {
       font-size: 10px;
-      color: $text-hint;
+      color: var(--dgc-text-hint);
     }
 
     span {
-      color: $text-primary;
+      color: var(--dgc-text-primary);
     }
   }
 }
@@ -76,7 +79,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--dgc-loading-overlay-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,7 +106,7 @@
     }
 
     span {
-      color: $text-secondary;
+      color: var(--dgc-text-secondary);
       font-size: $font-size-sm;
     }
   }
@@ -125,33 +128,34 @@
   align-items: center;
   gap: $spacing-md;
   padding: $spacing-md $spacing-lg;
-  background: $bg-card;
+  background: var(--dgc-bg-card);
   border-radius: $border-radius;
-  box-shadow: $shadow-2;
+  box-shadow: var(--dgc-shadow-2);
   min-width: 300px;
   animation: slideIn 0.3s ease;
+  color: var(--dgc-text-primary);
 
   &.success {
-    border-left: 4px solid $success;
+    border-left: 4px solid var(--dgc-success);
 
     i {
-      color: $success;
+      color: var(--dgc-success);
     }
   }
 
   &.error {
-    border-left: 4px solid $error;
+    border-left: 4px solid var(--dgc-error);
 
     i {
-      color: $error;
+      color: var(--dgc-error);
     }
   }
 
   &.warning {
-    border-left: 4px solid $warning;
+    border-left: 4px solid var(--dgc-warning);
 
     i {
-      color: $warning;
+      color: var(--dgc-warning);
     }
   }
 
@@ -166,12 +170,12 @@
   .toast-close {
     background: transparent;
     border: none;
-    color: $text-hint;
+    color: var(--dgc-text-hint);
     cursor: pointer;
     padding: $spacing-xs;
 
     &:hover {
-      color: $text-primary;
+      color: var(--dgc-text-primary);
     }
   }
 }

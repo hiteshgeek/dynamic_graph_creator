@@ -238,4 +238,90 @@ class Utility
         $shortId = substr(str_replace('-', '', $uuid), 0, 8);
         return $prefix ? $prefix . '-' . $shortId : $shortId;
     }
+
+    /**
+     * Render the page header component
+     *
+     * @param array $options Configuration options:
+     *   - 'title' (string) Required. The page title
+     *   - 'backUrl' (string|null) Optional. URL for back button
+     *   - 'backLabel' (string) Optional. Back button label (default: 'Back')
+     *   - 'badges' (array) Optional. Array of badge configs: ['label' => 'text', 'icon' => 'fa-icon', 'class' => 'badge-system']
+     *   - 'leftContent' (string) Optional. Additional HTML for left section (after theme toggle)
+     *   - 'rightContent' (string) Optional. HTML for right section (page-header-right)
+     *   - 'titleEditable' (bool) Optional. If true, title can be edited inline (default: false)
+     *   - 'titleId' (string) Optional. ID for the title element when editable
+     * @return string HTML markup for the page header
+     */
+    public static function renderPageHeader($options)
+    {
+        $title = isset($options['title']) ? $options['title'] : '';
+        $backUrl = isset($options['backUrl']) ? $options['backUrl'] : null;
+        $backLabel = isset($options['backLabel']) ? $options['backLabel'] : 'Back';
+        $badges = isset($options['badges']) ? $options['badges'] : [];
+        $leftContent = isset($options['leftContent']) ? $options['leftContent'] : '';
+        $rightContent = isset($options['rightContent']) ? $options['rightContent'] : '';
+        $titleEditable = isset($options['titleEditable']) ? $options['titleEditable'] : false;
+        $titleId = isset($options['titleId']) ? $options['titleId'] : '';
+
+        $html = '<div class="page-header">';
+        $html .= '<div class="page-header-left">';
+
+        // Back button
+        if ($backUrl) {
+            $html .= '<a href="' . htmlspecialchars($backUrl) . '" class="btn btn-secondary btn-sm">';
+            $html .= '<i class="fas fa-arrow-left"></i> ' . htmlspecialchars($backLabel);
+            $html .= '</a>';
+        }
+
+        // Title
+        if ($titleEditable) {
+            $html .= '<div class="dashboard-name-editor">';
+            $idAttr = $titleId ? ' id="' . htmlspecialchars($titleId) . '"' : '';
+            $html .= '<h1' . $idAttr . '>' . htmlspecialchars($title) . '</h1>';
+            $inputId = $titleId ? str_replace('-display', '-input', $titleId) : '';
+            $inputIdAttr = $inputId ? ' id="' . htmlspecialchars($inputId) . '"' : '';
+            $html .= '<input type="text"' . $inputIdAttr . ' class="form-control dashboard-name-input" value="' . htmlspecialchars($title) . '" placeholder="Name" style="display: none;">';
+            $html .= '<button id="edit-name-btn" class="btn-icon btn-warning" title="Edit Name"><i class="fas fa-pencil"></i></button>';
+            $html .= '<button id="save-name-btn" class="btn-icon btn-success" title="Save Name" style="display: none;"><i class="fas fa-check"></i></button>';
+            $html .= '<button id="cancel-name-btn" class="btn-icon btn-secondary" title="Cancel" style="display: none;"><i class="fas fa-times"></i></button>';
+            $html .= '</div>';
+        } else {
+            $html .= '<h1>' . htmlspecialchars($title) . '</h1>';
+        }
+
+        // Theme toggle button
+        $html .= '<button type="button" class="theme-toggle-btn" title="Toggle theme">';
+        $html .= '<i class="fas fa-desktop"></i>';
+        $html .= '</button>';
+
+        // Badges
+        foreach ($badges as $badge) {
+            $badgeClass = isset($badge['class']) ? $badge['class'] : 'badge-secondary';
+            $html .= '<span class="badge ' . htmlspecialchars($badgeClass) . '">';
+            if (isset($badge['icon'])) {
+                $html .= '<i class="fas ' . htmlspecialchars($badge['icon']) . '"></i> ';
+            }
+            $html .= htmlspecialchars($badge['label']);
+            $html .= '</span>';
+        }
+
+        // Additional left content (custom buttons, etc.)
+        if ($leftContent) {
+            $html .= $leftContent;
+        }
+
+        $html .= '</div>'; // End page-header-left
+
+        // Right section
+        if ($rightContent) {
+            $html .= '<div class="page-header-right">';
+            $html .= $rightContent;
+            $html .= '</div>';
+        }
+
+        $html .= '</div>'; // End page-header
+
+        return $html;
+    }
 }

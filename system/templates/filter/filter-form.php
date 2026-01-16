@@ -31,14 +31,12 @@
 </head>
 
 <body>
-    <div class="page-header">
-        <div class="page-header-left">
-            <a href="?urlq=filters" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-            <h1><?php echo $filter ? 'Edit' : 'Add'; ?> Filter</h1>
-        </div>
-    </div>
+    <?php
+    echo Utility::renderPageHeader([
+        'title' => ($filter ? 'Edit' : 'Add') . ' Filter',
+        'backUrl' => '?urlq=filters'
+    ]);
+    ?>
 
     <div class="container">
         <div class="filter-form-page" data-filter-id="<?php echo $filter ? $filter->getId() : ''; ?>">
@@ -150,7 +148,7 @@
                                                 <div class="filter-option-item">
                                                     <input type="text" class="form-control option-value" placeholder="Value" value="<?php echo htmlspecialchars($opt['value']); ?>">
                                                     <input type="text" class="form-control option-label" placeholder="Label" value="<?php echo htmlspecialchars($opt['label']); ?>">
-                                                    <button type="button" class="btn btn-sm btn-outline remove-option-btn">
+                                                    <button type="button" class="btn btn-sm btn-outline-secondary remove-option-btn">
                                                         <i class="fas fa-times"></i>
                                                     </button>
                                                 </div>
@@ -161,14 +159,14 @@
                                             <div class="filter-option-item">
                                                 <input type="text" class="form-control option-value" placeholder="Value">
                                                 <input type="text" class="form-control option-label" placeholder="Label">
-                                                <button type="button" class="btn btn-sm btn-outline remove-option-btn">
+                                                <button type="button" class="btn btn-sm btn-outline-secondary remove-option-btn">
                                                     <i class="fas fa-times"></i>
                                                 </button>
                                             </div>
                                         <?php endif; ?>
                                     </div>
                                     <div class="static-options-actions">
-                                        <button type="button" class="btn btn-sm btn-outline add-option-btn">
+                                        <button type="button" class="btn btn-sm btn-outline-secondary add-option-btn">
                                             <i class="fas fa-plus"></i> Add Option
                                         </button>
                                     </div>
@@ -183,10 +181,10 @@
                                     <small class="form-hint">Query must return <code>value</code> and <code>label</code> columns</small>
                                 </div>
                                 <div class="query-actions">
-                                    <button type="button" class="btn btn-sm btn-outline" id="copy-query-btn">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="copy-query-btn">
                                         <i class="fas fa-copy"></i> Copy
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline" id="format-query-btn">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" id="format-query-btn">
                                         <i class="fas fa-align-left"></i> Format SQL
                                     </button>
                                     <button type="button" class="btn btn-sm btn-primary" id="test-query-btn">
@@ -218,6 +216,7 @@
     <?php if ($js = Utility::getJs('common')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
+    <script src="system/scripts/src/Theme.js"></script>
     <?php if ($js = Utility::getJs('filter')): ?>
         <script src="<?php echo $js; ?>"></script>
     <?php endif; ?>
