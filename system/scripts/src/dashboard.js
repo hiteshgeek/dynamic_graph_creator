@@ -114,10 +114,15 @@ class DashboardBuilder {
   }
 
   async showTemplateSelector() {
-    const modal = document.getElementById("template-modal");
-    if (!modal) return;
+    const modalElement = document.getElementById("template-modal");
+    if (!modalElement) return;
 
-    modal.style.display = "flex";
+    // Get or create Bootstrap modal instance
+    let modal = bootstrap.Modal.getInstance(modalElement);
+    if (!modal) {
+      modal = new bootstrap.Modal(modalElement);
+    }
+    modal.show();
 
     try {
       const result = await Ajax.post("get_templates", {});
@@ -266,8 +271,12 @@ class DashboardBuilder {
         // Load the dashboard
         await this.loadDashboard();
 
-        // Close modal
-        document.getElementById("template-modal").style.display = "none";
+        // Close modal using Bootstrap API
+        const modalElement = document.getElementById("template-modal");
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+          modal.hide();
+        }
 
         Toast.success("Dashboard created successfully");
       } else {
@@ -293,8 +302,12 @@ class DashboardBuilder {
       if (result.success) {
         await this.loadDashboard();
 
-        // Close modal
-        document.getElementById("template-modal").style.display = "none";
+        // Close modal using Bootstrap API
+        const modalElement = document.getElementById("template-modal");
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+          modal.hide();
+        }
 
         // Reset mode
         this.templateSelectorMode = "create-dashboard";
@@ -1123,26 +1136,6 @@ class DashboardBuilder {
     const confirmBtn = document.getElementById("confirm-add-section");
     if (confirmBtn) {
       confirmBtn.addEventListener("click", () => this.handleAddSection());
-    }
-
-    // Template modal close
-    const modalClose = document.querySelector(
-      "#template-modal .modal-close"
-    );
-    if (modalClose) {
-      modalClose.addEventListener("click", () => {
-        document.getElementById("template-modal").style.display = "none";
-      });
-    }
-
-    // Template modal overlay close
-    const modalOverlay = document.querySelector(
-      "#template-modal .modal-overlay"
-    );
-    if (modalOverlay) {
-      modalOverlay.addEventListener("click", () => {
-        document.getElementById("template-modal").style.display = "none";
-      });
     }
 
     // Remove section handlers - use event delegation on container instead of document

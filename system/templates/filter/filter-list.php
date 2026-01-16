@@ -118,21 +118,21 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal-overlay" id="delete-modal">
-        <div class="modal-container modal-sm">
-            <div class="modal-header">
-                <h3>Delete Filter</h3>
-                <button type="button" class="modal-close-btn">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the filter "<span class="filter-name"></span>"?</p>
-                <p class="text-muted"><small>This will also remove it from any graphs using it.</small></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary modal-cancel-btn">Cancel</button>
-                <button type="button" class="btn btn-danger confirm-delete-btn">Delete</button>
+    <div class="modal fade" id="delete-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Filter</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the filter "<span class="filter-name"></span>"?</p>
+                    <p class="text-muted"><small>This will also remove it from any graphs using it.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger confirm-delete-btn">Delete</button>
+                </div>
             </div>
         </div>
     </div>

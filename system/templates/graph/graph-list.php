@@ -99,21 +99,21 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div class="modal-overlay" id="delete-modal">
-        <div class="modal-container modal-sm">
-            <div class="modal-header">
-                <h3>Delete Graph</h3>
-                <button type="button" class="modal-close-btn">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the graph "<span class="graph-name"></span>"?</p>
-                <p class="text-muted"><small>This action cannot be undone.</small></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary modal-cancel-btn">Cancel</button>
-                <button type="button" class="btn btn-danger confirm-delete-btn">Delete</button>
+    <div class="modal fade" id="delete-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Graph</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the graph "<span class="graph-name"></span>"?</p>
+                    <p class="text-muted"><small>This action cannot be undone.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger confirm-delete-btn">Delete</button>
+                </div>
             </div>
         </div>
     </div>
@@ -131,15 +131,16 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        var deleteModal = document.getElementById('delete-modal');
+        var deleteModalElement = document.getElementById('delete-modal');
+        var deleteModal = new bootstrap.Modal(deleteModalElement);
         var graphIdToDelete = null;
 
         // Delete graph buttons
         document.querySelectorAll('.delete-graph-btn').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 graphIdToDelete = this.dataset.id;
-                deleteModal.querySelector('.graph-name').textContent = this.dataset.name;
-                openModal(deleteModal);
+                deleteModalElement.querySelector('.graph-name').textContent = this.dataset.name;
+                deleteModal.show();
             });
         });
 
@@ -149,6 +150,7 @@
                 Loading.show('Deleting graph...');
                 Ajax.post('delete_graph', { id: graphIdToDelete }).then(function(result) {
                     Loading.hide();
+                    deleteModal.hide();
                     if (result.success) {
                         Toast.success('Graph deleted');
                         location.reload();
@@ -157,25 +159,11 @@
                     }
                 }).catch(function() {
                     Loading.hide();
+                    deleteModal.hide();
                     Toast.error('Failed to delete graph');
                 });
             }
         });
-
-        // Modal close buttons
-        document.querySelectorAll('.modal-close-btn, .modal-cancel-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                closeModal(this.closest('.modal-overlay'));
-            });
-        });
-
-        function openModal(modal) {
-            modal.classList.add('active');
-        }
-
-        function closeModal(modal) {
-            modal.classList.remove('active');
-        }
     });
     </script>
 </body>

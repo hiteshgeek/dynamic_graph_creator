@@ -184,4 +184,26 @@ class Utility
 
         return $html;
     }
+
+    /**
+     * Render a dashboard cell empty state
+     * Used for empty areas/cells within dashboard sections (both edit and view mode)
+     *
+     * @param string $icon FontAwesome icon class (e.g., 'fa-chart-line', 'fa-plus-circle')
+     * @param string $message The message to display below the icon
+     * @return string HTML markup for the dashboard cell empty state
+     */
+    public static function renderDashboardCellEmpty($icon = 'fa-plus-circle', $message = 'Add content here')
+    {
+        $html = '<div class="dashboard-cell-empty">';
+        $html .= '<div class="cell-empty-icon">';
+        $html .= '<i class="fas ' . htmlspecialchars($icon) . '"></i>';
+        $html .= '</div>';
+        $html .= '<div class="cell-empty-message">';
+        $html .= htmlspecialchars($message);
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
 }

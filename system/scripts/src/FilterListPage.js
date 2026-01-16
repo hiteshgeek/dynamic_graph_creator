@@ -10,6 +10,7 @@ const Toast = window.Toast;
 export default class FilterListPage {
     constructor(container) {
         this.container = container;
+        this.deleteModalElement = null;
         this.deleteModal = null;
         this.filterIdToDelete = null;
 
@@ -22,7 +23,10 @@ export default class FilterListPage {
      * Initialize the filter list page
      */
     init() {
-        this.deleteModal = document.getElementById('delete-modal');
+        this.deleteModalElement = document.getElementById('delete-modal');
+        if (this.deleteModalElement) {
+            this.deleteModal = new bootstrap.Modal(this.deleteModalElement);
+        }
         this.bindEvents();
     }
 
@@ -34,11 +38,13 @@ export default class FilterListPage {
         this.container.querySelectorAll('.delete-filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 this.filterIdToDelete = e.currentTarget.dataset.id;
-                const filterName = this.deleteModal.querySelector('.filter-name');
+                const filterName = this.deleteModalElement.querySelector('.filter-name');
                 if (filterName) {
                     filterName.textContent = e.currentTarget.dataset.label;
                 }
-                this.openModal(this.deleteModal);
+                if (this.deleteModal) {
+                    this.deleteModal.show();
+                }
             });
         });
 
@@ -47,13 +53,6 @@ export default class FilterListPage {
         if (confirmDeleteBtn) {
             confirmDeleteBtn.addEventListener('click', () => this.deleteFilter());
         }
-
-        // Modal close buttons
-        document.querySelectorAll('.modal-close-btn, .modal-cancel-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.closeModal(e.target.closest('.modal-overlay'));
-            });
-        });
     }
 
     /**
@@ -67,6 +66,9 @@ export default class FilterListPage {
         Ajax.post('delete_filter', { id: this.filterIdToDelete })
             .then(result => {
                 Loading.hide();
+                if (this.deleteModal) {
+                    this.deleteModal.hide();
+                }
                 if (result.success) {
                     Toast.success('Filter deleted');
                     location.reload();
@@ -76,25 +78,10 @@ export default class FilterListPage {
             })
             .catch(() => {
                 Loading.hide();
+                if (this.deleteModal) {
+                    this.deleteModal.hide();
+                }
                 Toast.error('Failed to delete filter');
             });
-    }
-
-    /**
-     * Open a modal
-     */
-    openModal(modal) {
-        if (modal) {
-            modal.classList.add('active');
-        }
-    }
-
-    /**
-     * Close a modal
-     */
-    closeModal(modal) {
-        if (modal) {
-            modal.classList.remove('active');
-        }
     }
 }

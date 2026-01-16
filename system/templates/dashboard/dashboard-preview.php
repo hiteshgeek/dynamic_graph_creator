@@ -84,14 +84,11 @@
                                         <?php foreach ($area['subRows'] as $subRow): ?>
                                             <div class="dashboard-sub-row" data-row-id="<?php echo htmlspecialchars($subRow['rowId']); ?>">
                                                 <?php if (isset($subRow['content']) && $subRow['content']['type'] === 'empty'): ?>
-                                                    <div class="empty-state">
-                                                        <div class="empty-state-icon">
-                                                            <i class="fas <?php echo isset($subRow['emptyState']['icon']) ? htmlspecialchars($subRow['emptyState']['icon']) : 'fa-plus-circle'; ?>"></i>
-                                                        </div>
-                                                        <div class="empty-state-message">
-                                                            <?php echo isset($subRow['emptyState']['message']) ? htmlspecialchars($subRow['emptyState']['message']) : 'Add content here'; ?>
-                                                        </div>
-                                                    </div>
+                                                    <?php
+                                                    $icon = isset($subRow['emptyState']['icon']) ? $subRow['emptyState']['icon'] : 'fa-plus-circle';
+                                                    $message = isset($subRow['emptyState']['message']) ? $subRow['emptyState']['message'] : 'Add content here';
+                                                    echo Utility::renderDashboardCellEmpty($icon, $message);
+                                                    ?>
                                                 <?php else: ?>
                                                     <div class="area-content">
                                                         <p>Widget: <?php echo isset($subRow['content']['widgetType']) ? htmlspecialchars($subRow['content']['widgetType']) : 'Unknown'; ?></p>
@@ -108,14 +105,11 @@
                                         style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>;">
 
                                         <?php if (isset($area['content']) && $area['content']['type'] === 'empty'): ?>
-                                            <div class="empty-state">
-                                                <div class="empty-state-icon">
-                                                    <i class="fas <?php echo isset($area['emptyState']['icon']) ? htmlspecialchars($area['emptyState']['icon']) : 'fa-plus-circle'; ?>"></i>
-                                                </div>
-                                                <div class="empty-state-message">
-                                                    <?php echo isset($area['emptyState']['message']) ? htmlspecialchars($area['emptyState']['message']) : 'Add content here'; ?>
-                                                </div>
-                                            </div>
+                                            <?php
+                                            $icon = isset($area['emptyState']['icon']) ? $area['emptyState']['icon'] : 'fa-plus-circle';
+                                            $message = isset($area['emptyState']['message']) ? $area['emptyState']['message'] : 'Add content here';
+                                            echo Utility::renderDashboardCellEmpty($icon, $message);
+                                            ?>
                                         <?php else: ?>
                                             <div class="area-content">
                                                 <p>Widget: <?php echo isset($area['content']['widgetType']) ? htmlspecialchars($area['content']['widgetType']) : 'Unknown'; ?></p>

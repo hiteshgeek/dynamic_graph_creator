@@ -99,19 +99,18 @@
     </div>
 
     <!-- Template Selector Modal -->
-    <div id="template-modal" class="dashboard-template-modal" style="display: none;">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Choose a Dashboard Template</h2>
-                <button class="modal-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="loader">
-                    <i class="fas fa-spinner fa-spin loader-spinner"></i>
-                    <span class="loader-text">Loading templates...</span>
+    <div id="template-modal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Choose a Dashboard Template</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="loader">
+                        <i class="fas fa-spinner fa-spin loader-spinner"></i>
+                        <span class="loader-text">Loading templates...</span>
+                    </div>
                 </div>
             </div>
         </div>
