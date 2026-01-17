@@ -770,6 +770,8 @@ option[value="__new__"] {
 
 // Bootstrap Tooltip customization
 .tooltip {
+  pointer-events: none;
+
   .tooltip-inner {
     font-size: 0.75rem;
   }

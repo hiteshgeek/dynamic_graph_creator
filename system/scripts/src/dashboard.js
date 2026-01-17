@@ -15,11 +15,12 @@ const ConfirmDialog = window.ConfirmDialog;
 // Grid configuration constants
 // Max total fr for a section is MAX_COLUMNS (6fr), not numColumns * MAX_FR_UNITS
 const GRID_CONFIG = {
-  MAX_FR_UNITS: 6, // Maximum fr units for any single column/row (6fr max)
+  MAX_COL_FR_UNITS: 6, // Maximum fr units for any single column (6fr max)
+  MAX_ROW_FR_UNITS: 4, // Maximum fr units for any single row (4fr max)
   MIN_FR_UNITS: 1, // Minimum fr units for any column/row
   MAX_COLUMNS: 6, // Maximum columns per section AND max total fr
   MIN_COLUMNS: 1, // Minimum columns (can't remove last)
-  MAX_ROWS_PER_COLUMN: 6, // Maximum rows in a column AND max total row fr
+  MAX_ROWS_PER_COLUMN: 4, // Maximum rows in a column AND max total row fr
   MIN_ROWS_PER_COLUMN: 1, // Minimum rows (can't remove last)
   DEFAULT_NEW_COLUMN_FR: 1,
   DEFAULT_NEW_ROW_FR: 1,
@@ -421,6 +422,11 @@ class DashboardBuilder {
     const sectionsContainer = this.container.querySelector(".dashboard-sections");
     if (!sectionsContainer) return;
 
+    // Dispose all tooltips before re-rendering to prevent orphaned tooltips
+    if (window.Tooltips) {
+      window.Tooltips.disposeAll();
+    }
+
     const structure = JSON.parse(this.currentDashboard.structure);
 
     let html = "";
@@ -534,7 +540,7 @@ class DashboardBuilder {
       // Shrink (minus): can decrease if current size > MIN
       // Expand (plus): can increase if current size < MAX AND total has room
       const canShrinkCol = widths[areaIndex] > GRID_CONFIG.MIN_FR_UNITS;
-      const canExpandCol = widths[areaIndex] < GRID_CONFIG.MAX_FR_UNITS && hasRoomToGrowResize;
+      const canExpandCol = widths[areaIndex] < GRID_CONFIG.MAX_COL_FR_UNITS && hasRoomToGrowResize;
       const hasResizeOptions = canShrinkCol || canExpandCol;
 
       // Calculate add column options
@@ -730,7 +736,7 @@ class DashboardBuilder {
       // Row resize conditions
       // Expand (plus on top): can increase if current size < MAX AND total has room
       // Shrink (minus on bottom): can decrease if current size > MIN
-      const canExpandRow = heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS && hasRoomToGrowRows;
+      const canExpandRow = heights[rowIndex] < GRID_CONFIG.MAX_ROW_FR_UNITS && hasRoomToGrowRows;
       const canShrinkRow = heights[rowIndex] > GRID_CONFIG.MIN_FR_UNITS;
 
       // Row drag handle - only show when more than one row
@@ -1397,7 +1403,7 @@ class DashboardBuilder {
     let changed = false;
     if (direction === "increase") {
       // Increase this column's width by 1fr
-      if (widths[areaIndex] < GRID_CONFIG.MAX_FR_UNITS && totalFr < maxTotalFr) {
+      if (widths[areaIndex] < GRID_CONFIG.MAX_COL_FR_UNITS && totalFr < maxTotalFr) {
         widths[areaIndex]++;
         changed = true;
       }
@@ -1450,7 +1456,7 @@ class DashboardBuilder {
     let changed = false;
     if (direction === "increase") {
       // Increase this row's height by 1fr
-      if (heights[rowIndex] < GRID_CONFIG.MAX_FR_UNITS && totalFr < maxTotalFr) {
+      if (heights[rowIndex] < GRID_CONFIG.MAX_ROW_FR_UNITS && totalFr < maxTotalFr) {
         heights[rowIndex]++;
         changed = true;
       }
@@ -1602,9 +1608,9 @@ class DashboardBuilder {
           recipientIndex = areaIndex - 1;
         }
 
-        // Add removed width to recipient, but cap at MAX_FR_UNITS
+        // Add removed width to recipient, but cap at MAX_COL_FR_UNITS
         const newWidth = widths[recipientIndex] + removedWidth;
-        widths[recipientIndex] = Math.min(newWidth, GRID_CONFIG.MAX_FR_UNITS);
+        widths[recipientIndex] = Math.min(newWidth, GRID_CONFIG.MAX_COL_FR_UNITS);
       }
     }
 

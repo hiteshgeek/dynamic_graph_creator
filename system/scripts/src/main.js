@@ -128,6 +128,18 @@ window.Ajax = {
 window.Tooltips = {
     init() {
         // Dispose existing tooltips to prevent duplicates
+        this.disposeAll();
+
+        // Initialize new tooltips with delay for slower appearance
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(tooltipTriggerEl => {
+            new bootstrap.Tooltip(tooltipTriggerEl, {
+                delay: { show: 400, hide: 100 }
+            });
+        });
+    },
+
+    disposeAll() {
         const existingTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         existingTooltips.forEach(el => {
             const tooltip = bootstrap.Tooltip.getInstance(el);
@@ -136,10 +148,9 @@ window.Tooltips = {
             }
         });
 
-        // Initialize new tooltips
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltipTriggerList.forEach(tooltipTriggerEl => {
-            new bootstrap.Tooltip(tooltipTriggerEl);
+        // Remove any orphaned tooltip elements
+        document.querySelectorAll('.tooltip.bs-tooltip-auto, .tooltip.bs-tooltip-top, .tooltip.bs-tooltip-bottom, .tooltip.bs-tooltip-start, .tooltip.bs-tooltip-end').forEach(el => {
+            el.remove();
         });
     }
 };

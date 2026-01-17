@@ -918,10 +918,24 @@ window.KeyboardShortcuts = {
 /**
  * Tooltips - Bootstrap tooltip initialization helper
  * Use Tooltips.init() to initialize/reinitialize all tooltips on the page
+ * Use Tooltips.disposeAll() before removing elements to clean up tooltips
  */
 window.Tooltips = {
     init() {
         // Dispose existing tooltips to prevent duplicates
+        this.disposeAll();
+
+        // Initialize new tooltips with delay for slower appearance
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(tooltipTriggerEl => {
+            new bootstrap.Tooltip(tooltipTriggerEl, {
+                delay: { show: 400, hide: 100 }
+            });
+        });
+    },
+
+    disposeAll() {
+        // Dispose all existing tooltips and hide any visible ones
         const existingTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         existingTooltips.forEach(el => {
             const tooltip = bootstrap.Tooltip.getInstance(el);
@@ -930,10 +944,9 @@ window.Tooltips = {
             }
         });
 
-        // Initialize new tooltips
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltipTriggerList.forEach(tooltipTriggerEl => {
-            new bootstrap.Tooltip(tooltipTriggerEl);
+        // Also remove any orphaned tooltip elements that might be left in the DOM
+        document.querySelectorAll('.tooltip.bs-tooltip-auto, .tooltip.bs-tooltip-top, .tooltip.bs-tooltip-bottom, .tooltip.bs-tooltip-start, .tooltip.bs-tooltip-end').forEach(el => {
+            el.remove();
         });
     }
 };
