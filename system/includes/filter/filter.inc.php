@@ -94,6 +94,11 @@ function saveFilter($data)
         $filterKey = (strpos($filterKey, ':') === 0) ? ':' . $filterKey : '::' . $filterKey;
     }
 
+    // Check if filter key already exists (excluding current filter for updates)
+    if (Filter::keyExists($filterKey, $filterId ?: null)) {
+        Utility::ajaxResponseFalse('A filter with this placeholder key already exists. Please use a unique key.');
+    }
+
     $filter = $filterId ? new Filter($filterId) : new Filter();
 
     $filter->setFilterKey($filterKey);

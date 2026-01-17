@@ -8,12 +8,12 @@
 // Change these to update all section/row/column buttons at once
 
 // Text buttons (Add Section, Add Row, Add Column, Grid Size Indicator)
-$builder-btn-padding: 0.25rem 0.75rem;
-$builder-btn-font-size: 0.75rem;
+$builder-btn-padding: 0.35rem 0.85rem;
+$builder-btn-font-size: 0.85rem;
 $builder-btn-font-weight: 500;
 $builder-btn-border-width: 2px;
 $builder-btn-border-radius: 14px;
-$builder-btn-icon-font-size: 0.7rem;
+$builder-btn-icon-font-size: 0.8rem;
 $builder-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0, 0.1);
 $builder-btn-box-shadow-hover: 0 0 12px;
 $builder-btn-transition: all 0.2s;
@@ -27,9 +27,10 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
 
 // Common base mixin for all builder text buttons (section, row, column)
 @mixin builder-border-btn($color-var, $hover-shadow-color) {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.35rem;
   padding: $builder-btn-padding;
   background: var(--dgc-bg-card);
   // border: $builder-btn-border-width dotted $color-var;
@@ -39,12 +40,23 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
   cursor: pointer;
   font-size: $builder-btn-font-size;
   font-weight: $builder-btn-font-weight;
+  line-height: 1;
   transition: $builder-btn-transition;
   box-shadow: $builder-btn-box-shadow;
   white-space: nowrap;
 
   i {
     font-size: $builder-btn-icon-font-size;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  span {
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
   }
 
   &:hover:not([disabled]) {
@@ -140,11 +152,6 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
     opacity: 0;
     pointer-events: none;
     z-index: 10;
-
-    // Hide the + icon for section buttons
-    i {
-      display: none;
-    }
   }
 
   // Top border button
@@ -222,14 +229,13 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
   }
 
   // Column drag handle - positioned at top left of column
-  // Shape: Square with rounded corners, Color: Orange/Warning
+  // Circular shape, Color: Orange/Warning
   .column-drag-handle {
     @include builder-icon-btn(var(--dgc-warning), rgba(255, 193, 7, 0.4));
     position: absolute;
     top: 0;
     left: 0;
     transform: translate(-50%, -50%);
-    border-radius: 6px; // Square with rounded corners (override circle)
     cursor: grab;
     z-index: 15;
     opacity: 0;
@@ -241,16 +247,13 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
   }
 
   // Row drag handle - positioned at top right of row
-  // Shape: Pill/Stadium, Color: Green/Success
+  // Circular shape, Color: Green/Success
   .row-drag-handle {
     @include builder-icon-btn(var(--dgc-success), rgba(40, 167, 69, 0.4));
     position: absolute;
     top: 0;
     right: 0;
     transform: translate(50%, -50%);
-    width: 34px; // Wider for pill shape
-    height: $builder-icon-btn-size;
-    border-radius: 12px; // Pill shape (override circle)
     cursor: grab;
     z-index: 15;
     opacity: 0;
@@ -485,7 +488,6 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
 .edge-btn {
   @include builder-border-btn(var(--dgc-primary), rgba(0, 123, 255, 0.3));
   position: absolute;
-  gap: 0.25rem;
   z-index: 10;
 
   // Row buttons (Top/Bottom) - Green/Success
@@ -630,6 +632,7 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
   font-size: $builder-btn-font-size;
   font-family: monospace;
   font-weight: $builder-btn-font-weight;
+  line-height: 1;
   color: var(--dgc-text-secondary);
   white-space: nowrap;
   opacity: 0;
@@ -643,7 +646,7 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
 
   // Column highlight (orange - matches column drag handlers)
   .grid-size-part {
-    padding: 0.125rem 0.375rem;
+    padding: 0 0.25rem;
     border-radius: 4px;
     transition: all 0.15s ease;
 

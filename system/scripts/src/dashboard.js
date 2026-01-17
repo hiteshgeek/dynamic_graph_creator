@@ -554,20 +554,20 @@ class DashboardBuilder {
       const areaControls = `<div class="area-controls-overlay">
                 ${columnDragHandle}
                 <!-- Top: Add Row Above (splits column into rows) -->
-                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add row above">
-                    Add Row Above
+                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add row">
+                    <i class="fas fa-plus"></i> Row
                 </button>
                 <!-- Bottom: Add Row Below (splits column into rows) -->
-                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add row below">
-                    Add Row Below
+                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add row">
+                    <i class="fas fa-plus"></i> Row
                 </button>
                 <!-- Left: Add Column Left -->
-                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColLeft ? 'disabled' : ''}>
-                    Add Column Left
+                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column" ${!canAddColLeft ? 'disabled' : ''}>
+                    <i class="fas fa-plus"></i> Column
                 </button>
                 <!-- Right: Add Column Right -->
-                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColRight ? 'disabled' : ''}>
-                    Add Column Right
+                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column" ${!canAddColRight ? 'disabled' : ''}>
+                    <i class="fas fa-plus"></i> Column
                 </button>
                 <!-- Center: Resize buttons + Delete -->
                 <div class="center-controls">
@@ -632,9 +632,9 @@ class DashboardBuilder {
 
     // Add section button on top border
     const topBorderButton = `
-            <button class="add-section-border-btn add-section-top-btn" data-position="${index}" title="Add section above">
+            <button class="add-section-border-btn add-section-top-btn" data-position="${index}" title="Add section">
                 <i class="fas fa-plus"></i>
-                <span>Add Section Above</span>
+                <span>Section</span>
             </button>
         `;
 
@@ -642,9 +642,9 @@ class DashboardBuilder {
     const bottomBorderButton = `
             <button class="add-section-border-btn add-section-bottom-btn" data-position="${
               index + 1
-            }" title="Add section below">
+            }" title="Add section">
                 <i class="fas fa-plus"></i>
-                <span>Add Section Below</span>
+                <span>Section</span>
             </button>
         `;
 
@@ -742,18 +742,18 @@ class DashboardBuilder {
                 ${isFirstRow ? columnDragHandle : ''}
                 ${rowDragHandle}
                 <!-- Column actions: Add Column Left/Right -->
-                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to left" ${!canAddColLeft ? 'disabled' : ''}>
-                    Add Column Left
+                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column" ${!canAddColLeft ? 'disabled' : ''}>
+                    <i class="fas fa-plus"></i> Column
                 </button>
-                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column to right" ${!canAddColRight ? 'disabled' : ''}>
-                    Add Column Right
+                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column" ${!canAddColRight ? 'disabled' : ''}>
+                    <i class="fas fa-plus"></i> Column
                 </button>
                 <!-- Row actions: Add Row Above/Below - each row can add above or below itself -->
-                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Add row above" ${!canAddRow ? 'disabled' : ''}>
-                    Add Row Above
+                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Add row" ${!canAddRow ? 'disabled' : ''}>
+                    <i class="fas fa-plus"></i> Row
                 </button>
-                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Add row below" ${!canAddRow ? 'disabled' : ''}>
-                    Add Row Below
+                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Add row" ${!canAddRow ? 'disabled' : ''}>
+                    <i class="fas fa-plus"></i> Row
                 </button>
                 <!-- Center: All resize buttons + Delete buttons -->
                 <div class="center-controls">

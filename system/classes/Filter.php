@@ -242,6 +242,31 @@ class Filter implements DatabaseObject
     }
 
     /**
+     * Check if a filter key already exists
+     *
+     * @param string $key The filter key to check
+     * @param int|null $excludeId Filter ID to exclude (for updates)
+     * @return bool True if key exists, false otherwise
+     */
+    public static function keyExists($key, $excludeId = null)
+    {
+        $db = Rapidkart::getInstance()->getDB();
+
+        $sql = "SELECT fid FROM " . SystemTables::DB_TBL_FILTER . "
+                WHERE filter_key = '::key' AND fsid != 3";
+        $args = array('::key' => $key);
+
+        if ($excludeId !== null) {
+            $sql .= " AND fid != '::exclude_id'";
+            $args['::exclude_id'] = intval($excludeId);
+        }
+
+        $sql .= " LIMIT 1";
+        $res = $db->query($sql, $args);
+        return $db->numRows($res) > 0;
+    }
+
+    /**
      * Extract placeholders from a SQL query
      * Looks for :word patterns that match filter syntax
      *
