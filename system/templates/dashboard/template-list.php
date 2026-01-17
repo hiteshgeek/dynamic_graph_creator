@@ -86,10 +86,10 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                             <i class="fas fa-grip-vertical"></i>
                         </div>
                     </div>
-                    <div class="template-grid">
+                    <div class="item-card-grid">
                         <?php if (empty($categoryData['templates'])): ?>
                         <!-- Empty Category State -->
-                        <div class="template-card template-card-empty" data-category-id="<?php echo $categoryData['category']['dtcid']; ?>">
+                        <div class="item-card item-card-empty" data-category-id="<?php echo $categoryData['category']['dtcid']; ?>">
                             <div class="empty-category-content">
                                 <div class="empty-category-icon">
                                     <i class="fas fa-folder-open"></i>
@@ -112,7 +112,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                         </div>
                         <?php else: ?>
                         <?php foreach ($categoryData['templates'] as $template): ?>
-                        <div class="item-card template-card" data-template-id="<?php echo $template['dtid']; ?>">
+                        <div class="item-card" data-template-id="<?php echo $template['dtid']; ?>">
                             <div class="template-preview">
                                 <?php
                                 $structure = json_decode($template['structure'], true);

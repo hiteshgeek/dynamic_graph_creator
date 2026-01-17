@@ -24,7 +24,7 @@
       border: 1px solid var(--dgc-border-color);
       border-radius: 6px;
       padding: 0.5rem 0.75rem;
-      box-shadow: var(--dgc-shadow-1);
+      // box-shadow: var(--dgc-shadow-1);
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
@@ -140,11 +140,9 @@
       }
     }
 
-    .template-grid {
-      display: grid;
+    .item-card-grid {
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: $spacing-md;
-      overflow: hidden;
+      // overflow: hidden;
       transition: max-height 0.3s ease, opacity 0.2s ease;
       max-height: 2000px; // Large enough for expanded state
     }
@@ -159,17 +157,15 @@
         }
       }
 
-      .template-grid {
+      .item-card-grid {
         max-height: 0;
         opacity: 0;
       }
     }
   }
 
-  // Template card extends .item-card with template-specific overrides
-  // Base .item-card styles come from _base.scss
-  .template-card {
-    // Template-specific overrides
+  // Template-specific overrides for .item-card within template list
+  .item-card {
     height: 100%;
     position: relative;
 
@@ -207,97 +203,101 @@
         }
       }
     }
+  }
 
-    // Empty category state card
-    &.template-card-empty {
-      border: 2px dashed var(--dgc-border-color);
-      background: var(--dgc-bg-elevated);
-      min-height: 200px;
-      justify-content: center;
-      align-items: center;
+  // Empty category state card
+  .item-card-empty {
+    border: 2px dashed var(--dgc-border-color);
+    background: var(--dgc-bg-elevated);
+    min-height: 200px;
+    justify-content: center;
+    align-items: center;
 
-      &:hover {
-        border-color: var(--dgc-primary);
-        background: var(--dgc-bg-hover);
+    &:hover {
+      border-color: var(--dgc-primary);
+      background: var(--dgc-bg-hover);
+    }
+
+    .empty-category-content {
+      text-align: center;
+      padding: $spacing-lg;
+
+      .empty-category-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(
+          135deg,
+          rgba(156, 39, 176, 0.1) 0%,
+          rgba(156, 39, 176, 0.2) 100%
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.75rem;
+
+        i {
+          font-size: 1.5rem;
+          color: #9c27b0;
+        }
       }
 
-      .empty-category-content {
-        text-align: center;
-        padding: $spacing-lg;
+      h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--dgc-text-primary);
+        margin: 0 0 0.25rem 0;
+      }
 
-        .empty-category-icon {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.2) 100%);
-          display: flex;
+      p {
+        font-size: 0.8rem;
+        color: var(--dgc-text-secondary);
+        margin: 0 0 1rem 0;
+        line-height: 1.4;
+      }
+
+      .empty-category-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+
+        .btn {
+          font-size: 0.8rem;
+          padding: 0.5rem 1.25rem;
+          border-radius: 6px;
+          font-weight: 500;
+          display: inline-flex;
           align-items: center;
           justify-content: center;
-          margin: 0 auto 0.75rem;
+          gap: 0.4rem;
+          min-width: 140px;
 
           i {
-            font-size: 1.5rem;
-            color: #9c27b0;
+            font-size: 0.75rem;
           }
         }
 
-        h4 {
-          font-size: 1rem;
-          font-weight: 600;
-          color: var(--dgc-text-primary);
-          margin: 0 0 0.25rem 0;
-        }
+        .btn-primary {
+          background: var(--dgc-primary);
+          border-color: var(--dgc-primary);
+          color: var(--dgc-text-inverse);
 
-        p {
-          font-size: 0.8rem;
-          color: var(--dgc-text-secondary);
-          margin: 0 0 1rem 0;
-          line-height: 1.4;
-        }
-
-        .empty-category-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          align-items: center;
-
-          .btn {
-            font-size: 0.8rem;
-            padding: 0.5rem 1.25rem;
-            border-radius: 6px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            min-width: 140px;
-
-            i {
-              font-size: 0.75rem;
-            }
+          &:hover {
+            background: #1565c0;
+            border-color: #1565c0;
           }
+        }
 
-          .btn-primary {
-            background: var(--dgc-primary);
-            border-color: var(--dgc-primary);
+        .btn-outline-danger {
+          background: var(--dgc-bg-card);
+          border: 1px solid var(--dgc-error);
+          color: var(--dgc-error);
+
+          &:hover {
+            background: var(--dgc-error);
+            border-color: var(--dgc-error);
             color: var(--dgc-text-inverse);
-
-            &:hover {
-              background: #1565c0;
-              border-color: #1565c0;
-            }
-          }
-
-          .btn-outline-danger {
-            background: var(--dgc-bg-card);
-            border: 1px solid var(--dgc-error);
-            color: var(--dgc-error);
-
-            &:hover {
-              background: var(--dgc-error);
-              border-color: var(--dgc-error);
-              color: var(--dgc-text-inverse);
-            }
           }
         }
       }
@@ -396,12 +396,12 @@
     }
   }
 
-  // Template card being dragged
-  .template-card.sortable-ghost {
+  // Item card being dragged
+  .item-card.sortable-ghost {
     opacity: 0.4;
   }
 
-  .template-card.sortable-chosen {
+  .item-card.sortable-chosen {
     box-shadow: var(--dgc-shadow-3);
     z-index: 10;
 
@@ -419,7 +419,11 @@
   .template-category-section.drag-target-different-category {
     .category-header {
       border-color: rgba($error, 0.3);
-      background: linear-gradient(90deg, rgba($error, 0.08) 0%, var(--dgc-bg-card) 50%);
+      background: linear-gradient(
+        90deg,
+        rgba($error, 0.08) 0%,
+        var(--dgc-bg-card) 50%
+      );
       box-shadow: 0 2px 8px rgba($error, 0.2);
 
       .category-header-content::before {
@@ -431,7 +435,7 @@
       }
     }
 
-    .template-grid {
+    .item-card-grid {
       background: rgba($error, 0.03);
       border-radius: 8px;
       outline: 2px dashed rgba($error, 0.3);
@@ -486,7 +490,7 @@ body.template-dragging {
 
 // Fallback element (clone that follows cursor) - must be outside .template-list-page
 // because fallbackOnBody appends it to <body>, so we need drag-specific enhancements
-.sortable-fallback.template-card {
+.sortable-fallback.item-card {
   // Drag-specific enhancements
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25) !important;
   transform: rotate(2deg);
@@ -534,14 +538,5 @@ body.template-ordering-disabled {
     .template-drag-handle {
       display: none !important;
     }
-  }
-}
-
-// Dark mode adjustments for badges
-:root.theme-dark {
-  .template-list-page .template-card .badge-custom,
-  .sortable-fallback.template-card .badge-custom {
-    background: rgba(156, 39, 176, 0.2);
-    color: #ce93d8;
   }
 }

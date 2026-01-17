@@ -239,13 +239,13 @@ class DashboardBuilder {
                         <h3>${categoryName.toUpperCase()}</h3>
                         ${categoryDescription ? `<p>${categoryDescription}</p>` : ''}
                     </div>
-                    <div class="template-grid">`;
+                    <div class="item-card-grid">`;
 
         categoryData.templates.forEach((template) => {
           const systemBadge = template.is_system == 1
             ? '<span class="badge badge-system"><i class="fas fa-lock"></i> System</span>'
             : '';
-          html += `<div class="template-card" data-template-id="${
+          html += `<div class="item-card" data-template-id="${
             template.dtid
           }">
                         <div class="template-preview">
@@ -266,7 +266,7 @@ class DashboardBuilder {
     templateList.innerHTML = html;
 
     // Add click handlers
-    templateList.querySelectorAll(".template-card").forEach((card) => {
+    templateList.querySelectorAll(".item-card").forEach((card) => {
       card.addEventListener("click", () => {
         const templateId = parseInt(card.dataset.templateId);
         if (this.templateSelectorMode === "add-section") {
@@ -460,7 +460,7 @@ class DashboardBuilder {
   }
 
   updateSidebarAfterCreation() {
-    // Replace the choose-template-card with the dashboard sections container
+    // Replace the choose-item-card with the dashboard sections container
     const gridEditor = document.querySelector(".grid-editor");
     if (!gridEditor) return;
 
@@ -1264,7 +1264,7 @@ class DashboardBuilder {
         }
 
         // Handle template card clicks
-        const templateCard = e.target.closest(".template-card");
+        const templateCard = e.target.closest(".item-card");
         if (templateCard) {
           const templateId = parseInt(templateCard.dataset.templateId);
           this.addSectionFromTemplateCard(templateId);
@@ -2091,14 +2091,14 @@ class DashboardBuilder {
                         <h3>${categoryName.toUpperCase()}</h3>
                         ${categoryDescription ? `<p>${categoryDescription}</p>` : ""}
                       </div>
-                      <div class="template-grid">`;
+                      <div class="item-card-grid">`;
 
             filteredTemplates.forEach((template) => {
               const systemBadge =
                 template.is_system == 1
                   ? '<span class="badge badge-system"><i class="fas fa-lock"></i> System</span>'
                   : "";
-              html += `<div class="template-card" data-template-id="${template.dtid}">
+              html += `<div class="item-card" data-template-id="${template.dtid}">
                         <div class="template-preview">
                           ${this.renderTemplatePreview(template)}
                         </div>

@@ -186,7 +186,7 @@ export class TemplateManager {
 
         // Remove template card from UI
         const templateCard = document.querySelector(
-          `.template-card[data-template-id="${templateId}"]`
+          `.item-card[data-template-id="${templateId}"]`
         );
         if (templateCard) {
           templateCard.style.opacity = "0";
@@ -200,14 +200,14 @@ export class TemplateManager {
             );
             if (categorySection) {
               const remainingCards =
-                categorySection.querySelectorAll(".template-card");
+                categorySection.querySelectorAll(".item-card");
               if (remainingCards.length === 0) {
                 categorySection.remove();
               }
             }
 
             // Check if page is now empty
-            const allCards = document.querySelectorAll(".template-card");
+            const allCards = document.querySelectorAll(".item-card");
             if (allCards.length === 0) {
               // Reload page to show empty state
               window.location.reload();
@@ -321,7 +321,7 @@ export class TemplateManager {
 
         // Remove category section from UI
         const categoryCard = document.querySelector(
-          `.template-card-empty[data-category-id="${categoryId}"]`
+          `.item-card-empty[data-category-id="${categoryId}"]`
         );
         if (categoryCard) {
           const categorySection = categoryCard.closest(".template-category-section");
@@ -444,13 +444,13 @@ export class TemplateManager {
 
     // Template sortables - one for each category's template grid
     // Using group to allow cross-list dragging
-    const templateGrids = document.querySelectorAll(".template-grid");
+    const templateGrids = document.querySelectorAll(".item-card-grid");
     templateGrids.forEach(grid => {
       const sortable = Sortable.create(grid, {
         group: "templates", // Allow dragging between grids
         animation: 150,
         handle: ".template-drag-handle",
-        draggable: ".template-card:not(.template-card-empty)",
+        draggable: ".item-card:not(.item-card-empty)",
         ghostClass: "sortable-ghost",
         chosenClass: "sortable-chosen",
         dragClass: "sortable-drag",
@@ -634,7 +634,7 @@ export class TemplateManager {
 
                 // For collapsed category drops, move item to target grid (at end)
                 if (droppedOnCollapsed) {
-                  const targetGrid = targetSection.querySelector(".template-grid");
+                  const targetGrid = targetSection.querySelector(".item-card-grid");
                   if (targetGrid) {
                     targetGrid.appendChild(evt.item);
                   }
@@ -642,10 +642,10 @@ export class TemplateManager {
 
                 // Also reorder within new category
                 const targetGrid = droppedOnCollapsed
-                  ? targetSection.querySelector(".template-grid")
+                  ? targetSection.querySelector(".item-card-grid")
                   : evt.to;
                 if (targetGrid) {
-                  const templates = targetGrid.querySelectorAll(".template-card:not(.template-card-empty)");
+                  const templates = targetGrid.querySelectorAll(".item-card:not(.item-card-empty)");
                   const order = Array.from(templates).map(card => card.dataset.templateId);
                   await Ajax.post("reorder_templates", { order: order });
                 }
@@ -653,7 +653,7 @@ export class TemplateManager {
                 // Check if source category is now empty (no templates left)
                 const sourceSection = document.querySelector(`.template-category-section[data-category-id="${sourceCategoryId}"]`);
                 if (sourceSection) {
-                  const remainingTemplates = sourceSection.querySelectorAll(".template-card:not(.template-card-empty)");
+                  const remainingTemplates = sourceSection.querySelectorAll(".item-card:not(.item-card-empty)");
                   if (remainingTemplates.length === 0) {
                     // Reload to show empty state for category
                     window.location.reload();
@@ -682,7 +682,7 @@ export class TemplateManager {
             }
           } else if (evt.oldIndex !== evt.newIndex || evt.from !== evt.to) {
             // Same category reorder
-            const templates = evt.to.querySelectorAll(".template-card:not(.template-card-empty)");
+            const templates = evt.to.querySelectorAll(".item-card:not(.item-card-empty)");
             const order = Array.from(templates).map(card => card.dataset.templateId);
 
             try {
