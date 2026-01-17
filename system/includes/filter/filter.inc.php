@@ -99,6 +99,13 @@ function saveFilter($data)
         Utility::ajaxResponseFalse('A filter with this placeholder key already exists. Please use a unique key.');
     }
 
+    // Check for substring conflicts with other filter keys
+    // e.g., ::category and ::category_checkbox would conflict
+    $conflict = Filter::checkKeyConflict($filterKey, $filterId ?: null);
+    if ($conflict) {
+        Utility::ajaxResponseFalse($conflict['message']);
+    }
+
     $filter = $filterId ? new Filter($filterId) : new Filter();
 
     $filter->setFilterKey($filterKey);

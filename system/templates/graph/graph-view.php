@@ -49,6 +49,10 @@
                             $filterType = $filter['filter_type'];
                             $defaultValue = $filter['default_value'];
                             $options = isset($filter['options']) ? $filter['options'] : array();
+                            // Get filter config for inline display
+                            $filterConfig = isset($filter['filter_config']) ? $filter['filter_config'] : '';
+                            $filterConfigArr = $filterConfig ? json_decode($filterConfig, true) : array();
+                            $isInline = isset($filterConfigArr['inline']) && $filterConfigArr['inline'];
                         ?>
                             <div class="filter-input-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>">
                                 <div class="filter-input-header">
@@ -98,7 +102,7 @@
                                     </div>
 
                                 <?php elseif ($filterType === 'checkbox'): ?>
-                                    <div class="filter-checkbox-group">
+                                    <div class="filter-checkbox-group<?php echo $isInline ? ' inline' : ''; ?>">
                                         <?php foreach ($options as $index => $opt):
                                             $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                             $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
@@ -113,7 +117,7 @@
                                     </div>
 
                                 <?php elseif ($filterType === 'radio'): ?>
-                                    <div class="filter-radio-group">
+                                    <div class="filter-radio-group<?php echo $isInline ? ' inline' : ''; ?>">
                                         <?php foreach ($options as $index => $opt):
                                             $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                             $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;

@@ -152,6 +152,10 @@
                                                 $filterKey = $filter['filter_key'];
                                                 $filterKeyClean = ltrim($filterKey, ':');
                                                 $defaultValue = $filter['default_value'];
+                                                // Get filter config for inline display
+                                                $filterConfig = $filterObj->getFilterConfig();
+                                                $filterConfigArr = $filterConfig ? json_decode($filterConfig, true) : array();
+                                                $isInline = isset($filterConfigArr['inline']) && $filterConfigArr['inline'];
                                                 ?>
                                                 <div class="filter-input-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" style="display: none;">
                                                     <div class="filter-input-header">
@@ -202,7 +206,7 @@
                                                         </div>
 
                                                     <?php elseif ($filterType === 'checkbox'): ?>
-                                                        <div class="filter-checkbox-group">
+                                                        <div class="filter-checkbox-group<?php echo $isInline ? ' inline' : ''; ?>">
                                                             <?php foreach ($options as $index => $opt):
                                                                 $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                                                 $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
@@ -217,7 +221,7 @@
                                                         </div>
 
                                                     <?php elseif ($filterType === 'radio'): ?>
-                                                        <div class="filter-radio-group">
+                                                        <div class="filter-radio-group<?php echo $isInline ? ' inline' : ''; ?>">
                                                             <?php foreach ($options as $index => $opt):
                                                                 $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                                                 $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
@@ -270,7 +274,7 @@
 
             <!-- Center: Preview and Query -->
             <div class="graph-main">
-                <!-- Save Bar (at top) -->
+                <!-- Save Bar (at top, fixed within graph-main) -->
                 <div class="graph-save-bar">
                     <div class="graph-name-wrapper">
                         <label class="graph-name-label" for="graph-name-input">Graph Name <span class="required">*</span></label>
@@ -284,6 +288,8 @@
                     </div>
                 </div>
 
+                <!-- Scrollable content area -->
+                <div class="graph-main-content">
                 <!-- Preview Card -->
                 <div class="graph-preview-card">
                     <div class="graph-preview-header">
@@ -312,6 +318,9 @@
                     </div>
                     <div class="query-builder">
                         <div class="query-editor-wrapper">
+                            <button type="button" class="btn btn-sm btn-outline-secondary copy-query-btn" title="Copy SQL">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
                             <textarea class="query-editor" placeholder="SELECT category, SUM(amount) as total FROM sales WHERE date >= :date_from GROUP BY category"><?php echo $graph ? htmlspecialchars($graph->getQuery()) : ''; ?></textarea>
                         </div>
                         <div class="query-toolbar">
@@ -319,9 +328,6 @@
                                 <span class="query-hint">Use <code>::placeholder</code> for filter values</span>
                             </div>
                             <div class="query-toolbar-right">
-                                <button type="button" class="btn btn-sm btn-outline-secondary copy-query-btn" title="Copy SQL">
-                                    <i class="fas fa-copy"></i> Copy
-                                </button>
                                 <button type="button" class="btn btn-sm btn-outline-secondary format-query-btn" title="Format SQL">
                                     <i class="fas fa-align-left"></i> Format SQL
                                 </button>
@@ -334,6 +340,32 @@
                     </div>
                 </div>
 
+                <!-- Placeholder Settings Section -->
+                <div class="graph-section placeholder-settings-section" style="display: none;">
+                    <div class="graph-section-header">
+                        <h3><i class="fas fa-cog"></i> Placeholder Settings</h3>
+                        <small class="text-muted">Configure behavior when filter values are empty</small>
+                    </div>
+                    <div class="placeholder-settings-content">
+                        <table class="placeholder-settings-table">
+                            <thead>
+                                <tr>
+                                    <th>Placeholder</th>
+                                    <th>Linked Filter</th>
+                                    <th>Allow Empty</th>
+                                </tr>
+                            </thead>
+                            <tbody id="placeholder-settings-body">
+                                <!-- Populated by JavaScript -->
+                            </tbody>
+                        </table>
+                        <p class="placeholder-settings-hint text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            When "Allow Empty" is checked, empty filter values will match all records. Otherwise, an error will be shown.
+                        </p>
+                    </div>
+                </div>
+
                 <!-- Graph Data Section (populated after query test) -->
                 <div class="graph-section graph-data-section" style="display: none;">
                     <div class="graph-section-header">
@@ -341,6 +373,7 @@
                     </div>
                     <div class="graph-data-content"></div>
                 </div>
+                </div><!-- /.graph-main-content -->
             </div>
 
         </div>

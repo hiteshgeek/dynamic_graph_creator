@@ -59,7 +59,7 @@
   height: fit-content;
   overflow: visible;
   position: sticky;
-  top: 85px; // Account for header height + spacing
+  top: 0; // Account for header height + spacing
   transition: all $transition-normal;
 
   &.collapsed {
@@ -306,6 +306,7 @@
 }
 
 // Center - Preview and Query (single unified card)
+// The save bar stays at top, content scrolls inside
 .graph-main {
   display: flex;
   flex-direction: column;
@@ -314,6 +315,20 @@
   border-radius: $border-radius-lg;
   box-shadow: var(--dgc-shadow-subtle);
   transition: background-color 0.2s ease;
+  // Make this sticky so it stays in viewport, with its own scroll
+  position: sticky;
+  top: 85px; // Same as collapsible-panel
+  max-height: calc(100vh - 100px); // Viewport minus header
+  overflow: hidden; // Hide overflow, content wrapper will scroll
+  align-self: flex-start; // Required for sticky to work in grid
+}
+
+// Scrollable content wrapper inside graph-main
+.graph-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; // This area scrolls
 }
 
 .graph-preview-card {
@@ -609,13 +624,16 @@
   }
 }
 
-// Save bar
+// Save bar (fixed at top of graph-main container)
 .graph-save-bar {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   padding: $spacing-md $spacing-lg;
   border-bottom: 1px solid var(--dgc-border-color);
+  background: var(--dgc-bg-card);
+  flex-shrink: 0; // Don't shrink, stay at top
+  border-radius: $border-radius-lg $border-radius-lg 0 0;
 }
 
 .graph-name-wrapper {
@@ -937,6 +955,18 @@
   background: var(--dgc-bg-card);
   border: 1px solid var(--dgc-border-color);
   border-radius: $border-radius;
+
+  // Inline display mode
+  &.inline {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+    max-height: none;
+
+    .form-check {
+      margin: 0;
+    }
+  }
 
   .form-check {
     gap: $spacing-sm;
@@ -1398,6 +1428,18 @@
     border: 1px solid var(--dgc-border-color);
     border-radius: $border-radius;
 
+    // Inline display mode
+    &.inline {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: $spacing-md;
+      max-height: none;
+
+      .form-check {
+        margin: 0;
+      }
+    }
+
     .form-check {
       padding: 2px 0;
     }
@@ -1432,6 +1474,87 @@
     justify-content: flex-start;
     padding-top: $spacing-sm;
     border-top: 1px solid var(--dgc-border-color);
+  }
+}
+
+// Placeholder Settings Section
+.placeholder-settings-section {
+  // Uses graph-section base styles
+}
+
+.placeholder-settings-content {
+  // Table container
+}
+
+.placeholder-settings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+  background: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
+  border-radius: $border-radius;
+  overflow: hidden;
+
+  th,
+  td {
+    padding: $spacing-sm $spacing-md;
+    text-align: left;
+    border-bottom: 1px solid var(--dgc-border-color);
+  }
+
+  th {
+    background: var(--dgc-gray-100);
+    font-weight: $font-weight-medium;
+    color: var(--dgc-text-primary);
+    white-space: nowrap;
+  }
+
+  td {
+    color: var(--dgc-text-secondary);
+    vertical-align: middle;
+
+    code {
+      background: var(--dgc-primary);
+      color: var(--dgc-text-inverse);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  tbody tr:hover {
+    background: var(--dgc-bg-hover);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  // Checkbox column
+  .form-check {
+    margin: 0;
+    min-height: auto;
+
+    .form-check-input {
+      margin-top: 0;
+    }
+
+    .form-check-label {
+      font-size: $font-size-sm;
+      color: var(--dgc-text-secondary);
+      margin-left: $spacing-xs;
+    }
+  }
+}
+
+.placeholder-settings-hint {
+  margin-top: $spacing-md;
+  font-size: $font-size-sm;
+  color: var(--dgc-text-hint);
+
+  i {
+    margin-right: $spacing-xs;
   }
 }
 

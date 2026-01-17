@@ -267,6 +267,64 @@ class Filter implements DatabaseObject
     }
 
     /**
+     * Check if a filter key conflicts with existing filter keys (substring issue)
+     * Returns conflicting filters if:
+     * 1. Current key is a substring of an existing key (e.g., ::category vs ::category_checkbox)
+     * 2. An existing key is a substring of current key (e.g., ::category_checkbox vs ::category)
+     *
+     * @param string $key The filter key to check
+     * @param int|null $excludeId Filter ID to exclude (for updates)
+     * @return array|null Array with conflict info and list of conflicting filters, or null if no conflict
+     */
+    public static function checkKeyConflict($key, $excludeId = null)
+    {
+        $db = Rapidkart::getInstance()->getDB();
+
+        $sql = "SELECT fid, filter_key, filter_label FROM " . SystemTables::DB_TBL_FILTER . "
+                WHERE fsid != 3";
+        $args = array();
+
+        if ($excludeId !== null) {
+            $sql .= " AND fid != '::exclude_id'";
+            $args['::exclude_id'] = intval($excludeId);
+        }
+
+        $res = $db->query($sql, $args);
+
+        $conflicts = array();
+
+        while ($row = $db->fetchAssoc($res)) {
+            $existingKey = $row['filter_key'];
+
+            // Skip if same key (exact match is handled by keyExists)
+            if ($existingKey === $key) {
+                continue;
+            }
+
+            // Check if current key is substring of existing key
+            // e.g., ::category is found within ::category_checkbox
+            if (strpos($existingKey, $key) !== false) {
+                $conflicts[] = "{$existingKey} ({$row['filter_label']})";
+            }
+
+            // Check if existing key is substring of current key
+            // e.g., ::category is found within new ::category_checkbox
+            if (strpos($key, $existingKey) !== false) {
+                $conflicts[] = "{$existingKey} ({$row['filter_label']})";
+            }
+        }
+
+        if (!empty($conflicts)) {
+            return array(
+                'conflicts' => $conflicts,
+                'message' => "Placeholder conflicts with: " . implode(', ', $conflicts)
+            );
+        }
+
+        return null;
+    }
+
+    /**
      * Extract placeholders from a SQL query
      * Looks for :word patterns that match filter syntax
      *

@@ -9,6 +9,7 @@ import QueryBuilder from './QueryBuilder.js';
 import DataMapper from './DataMapper.js';
 import FilterManager from './FilterManager.js';
 import ConfigPanel from './ConfigPanel.js';
+import PlaceholderSettings from './PlaceholderSettings.js';
 
 export default class GraphCreator {
     constructor(container, options = {}) {
@@ -25,6 +26,7 @@ export default class GraphCreator {
         this.dataMapper = null;
         this.filterManager = null;
         this.configPanel = null;
+        this.placeholderSettings = null;
 
         // State
         this.columns = [];
@@ -46,6 +48,7 @@ export default class GraphCreator {
         this.initDataMapper();
         this.initFilterManager();
         this.initConfigPanel();
+        this.initPlaceholderSettings();
         this.initGraphTypeSelector();
         this.initSaveHandler();
         this.initTabs();
@@ -111,10 +114,22 @@ export default class GraphCreator {
             this.queryBuilder = new QueryBuilder(queryContainer, {
                 onTest: (columns) => this.onQueryTest(columns),
                 onError: (error) => this.onQueryError(error),
-                onChange: () => this.checkForChanges(),
-                getFilterValues: () => this.getSidebarFilterValues()
+                onChange: () => {
+                    this.checkForChanges();
+                    this.updatePlaceholderSettings();
+                },
+                getFilterValues: () => this.getSidebarFilterValues(),
+                getPlaceholderSettings: () => this.getPlaceholderSettingsForQuery()
             });
         }
+    }
+
+    /**
+     * Get placeholder settings for query execution
+     */
+    getPlaceholderSettingsForQuery() {
+        if (!this.placeholderSettings) return {};
+        return this.placeholderSettings.getSettings();
     }
 
     /**
@@ -165,6 +180,54 @@ export default class GraphCreator {
             });
             this.configPanel.setGraphType(this.graphType);
         }
+    }
+
+    /**
+     * Initialize placeholder settings component
+     */
+    initPlaceholderSettings() {
+        const settingsContainer = this.container.querySelector('.graph-main');
+        if (settingsContainer) {
+            this.placeholderSettings = new PlaceholderSettings(settingsContainer, {
+                onChange: () => this.checkForChanges(),
+                getMatchedFilters: () => this.getMatchedFilters()
+            });
+        }
+    }
+
+    /**
+     * Get matched filters for placeholders in query
+     * Returns object mapping placeholder keys to filter info
+     */
+    getMatchedFilters() {
+        const matchedFilters = {};
+        const filtersContainer = this.container.querySelector('#graph-filters');
+        if (!filtersContainer) return matchedFilters;
+
+        const filterItems = filtersContainer.querySelectorAll('.filter-input-item');
+        filterItems.forEach(item => {
+            const filterKey = item.dataset.filterKey;
+            const filterLabel = item.querySelector('.filter-input-label')?.textContent || filterKey;
+            if (filterKey) {
+                matchedFilters['::' + filterKey] = {
+                    filter_key: filterKey,
+                    filter_label: filterLabel
+                };
+            }
+        });
+
+        return matchedFilters;
+    }
+
+    /**
+     * Update placeholder settings when query changes
+     */
+    updatePlaceholderSettings() {
+        if (!this.placeholderSettings || !this.queryBuilder) return;
+
+        const placeholders = this.queryBuilder.getPlaceholders();
+        const matchedFilters = this.getMatchedFilters();
+        this.placeholderSettings.setPlaceholders(placeholders, matchedFilters);
     }
 
     /**
@@ -768,6 +831,7 @@ export default class GraphCreator {
 
         // Use sidebar filter values (includes pre-selected options from is_selected)
         const filterValues = this.getSidebarFilterValues();
+        const placeholderSettings = this.getPlaceholderSettingsForQuery();
 
         try {
             const result = await Ajax.post('preview_graph', {
@@ -775,7 +839,8 @@ export default class GraphCreator {
                 mapping: mapping,
                 config: config,
                 graph_type: this.graphType,
-                filters: filterValues
+                filters: filterValues,
+                placeholder_settings: placeholderSettings
             });
 
             if (result.success && result.data) {
@@ -832,6 +897,11 @@ export default class GraphCreator {
                         this.setActiveSidebarTab(config.activeSidebarTab);
                     }
 
+                    // Restore placeholder settings
+                    if (this.placeholderSettings && config.placeholderSettings) {
+                        this.placeholderSettings.setSettings(config.placeholderSettings);
+                    }
+
                     // Set config panel values
                     if (this.configPanel) {
                         this.configPanel.setConfig(config);
@@ -855,6 +925,9 @@ export default class GraphCreator {
                         await this.queryBuilder.testQuery();
                     }
                 }
+
+                // Update placeholder settings table after query is set
+                this.updatePlaceholderSettings();
 
                 // Capture initial state after loading
                 this.captureState();
@@ -905,9 +978,10 @@ export default class GraphCreator {
         Loading.show('Saving graph...');
 
         try {
-            // Include activeSidebarTab in config
+            // Include activeSidebarTab and placeholderSettings in config
             const config = this.configPanel ? this.configPanel.getConfig() : {};
             config.activeSidebarTab = this.activeSidebarTab;
+            config.placeholderSettings = this.placeholderSettings ? this.placeholderSettings.getSettings() : {};
 
             const data = {
                 id: this.graphId,
@@ -1013,7 +1087,8 @@ export default class GraphCreator {
             query: this.queryBuilder ? this.queryBuilder.getQuery() : '',
             mapping: this.dataMapper ? JSON.stringify(this.dataMapper.getMapping()) : '{}',
             config: this.configPanel ? JSON.stringify(this.configPanel.getConfig()) : '{}',
-            filters: this.filterManager ? JSON.stringify(this.filterManager.getFilters()) : '[]'
+            filters: this.filterManager ? JSON.stringify(this.filterManager.getFilters()) : '[]',
+            placeholderSettings: this.placeholderSettings ? JSON.stringify(this.placeholderSettings.getSettings()) : '{}'
         };
     }
 
@@ -1033,7 +1108,8 @@ export default class GraphCreator {
             currentState.query !== this.savedState.query ||
             currentState.mapping !== this.savedState.mapping ||
             currentState.config !== this.savedState.config ||
-            currentState.filters !== this.savedState.filters;
+            currentState.filters !== this.savedState.filters ||
+            currentState.placeholderSettings !== this.savedState.placeholderSettings;
 
         this.setUnsavedChanges(hasChanges);
     }

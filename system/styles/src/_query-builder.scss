@@ -9,7 +9,45 @@
     position: relative;
     border: 1px solid var(--dgc-border-color);
     border-radius: $border-radius;
-    overflow: hidden;
+
+    // Copy button positioned in top-right corner
+    .copy-query-btn {
+        position: absolute;
+        top: $spacing-xs;
+        right: $spacing-xs;
+        z-index: 10;
+        font-size: $font-size-sm;
+        padding: 0.25rem 0.5rem;
+        background: var(--dgc-bg-card);
+        border-color: var(--dgc-border-color);
+        opacity: 0.85;
+        transition: opacity $transition-fast;
+
+        &:hover {
+            opacity: 1;
+            background: var(--dgc-bg-card);
+        }
+    }
+
+    // Auto-height CodeMirror (no scrolling)
+    .CodeMirror {
+        height: auto !important;
+        border-radius: $border-radius;
+
+        .CodeMirror-scroll {
+            height: auto !important;
+            overflow: visible !important;
+            min-height: 150px;
+        }
+
+        .CodeMirror-sizer {
+            min-height: 150px !important;
+        }
+
+        .CodeMirror-gutters {
+            height: auto !important;
+        }
+    }
 }
 
 .query-editor {
@@ -220,6 +258,63 @@
         }
 
         .CodeMirror-gutters {
+            background: var(--dgc-gray-200);
+            border-right: 1px solid var(--dgc-border-color);
+        }
+
+        .CodeMirror-linenumber {
+            color: var(--dgc-text-muted);
+        }
+
+        // Hide cursor for read-only
+        .CodeMirror-cursor {
+            display: none !important;
+        }
+    }
+}
+
+// Debug query wrapper with copy button overlay
+.debug-query-wrapper {
+    position: relative;
+
+    .copy-debug-query-btn {
+        position: absolute;
+        top: $spacing-xs;
+        right: $spacing-xs;
+        z-index: 10;
+        font-size: $font-size-sm;
+        padding: 0.25rem 0.5rem;
+        background: var(--dgc-bg-card);
+        border-color: var(--dgc-border-color);
+        opacity: 0.85;
+        transition: opacity $transition-fast;
+
+        &:hover {
+            opacity: 1;
+            background: var(--dgc-bg-card);
+        }
+    }
+
+    .CodeMirror {
+        height: auto !important;
+        border: 1px solid var(--dgc-border-color);
+        border-radius: $border-radius;
+        font-size: 12px;
+        background: var(--dgc-gray-100);
+        cursor: default;
+
+        .CodeMirror-scroll {
+            height: auto !important;
+            overflow: visible !important;
+            background: var(--dgc-gray-100);
+        }
+
+        .CodeMirror-sizer {
+            min-height: 0 !important;
+        }
+
+        .CodeMirror-gutters {
+            height: auto !important;
             background: var(--dgc-gray-200);
             border-right: 1px solid var(--dgc-border-color);
         }

@@ -165,18 +165,161 @@ function deleteGraph($data)
 }
 
 /**
+ * Replace placeholders in query with filter values
+ * Handles empty values based on placeholder settings:
+ * - If allowEmpty is true (default): replace condition with 1=1
+ * - If allowEmpty is false (required): use dummy value for testing
+ *
+ * @param string $query The SQL query with placeholders
+ * @param array $filters Filter values keyed by placeholder (e.g., ['::category' => 'value'])
+ * @param array $placeholderSettings Settings per placeholder (e.g., ['::category' => ['allowEmpty' => false]])
+ * @param object $db Database instance for escaping
+ * @return string The query with placeholders replaced
+ */
+function replaceQueryPlaceholders($query, $filters, $placeholderSettings, $db)
+{
+    // Sort filter keys by length descending to replace longer placeholders first
+    // This prevents ::category from matching within ::category_checkbox
+    uksort($filters, function ($a, $b) {
+        return strlen($b) - strlen($a);
+    });
+
+    // First, handle filters that have values
+    foreach ($filters as $placeholder => $value) {
+        $isEmpty = isFilterValueEmpty($value);
+
+        if (!$isEmpty) {
+            // Filter has a value, replace normally
+            if (is_array($value)) {
+                $escaped = array();
+                foreach ($value as $v) {
+                    $escaped[] = "'" . $db->escapeString($v) . "'";
+                }
+                $query = str_replace($placeholder, implode(',', $escaped), $query);
+            } else {
+                $query = str_replace($placeholder, "'" . $db->escapeString($value) . "'", $query);
+            }
+        } else {
+            // Filter is empty, check if allowEmpty
+            $settings = isset($placeholderSettings[$placeholder]) ? $placeholderSettings[$placeholder] : array();
+            $allowEmpty = isset($settings['allowEmpty']) ? $settings['allowEmpty'] : true;
+
+            if ($allowEmpty) {
+                // Replace the entire condition containing this placeholder with 1=1
+                $query = replaceConditionWithTrueValue($query, $placeholder);
+            } else {
+                // Required but empty - use dummy value for testing
+                $query = str_replace($placeholder, "'test'", $query);
+            }
+        }
+    }
+
+    // Handle any remaining placeholders not in filters (use dummy values)
+    $query = preg_replace_callback('/::([a-zA-Z_][a-zA-Z0-9_]*)/', function ($matches) use ($placeholderSettings) {
+        $placeholder = '::' . $matches[1];
+        $settings = isset($placeholderSettings[$placeholder]) ? $placeholderSettings[$placeholder] : array();
+        $allowEmpty = isset($settings['allowEmpty']) ? $settings['allowEmpty'] : true;
+
+        if ($allowEmpty) {
+            // Will be handled by condition replacement below
+            return $placeholder;
+        }
+        return "'test'";
+    }, $query);
+
+    // Final pass: replace any remaining placeholders with allowEmpty=true using 1=1
+    preg_match_all('/::([a-zA-Z_][a-zA-Z0-9_]*)/', $query, $matches);
+    foreach ($matches[0] as $placeholder) {
+        $settings = isset($placeholderSettings[$placeholder]) ? $placeholderSettings[$placeholder] : array();
+        $allowEmpty = isset($settings['allowEmpty']) ? $settings['allowEmpty'] : true;
+
+        if ($allowEmpty) {
+            $query = replaceConditionWithTrueValue($query, $placeholder);
+        }
+    }
+
+    return $query;
+}
+
+/**
+ * Check if a filter value is empty
+ */
+function isFilterValueEmpty($value)
+{
+    if ($value === null || $value === '') {
+        return true;
+    }
+    if (is_array($value) && count($value) === 0) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * Replace SQL condition containing placeholder with 1=1
+ * Handles patterns like:
+ * - field = ::placeholder
+ * - field != ::placeholder
+ * - field IN (::placeholder)
+ * - field NOT IN (::placeholder)
+ * - field LIKE ::placeholder
+ * - field > ::placeholder, field < ::placeholder, etc.
+ * - field BETWEEN ::placeholder_from AND ::placeholder_to
+ *
+ * @param string $query The SQL query
+ * @param string $placeholder The placeholder to find and replace
+ * @return string The query with condition replaced by 1=1
+ */
+function replaceConditionWithTrueValue($query, $placeholder)
+{
+    $escapedPlaceholder = preg_quote($placeholder, '/');
+
+    // Pattern for IN/NOT IN clauses: field IN (::placeholder) or field NOT IN (::placeholder)
+    $inPattern = '/\w+\s+(?:NOT\s+)?IN\s*\(\s*' . $escapedPlaceholder . '\s*\)/i';
+    $query = preg_replace($inPattern, '1=1', $query);
+
+    // Pattern for BETWEEN: field BETWEEN ::placeholder AND value or value AND ::placeholder
+    $betweenPattern = '/\w+\s+BETWEEN\s+(?:' . $escapedPlaceholder . '\s+AND\s+[^\s]+|[^\s]+\s+AND\s+' . $escapedPlaceholder . ')/i';
+    $query = preg_replace($betweenPattern, '1=1', $query);
+
+    // Pattern for comparison operators: field = ::placeholder, field >= ::placeholder, etc.
+    $comparisonPattern = '/\w+\s*(?:=|!=|<>|>=|<=|>|<)\s*' . $escapedPlaceholder . '/i';
+    $query = preg_replace($comparisonPattern, '1=1', $query);
+
+    // Pattern for LIKE: field LIKE ::placeholder
+    $likePattern = '/\w+\s+(?:NOT\s+)?LIKE\s+' . $escapedPlaceholder . '/i';
+    $query = preg_replace($likePattern, '1=1', $query);
+
+    // If placeholder still exists (not part of a recognized condition), just replace with 'test'
+    if (strpos($query, $placeholder) !== false) {
+        $query = str_replace($placeholder, "'test'", $query);
+    }
+
+    return $query;
+}
+
+/**
  * Test SQL query and return columns with sample rows
  */
 function testQuery($data)
 {
     $query = isset($data['query']) ? trim($data['query']) : '';
     $filters = isset($data['filters']) ? $data['filters'] : array();
+    $placeholderSettings = isset($data['placeholder_settings']) ? $data['placeholder_settings'] : array();
 
     // If filters is a JSON string, decode it
     if (is_string($filters)) {
         $filters = json_decode($filters, true);
         if (!is_array($filters)) {
             $filters = array();
+        }
+    }
+
+    // If placeholderSettings is a JSON string, decode it
+    if (is_string($placeholderSettings)) {
+        $placeholderSettings = json_decode($placeholderSettings, true);
+        if (!is_array($placeholderSettings)) {
+            $placeholderSettings = array();
         }
     }
 
@@ -187,28 +330,8 @@ function testQuery($data)
     $db = Rapidkart::getInstance()->getDB();
     $testQuery = $query;
 
-    // Replace placeholders with actual filter values or dummy values
-    $testQuery = preg_replace_callback('/::([a-zA-Z_][a-zA-Z0-9_]*)/', function ($matches) use ($filters, $db) {
-        $placeholder = '::' . $matches[1];
-
-        if (isset($filters[$placeholder])) {
-            $value = $filters[$placeholder];
-
-            // Handle array values (multi-select, checkbox)
-            if (is_array($value)) {
-                $escaped = array_map(function ($v) use ($db) {
-                    return "'" . $db->escapeString($v) . "'";
-                }, $value);
-                return implode(',', $escaped);
-            }
-
-            // Single value
-            return "'" . $db->escapeString($value) . "'";
-        }
-
-        // No filter value provided, use dummy value
-        return "'test'";
-    }, $testQuery);
+    // Replace placeholders with filter values, handling empty values based on settings
+    $testQuery = replaceQueryPlaceholders($testQuery, $filters, $placeholderSettings, $db);
 
     // Store the debug query (with placeholders replaced, but without forced LIMIT)
     $debugQuery = $testQuery;
@@ -291,6 +414,7 @@ function previewGraph($data)
         $mapping = isset($data['mapping']) ? $data['mapping'] : array();
         $graphType = isset($data['graph_type']) ? $data['graph_type'] : 'bar';
         $filters = isset($data['filters']) ? $data['filters'] : array();
+        $placeholderSettings = isset($data['placeholder_settings']) ? $data['placeholder_settings'] : array();
 
         if (is_string($mapping)) {
             $mapping = json_decode($mapping, true);
@@ -298,30 +422,22 @@ function previewGraph($data)
         if (is_string($filters)) {
             $filters = json_decode($filters, true);
         }
+        if (is_string($placeholderSettings)) {
+            $placeholderSettings = json_decode($placeholderSettings, true);
+            if (!is_array($placeholderSettings)) {
+                $placeholderSettings = array();
+            }
+        }
 
         if (empty($query)) {
             Utility::ajaxResponseFalse('No query provided');
         }
 
-        // Apply filter values to query
-        foreach ($filters as $key => $value) {
-            if (is_array($value)) {
-                $db = Rapidkart::getInstance()->getDB();
-                $escaped = array();
-                foreach ($value as $v) {
-                    $escaped[] = "'" . $db->escapeString($v) . "'";
-                }
-                $query = str_replace($key, implode(',', $escaped), $query);
-            } else {
-                $db = Rapidkart::getInstance()->getDB();
-                $query = str_replace($key, "'" . $db->escapeString($value) . "'", $query);
-            }
-        }
-
-        // Replace remaining placeholders with dummy values
-        $query = preg_replace('/:([a-zA-Z_][a-zA-Z0-9_]*)/', "'test'", $query);
-
         $db = Rapidkart::getInstance()->getDB();
+
+        // Replace placeholders with filter values, handling empty values based on settings
+        $query = replaceQueryPlaceholders($query, $filters, $placeholderSettings, $db);
+
         $res = $db->query($query);
 
         if (!$res) {

@@ -10,6 +10,7 @@ export default class QueryBuilder {
         this.onError = options.onError || (() => {});
         this.onChange = options.onChange || (() => {});
         this.getFilterValues = options.getFilterValues || (() => ({}));
+        this.getPlaceholderSettings = options.getPlaceholderSettings || (() => ({}));
 
         this.textarea = null;
         this.testBtn = null;
@@ -84,8 +85,8 @@ export default class QueryBuilder {
             this.onChange();
         });
 
-        // Set height
-        this.editor.setSize(null, 200);
+        // Auto-height: show full content without scrolling
+        this.editor.setSize(null, 'auto');
     }
 
     /**
@@ -133,8 +134,31 @@ export default class QueryBuilder {
         const feedback = document.createElement('span');
         feedback.className = `copy-feedback ${success ? 'success' : 'error'}`;
         feedback.textContent = message;
-        this.copyBtn.style.position = 'relative';
         this.copyBtn.appendChild(feedback);
+
+        // Animate and remove
+        setTimeout(() => feedback.classList.add('show'), 10);
+        setTimeout(() => {
+            feedback.classList.remove('show');
+            setTimeout(() => feedback.remove(), 200);
+        }, 1500);
+    }
+
+    /**
+     * Show animated copy feedback for debug query button
+     */
+    showDebugCopyFeedback(button, message, success) {
+        if (!button) return;
+
+        // Remove existing feedback
+        const existing = button.querySelector('.copy-feedback');
+        if (existing) existing.remove();
+
+        // Create feedback element
+        const feedback = document.createElement('span');
+        feedback.className = `copy-feedback ${success ? 'success' : 'error'}`;
+        feedback.textContent = message;
+        button.appendChild(feedback);
 
         // Animate and remove
         setTimeout(() => feedback.classList.add('show'), 10);
@@ -271,9 +295,14 @@ export default class QueryBuilder {
         }
 
         try {
-            // Get filter values from sidebar
+            // Get filter values and placeholder settings from sidebar
             const filterValues = this.getFilterValues();
-            const result = await Ajax.post('test_query', { query, filters: filterValues });
+            const placeholderSettings = this.getPlaceholderSettings();
+            const result = await Ajax.post('test_query', {
+                query,
+                filters: filterValues,
+                placeholder_settings: placeholderSettings
+            });
 
             if (result.success) {
                 const columns = result.data.columns || [];
@@ -322,9 +351,16 @@ export default class QueryBuilder {
         if (this.graphDataSection && this.graphDataContent) {
             let dataHtml = '';
 
-            // Add debug query textarea (CodeMirror will replace it) - no wrapper needed
+            // Add debug query textarea (CodeMirror will replace it) with copy button overlay
             if (debugQuery) {
-                dataHtml += `<textarea class="query-debug-textarea" style="display:none;">${this.escapeHtml(debugQuery)}</textarea>`;
+                dataHtml += `
+                    <div class="debug-query-wrapper">
+                        <button type="button" class="btn btn-sm btn-outline-secondary copy-debug-query-btn" title="Copy SQL">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                        <textarea class="query-debug-textarea" style="display:none;">${this.escapeHtml(debugQuery)}</textarea>
+                    </div>
+                `;
             }
 
             // Add sample data table if rows exist
@@ -375,10 +411,20 @@ export default class QueryBuilder {
                             lineWrapping: true,
                             readOnly: true
                         });
-                        // Auto-adjust height based on content
-                        const lineCount = debugQuery.split('\n').length;
-                        const height = Math.min(Math.max(lineCount * 22, 80), 200);
-                        debugEditor.setSize(null, height);
+                        // Auto-height: show full content without scrolling
+                        debugEditor.setSize(null, 'auto');
+                    }
+
+                    // Bind copy button for debug query
+                    const copyDebugBtn = this.graphDataContent.querySelector('.copy-debug-query-btn');
+                    if (copyDebugBtn) {
+                        copyDebugBtn.addEventListener('click', () => {
+                            navigator.clipboard.writeText(debugQuery).then(() => {
+                                this.showDebugCopyFeedback(copyDebugBtn, 'Copied!', true);
+                            }).catch(() => {
+                                this.showDebugCopyFeedback(copyDebugBtn, 'Failed', false);
+                            });
+                        });
                     }
                 }
             } else {
