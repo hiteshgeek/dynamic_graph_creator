@@ -1,46 +1,113 @@
-// Responsive Styles
+// Responsive Dashboard Layouts
+// Hybrid: CSS media queries (automatic) + data attributes (builder preview)
 
-.dashboard-builder[data-breakpoint="mobile"] {
-    .grid-editor {
-        max-width: 375px;
+@use "../variables" as *;
 
-        .dashboard-section {
-            grid-template-columns: 1fr !important;
+// ===========================================
+// Responsive Mixins (reusable for both media queries and data attributes)
+// ===========================================
 
-            .dashboard-area {
-                grid-column: span 1 !important;
-            }
-        }
-    }
+@mixin layout-mobile {
+  // Force single column
+  .dashboard-section {
+    grid-template-columns: 1fr !important;
+  }
+
+  // All areas span full width
+  .dashboard-area,
+  .dashboard-area-nested {
+    grid-column: span 1 !important;
+  }
+
+  // Reduce row height via CSS variable override
+  --dgc-layout-row-height: #{$layout-row-height-mobile};
 }
 
-.dashboard-builder[data-breakpoint="tablet"] {
-    .grid-editor {
-        max-width: 768px;
+@mixin layout-tablet {
+  // Limit to 2 columns max
+  .dashboard-section {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
 
-        .dashboard-section[data-columns="3"],
-        .dashboard-section[data-columns="4"] {
-            grid-template-columns: repeat(2, 1fr) !important;
-        }
-    }
+  // Default to span 1
+  .dashboard-area,
+  .dashboard-area-nested {
+    grid-column: span 1 !important;
+  }
+
+  // Preserve full-width for areas that span 2+ columns
+  .dashboard-area[style*="span 2"],
+  .dashboard-area[style*="span 3"],
+  .dashboard-area[style*="span 4"],
+  .dashboard-area-nested[style*="span 2"],
+  .dashboard-area-nested[style*="span 3"],
+  .dashboard-area-nested[style*="span 4"] {
+    grid-column: span 2 !important;
+  }
 }
+
+// ===========================================
+// CSS Media Queries (Automatic - for actual views)
+// ===========================================
+
+// Mobile (≤ 576px)
+@media (max-width: $breakpoint-mobile) {
+  .dashboard-preview,
+  .dashboard-builder .grid-editor {
+    @include layout-mobile;
+  }
+}
+
+// Tablet (577px - 992px)
+@media (min-width: ($breakpoint-mobile + 1)) and (max-width: $breakpoint-tablet) {
+  .dashboard-preview,
+  .dashboard-builder .grid-editor {
+    @include layout-tablet;
+  }
+}
+
+// ===========================================
+// Data Attribute Overrides (Builder Preview Toggle)
+// ===========================================
+
+// Mobile preview (forced via data attribute)
+[data-breakpoint="mobile"] {
+  .grid-editor {
+    max-width: 375px;
+    margin: 0 auto;
+    @include layout-mobile;
+  }
+}
+
+// Tablet preview (forced via data attribute)
+[data-breakpoint="tablet"] {
+  .grid-editor {
+    max-width: 768px;
+    margin: 0 auto;
+    @include layout-tablet;
+  }
+}
+
+// ===========================================
+// Builder UI Responsive (sidebar collapse, etc.)
+// ===========================================
 
 @media (max-width: 768px) {
-    .dashboard-builder {
-        .builder-body {
-            flex-direction: column;
+  .dashboard-builder {
+    .builder-body {
+      flex-direction: column;
 
-            .builder-sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid #e0e0e0;
-            }
-        }
+      .builder-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--dgc-border-color);
+      }
     }
+  }
 
-    .dashboard-list-page {
-        .dashboard-grid {
-            grid-template-columns: 1fr;
-        }
+  .dashboard-list-page {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
     }
+  }
 }

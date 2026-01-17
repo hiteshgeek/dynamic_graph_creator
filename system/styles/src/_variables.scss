@@ -101,6 +101,11 @@ $template-preview-gap: 2px;
 
 // Layout row height (base height for 1fr row unit in dashboard layouts)
 $layout-row-height: 150px;
+$layout-row-height-mobile: 120px;
+
+// Responsive breakpoints
+$breakpoint-tablet: 992px;
+$breakpoint-mobile: 576px;
 
 // Transitions
 $transition-fast: 0.15s ease;
