@@ -703,19 +703,25 @@ window.KeyboardShortcuts = {
 
         // Graph Creator: Alt+O to toggle sidebar
         this.register('alt+o', () => {
-            const sidebar = document.querySelector('.graph-creator .graph-sidebar');
-            const panel = sidebar?.querySelector('.collapsible-panel');
-            if (panel) {
-                panel.classList.toggle('collapsed');
+            const sidebar = document.querySelector('.graph-creator .graph-sidebar-left');
+            const card = sidebar?.querySelector('.sidebar-card');
+            if (card) {
+                card.classList.toggle('collapsed');
             }
             if (sidebar) {
                 sidebar.classList.toggle('collapsed');
                 localStorage.setItem('graphCreatorSidebarCollapsed', sidebar.classList.contains('collapsed') ? 'true' : 'false');
+                // Trigger chart resize after animation
+                setTimeout(() => {
+                    if (window.graphCreator?.preview) {
+                        window.graphCreator.preview.resize();
+                    }
+                }, 350);
             }
         }, {
             description: 'Toggle options panel',
             scope: 'graph-creator',
-            available: () => !!document.querySelector('.graph-creator .graph-sidebar')
+            available: () => !!document.querySelector('.graph-creator .graph-sidebar-left')
         });
 
         return this;

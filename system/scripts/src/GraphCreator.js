@@ -459,7 +459,8 @@ export default class GraphCreator {
      * Initialize collapsible panels
      */
     initCollapsiblePanels() {
-        const headers = this.container.querySelectorAll('.collapsible-header');
+        // New sidebar-card header (with title and collapse button)
+        const collapseHeader = this.container.querySelector('.sidebar-card-header');
 
         // Check if sidebar is already collapsed (by inline script) and resize chart accordingly
         const sidebar = this.container.querySelector('.graph-sidebar');
@@ -471,13 +472,14 @@ export default class GraphCreator {
             }, 100);
         }
 
-        headers.forEach(header => {
-            header.addEventListener('click', () => {
-                const panel = header.closest('.collapsible-panel');
-                const sidebar = header.closest('.graph-sidebar');
+        // Handle new sidebar-card collapse
+        if (collapseHeader) {
+            collapseHeader.addEventListener('click', () => {
+                const card = this.container.querySelector('.sidebar-card');
+                const sidebar = this.container.querySelector('.graph-sidebar-left');
 
-                if (panel) {
-                    panel.classList.toggle('collapsed');
+                if (card) {
+                    card.classList.toggle('collapsed');
                 }
                 if (sidebar) {
                     sidebar.classList.toggle('collapsed');
@@ -493,6 +495,30 @@ export default class GraphCreator {
                     }
                 }, 350);
             });
+        }
+
+        // Legacy: Handle old collapsible-header (for backward compatibility)
+        const headers = this.container.querySelectorAll('.collapsible-header');
+        headers.forEach(header => {
+            header.addEventListener('click', () => {
+                const panel = header.closest('.collapsible-panel');
+                const sidebar = header.closest('.graph-sidebar');
+
+                if (panel) {
+                    panel.classList.toggle('collapsed');
+                }
+                if (sidebar) {
+                    sidebar.classList.toggle('collapsed');
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    localStorage.setItem('graphCreatorSidebarCollapsed', isCollapsed ? 'true' : 'false');
+                }
+
+                setTimeout(() => {
+                    if (this.preview) {
+                        this.preview.resize();
+                    }
+                }, 350);
+            });
         });
     }
 
@@ -501,12 +527,12 @@ export default class GraphCreator {
      */
     expandSidebar() {
         const sidebar = this.container.querySelector('.graph-sidebar-left');
-        const panel = this.container.querySelector('#graph-collapsible-panel');
+        const card = this.container.querySelector('.sidebar-card');
 
         if (sidebar && sidebar.classList.contains('collapsed')) {
             sidebar.classList.remove('collapsed');
-            if (panel) {
-                panel.classList.remove('collapsed');
+            if (card) {
+                card.classList.remove('collapsed');
             }
             // Update localStorage
             localStorage.setItem('graphCreatorSidebarCollapsed', 'false');
@@ -608,6 +634,10 @@ export default class GraphCreator {
                 // Show selector view
                 selectorView.style.display = 'flex';
                 activeView.style.display = 'none';
+
+                // Update button state based on currently checked filters
+                const selected = Array.from(checkboxes).filter(cb => cb.checked);
+                useBtn.disabled = selected.length === 0;
             });
         }
     }

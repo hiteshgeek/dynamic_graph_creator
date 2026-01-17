@@ -56,37 +56,44 @@
 
             <!-- Left Sidebar - Graph Info, Chart Type, Config & Filters -->
             <div class="graph-sidebar graph-sidebar-left" id="graph-sidebar-left">
-                <!-- Graph Info Section (above collapsible) -->
-                <div class="graph-info-section">
-                    <div class="graph-info-wrapper">
-                        <div class="graph-name-wrapper">
-                            <label class="graph-name-label" for="graph-name-input">Graph Name <span class="required">*</span></label>
-                            <input type="text" class="form-control graph-name-input" id="graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
-                        </div>
-                        <div class="graph-description-wrapper">
-                            <label class="graph-description-label" for="graph-description-input">Description</label>
-                            <textarea class="form-control graph-description-input" id="graph-description-input" placeholder="Enter graph description (optional)" rows="1"><?php echo $graph ? htmlspecialchars($graph->getDescription()) : ''; ?></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="collapsible-panel" id="graph-collapsible-panel">
+                <div class="sidebar-card" id="graph-sidebar-card">
                     <!-- Immediately apply saved collapse state to prevent flash -->
                     <script>
                         (function() {
                             if (localStorage.getItem('graphCreatorSidebarCollapsed') === 'true') {
                                 document.getElementById('graph-sidebar-left').classList.add('collapsed');
-                                document.getElementById('graph-collapsible-panel').classList.add('collapsed');
+                                document.getElementById('graph-sidebar-card').classList.add('collapsed');
                             }
                         })();
                     </script>
-                    <div class="collapsible-header" data-toggle="collapse" data-target="left-panel">
-                        <h3><i class="fas fa-sliders-h"></i> Options</h3>
+
+                    <!-- Sidebar Header with Title and Collapse Button -->
+                    <div class="sidebar-card-header" data-toggle="collapse">
+                        <h3 class="sidebar-card-title"><i class="fas fa-cog"></i> Graph Settings</h3>
                         <button type="button" class="collapse-btn">
                             <i class="fas fa-chevron-left"></i>
                         </button>
                     </div>
-                    <div class="collapsible-content" id="left-panel">
+
+                    <!-- Graph Info Section -->
+                    <div class="sidebar-section graph-info-section">
+                        <div class="graph-info-wrapper">
+                            <div class="graph-name-wrapper">
+                                <label class="graph-name-label" for="graph-name-input">Graph Name <span class="required">*</span></label>
+                                <input type="text" class="form-control graph-name-input" id="graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
+                            </div>
+                            <div class="graph-description-wrapper">
+                                <label class="graph-description-label" for="graph-description-input">Description</label>
+                                <textarea class="form-control graph-description-input" id="graph-description-input" placeholder="Enter graph description (optional)" rows="1"><?php echo $graph ? htmlspecialchars($graph->getDescription()) : ''; ?></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Options Section -->
+                    <div class="sidebar-section options-section">
+                        <div class="sidebar-section-header">
+                            <h3><i class="fas fa-sliders-h"></i> Options</h3>
+                        </div>
                         <!-- Sidebar Tabs -->
                         <div class="sidebar-tabs">
                             <button class="sidebar-tab active" data-tab="config">

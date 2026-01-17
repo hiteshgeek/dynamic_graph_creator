@@ -51,8 +51,8 @@
   }
 }
 
-// Collapsible panel
-.collapsible-panel {
+// Sidebar card (unified card containing all sections)
+.sidebar-card {
   background: var(--dgc-bg-card);
   border-radius: $border-radius-lg;
   box-shadow: var(--dgc-shadow-subtle);
@@ -61,23 +61,28 @@
   position: sticky;
   top: 85px; // Account for header height + spacing
   transition: all $transition-normal;
+  padding-bottom: $spacing-md;
 
+  // Collapsed state
   &.collapsed {
-    .collapsible-content {
+    padding-bottom: 0;
+
+    .sidebar-section {
       display: none;
     }
 
-    .collapsible-header {
+    .sidebar-card-header {
       flex-direction: column;
-      padding: $spacing-sm;
+      padding: $spacing-md $spacing-sm;
       border-bottom: none;
-      min-height: 200px;
+      gap: $spacing-lg;
 
-      h3 {
+      .sidebar-card-title {
         writing-mode: vertical-rl;
         text-orientation: mixed;
+        transform: rotate(180deg);
+        flex-direction: row;
         gap: $spacing-sm;
-        order: 1;
 
         i {
           transform: rotate(90deg);
@@ -85,72 +90,111 @@
       }
 
       .collapse-btn {
-        order: 2;
-        margin-top: $spacing-md;
-      }
-    }
+        order: -1; // Button at top
 
-    .graph-sidebar-left & {
-      .collapsible-header {
-        h3 {
-          transform: rotate(180deg);
-          flex-direction: row-reverse;
-        }
-
-        .collapse-btn i {
-          // Point right to indicate expand
-          transform: rotate(180deg);
-        }
-      }
-    }
-
-    .graph-sidebar-right & {
-      .collapsible-header {
-        h3 {
-          flex-direction: row;
-        }
-
-        .collapse-btn i {
-          // Point left to indicate expand
-          transform: rotate(180deg) !important;
-        }
-      }
-    }
-
-    // Compact collapsed state for single sidebar layout
-    .graph-creator-single-sidebar & {
-      .collapsible-header {
-        min-height: auto;
-        padding: $spacing-md $spacing-sm;
-        align-items: center;
-        gap: $spacing-lg;
-        border-radius: $border-radius-lg; // Match parent panel border-radius to prevent clipping on hover
-
-        h3 {
-          writing-mode: vertical-rl;
-          text-orientation: mixed;
-          transform: rotate(180deg);
-          flex-direction: row; // Icon before text (after rotation: icon on top)
-          order: 2; // h3 (icon + Options) comes after collapse button
-          gap: $spacing-sm;
-
-          i {
-            transform: rotate(90deg);
-          }
-        }
-
-        .collapse-btn {
-          order: 1; // Collapse button at top
-          margin-top: 0;
-          margin-bottom: 0;
-
-          i {
-            transform: rotate(180deg); // Point right to indicate expand
-          }
+        i {
+          transform: rotate(180deg); // Point right to indicate expand
         }
       }
     }
   }
+}
+
+// Sidebar card header with title and collapse button
+.sidebar-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-sm $spacing-md;
+  border-bottom: 1px solid var(--dgc-border-color);
+  border-radius: $border-radius-lg $border-radius-lg 0 0; // Match card's top corners
+  cursor: pointer;
+  user-select: none;
+  transition: all $transition-normal;
+
+  &:hover {
+    background: var(--dgc-bg-hover);
+  }
+
+  &:hover .collapse-btn {
+    background: var(--dgc-primary);
+    border-color: var(--dgc-primary);
+    color: var(--dgc-text-inverse);
+  }
+
+  // When card is collapsed, apply full border-radius
+  .sidebar-card.collapsed & {
+    border-radius: $border-radius-lg;
+  }
+}
+
+.sidebar-card-title {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  margin: 0;
+  color: var(--dgc-text-secondary);
+  white-space: nowrap;
+
+  i {
+    font-size: 14px;
+    color: var(--dgc-primary);
+  }
+}
+
+// Sidebar sections (inside sidebar card)
+.sidebar-section {
+  padding: $spacing-md;
+  border-bottom: 1px solid var(--dgc-border-color);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  // Options section has no bottom padding (tabs handle spacing)
+  &.options-section {
+    padding-bottom: 0;
+  }
+
+  // Inside tab content, no extra padding (tab content handles spacing)
+  .sidebar-tab-content & {
+    padding: 0;
+    border-bottom: none;
+  }
+}
+
+// Options section header
+.sidebar-section-header {
+  margin-bottom: $spacing-md;
+
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: $font-size-base;
+    margin: 0;
+    color: var(--dgc-text-secondary);
+    white-space: nowrap;
+
+    i {
+      font-size: 14px;
+      color: var(--dgc-primary);
+    }
+  }
+}
+
+// Legacy: Collapsible panel (keep for backward compatibility)
+.collapsible-panel {
+  background: var(--dgc-bg-card);
+  border-radius: $border-radius-lg;
+  box-shadow: var(--dgc-shadow-subtle);
+  height: fit-content;
+  overflow: visible;
+  position: sticky;
+  top: 85px;
+  transition: all $transition-normal;
 }
 
 .collapsible-header {
@@ -230,7 +274,7 @@
 // Sidebar sections (inside collapsible content)
 .sidebar-section {
   padding-bottom: $spacing-md;
-  margin-bottom: $spacing-md;
+  // margin-bottom: $spacing-md;
   border-bottom: 1px solid var(--dgc-border-color);
 
   &:last-child {
@@ -612,20 +656,6 @@
     color: var(--dgc-text-inverse);
     border-radius: 12px;
     font-size: $font-size-sm;
-  }
-}
-
-// Graph info section (in sidebar, above collapsible panel)
-.graph-info-section {
-  padding: $spacing-md;
-  background: var(--dgc-bg-card);
-  border-radius: $border-radius-lg;
-  box-shadow: var(--dgc-shadow-subtle);
-  margin-bottom: $spacing-md;
-
-  // Hide when sidebar is collapsed
-  .graph-sidebar-left.collapsed & {
-    display: none;
   }
 }
 
