@@ -4,121 +4,22 @@
 // Filter List Page
 .filter-list-page {
   // Padding handled by body > .container rule in _common.scss
-}
 
-// Filter grid layout
-.filter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-}
+  // Filter-specific styles for item cards
+  .filter-key {
+    margin-bottom: 0.5rem;
 
-// Filter card style (matching graph/dashboard cards)
-.filter-card {
-  background: var(--dgc-bg-card);
-  border: 2px solid var(--dgc-border-color);
-  border-radius: 8px;
-  overflow: hidden;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-
-  &:hover {
-    border-color: var(--dgc-primary);
-  }
-
-  .filter-card-content {
-    flex: 1;
-    margin-bottom: 1rem;
-
-    .filter-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 0.75rem;
-    }
-
-    h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-      color: var(--dgc-text-primary);
-    }
-
-    .filter-key {
-      margin-bottom: 0.5rem;
-
-      code {
-        background: var(--dgc-gray-100);
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        color: var(--dgc-text-secondary);
-      }
-    }
-
-    .filter-meta {
-      display: flex;
-      gap: 1rem;
+    code {
+      background: var(--dgc-gray-100);
+      padding: 2px 8px;
+      border-radius: 4px;
       font-size: 0.8rem;
       color: var(--dgc-text-secondary);
-      margin-top: 0.5rem;
-
-      .meta-item {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-
-        &.required {
-          color: var(--dgc-error);
-        }
-      }
     }
   }
 
-  .filter-card-actions {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    padding-top: 0.75rem;
-    border-top: 1px solid var(--dgc-border-color);
-
-    .btn-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--dgc-border-color);
-      background: var(--dgc-bg-card);
-      color: var(--dgc-text-secondary);
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 0.875rem;
-      text-decoration: none;
-
-      &.btn-design {
-        border-color: var(--dgc-warning);
-        color: var(--dgc-warning);
-
-        &:hover {
-          background: var(--dgc-warning);
-          color: var(--dgc-text-inverse);
-        }
-      }
-
-      &.btn-danger {
-        border-color: var(--dgc-error);
-        color: var(--dgc-error);
-
-        &:hover {
-          background: var(--dgc-error);
-          color: var(--dgc-text-inverse);
-        }
-      }
-    }
+  .item-card-meta .meta-item.required {
+    color: var(--dgc-error);
   }
 }
 

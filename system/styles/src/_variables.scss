@@ -120,3 +120,134 @@ $chart-colors: (
     #795548,
     #607D8B
 );
+
+// ===========================================
+// Mixins
+// ===========================================
+
+// Card mixin - common card design used across the app (content cards)
+@mixin card-base {
+  background: var(--dgc-bg-card);
+  border-radius: $border-radius-lg;
+  box-shadow: var(--dgc-shadow-subtle);
+  transition: background-color 0.2s ease;
+}
+
+// Item card mixin - for list items (graph cards, filter cards, dashboard cards)
+@mixin item-card {
+  background: var(--dgc-bg-card);
+  border-radius: $border-radius-lg;
+  box-shadow: var(--dgc-shadow-1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: var(--dgc-shadow-2);
+  }
+}
+
+// Item card content section
+@mixin item-card-content {
+  flex: 1;
+  margin-bottom: 1rem;
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--dgc-text-primary);
+  }
+}
+
+// Item card header (icon + title area)
+@mixin item-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+// Item card meta info
+@mixin item-card-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: var(--dgc-text-secondary);
+  margin-top: 0.5rem;
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+}
+
+// Item card actions (bottom buttons)
+@mixin item-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--dgc-border-color);
+}
+
+// Icon button for card actions
+@mixin item-card-btn-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--dgc-border-color);
+  background: var(--dgc-bg-card);
+  color: var(--dgc-text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  text-decoration: none;
+
+  &.btn-primary {
+    border-color: var(--dgc-primary);
+    color: var(--dgc-primary);
+
+    &:hover {
+      background: var(--dgc-primary);
+      color: var(--dgc-text-inverse);
+    }
+  }
+
+  &.btn-design,
+  &.btn-warning {
+    border-color: var(--dgc-warning);
+    color: var(--dgc-warning);
+
+    &:hover {
+      background: var(--dgc-warning);
+      color: var(--dgc-text-inverse);
+    }
+  }
+
+  &.btn-danger {
+    border-color: var(--dgc-error);
+    color: var(--dgc-error);
+
+    &:hover {
+      background: var(--dgc-error);
+      color: var(--dgc-text-inverse);
+    }
+  }
+
+  &.btn-success {
+    border-color: var(--dgc-success);
+    color: var(--dgc-success);
+
+    &:hover {
+      background: var(--dgc-success);
+      color: var(--dgc-text-inverse);
+    }
+  }
+}

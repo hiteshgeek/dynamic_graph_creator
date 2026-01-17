@@ -47,11 +47,11 @@
                 'green'
             ); ?>
             <?php else: ?>
-            <div class="filter-grid">
+            <div class="item-card-grid">
                 <?php foreach ($filters as $filter): ?>
-                <div class="filter-card" data-filter-id="<?php echo $filter['fid']; ?>">
-                    <div class="filter-card-content">
-                        <div class="filter-card-header">
+                <div class="item-card" data-filter-id="<?php echo $filter['fid']; ?>">
+                    <div class="item-card-content">
+                        <div class="item-card-header">
                             <?php
                             $typeIcons = array(
                                 'text' => 'font',
@@ -77,7 +77,7 @@
                         <div class="filter-key">
                             <code><?php echo htmlspecialchars($filter['filter_key']); ?></code>
                         </div>
-                        <div class="filter-meta">
+                        <div class="item-card-meta">
                             <span class="meta-item">
                                 <?php if ($filter['data_source'] === 'query'): ?>
                                 <i class="fas fa-database"></i> Query
@@ -92,7 +92,7 @@
                             <?php endif; ?>
                         </div>
                     </div>
-                    <div class="filter-card-actions">
+                    <div class="item-card-actions">
                         <a href="?urlq=filters/edit/<?php echo $filter['fid']; ?>" class="btn-icon btn-design" title="Design">
                             <i class="fas fa-paint-brush"></i>
                         </a>

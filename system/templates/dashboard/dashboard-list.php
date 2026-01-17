@@ -58,26 +58,26 @@
                 'blue'
             ); ?>
             <?php else: ?>
-            <div class="dashboard-grid">
+            <div class="item-card-grid">
                 <?php foreach ($dashboards as $dashboard): ?>
-                <div class="dashboard-card" data-dashboard-id="<?php echo $dashboard->getId(); ?>">
-                    <div class="dashboard-card-content">
+                <div class="item-card" data-dashboard-id="<?php echo $dashboard->getId(); ?>">
+                    <div class="item-card-content">
                         <h3><?php echo htmlspecialchars($dashboard->getName()); ?></h3>
-                        <div class="dashboard-meta">
+                        <div class="item-card-meta">
                             <span class="meta-item">
                                 <i class="fas fa-clock"></i>
                                 <?php echo date('M d, Y', strtotime($dashboard->getUpdatedTs())); ?>
                             </span>
                         </div>
                         <?php if ($dashboard->getIsSystem()): ?>
-                        <div class="dashboard-tags">
+                        <div class="item-card-tags">
                             <span class="badge badge-system">
                                 <i class="fas fa-lock"></i> System
                             </span>
                         </div>
                         <?php endif; ?>
                     </div>
-                    <div class="dashboard-card-actions">
+                    <div class="item-card-actions">
                         <a href="?urlq=dashboard/preview/<?php echo $dashboard->getId(); ?>"
                            class="btn-icon btn-primary"
                            title="View Mode">

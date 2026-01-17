@@ -464,7 +464,7 @@ body {
 // Cards
 .card {
   background: var(--dgc-bg-card);
-  box-shadow: var(--dgc-shadow-1);
+  box-shadow: var(--dgc-shadow-subtle);
 
   .card-header {
     border-color: var(--dgc-border-color);
@@ -667,12 +667,7 @@ code {
   border-color: var(--dgc-border-color);
 }
 
-// Graph main area
-.graph-main {
-  background: var(--dgc-bg-card);
-  box-shadow: var(--dgc-shadow-subtle);
-}
-
+// Graph main area (inherits from .card)
 .graph-preview-card {
   border-color: var(--dgc-border-color);
 }
@@ -680,16 +675,6 @@ code {
 .graph-preview-container {
   border-color: var(--dgc-border-color);
   background: var(--dgc-gray-50);
-}
-
-// Graph cards in list
-.graph-card {
-  background: var(--dgc-bg-card);
-  box-shadow: var(--dgc-shadow-1);
-
-  &:hover {
-    box-shadow: var(--dgc-shadow-2);
-  }
 }
 
 // Buttons - use theme variables

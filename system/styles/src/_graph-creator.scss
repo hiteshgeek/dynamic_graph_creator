@@ -51,16 +51,13 @@
   }
 }
 
-// Sidebar card (unified card containing all sections)
+// Sidebar card (uses common card design)
 .sidebar-card {
-  background: var(--dgc-bg-card);
-  border-radius: $border-radius-lg;
-  box-shadow: var(--dgc-shadow-subtle);
+  @include card-base;
   height: fit-content;
   overflow: visible;
   position: sticky;
   top: 85px; // Account for header height + spacing
-  transition: all $transition-normal;
   padding-bottom: $spacing-md;
 
   // Collapsed state
@@ -185,16 +182,13 @@
   }
 }
 
-// Legacy: Collapsible panel (keep for backward compatibility)
+// Legacy: Collapsible panel (uses common card design)
 .collapsible-panel {
-  background: var(--dgc-bg-card);
-  border-radius: $border-radius-lg;
-  box-shadow: var(--dgc-shadow-subtle);
+  @include card-base;
   height: fit-content;
   overflow: visible;
   position: sticky;
   top: 85px;
-  transition: all $transition-normal;
 }
 
 .collapsible-header {
@@ -349,15 +343,12 @@
   color: var(--dgc-text-primary);
 }
 
-// Center - Preview and Query (single unified card)
+// Center - Preview and Query (uses common card design)
 .graph-main {
+  @include card-base;
   display: flex;
   flex-direction: column;
   min-width: 0; // Prevent overflow
-  background: var(--dgc-bg-card);
-  border-radius: $border-radius-lg;
-  box-shadow: var(--dgc-shadow-subtle);
-  transition: background-color 0.2s ease;
 }
 
 // Content wrapper inside graph-main

@@ -53,14 +53,94 @@ a {
   }
 }
 
-// Cards
+// Cards (uses common card mixin)
 .card {
-  background: var(--dgc-bg-card);
-  border-radius: $border-radius-lg;
-  box-shadow: var(--dgc-shadow-1);
+  @include card-base;
   padding: $spacing-lg;
   margin-bottom: $spacing-lg;
-  transition: background-color 0.2s ease;
+}
+
+// ===========================================
+// Item Card - Common list item card design
+// Used for graph, filter, dashboard, and template cards
+// ===========================================
+.item-card {
+  @include item-card;
+
+  .item-card-content {
+    @include item-card-content;
+
+    .item-card-header {
+      @include item-card-header;
+    }
+
+    .item-card-meta {
+      @include item-card-meta;
+    }
+
+    .item-card-description {
+      font-size: 0.85rem;
+      color: var(--dgc-text-secondary);
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .item-card-tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: auto;
+      padding-top: 0.5rem;
+
+      .badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 500;
+
+        &.badge-system {
+          background: var(--dgc-info-bg);
+          color: var(--dgc-info-dark);
+
+          i {
+            margin-right: 0.25rem;
+          }
+        }
+
+        &.badge-custom {
+          background: rgba(123, 31, 162, 0.1);
+          color: #9c27b0;
+        }
+      }
+    }
+  }
+
+  .item-card-actions {
+    @include item-card-actions;
+
+    .btn-icon {
+      @include item-card-btn-icon;
+    }
+  }
+}
+
+// Item card grid layout (common for all list pages)
+.item-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+// Dark mode adjustments for item card badges
+:root.theme-dark {
+  .item-card .badge-custom {
+    background: rgba(156, 39, 176, 0.2);
+    color: #ce93d8;
+  }
 }
 
 .card-header {

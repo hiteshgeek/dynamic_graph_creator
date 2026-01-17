@@ -48,11 +48,11 @@
                 'orange'
             ); ?>
             <?php else: ?>
-            <div class="graph-grid">
+            <div class="item-card-grid">
                 <?php foreach ($graphs as $g): ?>
-                <div class="graph-card" data-graph-id="<?php echo $g->getId(); ?>">
-                    <div class="graph-card-content">
-                        <div class="graph-card-header">
+                <div class="item-card" data-graph-id="<?php echo $g->getId(); ?>">
+                    <div class="item-card-content">
+                        <div class="item-card-header">
                             <span class="graph-type-icon <?php echo $g->getGraphType(); ?>">
                                 <i class="fas fa-chart-<?php echo $g->getGraphType(); ?>"></i>
                             </span>
@@ -62,16 +62,16 @@
                         </div>
                         <h3><?php echo htmlspecialchars($g->getName()); ?></h3>
                         <?php if ($g->getDescription()): ?>
-                        <p class="graph-description"><?php echo htmlspecialchars($g->getDescription()); ?></p>
+                        <p class="item-card-description"><?php echo htmlspecialchars($g->getDescription()); ?></p>
                         <?php endif; ?>
-                        <div class="graph-meta">
+                        <div class="item-card-meta">
                             <span class="meta-item">
                                 <i class="fas fa-clock"></i>
                                 <?php echo date('M d, Y', strtotime($g->getUpdatedTs())); ?>
                             </span>
                         </div>
                     </div>
-                    <div class="graph-card-actions">
+                    <div class="item-card-actions">
                         <a href="?urlq=graph/view/<?php echo $g->getId(); ?>" class="btn-icon btn-primary" title="View">
                             <i class="fas fa-eye"></i>
                         </a>

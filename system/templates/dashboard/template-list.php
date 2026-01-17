@@ -112,34 +112,34 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                         </div>
                         <?php else: ?>
                         <?php foreach ($categoryData['templates'] as $template): ?>
-                        <div class="template-card" data-template-id="<?php echo $template['dtid']; ?>">
+                        <div class="item-card template-card" data-template-id="<?php echo $template['dtid']; ?>">
                             <div class="template-preview">
                                 <?php
                                 $structure = json_decode($template['structure'], true);
                                 echo renderTemplatePreview($structure);
                                 ?>
                             </div>
-                            <div class="template-info">
-                                <h4><?php echo htmlspecialchars($template['name']); ?></h4>
+                            <div class="item-card-content">
+                                <h3><?php echo htmlspecialchars($template['name']); ?></h3>
                                 <?php if (!empty($template['description'])): ?>
-                                <p><?php echo htmlspecialchars($template['description']); ?></p>
+                                <p class="item-card-description"><?php echo htmlspecialchars($template['description']); ?></p>
                                 <?php endif; ?>
                                 <?php if ($template['is_system']): ?>
-                                <div class="template-meta">
+                                <div class="item-card-tags">
                                     <span class="badge badge-system">
                                         <i class="fas fa-lock"></i> System
                                     </span>
                                 </div>
                                 <?php endif; ?>
                             </div>
-                            <div class="template-card-actions">
+                            <div class="item-card-actions">
                                 <button class="btn-icon btn-primary"
                                         title="View Mode"
                                         onclick="window.location='?urlq=dashboard/template/preview/<?php echo $template['dtid']; ?>'">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <?php if (!$template['is_system']): ?>
-                                <button class="btn-icon btn-design"
+                                <button class="btn-icon btn-warning"
                                         title="Design Mode"
                                         onclick="window.location='?urlq=dashboard/template/builder/<?php echo $template['dtid']; ?>'">
                                     <i class="fas fa-paint-brush"></i>

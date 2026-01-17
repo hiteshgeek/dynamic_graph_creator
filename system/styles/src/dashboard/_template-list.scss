@@ -166,24 +166,15 @@
     }
   }
 
-  // Reuse template card styles from template-selector
+  // Template card extends .item-card with template-specific overrides
+  // Base .item-card styles come from _base.scss
   .template-card {
-    background: var(--dgc-bg-card);
-    border: 2px solid var(--dgc-border-color);
-    border-radius: 12px;
-    padding: $spacing-md;
-    cursor: default;
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
+    // Template-specific overrides
     height: 100%;
     position: relative;
 
     &:hover {
-      border-color: var(--dgc-primary);
-      box-shadow: var(--dgc-shadow-2);
-
-      .template-card-actions .template-drag-handle {
+      .item-card-actions .template-drag-handle {
         opacity: 1;
       }
     }
@@ -191,75 +182,12 @@
     .template-preview {
       @include template-preview-small;
       padding: 0;
+      margin-bottom: 0.75rem;
     }
 
-    .template-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-
-      h4 {
-        font-size: 1rem;
-        font-weight: 600;
-        margin: 0 0 0.25rem 0;
-        color: var(--dgc-text-primary);
-      }
-
-      p {
-        font-size: 0.875rem;
-        color: var(--dgc-text-secondary);
-        margin: 0 0 0.5rem 0;
-        line-height: 1.4;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-
-      .template-meta {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        margin-top: auto;
-        padding-top: 0.5rem;
-        margin-bottom: 0.5rem;
-
-        .badge {
-          font-size: 0.75rem;
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
-          font-weight: 500;
-
-          &.badge-system {
-            background: var(--dgc-info-bg);
-            color: var(--dgc-info-dark);
-
-            i {
-              margin-right: 0.25rem;
-            }
-          }
-
-          &.badge-custom {
-            background: rgba(123, 31, 162, 0.1);
-            color: #9c27b0;
-          }
-
-          &.badge-category {
-            background: var(--dgc-gray-100);
-            color: var(--dgc-text-secondary);
-          }
-        }
-      }
-    }
-
-    .template-card-actions {
-      display: flex;
-      gap: 0.5rem;
+    // Template-specific action styling (drag handle, left-align)
+    .item-card-actions {
       justify-content: flex-start;
-      align-items: center;
-      padding-top: $spacing-md;
-      margin-top: auto;
-      border-top: 1px solid var(--dgc-border-color);
 
       .template-drag-handle {
         margin-left: auto;
@@ -276,65 +204,6 @@
 
         &:active {
           cursor: grabbing;
-        }
-      }
-
-      .btn-icon {
-        width: 32px;
-        height: 32px;
-        min-width: 32px;
-        min-height: 32px;
-        padding: 0 !important;
-        border-radius: 50% !important;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--dgc-border-color);
-        background: var(--dgc-bg-card);
-        color: var(--dgc-text-secondary);
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 0.875rem;
-        flex-shrink: 0;
-
-        &.btn-primary {
-          border-color: var(--dgc-primary);
-          color: var(--dgc-primary);
-
-          &:hover {
-            background: var(--dgc-primary);
-            color: var(--dgc-text-inverse);
-          }
-        }
-
-        &.btn-warning {
-          border-color: var(--dgc-warning);
-          color: var(--dgc-warning);
-
-          &:hover {
-            background: var(--dgc-warning);
-            color: var(--dgc-text-inverse);
-          }
-        }
-
-        &.btn-success {
-          border-color: var(--dgc-success);
-          color: var(--dgc-success);
-
-          &:hover {
-            background: var(--dgc-success);
-            color: var(--dgc-text-inverse);
-          }
-        }
-
-        &.btn-danger {
-          border-color: var(--dgc-error);
-          color: var(--dgc-error);
-
-          &:hover {
-            background: var(--dgc-error);
-            color: var(--dgc-text-inverse);
-          }
         }
       }
     }
@@ -533,11 +402,10 @@
   }
 
   .template-card.sortable-chosen {
-    border-color: var(--dgc-primary);
-    box-shadow: var(--dgc-shadow-2);
+    box-shadow: var(--dgc-shadow-3);
     z-index: 10;
 
-    .template-card-actions .template-drag-handle {
+    .item-card-actions .template-drag-handle {
       color: var(--dgc-primary);
     }
   }
@@ -617,17 +485,8 @@ body.template-dragging {
 }
 
 // Fallback element (clone that follows cursor) - must be outside .template-list-page
-// because fallbackOnBody appends it to <body>, so we need to replicate the card styles here
+// because fallbackOnBody appends it to <body>, so we need drag-specific enhancements
 .sortable-fallback.template-card {
-  // Base card styles (since it's outside .template-list-page context)
-  background: var(--dgc-bg-card);
-  border: 2px solid var(--dgc-border-color);
-  border-radius: 12px;
-  padding: $spacing-md;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-
   // Drag-specific enhancements
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25) !important;
   transform: rotate(2deg);
@@ -640,105 +499,10 @@ body.template-dragging {
     padding: 0;
   }
 
-  // Template info
-  .template-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-
-    h4 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin: 0 0 0.25rem 0;
-      color: var(--dgc-text-primary);
-    }
-
-    p {
-      font-size: 0.875rem;
-      color: var(--dgc-text-secondary);
-      margin: 0 0 0.5rem 0;
-      line-height: 1.4;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .template-meta {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      margin-top: auto;
-      padding-top: 0.5rem;
-      margin-bottom: 0.5rem;
-
-      .badge {
-        font-size: 0.75rem;
-        padding: 0.25rem 0.5rem;
-        border-radius: 4px;
-        font-weight: 500;
-
-        &.badge-system {
-          background: var(--dgc-info-bg);
-          color: var(--dgc-info-dark);
-
-          i {
-            margin-right: 0.25rem;
-          }
-        }
-      }
-    }
-  }
-
-  // Card actions (buttons at bottom)
-  .template-card-actions {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: flex-start;
-    align-items: center;
-    padding-top: $spacing-md;
-    margin-top: auto;
-    border-top: 1px solid var(--dgc-border-color);
-
-    .template-drag-handle {
-      margin-left: auto;
-      color: var(--dgc-primary);
-      font-size: 1rem;
-      padding: 0.25rem 0.5rem;
-      opacity: 1;
-    }
-
-    .btn-icon {
-      width: 32px;
-      height: 32px;
-      min-width: 32px;
-      min-height: 32px;
-      padding: 0 !important;
-      border-radius: 50% !important;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--dgc-border-color);
-      background: var(--dgc-bg-card);
-      color: var(--dgc-text-secondary);
-      font-size: 0.875rem;
-      flex-shrink: 0;
-
-      &.btn-primary {
-        border-color: var(--dgc-primary);
-        color: var(--dgc-primary);
-      }
-
-      &.btn-success {
-        border-color: var(--dgc-success);
-        color: var(--dgc-success);
-      }
-
-      &.btn-danger {
-        border-color: var(--dgc-error);
-        color: var(--dgc-error);
-      }
-    }
+  // Show drag handle during drag
+  .item-card-actions .template-drag-handle {
+    color: var(--dgc-primary);
+    opacity: 1;
   }
 
   // Cross-category drag - highlight with danger color
