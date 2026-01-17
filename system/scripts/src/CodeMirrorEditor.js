@@ -28,6 +28,7 @@ export default class CodeMirrorEditor {
      * @param {Function} options.onTest - Callback when test button clicked
      * @param {Function} options.onChange - Callback when content changes
      * @param {Function} options.onFormat - Custom format function (optional)
+     * @param {string} options.hint - HTML content for hint displayed below toolbar
      */
     constructor(element, options = {}) {
         this.textarea = typeof element === 'string'
@@ -52,6 +53,7 @@ export default class CodeMirrorEditor {
             onTest: null,
             onChange: null,
             onFormat: null,
+            hint: null,
             ...options
         };
 
@@ -72,6 +74,7 @@ export default class CodeMirrorEditor {
         this.createWrapper();
         this.createEditor();
         this.createToolbar();
+        this.createHint();
         this.bindEvents();
     }
 
@@ -164,6 +167,18 @@ export default class CodeMirrorEditor {
 
             this.wrapper.appendChild(toolbar);
         }
+    }
+
+    /**
+     * Create hint element below toolbar
+     */
+    createHint() {
+        if (!this.options.hint) return;
+
+        const hint = document.createElement('div');
+        hint.className = 'query-hint';
+        hint.innerHTML = this.options.hint;
+        this.wrapper.appendChild(hint);
     }
 
     /**

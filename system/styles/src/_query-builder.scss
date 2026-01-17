@@ -1,185 +1,189 @@
 // Query Builder Styles
 // Note: Base CodeMirror styling is in _code-editor.scss (shared component)
-@use 'variables' as *;
+@use "variables" as *;
 
 .query-builder {
-    position: relative;
+  position: relative;
 }
 
 // Textarea fallback (before CodeMirror initializes)
 .query-editor {
-    width: 100%;
-    min-height: 150px;
-    padding: $spacing-md;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 13px;
-    line-height: 1.6;
-    border: none;
-    background: var(--dgc-code-bg);
-    color: var(--dgc-text-primary);
+  width: 100%;
+  min-height: 150px;
+  padding: $spacing-md;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  border: none;
+  background: var(--dgc-code-bg);
+  color: var(--dgc-text-primary);
 
-    &:focus {
-        outline: none;
-        background: var(--dgc-bg-input);
-    }
+  &:focus {
+    outline: none;
+    background: var(--dgc-bg-input);
+  }
 }
 
 // Query hint (placeholder syntax help)
 .query-hint {
-    font-size: $font-size-sm;
-    color: var(--dgc-text-hint);
-    padding: $spacing-sm $spacing-md;
+  font-size: $font-size-sm;
+  color: var(--dgc-text-secondary);
+  padding: $spacing-sm $spacing-md;
+  border-top: 1px solid var(--dgc-border-color);
 
-    code {
-        background: var(--dgc-gray-200);
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-size: 12px;
-        color: var(--dgc-primary);
-    }
+  code {
+    background: var(--dgc-primary-light);
+    padding: 2px 6px;
+    margin: 0 2px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
+    color: #fff;
+    font-weight: $font-weight-medium;
+  }
 }
 
 // Debug query wrapper (read-only CodeMirror for test results)
 .query-debug {
-    margin-top: $spacing-md;
+  margin-top: $spacing-md;
+  padding: $spacing-sm;
+  background: var(--dgc-gray-100);
+  border-radius: $border-radius;
+
+  small {
+    display: block;
+    margin-bottom: $spacing-xs;
+    color: var(--dgc-text-secondary);
+  }
+
+  .query-debug-sql {
+    margin: 0;
     padding: $spacing-sm;
-    background: var(--dgc-gray-100);
+    background: var(--dgc-bg-card);
     border-radius: $border-radius;
-
-    small {
-        display: block;
-        margin-bottom: $spacing-xs;
-        color: var(--dgc-text-secondary);
-    }
-
-    .query-debug-sql {
-        margin: 0;
-        padding: $spacing-sm;
-        background: var(--dgc-bg-card);
-        border-radius: $border-radius;
-        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-        font-size: 11px;
-        line-height: 1.5;
-        overflow-x: auto;
-        white-space: pre-wrap;
-        word-break: break-all;
-        color: var(--dgc-text-secondary);
-    }
+    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--dgc-text-secondary);
+  }
 }
 
 // Debug query wrapper with copy button overlay
 .debug-query-wrapper {
-    position: relative;
+  position: relative;
 
-    .copy-debug-query-btn {
-        position: absolute;
-        top: $spacing-xs;
-        right: $spacing-xs;
-        z-index: 10;
-        font-size: $font-size-sm;
-        padding: 0.25rem 0.5rem;
-        background: var(--dgc-bg-card);
-        border-color: var(--dgc-border-color);
-        opacity: 0.85;
-        transition: opacity $transition-fast;
+  .copy-debug-query-btn {
+    position: absolute;
+    top: $spacing-xs;
+    right: $spacing-xs;
+    z-index: 10;
+    font-size: $font-size-sm;
+    padding: 0.25rem 0.5rem;
+    background: var(--dgc-bg-card);
+    border-color: var(--dgc-border-color);
+    opacity: 0.85;
+    transition: opacity $transition-fast;
 
-        &:hover {
-            opacity: 1;
-            background: var(--dgc-bg-card);
-        }
+    &:hover {
+      opacity: 1;
+      background: var(--dgc-bg-card);
+    }
+  }
+
+  // Read-only CodeMirror styling
+  .CodeMirror {
+    height: auto !important;
+    border: 1px solid var(--dgc-border-color);
+    border-radius: $border-radius;
+    font-size: 12px;
+    background: var(--dgc-gray-100);
+    cursor: default;
+
+    .CodeMirror-scroll {
+      height: auto !important;
+      overflow: visible !important;
+      background: var(--dgc-gray-100);
     }
 
-    // Read-only CodeMirror styling
-    .CodeMirror {
-        height: auto !important;
-        border: 1px solid var(--dgc-border-color);
-        border-radius: $border-radius;
-        font-size: 12px;
-        background: var(--dgc-gray-100);
-        cursor: default;
-
-        .CodeMirror-scroll {
-            height: auto !important;
-            overflow: visible !important;
-            background: var(--dgc-gray-100);
-        }
-
-        .CodeMirror-sizer {
-            min-height: 0 !important;
-        }
-
-        .CodeMirror-gutters {
-            height: auto !important;
-            background: var(--dgc-gray-200);
-            border-right: 1px solid var(--dgc-border-color);
-        }
-
-        .CodeMirror-linenumber {
-            color: var(--dgc-text-muted);
-        }
-
-        // Hide cursor for read-only
-        .CodeMirror-cursor {
-            display: none !important;
-        }
+    .CodeMirror-sizer {
+      min-height: 0 !important;
     }
+
+    .CodeMirror-gutters {
+      height: auto !important;
+      background: var(--dgc-gray-200);
+      border-right: 1px solid var(--dgc-border-color);
+    }
+
+    .CodeMirror-linenumber {
+      color: var(--dgc-text-muted);
+    }
+
+    // Hide cursor for read-only
+    .CodeMirror-cursor {
+      display: none !important;
+    }
+  }
 }
 
 // Query columns result display
 .query-columns-result {
-    margin-top: $spacing-sm;
+  margin-top: $spacing-sm;
 
-    strong {
-        display: block;
-        margin-bottom: $spacing-xs;
-        color: var(--dgc-text-primary);
+  strong {
+    display: block;
+    margin-bottom: $spacing-xs;
+    color: var(--dgc-text-primary);
+  }
+
+  .column-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+  }
+
+  .column-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px $spacing-sm;
+    background: var(--dgc-primary);
+    color: white;
+    border-radius: 12px;
+    font-size: $font-size-sm;
+
+    i {
+      margin-right: 4px;
+      font-size: 10px;
     }
-
-    .column-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: $spacing-xs;
-    }
-
-    .column-item {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px $spacing-sm;
-        background: var(--dgc-primary);
-        color: white;
-        border-radius: 12px;
-        font-size: $font-size-sm;
-
-        i {
-            margin-right: 4px;
-            font-size: 10px;
-        }
-    }
+  }
 }
 
 // Syntax highlighting placeholders
 .query-placeholder {
-    color: var(--dgc-primary);
-    font-weight: $font-weight-medium;
+  color: var(--dgc-primary);
+  font-weight: $font-weight-medium;
 }
 
 // Query preview
 .query-preview {
-    margin-top: $spacing-md;
-    padding: $spacing-md;
-    background: var(--dgc-gray-100);
-    border-radius: $border-radius;
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-    font-size: 12px;
-    overflow-x: auto;
-    white-space: pre-wrap;
-    word-break: break-all;
-    color: var(--dgc-text-primary);
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background: var(--dgc-gray-100);
+  border-radius: $border-radius;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 12px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--dgc-text-primary);
 
-    .placeholder {
-        background: rgba(0, 123, 255, 0.2);
-        padding: 2px 4px;
-        border-radius: 2px;
-        color: var(--dgc-primary);
-    }
+  .placeholder {
+    background: rgba(0, 123, 255, 0.2);
+    padding: 2px 4px;
+    border-radius: 2px;
+    color: var(--dgc-primary);
+  }
 }

@@ -157,6 +157,15 @@ class DashboardBuilder {
     if (!modal) {
       modal = new bootstrap.Modal(modalElement);
     }
+
+    // Focus on name input when modal is shown (for new dashboard only)
+    if (!isAddingSection && nameInput) {
+      modalElement.addEventListener("shown.bs.modal", function focusHandler() {
+        nameInput.focus();
+        modalElement.removeEventListener("shown.bs.modal", focusHandler);
+      });
+    }
+
     modal.show();
 
     try {
@@ -388,19 +397,64 @@ class DashboardBuilder {
       if (text) text.textContent = "Saved";
     }
 
-    // Add View Dashboard button if it doesn't exist
+    // Add View Mode button and Tweak switch if they don't exist
+    // Order should be: Saved → View Mode → Tweak → Separator → Theme Toggle
     const headerRight = document.querySelector(".page-header-right");
     if (headerRight && this.dashboardId) {
+      // Find the separator before theme toggle to insert before it
+      const headerSeparator = headerRight.querySelector(".header-separator");
+
+      // Add View Mode button
       const existingViewBtn = headerRight.querySelector(
         'a[href*="dashboard/preview"]'
       );
       if (!existingViewBtn) {
         const viewBtn = document.createElement("a");
         viewBtn.href = `?urlq=dashboard/preview/${this.dashboardId}`;
-        viewBtn.className = "btn btn-primary";
-        viewBtn.title = "View Dashboard";
-        viewBtn.innerHTML = '<i class="fas fa-eye"></i> View Dashboard';
-        headerRight.appendChild(viewBtn);
+        viewBtn.className = "btn btn-primary btn-sm btn-view-mode";
+        viewBtn.innerHTML = '<i class="fas fa-eye"></i> View Mode';
+        if (headerSeparator) {
+          headerRight.insertBefore(viewBtn, headerSeparator);
+        } else {
+          headerRight.appendChild(viewBtn);
+        }
+      }
+
+      // Add Tweak switch
+      const existingTweakSwitch = headerRight.querySelector("#toggle-layout-edit-switch");
+      if (!existingTweakSwitch) {
+        const tweakDiv = document.createElement("div");
+        tweakDiv.className = "form-check form-switch text-switch text-switch-purple";
+        tweakDiv.innerHTML = `
+          <input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch">
+          <div class="text-switch-track">
+            <span class="text-switch-knob"></span>
+            <span class="text-switch-label label-text">Tweak</span>
+          </div>
+        `;
+        if (headerSeparator) {
+          headerRight.insertBefore(tweakDiv, headerSeparator);
+        } else {
+          headerRight.appendChild(tweakDiv);
+        }
+
+        // Initialize tweak switch functionality
+        const tweakSwitch = tweakDiv.querySelector("#toggle-layout-edit-switch");
+        const tweakEnabled = localStorage.getItem("dashboardTweakEnabled") === "true";
+        tweakSwitch.checked = tweakEnabled;
+        if (!tweakEnabled) {
+          this.container.classList.add("layout-edit-disabled");
+        }
+
+        tweakSwitch.addEventListener("change", () => {
+          if (tweakSwitch.checked) {
+            this.container.classList.remove("layout-edit-disabled");
+            localStorage.setItem("dashboardTweakEnabled", "true");
+          } else {
+            this.container.classList.add("layout-edit-disabled");
+            localStorage.setItem("dashboardTweakEnabled", "false");
+          }
+        });
       }
     }
   }

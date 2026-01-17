@@ -40,9 +40,6 @@ export default class QueryBuilder {
 
         // Initialize CodeMirror if available
         this.initCodeMirror();
-
-        // Add hint about placeholders
-        this.addPlaceholderHint();
     }
 
     /**
@@ -57,6 +54,7 @@ export default class QueryBuilder {
             formatBtn: true,
             testBtn: true,
             minHeight: 150,
+            hint: 'Use <code>::placeholder_name</code> for filter values. Example: <code>WHERE date &gt;= ::date_from AND status IN (::status_ids)</code>',
             onTest: () => this.testQuery(),
             onChange: () => this.onChange()
         });
@@ -70,25 +68,6 @@ export default class QueryBuilder {
                 'Ctrl-Enter': () => this.testQuery(),
                 'Cmd-Enter': () => this.testQuery()
             });
-        }
-    }
-
-    /**
-     * Add hint about filter placeholders
-     */
-    addPlaceholderHint() {
-        // CodeMirrorEditor adds a toolbar, so we add the hint after it
-        if (this.codeEditor && this.codeEditor.wrapper) {
-            const existingHint = this.codeEditor.wrapper.querySelector('.query-hint');
-            if (!existingHint) {
-                const hint = document.createElement('div');
-                hint.className = 'query-hint';
-                hint.innerHTML = `
-                    Use <code>::placeholder_name</code> for filter values.
-                    Example: <code>WHERE date >= ::date_from AND status IN (::status_ids)</code>
-                `;
-                this.codeEditor.wrapper.appendChild(hint);
-            }
         }
     }
 

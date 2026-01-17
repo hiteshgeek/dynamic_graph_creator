@@ -29,10 +29,13 @@
 
 <body>
     <?php
+    $rightContent = '<button type="submit" form="template-editor-form" class="btn btn-sm btn-outline-primary" id="submit-btn">';
+    $rightContent .= '<i class="fas fa-save"></i> Save Template</button>';
     echo Utility::renderPageHeader([
         'title' => $pageTitle,
         'backUrl' => '?urlq=dashboard/templates',
-        'backLabel' => 'Templates'
+        'backLabel' => 'Templates',
+        'rightContent' => $rightContent
     ]);
     ?>
 
@@ -40,7 +43,7 @@
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
                 <div class="card">
-                    <div class="card-body">
+                    <div class="card-body p-0">
                         <form id="template-editor-form">
                             <div class="mb-3">
                                 <label for="template-name" class="form-label">Template Name *</label>
@@ -100,11 +103,6 @@
                                 <input type="hidden" name="id" value="<?php echo $template->getId(); ?>">
                             <?php endif; ?>
 
-                            <div class="d-flex justify-content-end gap-2">
-                                <button type="submit" class="btn btn-sm btn-primary" id="submit-btn">
-                                    <i class="fas fa-check"></i> <?php echo $template && $template->getId() ? 'Update' : 'Create & Edit Structure'; ?>
-                                </button>
-                            </div>
                         </form>
                     </div>
                 </div>
@@ -212,7 +210,7 @@
                     // Show loading state
                     const originalBtnContent = submitBtn.innerHTML;
                     submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (templateId ? 'Updating...' : 'Creating...');
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
                     try {
                         const result = await Ajax.post(action, data);

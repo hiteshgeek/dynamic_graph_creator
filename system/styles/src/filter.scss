@@ -1,6 +1,7 @@
 // Filter-specific styles (use with common.css)
 @use "variables" as *;
 @use "filters";
+@use "query-builder";
 
 @media (max-width: 992px) {
   .filter-item {

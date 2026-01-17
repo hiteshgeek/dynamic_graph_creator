@@ -60,6 +60,7 @@ export default class FilterFormPage {
                 formatBtn: true,
                 testBtn: true,
                 minHeight: 100,
+                hint: 'Query must return <code>value</code> and <code>label</code> columns. Optional: add <code>is_selected</code> column (1/0) to pre-select options.',
                 onTest: () => this.testQuery(),
                 onFormat: (query) => this.formatQueryString(query)
             });
