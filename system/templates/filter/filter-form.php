@@ -47,13 +47,13 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Filter Key <span class="required">*</span></label>
+                                <label class="form-label" for="filter-key">Filter Key <span class="required">*</span></label>
                                 <input type="text" id="filter-key" class="form-control" placeholder="::placeholder_name" value="<?php echo $filter ? htmlspecialchars($filter->getFilterKey()) : ''; ?>" required>
                                 <small class="form-hint">Placeholder used in SQL queries (e.g., ::year, ::date_from, ::status)</small>
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Label <span class="required">*</span></label>
+                                <label class="form-label" for="filter-label">Label <span class="required">*</span></label>
                                 <input type="text" id="filter-label" class="form-control" placeholder="Year" value="<?php echo $filter ? htmlspecialchars($filter->getFilterLabel()) : ''; ?>" required>
                                 <small class="form-hint">Display label shown to users</small>
                             </div>
@@ -61,8 +61,8 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label class="form-label">Filter Type <span class="required">*</span></label>
-                                <select id="filter-type" class="form-control">
+                                <label class="form-label" for="filter-type">Filter Type <span class="required">*</span></label>
+                                <select id="filter-type" class="form-select">
                                     <option value="text" <?php echo ($filter && $filter->getFilterType() === 'text') ? 'selected' : ''; ?>>Text Input</option>
                                     <option value="number" <?php echo ($filter && $filter->getFilterType() === 'number') ? 'selected' : ''; ?>>Number Input</option>
                                     <option value="date" <?php echo ($filter && $filter->getFilterType() === 'date') ? 'selected' : ''; ?>>Date Picker</option>
@@ -75,7 +75,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="form-label">Default Value</label>
+                                <label class="form-label" for="filter-default">Default Value</label>
                                 <input type="text" id="filter-default" class="form-control" placeholder="Optional" value="<?php echo $filter ? htmlspecialchars($filter->getDefaultValue()) : ''; ?>">
                             </div>
                         </div>
@@ -88,23 +88,26 @@
                         $showCheckboxRadioConfig = $filter && in_array($filter->getFilterType(), array('checkbox', 'radio'));
                         ?>
                         <div id="select-config-section" class="form-group" style="<?php echo $showSelectConfig ? '' : 'display: none;'; ?>">
-                            <label class="form-label">
-                                <input type="checkbox" id="filter-multiple" <?php echo $isMultiSelect ? 'checked' : ''; ?>> Allow multiple selection
-                            </label>
-                            <small class="form-hint d-block">Enable users to select more than one option</small>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filter-multiple" <?php echo $isMultiSelect ? 'checked' : ''; ?>>
+                                <label class="form-check-label" for="filter-multiple">Allow multiple selection</label>
+                            </div>
+                            <small class="form-hint d-block mt-1">Enable users to select more than one option</small>
                         </div>
 
                         <div id="checkbox-radio-config-section" class="form-group" style="<?php echo $showCheckboxRadioConfig ? '' : 'display: none;'; ?>">
-                            <label class="form-label">
-                                <input type="checkbox" id="filter-inline" <?php echo $isInline ? 'checked' : ''; ?>> Display inline
-                            </label>
-                            <small class="form-hint d-block">Show options horizontally instead of stacked vertically</small>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filter-inline" <?php echo $isInline ? 'checked' : ''; ?>>
+                                <label class="form-check-label" for="filter-inline">Display inline</label>
+                            </div>
+                            <small class="form-hint d-block mt-1">Show options horizontally instead of stacked vertically</small>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">
-                                <input type="checkbox" id="filter-required" <?php echo ($filter && $filter->getIsRequired()) ? 'checked' : ''; ?>> Required field
-                            </label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="filter-required" <?php echo ($filter && $filter->getIsRequired()) ? 'checked' : ''; ?>>
+                                <label class="form-check-label" for="filter-required">Required field</label>
+                            </div>
                         </div>
 
                         <?php
@@ -176,7 +179,7 @@
                             <!-- Query Options -->
                             <div id="query-options-section" style="<?php echo $dataSource === 'query' ? '' : 'display: none;'; ?>">
                                 <div class="form-group">
-                                    <label class="form-label">SQL Query</label>
+                                    <label class="form-label" for="data-query">SQL Query</label>
                                     <textarea id="data-query" class="form-control query-textarea" rows="4" placeholder="SELECT id as value, name as label FROM categories WHERE status = 1 ORDER BY name"><?php echo $filter ? htmlspecialchars($filter->getDataQuery()) : ''; ?></textarea>
                                     <small class="form-hint">Query must return <code>value</code> and <code>label</code> columns</small>
                                 </div>

@@ -125,29 +125,35 @@ export default class FilterManager {
         const showOptions = filter.filter_type === 'select' ||
                            filter.filter_type === 'multi_select';
 
+        const filterId = `filter-${index}`;
+
         return `
             <div class="filter-item" data-index="${index}">
                 <div class="filter-item-field">
-                    <label>Key</label>
+                    <label for="${filterId}-key">Key</label>
                     <input
                         type="text"
+                        class="form-control"
+                        id="${filterId}-key"
                         value="${filter.filter_key || ''}"
                         data-field="filter_key"
                         placeholder=":placeholder"
                     >
                 </div>
                 <div class="filter-item-field">
-                    <label>Label</label>
+                    <label for="${filterId}-label">Label</label>
                     <input
                         type="text"
+                        class="form-control"
+                        id="${filterId}-label"
                         value="${filter.filter_label || ''}"
                         data-field="filter_label"
                         placeholder="Display label"
                     >
                 </div>
                 <div class="filter-item-field">
-                    <label>Type</label>
-                    <select data-field="filter_type">
+                    <label for="${filterId}-type">Type</label>
+                    <select class="form-select" id="${filterId}-type" data-field="filter_type">
                         ${this.filterTypes.map(t => `
                             <option
                                 value="${t.value}"
@@ -157,9 +163,11 @@ export default class FilterManager {
                     </select>
                 </div>
                 <div class="filter-item-field">
-                    <label>Default</label>
+                    <label for="${filterId}-default">Default</label>
                     <input
                         type="text"
+                        class="form-control"
+                        id="${filterId}-default"
                         value="${filter.default_value || ''}"
                         data-field="default_value"
                         placeholder="Default value"
@@ -202,6 +210,7 @@ export default class FilterManager {
                         <div class="filter-option-item">
                             <input
                                 type="text"
+                                class="form-control"
                                 value="${opt.value || ''}"
                                 placeholder="Value"
                                 data-opt-index="${optIndex}"
@@ -209,6 +218,7 @@ export default class FilterManager {
                             >
                             <input
                                 type="text"
+                                class="form-control"
                                 value="${opt.label || ''}"
                                 placeholder="Label"
                                 data-opt-index="${optIndex}"
@@ -227,11 +237,13 @@ export default class FilterManager {
                 <div class="filter-option-add">
                     <input
                         type="text"
+                        class="form-control"
                         placeholder="New value"
                         class="new-option-value"
                     >
                     <input
                         type="text"
+                        class="form-control"
                         placeholder="New label"
                         class="new-option-label"
                     >
@@ -421,25 +433,26 @@ export default class FilterManager {
         const key = filter.filter_key;
         const label = filter.filter_label || key;
         const defaultVal = filter.default_value || '';
+        const inputId = `filter-input-${key}`;
 
         let inputHtml = '';
 
         switch (filter.filter_type) {
             case 'date':
-                inputHtml = `<input type="date" data-filter-key="${key}" value="${defaultVal}">`;
+                inputHtml = `<input type="date" class="form-control" id="${inputId}" data-filter-key="${key}" value="${defaultVal}">`;
                 break;
 
             case 'date_range':
                 inputHtml = `
                     <div class="filter-input-group-date-range">
-                        <input type="date" data-filter-key="${key}_from" placeholder="From">
-                        <input type="date" data-filter-key="${key}_to" placeholder="To">
+                        <input type="date" class="form-control" data-filter-key="${key}_from" placeholder="From">
+                        <input type="date" class="form-control" data-filter-key="${key}_to" placeholder="To">
                     </div>
                 `;
                 break;
 
             case 'number':
-                inputHtml = `<input type="number" data-filter-key="${key}" value="${defaultVal}">`;
+                inputHtml = `<input type="number" class="form-control" id="${inputId}" data-filter-key="${key}" value="${defaultVal}">`;
                 break;
 
             case 'select':
@@ -447,7 +460,7 @@ export default class FilterManager {
                 const options = FilterManager.parseOptions(filter.filter_options);
                 const multiple = filter.filter_type === 'multi_select' ? 'multiple' : '';
                 inputHtml = `
-                    <select data-filter-key="${key}" ${multiple}>
+                    <select class="form-select" id="${inputId}" data-filter-key="${key}" ${multiple}>
                         <option value="">-- Select --</option>
                         ${options.map(o => `
                             <option value="${o.value}">${o.label}</option>
@@ -457,12 +470,12 @@ export default class FilterManager {
                 break;
 
             default:
-                inputHtml = `<input type="text" data-filter-key="${key}" value="${defaultVal}">`;
+                inputHtml = `<input type="text" class="form-control" id="${inputId}" data-filter-key="${key}" value="${defaultVal}">`;
         }
 
         return `
             <div class="filter-input-group">
-                <label>${label}</label>
+                <label for="${inputId}">${label}</label>
                 ${inputHtml}
             </div>
         `;

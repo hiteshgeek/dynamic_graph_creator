@@ -156,10 +156,13 @@ export default class DataMapper {
 
         let inputHtml = '';
 
+        const fieldId = `mapper-${field.key}`;
+
         if (fieldType === 'select') {
             inputHtml = `
                 <select
-                    class="form-control"
+                    class="form-select"
+                    id="${fieldId}"
                     data-field="${field.key}"
                 >
                     <option value="">-- Select column --</option>
@@ -176,6 +179,7 @@ export default class DataMapper {
                 <input
                     type="text"
                     class="form-control"
+                    id="${fieldId}"
                     data-field="${field.key}"
                     value="${this.escapeHtml(value)}"
                     placeholder="${field.placeholder || ''}"
@@ -185,7 +189,7 @@ export default class DataMapper {
 
         return `
             <div class="data-mapper-field ${fieldType === 'text' ? 'text-field' : ''}">
-                <label title="${field.description}">${field.label}</label>
+                <label for="${fieldId}" title="${field.description}">${field.label}</label>
                 ${inputHtml}
             </div>
         `;

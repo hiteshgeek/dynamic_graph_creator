@@ -117,13 +117,15 @@
                                                 $filterKey = $filter['filter_key'];
                                                 $filterKeyClean = ltrim($filterKey, ':');
                                                 ?>
-                                                <label class="filter-selector-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>">
-                                                    <input type="checkbox" class="filter-selector-checkbox" value="<?php echo htmlspecialchars($filterKeyClean); ?>">
-                                                    <div class="filter-selector-info">
-                                                        <span class="filter-selector-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
-                                                        <code class="filter-selector-key"><?php echo htmlspecialchars($filterKey); ?></code>
+                                                <div class="filter-selector-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input filter-selector-checkbox" type="checkbox" value="<?php echo htmlspecialchars($filterKeyClean); ?>" id="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                        <label class="form-check-label" for="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                            <span class="filter-selector-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
+                                                            <code class="filter-selector-key"><?php echo htmlspecialchars($filterKey); ?></code>
+                                                        </label>
                                                     </div>
-                                                </label>
+                                                </div>
                                             <?php endforeach; ?>
                                         </div>
                                         <button type="button" class="btn btn-sm btn-primary filter-use-btn" id="filter-use-btn" disabled>
@@ -169,48 +171,60 @@
                                                         </select>
 
                                                     <?php elseif ($filterType === 'multi_select'): ?>
-                                                        <div class="filter-multiselect-dropdown" data-filter-name="<?php echo htmlspecialchars($filterKeyClean); ?>">
-                                                            <div class="filter-multiselect-trigger">
+                                                        <div class="dropdown filter-multiselect-dropdown" data-filter-name="<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                            <button class="btn btn-outline-secondary dropdown-toggle filter-multiselect-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                                                                 <span class="filter-multiselect-placeholder">-- Select multiple --</span>
-                                                                <i class="fas fa-chevron-down"></i>
-                                                            </div>
-                                                            <div class="filter-multiselect-options">
-                                                                <?php foreach ($options as $opt):
+                                                            </button>
+                                                            <div class="dropdown-menu filter-multiselect-options">
+                                                                <div class="filter-multiselect-header">
+                                                                    <div class="filter-multiselect-actions">
+                                                                        <button type="button" class="btn btn-link btn-sm multiselect-select-all">All</button>
+                                                                        <span class="filter-multiselect-divider">|</span>
+                                                                        <button type="button" class="btn btn-link btn-sm multiselect-select-none">None</button>
+                                                                    </div>
+                                                                    <input type="text" class="form-control form-control-sm multiselect-search" placeholder="Search...">
+                                                                </div>
+                                                                <?php foreach ($options as $index => $opt):
                                                                     $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                                                     $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                                                    $optId = 'multiselect-' . $filterKeyClean . '-' . $index;
                                                                 ?>
-                                                                    <label class="filter-multiselect-option">
-                                                                        <input type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>">
-                                                                        <span><?php echo htmlspecialchars($label); ?></span>
-                                                                    </label>
+                                                                    <div class="dropdown-item filter-multiselect-option">
+                                                                        <div class="form-check">
+                                                                            <input class="form-check-input" type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>">
+                                                                            <label class="form-check-label" for="<?php echo $optId; ?>"><?php echo htmlspecialchars($label); ?></label>
+                                                                        </div>
+                                                                    </div>
                                                                 <?php endforeach; ?>
                                                             </div>
                                                         </div>
 
                                                     <?php elseif ($filterType === 'checkbox'): ?>
                                                         <div class="filter-checkbox-group">
-                                                            <?php foreach ($options as $opt):
+                                                            <?php foreach ($options as $index => $opt):
                                                                 $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                                                 $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                                                $optId = 'checkbox-' . $filterKeyClean . '-' . $index;
                                                             ?>
-                                                                <label class="filter-checkbox">
-                                                                    <input type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>">
-                                                                    <span><?php echo htmlspecialchars($label); ?></span>
-                                                                </label>
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>">
+                                                                    <label class="form-check-label" for="<?php echo $optId; ?>"><?php echo htmlspecialchars($label); ?></label>
+                                                                </div>
                                                             <?php endforeach; ?>
                                                         </div>
 
                                                     <?php elseif ($filterType === 'radio'): ?>
                                                         <div class="filter-radio-group">
-                                                            <?php foreach ($options as $opt):
+                                                            <?php foreach ($options as $index => $opt):
                                                                 $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                                                 $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
                                                                 $checked = ($value == $defaultValue) ? 'checked' : '';
+                                                                $optId = 'radio-' . $filterKeyClean . '-' . $index;
                                                             ?>
-                                                                <label class="filter-radio">
-                                                                    <input type="radio" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($value); ?>" <?php echo $checked; ?>>
-                                                                    <span><?php echo htmlspecialchars($label); ?></span>
-                                                                </label>
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>" <?php echo $checked; ?>>
+                                                                    <label class="form-check-label" for="<?php echo $optId; ?>"><?php echo htmlspecialchars($label); ?></label>
+                                                                </div>
                                                             <?php endforeach; ?>
                                                         </div>
 
@@ -253,8 +267,8 @@
                 <!-- Save Bar (at top) -->
                 <div class="graph-save-bar">
                     <div class="graph-name-wrapper">
-                        <label class="graph-name-label">Graph Name <span class="required">*</span></label>
-                        <input type="text" class="form-control form-control-sm graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
+                        <label class="graph-name-label" for="graph-name-input">Graph Name <span class="required">*</span></label>
+                        <input type="text" class="form-control form-control-sm graph-name-input" id="graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
                     </div>
                     <div class="save-buttons">
                         <a href="?urlq=graph" class="btn btn-secondary btn-sm">Cancel</a>

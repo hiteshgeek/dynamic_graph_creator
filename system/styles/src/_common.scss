@@ -255,6 +255,66 @@ body {
   }
 }
 
+// Custom styled Bootstrap form controls (matching our theme)
+// Removes default Bootstrap box-shadow and improves appearance
+.form-control {
+  background-color: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
+  color: var(--dgc-text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: var(--dgc-text-hint);
+  }
+
+  &:hover {
+    border-color: var(--dgc-primary-light);
+  }
+
+  &:focus {
+    background-color: var(--dgc-bg-card);
+    border-color: var(--dgc-primary);
+    box-shadow: none;
+    color: var(--dgc-text-primary);
+  }
+
+  &:disabled,
+  &[readonly] {
+    background-color: var(--dgc-bg-elevated);
+    color: var(--dgc-text-secondary);
+  }
+}
+
+.form-select {
+  background-color: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
+  color: var(--dgc-text-primary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: var(--dgc-primary-light);
+  }
+
+  &:focus {
+    background-color: var(--dgc-bg-card);
+    border-color: var(--dgc-primary);
+    box-shadow: none;
+    color: var(--dgc-text-primary);
+  }
+
+  &:disabled {
+    background-color: var(--dgc-bg-elevated);
+    color: var(--dgc-text-secondary);
+  }
+}
+
+// Form labels
+.form-label {
+  color: var(--dgc-text-primary);
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-xs;
+}
+
 // Form Validation Styles (Bootstrap-compatible)
 // Works with FormValidator utility
 .form-control,
@@ -276,7 +336,9 @@ body {
 
 .form-select.is-invalid {
   padding-right: 4.125rem;
-  background-position: right 0.75rem center, center right 2.25rem;
+  background-position:
+    right 0.75rem center,
+    center right 2.25rem;
 }
 
 .invalid-feedback {
@@ -435,6 +497,85 @@ option[value="__new__"] {
   }
 }
 
+// Custom styled Bootstrap checkbox (matching our theme)
+// Removes default Bootstrap box-shadow and improves appearance
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: auto;
+  padding-left: 0;
+}
+
+.form-check-input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  flex-shrink: 0;
+  border: 2px solid var(--dgc-border-color);
+  border-radius: 4px;
+  background-color: var(--dgc-bg-card);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--dgc-primary);
+  }
+
+  &:focus {
+    border-color: var(--dgc-primary);
+    box-shadow: none;
+    outline: none;
+  }
+
+  &:checked {
+    background-color: var(--dgc-primary);
+    border-color: var(--dgc-primary);
+  }
+
+  &:active {
+    filter: brightness(0.95);
+  }
+}
+
+.form-check-label {
+  color: var(--dgc-text-primary);
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 0;
+}
+
+// Custom styled Bootstrap radio button (matching our theme)
+.form-check-input[type="radio"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  flex-shrink: 0;
+  border: 2px solid var(--dgc-border-color);
+  background-color: var(--dgc-bg-card);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--dgc-primary);
+  }
+
+  &:focus {
+    border-color: var(--dgc-primary);
+    box-shadow: none;
+    outline: none;
+  }
+
+  &:checked {
+    background-color: var(--dgc-primary);
+    border-color: var(--dgc-primary);
+  }
+
+  &:active {
+    filter: brightness(0.95);
+  }
+}
+
 // Custom styled Bootstrap switch (matching config panel design)
 // Use with: <div class="form-check form-switch custom-switch">
 // Contextual colors: custom-switch-success, custom-switch-warning, custom-switch-danger, custom-switch-info
@@ -450,10 +591,13 @@ option[value="__new__"] {
     cursor: pointer;
     background-color: $gray-300;
     border: none;
+    border-radius: 24px;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");
     background-position: left center;
     background-size: contain;
-    transition: background-color 0.15s ease, background-position 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      background-position 0.15s ease;
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
 
     &:focus {

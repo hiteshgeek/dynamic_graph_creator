@@ -605,16 +605,98 @@ export default class FilterFormPage {
      * Bind click events for multiselect dropdown toggle
      */
     bindMultiselectDropdown(container) {
+        const dropdown = container.querySelector('.filter-multiselect-dropdown');
         const trigger = container.querySelector('.filter-multiselect-trigger');
         const optionsPanel = container.querySelector('.filter-multiselect-options');
+        const placeholder = container.querySelector('.filter-multiselect-placeholder');
 
         if (!trigger || !optionsPanel) return;
+
+        const optionItems = dropdown.querySelectorAll('.filter-multiselect-option');
+        const selectAllBtn = dropdown.querySelector('.multiselect-select-all');
+        const selectNoneBtn = dropdown.querySelector('.multiselect-select-none');
+        const searchInput = dropdown.querySelector('.multiselect-search');
+
+        // Update placeholder text based on selection
+        const updatePlaceholder = () => {
+            const checkboxes = dropdown.querySelectorAll('.filter-multiselect-option input[type="checkbox"]');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+
+            if (checkedCount === 0) {
+                placeholder.textContent = '-- Select multiple --';
+                placeholder.classList.remove('has-selection');
+            } else {
+                placeholder.textContent = `${checkedCount} selected`;
+                placeholder.classList.add('has-selection');
+            }
+        };
+
+        // Bind checkbox changes
+        optionItems.forEach(item => {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.addEventListener('change', updatePlaceholder);
+            }
+        });
+
+        // Select All button (only selects visible items)
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                optionItems.forEach(item => {
+                    if (item.style.display !== 'none') {
+                        const cb = item.querySelector('input[type="checkbox"]');
+                        if (cb) cb.checked = true;
+                    }
+                });
+                updatePlaceholder();
+            });
+        }
+
+        // Select None button (only deselects visible items)
+        if (selectNoneBtn) {
+            selectNoneBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                optionItems.forEach(item => {
+                    if (item.style.display !== 'none') {
+                        const cb = item.querySelector('input[type="checkbox"]');
+                        if (cb) cb.checked = false;
+                    }
+                });
+                updatePlaceholder();
+            });
+        }
+
+        // Search functionality
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                optionItems.forEach(item => {
+                    const label = item.querySelector('.form-check-label')?.textContent.toLowerCase() || '';
+                    if (searchTerm === '' || label.includes(searchTerm)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+
+            // Prevent dropdown from closing when clicking search input
+            searchInput.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
 
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
             optionsPanel.classList.toggle('open');
-            trigger.querySelector('i').classList.toggle('fa-chevron-down');
-            trigger.querySelector('i').classList.toggle('fa-chevron-up');
+            const icon = trigger.querySelector('i');
+            if (icon) {
+                icon.classList.toggle('fa-chevron-down');
+                icon.classList.toggle('fa-chevron-up');
+            }
         });
 
         // Close dropdown when clicking outside
@@ -622,8 +704,10 @@ export default class FilterFormPage {
             if (!container.contains(e.target)) {
                 optionsPanel.classList.remove('open');
                 const icon = trigger.querySelector('i');
-                icon.classList.remove('fa-chevron-up');
-                icon.classList.add('fa-chevron-down');
+                if (icon) {
+                    icon.classList.remove('fa-chevron-up');
+                    icon.classList.add('fa-chevron-down');
+                }
             }
         });
     }
@@ -649,19 +733,28 @@ export default class FilterFormPage {
         // Render different preview based on filter type
         if (filterType === 'select') {
             if (isMultiple) {
-                // Multi-select dropdown with checkboxes
+                // Multi-select dropdown with checkboxes using Bootstrap dropdown
                 previewHtml += `
-                    <div class="filter-multiselect-dropdown">
-                        <div class="filter-multiselect-trigger">
+                    <div class="dropdown filter-multiselect-dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle filter-multiselect-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                             <span class="filter-multiselect-placeholder">-- Select multiple --</span>
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                        <div class="filter-multiselect-options">
-                            ${options.map(opt => `
-                                <label class="filter-multiselect-option">
-                                    <input type="checkbox" value="${this.escapeHtml(opt.value)}">
-                                    <span>${this.escapeHtml(opt.label)}</span>
-                                </label>
+                        </button>
+                        <div class="dropdown-menu filter-multiselect-options">
+                            <div class="filter-multiselect-header">
+                                <div class="filter-multiselect-actions">
+                                    <button type="button" class="btn btn-link btn-sm multiselect-select-all">All</button>
+                                    <span class="filter-multiselect-divider">|</span>
+                                    <button type="button" class="btn btn-link btn-sm multiselect-select-none">None</button>
+                                </div>
+                                <input type="text" class="form-control form-control-sm multiselect-search" placeholder="Search...">
+                            </div>
+                            ${options.map((opt, index) => `
+                                <div class="dropdown-item filter-multiselect-option">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="${this.escapeHtml(opt.value)}" id="preview-multiselect-${index}">
+                                        <label class="form-check-label" for="preview-multiselect-${index}">${this.escapeHtml(opt.label)}</label>
+                                    </div>
+                                </div>
                             `).join('')}
                         </div>
                     </div>
@@ -679,12 +772,12 @@ export default class FilterFormPage {
             // Checkboxes
             const inlineClass = isInline ? ' inline' : '';
             previewHtml += `<div class="filter-preview-checkboxes${inlineClass}">`;
-            options.forEach(opt => {
+            options.forEach((opt, index) => {
                 previewHtml += `
-                    <label class="filter-preview-checkbox">
-                        <input type="checkbox" name="preview_checkbox" value="${this.escapeHtml(opt.value)}">
-                        <span>${this.escapeHtml(opt.label)}</span>
-                    </label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="preview_checkbox" value="${this.escapeHtml(opt.value)}" id="preview-checkbox-${index}">
+                        <label class="form-check-label" for="preview-checkbox-${index}">${this.escapeHtml(opt.label)}</label>
+                    </div>
                 `;
             });
             previewHtml += '</div>';
@@ -692,12 +785,12 @@ export default class FilterFormPage {
             // Radio buttons
             const inlineClass = isInline ? ' inline' : '';
             previewHtml += `<div class="filter-preview-radios${inlineClass}">`;
-            options.forEach(opt => {
+            options.forEach((opt, index) => {
                 previewHtml += `
-                    <label class="filter-preview-radio">
-                        <input type="radio" name="preview_radio" value="${this.escapeHtml(opt.value)}">
-                        <span>${this.escapeHtml(opt.label)}</span>
-                    </label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="preview_radio" value="${this.escapeHtml(opt.value)}" id="preview-radio-${index}">
+                        <label class="form-check-label" for="preview-radio-${index}">${this.escapeHtml(opt.label)}</label>
+                    </div>
                 `;
             });
             previewHtml += '</div>';

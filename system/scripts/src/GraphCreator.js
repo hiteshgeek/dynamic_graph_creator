@@ -486,9 +486,31 @@ export default class GraphCreator {
             const trigger = dropdown.querySelector('.filter-multiselect-trigger');
             const optionsPanel = dropdown.querySelector('.filter-multiselect-options');
             const placeholder = dropdown.querySelector('.filter-multiselect-placeholder');
-            const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]');
+            const optionItems = dropdown.querySelectorAll('.filter-multiselect-option');
+            const checkboxes = dropdown.querySelectorAll('.filter-multiselect-option input[type="checkbox"]');
+            const selectAllBtn = dropdown.querySelector('.multiselect-select-all');
+            const selectNoneBtn = dropdown.querySelector('.multiselect-select-none');
+            const searchInput = dropdown.querySelector('.multiselect-search');
 
             if (!trigger || !optionsPanel) return;
+
+            // Helper function to update placeholder
+            const updatePlaceholder = () => {
+                const selected = Array.from(checkboxes)
+                    .filter(cb => cb.checked)
+                    .map(cb => cb.nextElementSibling?.textContent || cb.value);
+
+                if (selected.length === 0) {
+                    placeholder.textContent = '-- Select multiple --';
+                    placeholder.classList.remove('has-selection');
+                } else if (selected.length <= 2) {
+                    placeholder.textContent = selected.join(', ');
+                    placeholder.classList.add('has-selection');
+                } else {
+                    placeholder.textContent = `${selected.length} SELECTED`;
+                    placeholder.classList.add('has-selection');
+                }
+            };
 
             // Toggle dropdown on trigger click
             trigger.addEventListener('click', (e) => {
@@ -514,21 +536,59 @@ export default class GraphCreator {
                 }
             });
 
+            // Select All button (only selects visible/filtered items)
+            if (selectAllBtn) {
+                selectAllBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    optionItems.forEach(item => {
+                        if (item.style.display !== 'none') {
+                            const cb = item.querySelector('input[type="checkbox"]');
+                            if (cb) cb.checked = true;
+                        }
+                    });
+                    updatePlaceholder();
+                });
+            }
+
+            // Select None button (only deselects visible/filtered items)
+            if (selectNoneBtn) {
+                selectNoneBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    optionItems.forEach(item => {
+                        if (item.style.display !== 'none') {
+                            const cb = item.querySelector('input[type="checkbox"]');
+                            if (cb) cb.checked = false;
+                        }
+                    });
+                    updatePlaceholder();
+                });
+            }
+
+            // Search functionality
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase().trim();
+                    optionItems.forEach(item => {
+                        const label = item.querySelector('.form-check-label')?.textContent.toLowerCase() || '';
+                        if (searchTerm === '' || label.includes(searchTerm)) {
+                            item.style.display = '';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+
+                // Prevent dropdown from closing when clicking search input
+                searchInput.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+
             // Update placeholder text when checkboxes change
             checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', () => {
-                    const selected = Array.from(checkboxes)
-                        .filter(cb => cb.checked)
-                        .map(cb => cb.nextElementSibling?.textContent || cb.value);
-
-                    if (selected.length === 0) {
-                        placeholder.textContent = '-- Select multiple --';
-                    } else if (selected.length <= 2) {
-                        placeholder.textContent = selected.join(', ');
-                    } else {
-                        placeholder.textContent = `${selected.length} selected`;
-                    }
-                });
+                checkbox.addEventListener('change', updatePlaceholder);
             });
         });
 
