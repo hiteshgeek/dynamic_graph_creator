@@ -28,7 +28,7 @@ if (isset($_POST['submit'])) {
 
 // Handle GET actions
 switch ($action) {
-    case 'add':
+    case 'create':
         showFilterForm();
         break;
     case 'edit':

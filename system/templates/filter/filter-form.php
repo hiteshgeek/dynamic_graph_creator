@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $filter ? 'Edit' : 'Add'; ?> Filter - Dynamic Graph Creator</title>
+    <title><?php echo $filter ? 'Edit' : 'Create'; ?> Filter - Dynamic Graph Creator</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -38,10 +38,10 @@
 <body>
     <?php
     echo Utility::renderPageHeader([
-        'title' => ($filter ? 'Edit' : 'Add') . ' Filter',
+        'title' => $filter ? 'Edit Filter' : 'Create Filter',
         'backUrl' => '?urlq=filters',
         'backLabel' => 'Filters',
-        'rightContent' => '<button type="button" class="btn btn-outline-primary btn-sm save-filter-btn"><i class="fas fa-save"></i> Save Filter</button>'
+        'rightContent' => '<button type="button" class="btn btn-outline-primary btn-sm save-filter-btn"><i class="fas fa-save"></i> ' . ($filter ? 'Save' : 'Create Filter') . '</button>'
     ]);
     ?>
 

@@ -67,7 +67,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
             <?php foreach ($templates as $categorySlug => $categoryData): ?>
                 <div class="template-category-section" data-category-id="<?php echo $categoryData['category']['dtcid']; ?>">
                     <div class="category-header">
-                        <button type="button" class="category-collapse-toggle" title="Toggle category">
+                        <button type="button" class="btn btn-sm btn-outline-secondary category-collapse-toggle" title="Toggle category">
                             <i class="fas fa-chevron-down"></i>
                         </button>
                         <div class="category-header-content">

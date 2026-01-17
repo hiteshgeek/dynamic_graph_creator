@@ -30,7 +30,7 @@
 <body>
     <?php
     $rightContent = '<button type="submit" form="template-editor-form" class="btn btn-sm btn-outline-primary" id="submit-btn">';
-    $rightContent .= '<i class="fas fa-save"></i> Save Template</button>';
+    $rightContent .= '<i class="fas fa-save"></i> ' . ($template ? 'Save' : 'Create Template') . '</button>';
     echo Utility::renderPageHeader([
         'title' => $pageTitle,
         'backUrl' => '?urlq=dashboard/templates',

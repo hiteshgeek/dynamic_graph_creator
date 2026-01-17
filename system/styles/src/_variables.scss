@@ -218,6 +218,15 @@ $chart-colors: (
   font-size: 0.875rem;
   text-decoration: none;
 
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($primary, 0.25);
+  }
+
   &.btn-primary {
     border-color: var(--dgc-primary);
     color: var(--dgc-primary);
@@ -226,9 +235,26 @@ $chart-colors: (
       background: var(--dgc-primary);
       color: var(--dgc-text-inverse);
     }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($primary, 0.3);
+    }
   }
 
-  &.btn-design,
+  &.btn-design {
+    border-color: #6f42c1;
+    color: #6f42c1;
+
+    &:hover {
+      background: #6f42c1;
+      color: var(--dgc-text-inverse);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#6f42c1, 0.35);
+    }
+  }
+
   &.btn-warning {
     border-color: var(--dgc-warning);
     color: var(--dgc-warning);
@@ -236,6 +262,10 @@ $chart-colors: (
     &:hover {
       background: var(--dgc-warning);
       color: var(--dgc-text-inverse);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($warning, 0.3);
     }
   }
 
@@ -247,6 +277,10 @@ $chart-colors: (
       background: var(--dgc-error);
       color: var(--dgc-text-inverse);
     }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($error, 0.3);
+    }
   }
 
   &.btn-success {
@@ -256,6 +290,10 @@ $chart-colors: (
     &:hover {
       background: var(--dgc-success);
       color: var(--dgc-text-inverse);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($success, 0.3);
     }
   }
 }

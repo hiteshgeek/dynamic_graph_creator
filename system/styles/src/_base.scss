@@ -135,11 +135,38 @@ a {
   gap: 1rem;
 }
 
-// Dark mode adjustments for item card badges
+// Dark mode adjustments for item cards
 :root.theme-dark {
   .item-card .badge-custom {
     background: rgba(156, 39, 176, 0.2);
     color: #ce93d8;
+  }
+
+  // Dark mode focus styles for card action buttons
+  .item-card-actions .btn-icon {
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.3);
+    }
+
+    &.btn-primary:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.4);
+    }
+
+    &.btn-design:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#a78bfa, 0.5);
+    }
+
+    &.btn-warning:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#fbbf24, 0.4);
+    }
+
+    &.btn-danger:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#f87171, 0.4);
+    }
+
+    &.btn-success:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#4ade80, 0.4);
+    }
   }
 }
 

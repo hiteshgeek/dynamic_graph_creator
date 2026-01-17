@@ -27,7 +27,7 @@
     $rightContent = '<a href="?urlq=dashboard" class="btn btn-secondary btn-sm"><i class="fas fa-th-large"></i> Dashboards</a>';
     $rightContent .= '<a href="?urlq=graph" class="btn btn-secondary btn-sm"><i class="fas fa-chart-bar"></i> Graphs</a>';
     if (!empty($filters)) {
-        $rightContent .= '<a href="?urlq=filters/add" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Filter</a>';
+        $rightContent .= '<a href="?urlq=filters/create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Filter</a>';
     }
     echo Utility::renderPageHeader([
         'title' => 'Filters',
@@ -42,8 +42,8 @@
                 'fa-filter',
                 'No Filters Yet',
                 'Create reusable filters for your graphs and dashboards',
-                'Add Filter',
-                '?urlq=filters/add',
+                'Create Filter',
+                '?urlq=filters/create',
                 'green'
             ); ?>
             <?php else: ?>

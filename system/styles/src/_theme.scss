@@ -305,6 +305,11 @@ body {
     outline: none;
   }
 
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(#0284c7, 0.3);
+  }
+
   // Mode-specific styling - use opacity transitions for smooth effect
   &[data-mode="system"] {
     &::before {
@@ -375,6 +380,10 @@ body {
 
     &::after {
       background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#7dd3fc, 0.4);
     }
 
     &[data-mode="system"] {

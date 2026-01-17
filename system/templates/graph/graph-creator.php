@@ -44,12 +44,12 @@
 <body>
     <?php
     $rightContent = '<div class="status-indicators"></div>';
-    $rightContent .= '<button type="button" class="btn btn-outline-primary btn-sm save-graph-btn"><i class="fas fa-save"></i> Save Graph</button>';
+    $rightContent .= '<button type="button" class="btn btn-outline-primary btn-sm save-graph-btn"><i class="fas fa-save"></i> ' . ($graph ? 'Save' : 'Create Graph') . '</button>';
     if ($graph) {
         $rightContent .= '<a href="?urlq=graph/view/' . $graph->getId() . '" class="btn btn-primary btn-sm btn-view-mode"><i class="fas fa-eye"></i> View Mode</a>';
     }
     echo Utility::renderPageHeader([
-        'title' => $graph ? $graph->getName() : 'Create Graph',
+        'title' => $graph ? 'Edit Graph' : 'Create Graph',
         'backUrl' => '?urlq=graph',
         'backLabel' => 'Graphs',
         'rightContent' => $rightContent
@@ -288,7 +288,7 @@
                                     </div>
                                 <?php endif; ?>
                                 <?php if ($canCreateFilter): ?>
-                                    <a href="?urlq=filters/add" class="btn btn-sm btn-outline-secondary filters-manage-btn">
+                                    <a href="?urlq=filters/create" class="btn btn-sm btn-outline-secondary filters-manage-btn">
                                         <i class="fas fa-plus"></i> Create Filter
                                     </a>
                                 <?php endif; ?>
