@@ -13,13 +13,13 @@ const Ajax = window.Ajax;
 const ConfirmDialog = window.ConfirmDialog;
 
 // Grid configuration constants
-// Max total fr for a section is MAX_COLUMNS (4fr), not numColumns * MAX_FR_UNITS
+// Max total fr for a section is MAX_COLUMNS (6fr), not numColumns * MAX_FR_UNITS
 const GRID_CONFIG = {
-  MAX_FR_UNITS: 4, // Maximum fr units for any single column/row (4fr max)
+  MAX_FR_UNITS: 6, // Maximum fr units for any single column/row (6fr max)
   MIN_FR_UNITS: 1, // Minimum fr units for any column/row
-  MAX_COLUMNS: 4, // Maximum columns per section AND max total fr
+  MAX_COLUMNS: 6, // Maximum columns per section AND max total fr
   MIN_COLUMNS: 1, // Minimum columns (can't remove last)
-  MAX_ROWS_PER_COLUMN: 4, // Maximum rows in a column AND max total row fr
+  MAX_ROWS_PER_COLUMN: 6, // Maximum rows in a column AND max total row fr
   MIN_ROWS_PER_COLUMN: 1, // Minimum rows (can't remove last)
   DEFAULT_NEW_COLUMN_FR: 1,
   DEFAULT_NEW_ROW_FR: 1,
@@ -1177,21 +1177,30 @@ class DashboardBuilder {
       });
     }
 
-    // Confirm add section
-    const confirmBtn = document.getElementById("confirm-add-section");
-    if (confirmBtn) {
-      confirmBtn.addEventListener("click", () => this.handleAddSection());
-    }
-
-    // Handle Enter key in Add Section modal
+    // Add Section Modal - new layout with buttons and template grid
     const addSectionModal = document.getElementById("add-section-modal");
     if (addSectionModal) {
-      addSectionModal.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          if (confirmBtn) {
-            confirmBtn.click();
-          }
+      // Generate empty column buttons dynamically based on GRID_CONFIG
+      this.generateEmptyColumnButtons(addSectionModal);
+
+      // Load templates when modal is shown
+      addSectionModal.addEventListener("show.bs.modal", () => {
+        this.loadTemplatesForAddSectionModal();
+      });
+
+      // Handle empty column button clicks
+      addSectionModal.addEventListener("click", (e) => {
+        const columnBtn = e.target.closest(".add-empty-columns-btn");
+        if (columnBtn) {
+          const columns = parseInt(columnBtn.dataset.columns);
+          this.addEmptySection(columns);
+        }
+
+        // Handle template card clicks
+        const templateCard = e.target.closest(".template-card");
+        if (templateCard) {
+          const templateId = parseInt(templateCard.dataset.templateId);
+          this.addSectionFromTemplateCard(templateId);
         }
       });
     }
@@ -1848,15 +1857,13 @@ class DashboardBuilder {
     }
   }
 
-  async handleAddSection() {
-    const columns = document.getElementById("section-columns").value;
-    // Use the stored position from the button click
-    const position =
-      this.pendingAddPosition !== undefined ? this.pendingAddPosition : 0;
+  /**
+   * Close the add section modal with cleanup
+   */
+  async closeAddSectionModal() {
     const modalElement = document.getElementById("add-section-modal");
     const modalInstance = bootstrap.Modal.getInstance(modalElement);
 
-    // Close modal first
     if (modalInstance) {
       modalInstance.hide();
 
@@ -1878,7 +1885,16 @@ class DashboardBuilder {
       document.body.style.overflow = "";
       document.body.style.paddingRight = "";
     }
+  }
 
+  /**
+   * Add empty section with specified columns
+   */
+  async addEmptySection(columns) {
+    const position =
+      this.pendingAddPosition !== undefined ? this.pendingAddPosition : 0;
+
+    await this.closeAddSectionModal();
     Loading.show("Adding section...");
 
     try {
@@ -1890,11 +1906,11 @@ class DashboardBuilder {
         const newSectionId = IdGenerator.sectionId();
 
         // Create column template
-        const colWidths = Array(parseInt(columns)).fill("1fr").join(" ");
+        const colWidths = Array(columns).fill("1fr").join(" ");
 
         // Create areas for the new section
         const areas = [];
-        for (let i = 0; i < parseInt(columns); i++) {
+        for (let i = 0; i < columns; i++) {
           areas.push({
             aid: IdGenerator.areaId(),
             colSpanFr: "1fr",
@@ -1947,6 +1963,253 @@ class DashboardBuilder {
     } finally {
       Loading.hide();
     }
+  }
+
+  /**
+   * Generate empty column buttons dynamically based on GRID_CONFIG.MAX_COLUMNS
+   * @param {HTMLElement} modal - The modal element containing the buttons container
+   */
+  generateEmptyColumnButtons(modal) {
+    const container = modal.querySelector(".add-section-empty-columns .d-flex.gap-2");
+    if (!container) return;
+
+    // Clear existing buttons
+    container.innerHTML = "";
+
+    // Generate buttons from 1 to MAX_COLUMNS
+    for (let i = 1; i <= GRID_CONFIG.MAX_COLUMNS; i++) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "btn btn-sm btn-outline-primary add-empty-columns-btn";
+      button.dataset.columns = i;
+      button.textContent = `${i} Column${i > 1 ? "s" : ""}`;
+      container.appendChild(button);
+    }
+  }
+
+  /**
+   * Load templates for the Add Section modal and render template grid
+   */
+  async loadTemplatesForAddSectionModal() {
+    const templateList = document.getElementById("add-section-template-list");
+    if (!templateList) return;
+
+    // Show loading state
+    templateList.innerHTML = `<div class="loader">
+      <i class="fas fa-spinner fa-spin loader-spinner"></i>
+      <span class="loader-text">Loading templates...</span>
+    </div>`;
+
+    try {
+      const result = await Ajax.post("get_templates", {});
+
+      if (result.success && result.data) {
+        let html = "";
+
+        // Iterate through each category group
+        for (const [categorySlug, categoryData] of Object.entries(result.data)) {
+          // Filter out current template if in template mode
+          const filteredTemplates = categoryData.templates
+            ? categoryData.templates.filter(
+                (t) => !(this.mode === "template" && t.dtid === this.templateId)
+              )
+            : [];
+
+          if (filteredTemplates.length > 0) {
+            const categoryName = categoryData.category?.name || categorySlug;
+            const categoryDescription = categoryData.category?.description || "";
+
+            html += `<div class="template-category">
+                      <div class="template-category-header">
+                        <h3>${categoryName.toUpperCase()}</h3>
+                        ${categoryDescription ? `<p>${categoryDescription}</p>` : ""}
+                      </div>
+                      <div class="template-grid">`;
+
+            filteredTemplates.forEach((template) => {
+              const systemBadge =
+                template.is_system == 1
+                  ? '<span class="badge badge-system"><i class="fas fa-lock"></i> System</span>'
+                  : "";
+              html += `<div class="template-card" data-template-id="${template.dtid}">
+                        <div class="template-preview">
+                          ${this.renderTemplatePreview(template)}
+                        </div>
+                        <div class="template-info">
+                          <h4>${template.name}</h4>
+                          <p>${template.description || ""}</p>
+                          ${systemBadge ? `<div class="template-meta">${systemBadge}</div>` : ""}
+                        </div>
+                      </div>`;
+            });
+
+            html += `</div></div>`;
+          }
+        }
+
+        if (html) {
+          templateList.innerHTML = html;
+        } else {
+          templateList.innerHTML = `<div class="empty-state">
+            <i class="fas fa-th-large"></i>
+            <p>No templates available</p>
+          </div>`;
+        }
+      } else {
+        templateList.innerHTML = `<div class="empty-state">
+          <i class="fas fa-th-large"></i>
+          <p>No templates available</p>
+        </div>`;
+      }
+    } catch (error) {
+      console.error("Failed to load templates:", error);
+      templateList.innerHTML = `<div class="empty-state">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>Failed to load templates</p>
+      </div>`;
+    }
+  }
+
+  /**
+   * Add sections from a template card click
+   */
+  async addSectionFromTemplateCard(templateId) {
+    const position =
+      this.pendingAddPosition !== undefined ? this.pendingAddPosition : 0;
+
+    await this.closeAddSectionModal();
+    Loading.show("Adding sections from template...");
+
+    try {
+      await this.addSectionsFromTemplate(templateId, position);
+    } catch (error) {
+      console.error("Add section from template error:", error);
+      Toast.error("Failed to add sections from template");
+    } finally {
+      Loading.hide();
+    }
+  }
+
+  /**
+   * Add sections from another template
+   */
+  async addSectionsFromTemplate(templateId, position) {
+    try {
+      // First, get the template structure
+      const result = await Ajax.post("get_template", {
+        id: templateId,
+      });
+
+      if (!result.success || !result.data) {
+        Toast.error("Failed to load template");
+        return;
+      }
+
+      const templateData = result.data;
+      let templateStructure;
+
+      try {
+        templateStructure =
+          typeof templateData.structure === "string"
+            ? JSON.parse(templateData.structure)
+            : templateData.structure;
+      } catch (e) {
+        Toast.error("Invalid template structure");
+        return;
+      }
+
+      if (
+        !templateStructure.sections ||
+        templateStructure.sections.length === 0
+      ) {
+        Toast.error("Template has no sections");
+        return;
+      }
+
+      if (this.mode === "template") {
+        // In template mode, directly modify the structure
+        const structure = JSON.parse(this.currentDashboard.structure);
+
+        // Add each section from the template with new IDs
+        templateStructure.sections.forEach((section, index) => {
+          const newSection = this.cloneSectionWithNewIds(section);
+          structure.sections.splice(position + index, 0, newSection);
+        });
+
+        // Update current dashboard structure
+        this.currentDashboard.structure = JSON.stringify(structure);
+
+        // Re-render
+        this.renderDashboard();
+
+        // Auto-save
+        await this.saveDashboard(false);
+
+        const sectionCount = templateStructure.sections.length;
+        Toast.success(
+          `Added ${sectionCount} section${sectionCount > 1 ? "s" : ""} from template`
+        );
+      } else {
+        // In dashboard mode, use API call
+        const apiResult = await Ajax.post("add_section_from_template", {
+          dashboard_id: this.dashboardId,
+          template_id: templateId,
+          position: position === 0 ? "top" : "bottom",
+        });
+
+        if (apiResult.success) {
+          await this.loadDashboard();
+          Toast.success("Sections added from template");
+        } else {
+          Toast.error(apiResult.message);
+        }
+      }
+    } catch (error) {
+      console.error("Add sections from template error:", error);
+      Toast.error("Failed to add sections from template");
+    }
+  }
+
+  /**
+   * Clone a section with new unique IDs
+   */
+  cloneSectionWithNewIds(section) {
+    const newSection = {
+      sid: IdGenerator.sectionId(),
+      gridTemplate: section.gridTemplate,
+      areas: [],
+    };
+
+    if (section.areas) {
+      section.areas.forEach((area) => {
+        const newArea = {
+          aid: IdGenerator.areaId(),
+          colSpan: area.colSpan,
+          colSpanFr: area.colSpanFr,
+          content: area.content ? { ...area.content } : { type: "empty" },
+          emptyState: area.emptyState
+            ? { ...area.emptyState }
+            : { icon: "fa-plus-circle", message: "Add content" },
+        };
+
+        // Handle sub-rows if present
+        if (area.hasSubRows && area.subRows) {
+          newArea.hasSubRows = true;
+          newArea.subRows = area.subRows.map((subRow) => ({
+            rowId: IdGenerator.rowId(),
+            height: subRow.height || "1fr",
+            content: subRow.content ? { ...subRow.content } : { type: "empty" },
+            emptyState: subRow.emptyState
+              ? { ...subRow.emptyState }
+              : { icon: "fa-plus-circle", message: "Add content" },
+          }));
+        }
+
+        newSection.areas.push(newArea);
+      });
+    }
+
+    return newSection;
   }
 
   async removeSection(sectionId) {

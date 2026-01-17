@@ -135,7 +135,7 @@ $grid-gap: $spacing-md;
   background: var(--dgc-bg-elevated);
   border: 2px dashed var(--dgc-border-color);
   border-radius: 8px;
-  padding: 1.5rem;
+  // padding: 1.5rem;
   min-height: 150px;
   cursor: pointer;
   transition: all 0.3s;
@@ -162,7 +162,7 @@ $grid-gap: $spacing-md;
     background: var(--dgc-bg-card);
     box-shadow: $shadow-subtle;
     cursor: default;
-    padding: 1.5rem;
+    // padding: 1.5rem;
     min-height: 150px;
 
     // Pointer cursor on empty cell
@@ -201,7 +201,7 @@ $grid-gap: $spacing-md;
   background: var(--dgc-bg-elevated);
   border: 2px dashed var(--dgc-border-color);
   border-radius: 6px;
-  padding: 1rem;
+  // padding: 1rem;
   min-height: 80px;
   cursor: pointer;
   transition: all 0.3s;

@@ -14,8 +14,8 @@ $builder-btn-font-weight: 500;
 $builder-btn-border-width: 2px;
 $builder-btn-border-radius: 14px;
 $builder-btn-icon-font-size: 0.7rem;
-$builder-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-$builder-btn-box-shadow-hover: 0 3px 8px;
+$builder-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0, 0.1);
+$builder-btn-box-shadow-hover: 0 0 12px;
 $builder-btn-transition: all 0.2s;
 
 // Icon buttons (Drag handles, Delete, Resize arrows)
@@ -23,7 +23,7 @@ $builder-icon-btn-size: 28px;
 $builder-icon-btn-font-size: 0.75rem;
 $builder-icon-btn-border-width: 2px;
 $builder-icon-btn-border-radius: 50%;
-$builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+$builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0, 0.1);
 
 // Common base mixin for all builder text buttons (section, row, column)
 @mixin builder-border-btn($color-var, $hover-shadow-color) {
@@ -40,7 +40,7 @@ $builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   font-size: $builder-btn-font-size;
   font-weight: $builder-btn-font-weight;
   transition: $builder-btn-transition;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: $builder-btn-box-shadow;
   white-space: nowrap;
 
   i {
@@ -50,7 +50,7 @@ $builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   &:hover:not([disabled]) {
     background: $color-var;
     color: var(--dgc-text-inverse);
-    box-shadow: 0 4px 12px $hover-shadow-color, 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: $builder-btn-box-shadow-hover $hover-shadow-color, 0 0 4px rgba(0, 0, 0, 0.1);
   }
 
   &[disabled] {
@@ -58,7 +58,7 @@ $builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     cursor: not-allowed;
     background: var(--dgc-bg-elevated);
     color: var(--dgc-text-hint);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -76,7 +76,7 @@ $builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   color: $color-var;
   cursor: pointer;
   transition: $builder-btn-transition;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: $builder-icon-btn-box-shadow;
 
   i {
     font-size: $builder-icon-btn-font-size;
@@ -85,7 +85,7 @@ $builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   &:hover:not([disabled]) {
     background: $color-var;
     color: var(--dgc-text-inverse);
-    box-shadow: 0 4px 12px $hover-shadow-color, 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: $builder-btn-box-shadow-hover $hover-shadow-color, 0 0 4px rgba(0, 0, 0, 0.1);
   }
 
   &[disabled] {
@@ -93,7 +93,7 @@ $builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     cursor: not-allowed;
     background: var(--dgc-bg-elevated);
     color: var(--dgc-text-hint);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -488,60 +488,68 @@ $builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   gap: 0.25rem;
   z-index: 10;
 
-  // Top edge - centered on top border (Row - Green/Success)
+  // Row buttons (Top/Bottom) - Green/Success
+  &.edge-top,
+  &.edge-bottom {
+    background: var(--dgc-bg-card);
+    box-shadow: $builder-btn-box-shadow;
+    color: var(--dgc-success);
+
+    &:hover:not([disabled]) {
+      background: var(--dgc-success);
+      box-shadow: $builder-btn-box-shadow-hover rgba(40, 167, 69, 0.4);
+    }
+
+    &[disabled] {
+      opacity: 1;
+      background: var(--dgc-bg-card);
+      color: var(--dgc-text-hint);
+      box-shadow: $builder-btn-box-shadow;
+    }
+  }
+
   &.edge-top {
     top: 0;
     left: 50%;
     transform: translateX(-50%) translateY(-50%);
-    border-color: var(--dgc-success);
-    color: var(--dgc-success);
-
-    &:hover:not([disabled]) {
-      background: var(--dgc-success);
-      box-shadow: $builder-btn-box-shadow-hover rgba(40, 167, 69, 0.4);
-    }
   }
 
-  // Bottom edge - centered on bottom border (Row - Green/Success)
   &.edge-bottom {
     bottom: 0;
     left: 50%;
     transform: translateX(-50%) translateY(50%);
-    border-color: var(--dgc-success);
-    color: var(--dgc-success);
+  }
+
+  // Column buttons (Left/Right) - Orange/Warning
+  &.edge-left,
+  &.edge-right {
+    background: var(--dgc-bg-card);
+    box-shadow: $builder-btn-box-shadow;
+    color: var(--dgc-warning);
 
     &:hover:not([disabled]) {
-      background: var(--dgc-success);
-      box-shadow: $builder-btn-box-shadow-hover rgba(40, 167, 69, 0.4);
+      background: var(--dgc-warning);
+      box-shadow: $builder-btn-box-shadow-hover rgba(255, 193, 7, 0.4);
+    }
+
+    &[disabled] {
+      opacity: 1;
+      background: var(--dgc-bg-card);
+      color: var(--dgc-text-hint);
+      box-shadow: $builder-btn-box-shadow;
     }
   }
 
-  // Left edge - centered on left border (Column - Orange/Warning)
   &.edge-left {
     left: 0;
     top: 50%;
     transform: translateX(-50%) translateY(-50%) rotate(-90deg);
-    border-color: var(--dgc-warning);
-    color: var(--dgc-warning);
-
-    &:hover:not([disabled]) {
-      background: var(--dgc-warning);
-      box-shadow: $builder-btn-box-shadow-hover rgba(255, 193, 7, 0.4);
-    }
   }
 
-  // Right edge - centered on right border (Column - Orange/Warning)
   &.edge-right {
     right: 0;
     top: 50%;
     transform: translateX(50%) translateY(-50%) rotate(90deg);
-    border-color: var(--dgc-warning);
-    color: var(--dgc-warning);
-
-    &:hover:not([disabled]) {
-      background: var(--dgc-warning);
-      box-shadow: $builder-btn-box-shadow-hover rgba(255, 193, 7, 0.4);
-    }
   }
 }
 
@@ -575,7 +583,7 @@ $builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       background: var(--dgc-success);
       border-color: var(--dgc-success);
       color: var(--dgc-text-inverse);
-      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: $builder-btn-box-shadow-hover rgba(40, 167, 69, 0.4), 0 0 4px rgba(0, 0, 0, 0.1);
     }
   }
 
@@ -585,7 +593,7 @@ $builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       background: var(--dgc-warning);
       border-color: var(--dgc-warning);
       color: var(--dgc-text-inverse);
-      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+      box-shadow: $builder-btn-box-shadow-hover rgba(255, 193, 7, 0.4), 0 0 4px rgba(0, 0, 0, 0.1);
     }
   }
 
@@ -628,7 +636,7 @@ $builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   pointer-events: none;
   transition: $builder-btn-transition;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: $builder-btn-box-shadow;
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -798,6 +806,11 @@ $builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   // Hide column and row drag handles (within sections)
   .column-drag-handle,
   .row-drag-handle {
+    display: none !important;
+  }
+
+  // Hide grid size indicator
+  .grid-size-indicator {
     display: none !important;
   }
 

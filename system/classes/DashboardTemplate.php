@@ -229,6 +229,8 @@ class DashboardTemplate implements DatabaseObject
             $catKey = $row['category_slug'] ? $row['category_slug'] : 'uncategorized';
 
             if (!isset($grouped[$catKey])) {
+                // Uncategorized templates should show first (display_order: -1)
+                $displayOrder = $row['category_order'] ? $row['category_order'] : ($catKey === 'uncategorized' ? -1 : 999);
                 $grouped[$catKey] = array(
                     'category' => array(
                         'slug' => $row['category_slug'],
@@ -236,7 +238,7 @@ class DashboardTemplate implements DatabaseObject
                         'description' => $row['category_description'],
                         'icon' => $row['category_icon'] ? $row['category_icon'] : 'fa-folder',
                         'color' => $row['category_color'] ? $row['category_color'] : '#6c757d',
-                        'display_order' => $row['category_order'] ? $row['category_order'] : 999
+                        'display_order' => $displayOrder
                     ),
                     'templates' => array()
                 );
@@ -244,10 +246,17 @@ class DashboardTemplate implements DatabaseObject
             $grouped[$catKey]['templates'][] = $row;
         }
 
-        // Filter out empty categories and return only categories with templates
-        return array_filter($grouped, function($categoryData) {
+        // Filter out empty categories
+        $result = array_filter($grouped, function($categoryData) {
             return !empty($categoryData['templates']);
         });
+
+        // Sort by display_order (uncategorized first with -1)
+        uasort($result, function($a, $b) {
+            return $a['category']['display_order'] - $b['category']['display_order'];
+        });
+
+        return $result;
     }
 
     /**
@@ -302,7 +311,7 @@ class DashboardTemplate implements DatabaseObject
                             'description' => 'Templates without a category',
                             'icon' => 'fa-folder-open',
                             'color' => '#6c757d',
-                            'display_order' => 999,
+                            'display_order' => -1, // Show first
                             'is_system' => 0
                         ),
                         'templates' => array()

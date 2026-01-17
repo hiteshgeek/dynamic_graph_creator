@@ -4,7 +4,8 @@
 
 // Template selector modal uses Bootstrap modal (modal-xl)
 // These styles enhance the Bootstrap modal content
-#template-modal {
+#template-modal,
+#add-section-modal {
   .modal-header {
     .modal-title-wrapper {
       display: flex;
