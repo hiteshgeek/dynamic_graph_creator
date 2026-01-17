@@ -41,14 +41,10 @@ export default class GraphView {
         this.initFilters();
         this.bindEvents();
 
-        // Only auto-load if no filters are present
-        // When filters exist, wait for user to apply them first
-        if (!this.hasFilters) {
-            this.initPreview();
-            this.loadGraphData();
-        } else {
-            this.showFilterMessage();
-        }
+        // Always initialize preview and load graph data
+        // Filter values will be automatically picked up from pre-selected options (is_selected)
+        this.initPreview();
+        this.loadGraphData();
     }
 
     /**
@@ -171,6 +167,9 @@ export default class GraphView {
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', updatePlaceholder);
             });
+
+            // Update placeholder on init to reflect any pre-selected options (from is_selected)
+            updatePlaceholder();
         });
     }
 

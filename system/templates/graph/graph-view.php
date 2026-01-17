@@ -84,11 +84,12 @@
                                             <?php foreach ($options as $index => $opt):
                                                 $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                                 $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                                $isSelected = is_array($opt) && isset($opt['is_selected']) && $opt['is_selected'];
                                                 $optId = 'multiselect-' . $filterKeyClean . '-' . $index;
                                             ?>
                                                 <div class="dropdown-item filter-multiselect-option">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>">
+                                                        <input class="form-check-input" type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>" <?php echo $isSelected ? 'checked' : ''; ?>>
                                                         <label class="form-check-label" for="<?php echo $optId; ?>"><?php echo htmlspecialchars($label); ?></label>
                                                     </div>
                                                 </div>
@@ -101,10 +102,11 @@
                                         <?php foreach ($options as $index => $opt):
                                             $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                             $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                            $isSelected = is_array($opt) && isset($opt['is_selected']) && $opt['is_selected'];
                                             $optId = 'checkbox-' . $filterKeyClean . '-' . $index;
                                         ?>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>">
+                                                <input class="form-check-input" type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>" <?php echo $isSelected ? 'checked' : ''; ?>>
                                                 <label class="form-check-label" for="<?php echo $optId; ?>"><?php echo htmlspecialchars($label); ?></label>
                                             </div>
                                         <?php endforeach; ?>
@@ -115,7 +117,8 @@
                                         <?php foreach ($options as $index => $opt):
                                             $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                             $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
-                                            $checked = ($value == $defaultValue) ? 'checked' : '';
+                                            $isSelected = is_array($opt) && isset($opt['is_selected']) && $opt['is_selected'];
+                                            $checked = $isSelected || ($value == $defaultValue) ? 'checked' : '';
                                             $optId = 'radio-' . $filterKeyClean . '-' . $index;
                                         ?>
                                             <div class="form-check">

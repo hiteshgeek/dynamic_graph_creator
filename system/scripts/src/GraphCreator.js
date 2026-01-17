@@ -558,6 +558,9 @@ export default class GraphCreator {
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', updatePlaceholder);
             });
+
+            // Update placeholder on init to reflect any pre-selected options (from is_selected)
+            updatePlaceholder();
         });
 
         // Close dropdowns when clicking outside
@@ -635,6 +638,9 @@ export default class GraphCreator {
         }
 
         Toast.success(`Query valid. Found ${columns.length} columns.`);
+
+        // Automatically update preview after successful query test
+        this.updatePreview();
     }
 
     /**
@@ -750,16 +756,18 @@ export default class GraphCreator {
             return;
         }
 
-        const query = this.queryBuilder ? this.queryBuilder.getQuery() : '';
-        const filters = this.filterManager ? this.filterManager.getFilters() : [];
+        // If mapping is incomplete, show dummy data
+        if (!this.validateMapping(mapping)) {
+            this.preview.setConfig(config);
+            this.preview.setMapping(mapping);
+            this.preview.showDummyData(this.graphType);
+            return;
+        }
 
-        // Build default filter values for preview
-        const filterValues = {};
-        filters.forEach(f => {
-            if (f.default_value) {
-                filterValues[f.filter_key] = f.default_value;
-            }
-        });
+        const query = this.queryBuilder ? this.queryBuilder.getQuery() : '';
+
+        // Use sidebar filter values (includes pre-selected options from is_selected)
+        const filterValues = this.getSidebarFilterValues();
 
         try {
             const result = await Ajax.post('preview_graph', {
@@ -830,19 +838,22 @@ export default class GraphCreator {
                     }
                 }
 
-                // Set mapping
+                // Set filters first (they may be needed for query testing)
+                if (this.filterManager && graph.filters) {
+                    this.filterManager.setFilters(graph.filters);
+                }
+
+                // Set mapping and test query
                 if (this.dataMapper && graph.data_mapping) {
                     const mapping = JSON.parse(graph.data_mapping);
-                    // First test query to get columns
+                    // Set mapping without triggering onChange (we'll update preview after testQuery)
+                    this.dataMapper.setMapping(mapping, false);
+
+                    // Test query to get columns - this will call onQueryTest which now
+                    // calls updatePreview(), and since mapping is already set, it should work
                     if (graph.query) {
                         await this.queryBuilder.testQuery();
                     }
-                    this.dataMapper.setMapping(mapping);
-                }
-
-                // Set filters
-                if (this.filterManager && graph.filters) {
-                    this.filterManager.setFilters(graph.filters);
                 }
 
                 // Capture initial state after loading

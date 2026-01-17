@@ -14,6 +14,8 @@ export default class QueryBuilder {
         this.textarea = null;
         this.testBtn = null;
         this.resultContainer = null;
+        this.graphDataSection = null;
+        this.graphDataContent = null;
         this.editor = null; // CodeMirror instance
 
         this.init();
@@ -28,6 +30,13 @@ export default class QueryBuilder {
         this.formatBtn = this.container.querySelector('.format-query-btn');
         this.copyBtn = this.container.querySelector('.copy-query-btn');
         this.resultContainer = this.container.querySelector('.query-test-result');
+
+        // Find the graph data section (sibling section for displaying query results)
+        const graphMain = this.container.closest('.graph-main');
+        if (graphMain) {
+            this.graphDataSection = graphMain.querySelector('.graph-data-section');
+            this.graphDataContent = graphMain.querySelector('.graph-data-content');
+        }
 
         if (this.testBtn) {
             this.testBtn.addEventListener('click', () => this.testQuery());
@@ -166,7 +175,8 @@ export default class QueryBuilder {
     }
 
     /**
-     * Format SQL query - put keywords on their own lines
+     * Format SQL query - phpMyAdmin style formatting
+     * Keywords on their own line, content indented below
      */
     formatQuery() {
         let query = this.getQuery();
@@ -175,88 +185,68 @@ export default class QueryBuilder {
         // Normalize whitespace first
         query = query.replace(/\s+/g, ' ').trim();
 
-        // Keywords that should be on their own line (keyword only, content on next line)
-        const standaloneKeywords = ['SELECT', 'FROM', 'WHERE', 'ORDER BY', 'GROUP BY', 'HAVING', 'LIMIT', 'SET', 'VALUES'];
-
-        // Keywords that stay with their content on same line
-        const inlineKeywords = ['AND', 'OR', 'ON', 'OFFSET'];
-
-        // Add line breaks before all major keywords
-        const allKeywords = [
-            'SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'ORDER BY', 'GROUP BY',
-            'HAVING', 'LIMIT', 'OFFSET', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN',
-            'INNER JOIN', 'OUTER JOIN', 'CROSS JOIN', 'ON', 'SET', 'VALUES',
-            'INSERT INTO', 'UPDATE', 'DELETE FROM', 'UNION', 'UNION ALL'
+        // Major clauses - keyword on its own line, content indented below
+        const majorClauses = [
+            'SELECT', 'FROM', 'WHERE', 'ORDER BY', 'GROUP BY', 'HAVING',
+            'LIMIT', 'SET', 'VALUES', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN',
+            'INNER JOIN', 'OUTER JOIN', 'CROSS JOIN', 'INSERT INTO',
+            'UPDATE', 'DELETE FROM', 'UNION ALL', 'UNION'
         ];
 
-        allKeywords.forEach(keyword => {
-            const regex = new RegExp('\\s+(' + keyword.replace(/ /g, '\\s+') + ')\\b', 'gi');
+        // Sort by length descending to match longer keywords first
+        majorClauses.sort((a, b) => b.length - a.length);
+
+        // Add line break before each major clause keyword
+        majorClauses.forEach(clause => {
+            const regex = new RegExp('\\s+(' + clause.replace(/ /g, '\\s+') + ')\\b', 'gi');
             query = query.replace(regex, '\n$1');
         });
 
-        // Handle SELECT at the start
-        if (/^SELECT\s+/i.test(query)) {
-            query = query.replace(/^SELECT\s+/i, 'SELECT\n    ');
+        // Now separate keyword from its content (keyword on own line, content indented)
+        majorClauses.forEach(clause => {
+            const regex = new RegExp('^(' + clause.replace(/ /g, '\\s+') + ')\\s+(.+)$', 'gim');
+            query = query.replace(regex, '$1\n\t$2');
+        });
+
+        // Handle commas - each item on new line with indent
+        query = query.replace(/,\s*/g, ',\n\t');
+
+        // Handle AND/OR - each on new line with indent
+        query = query.replace(/\s+(AND)\s+/gi, '\n\t$1 ');
+        query = query.replace(/\s+(OR)\s+/gi, '\n\t$1 ');
+
+        // Clean up: trim lines and remove empty lines
+        const lines = query.split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+
+        // Rebuild with proper indentation
+        const formattedLines = [];
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i];
+
+            // Check if line is a major clause keyword only
+            const isKeywordOnly = majorClauses.some(clause => {
+                const regex = new RegExp('^' + clause.replace(/ /g, '\\s*') + '$', 'i');
+                return regex.test(line);
+            });
+
+            if (isKeywordOnly) {
+                // Uppercase the keyword
+                formattedLines.push(line.toUpperCase());
+            } else {
+                // Check if line starts with AND/OR
+                if (/^(AND|OR)\s/i.test(line)) {
+                    line = line.replace(/^(AND|OR)\s/i, (m) => m.toUpperCase());
+                    formattedLines.push('\t' + line);
+                } else {
+                    // Content line - indent it
+                    formattedLines.push('\t' + line);
+                }
+            }
         }
 
-        // Put content after standalone keywords on new line with indent
-        standaloneKeywords.forEach(keyword => {
-            const regex = new RegExp('\\n(' + keyword.replace(/ /g, '\\s+') + ')\\s+', 'gi');
-            query = query.replace(regex, '\n$1\n    ');
-        });
-
-        // Handle commas - put each item on new line
-        query = query.replace(/,\s*/g, ',\n    ');
-
-        // Indent AND/OR
-        query = query.replace(/\n(AND|OR)\s+/gi, '\n    $1 ');
-
-        // Clean up multiple newlines
-        query = query.replace(/\n\s*\n/g, '\n');
-
-        // Trim each line and rebuild
-        query = query.split('\n').map(line => line.trim()).filter(line => line).join('\n');
-
-        // Re-add proper indentation
-        const lines = query.split('\n');
-        const formatted = [];
-        let inSelectColumns = false;
-
-        lines.forEach((line, index) => {
-            const upperLine = line.toUpperCase();
-
-            // Check if this is a standalone keyword line
-            const isKeywordLine = standaloneKeywords.some(kw =>
-                new RegExp('^' + kw.replace(/ /g, '\\s*') + '$', 'i').test(line)
-            );
-
-            // Check if previous line was a standalone keyword
-            const prevLine = index > 0 ? lines[index - 1].toUpperCase().trim() : '';
-            const prevIsKeyword = standaloneKeywords.some(kw =>
-                new RegExp('^' + kw.replace(/ /g, '\\s*') + '$', 'i').test(prevLine)
-            );
-
-            // Check for AND/OR lines
-            const isAndOr = /^(AND|OR)\s/i.test(line);
-
-            if (isKeywordLine) {
-                formatted.push(line.toUpperCase());
-            } else if (prevIsKeyword || isAndOr) {
-                formatted.push('    ' + line);
-            } else if (!isKeywordLine && index > 0) {
-                // Check if we're continuing content (like columns after SELECT)
-                const lastFormatted = formatted[formatted.length - 1];
-                if (lastFormatted && lastFormatted.startsWith('    ')) {
-                    formatted.push('    ' + line);
-                } else {
-                    formatted.push(line);
-                }
-            } else {
-                formatted.push(line);
-            }
-        });
-
-        this.setQuery(formatted.join('\n'));
+        this.setQuery(formattedLines.join('\n'));
     }
 
     /**
@@ -315,7 +305,8 @@ export default class QueryBuilder {
     showSuccess(columns, rows = [], rowCount = 0, debugQuery = '') {
         if (!this.resultContainer) return;
 
-        let html = `
+        // Simple success message in query section
+        const statusHtml = `
             <div class="query-result-header">
                 <i class="fas fa-check-circle"></i>
                 Query is valid
@@ -323,43 +314,77 @@ export default class QueryBuilder {
             </div>
         `;
 
-        // Add debug query if available
-        if (debugQuery) {
-            html += `
-                <div class="query-debug">
-                    <small class="text-muted">Test query (placeholders replaced):</small>
-                    <pre class="query-debug-sql">${this.escapeHtml(debugQuery)}</pre>
-                </div>
-            `;
-        }
-
-        // Add sample data table if rows exist
-        if (rows && rows.length > 0) {
-            html += `
-                <div class="query-sample-data">
-                    <div class="query-result-table-wrapper">
-                        <table class="query-result-table">
-                            <thead>
-                                <tr>
-                                    ${columns.map(col => `<th>${this.escapeHtml(col)}</th>`).join('')}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${rows.map(row => `
-                                    <tr>
-                                        ${columns.map(col => `<td>${this.escapeHtml(row[col])}</td>`).join('')}
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-        }
-
         this.resultContainer.className = 'query-test-result success';
-        this.resultContainer.innerHTML = html;
+        this.resultContainer.innerHTML = statusHtml;
         this.resultContainer.style.display = 'block';
+
+        // Show debug query and data table in separate Graph Data section
+        if (this.graphDataSection && this.graphDataContent) {
+            let dataHtml = '';
+
+            // Add debug query textarea (CodeMirror will replace it) - no wrapper needed
+            if (debugQuery) {
+                dataHtml += `<textarea class="query-debug-textarea" style="display:none;">${this.escapeHtml(debugQuery)}</textarea>`;
+            }
+
+            // Add sample data table if rows exist
+            if (rows && rows.length > 0) {
+                dataHtml += `
+                    <div class="query-sample-data">
+                        <div class="query-result-table-wrapper">
+                            <table class="query-result-table">
+                                <thead>
+                                    <tr>
+                                        ${columns.map(col => `<th>${this.escapeHtml(col)}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${rows.map(row => `
+                                        <tr>
+                                            ${columns.map(col => `<td>${this.escapeHtml(row[col])}</td>`).join('')}
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (dataHtml) {
+                // Update section header with subtitle
+                const sectionHeader = this.graphDataSection.querySelector('.graph-section-header');
+                if (sectionHeader) {
+                    sectionHeader.innerHTML = `
+                        <h3><i class="fas fa-table"></i> Graph Data</h3>
+                        <small class="text-muted">Test query (placeholders replaced)</small>
+                    `;
+                }
+
+                this.graphDataContent.innerHTML = dataHtml;
+                this.graphDataSection.style.display = 'block';
+
+                // Initialize CodeMirror for debug query display
+                if (debugQuery && typeof CodeMirror !== 'undefined') {
+                    const debugTextarea = this.graphDataContent.querySelector('.query-debug-textarea');
+                    if (debugTextarea) {
+                        const debugEditor = CodeMirror.fromTextArea(debugTextarea, {
+                            mode: 'text/x-sql',
+                            theme: 'default',
+                            lineNumbers: true,
+                            lineWrapping: true,
+                            readOnly: true
+                        });
+                        // Auto-adjust height based on content
+                        const lineCount = debugQuery.split('\n').length;
+                        const height = Math.min(Math.max(lineCount * 22, 80), 200);
+                        debugEditor.setSize(null, height);
+                    }
+                }
+            } else {
+                this.graphDataSection.style.display = 'none';
+            }
+        }
     }
 
     /**
@@ -385,6 +410,11 @@ export default class QueryBuilder {
             ${message}
         `;
         this.resultContainer.style.display = 'block';
+
+        // Hide graph data section on error
+        if (this.graphDataSection) {
+            this.graphDataSection.style.display = 'none';
+        }
     }
 
     /**
@@ -393,6 +423,9 @@ export default class QueryBuilder {
     hideResult() {
         if (this.resultContainer) {
             this.resultContainer.style.display = 'none';
+        }
+        if (this.graphDataSection) {
+            this.graphDataSection.style.display = 'none';
         }
     }
 

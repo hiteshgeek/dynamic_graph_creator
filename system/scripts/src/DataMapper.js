@@ -41,10 +41,15 @@ export default class DataMapper {
 
     /**
      * Set mapping values
+     * @param {Object} mapping - The mapping object
+     * @param {boolean} triggerChange - Whether to trigger onChange callback (default: true)
      */
-    setMapping(mapping) {
+    setMapping(mapping, triggerChange = true) {
         this.mapping = mapping || {};
         this.render();
+        if (triggerChange) {
+            this.onChange();
+        }
     }
 
     /**
@@ -61,8 +66,8 @@ export default class DataMapper {
         const fields = this.getFieldsForType();
 
         let html = `
-            <div class="data-mapper-header">
-                <h4>Data Mapping</h4>
+            <div class="graph-section-header">
+                <h3><i class="fas fa-columns"></i> Data Mapping</h3>
             </div>
         `;
 

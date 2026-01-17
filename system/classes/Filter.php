@@ -332,6 +332,7 @@ class Filter implements DatabaseObject
 
     /**
      * Get filter options (executes query if data_source is 'query')
+     * Query can return optional 'is_selected' column (1/0) to pre-select options
      *
      * @return array
      */
@@ -344,10 +345,16 @@ class Filter implements DatabaseObject
             $options = array();
             if ($res) {
                 while ($row = $db->fetchAssoc($res)) {
-                    $options[] = array(
+                    $option = array(
                         'value' => isset($row['value']) ? $row['value'] : '',
                         'label' => isset($row['label']) ? $row['label'] : (isset($row['value']) ? $row['value'] : '')
                     );
+                    // Check for is_selected column (supports 1, '1', true, 'true', 'yes')
+                    if (isset($row['is_selected'])) {
+                        $isSelected = $row['is_selected'];
+                        $option['is_selected'] = ($isSelected === 1 || $isSelected === '1' || $isSelected === true || $isSelected === 'true' || $isSelected === 'yes');
+                    }
+                    $options[] = $option;
                 }
             }
             return $options;

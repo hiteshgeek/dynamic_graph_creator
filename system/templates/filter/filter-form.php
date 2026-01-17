@@ -181,8 +181,8 @@
                             <div id="query-options-section" style="<?php echo $dataSource === 'query' ? '' : 'display: none;'; ?>">
                                 <div class="form-group">
                                     <label class="form-label" for="data-query">SQL Query</label>
-                                    <textarea id="data-query" class="form-control query-textarea" rows="4" placeholder="SELECT id as value, name as label FROM categories WHERE status = 1 ORDER BY name"><?php echo $filter ? htmlspecialchars($filter->getDataQuery()) : ''; ?></textarea>
-                                    <small class="form-hint">Query must return <code>value</code> and <code>label</code> columns</small>
+                                    <textarea id="data-query" class="form-control query-textarea" rows="4" placeholder="SELECT id as value, name as label, 1 as is_selected FROM categories WHERE status = 1 ORDER BY name"><?php echo $filter ? htmlspecialchars($filter->getDataQuery()) : ''; ?></textarea>
+                                    <small class="form-hint">Query must return <code>value</code> and <code>label</code> columns. Optional: add <code>is_selected</code> column (1/0) to pre-select options.</small>
                                 </div>
                                 <div class="query-actions">
                                     <button type="button" class="btn btn-sm btn-outline-secondary" id="copy-query-btn">

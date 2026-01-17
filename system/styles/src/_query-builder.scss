@@ -206,6 +206,33 @@
         word-break: break-all;
         color: var(--dgc-text-secondary);
     }
+
+    // CodeMirror styling for debug query (read-only)
+    .CodeMirror {
+        border: 1px solid var(--dgc-border-color);
+        border-radius: $border-radius;
+        font-size: 12px;
+        background: var(--dgc-gray-100);
+        cursor: default;
+
+        .CodeMirror-scroll {
+            background: var(--dgc-gray-100);
+        }
+
+        .CodeMirror-gutters {
+            background: var(--dgc-gray-200);
+            border-right: 1px solid var(--dgc-border-color);
+        }
+
+        .CodeMirror-linenumber {
+            color: var(--dgc-text-muted);
+        }
+
+        // Hide cursor for read-only
+        .CodeMirror-cursor {
+            display: none !important;
+        }
+    }
 }
 
 .query-sample-data {

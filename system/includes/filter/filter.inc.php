@@ -160,6 +160,7 @@ function deleteFilter($data)
 /**
  * Test filter query (for query-based filter options)
  * Query should return 'value' and 'label' columns
+ * Optional 'is_selected' column (1/0) to pre-select options
  */
 function testFilterQuery($data)
 {
@@ -187,10 +188,16 @@ function testFilterQuery($data)
         if (empty($columns)) {
             $columns = array_keys($row);
         }
-        $options[] = array(
+        $option = array(
             'value' => isset($row['value']) ? $row['value'] : '',
             'label' => isset($row['label']) ? $row['label'] : (isset($row['value']) ? $row['value'] : '')
         );
+        // Include is_selected if present
+        if (isset($row['is_selected'])) {
+            $isSelected = $row['is_selected'];
+            $option['is_selected'] = ($isSelected === 1 || $isSelected === '1' || $isSelected === true || $isSelected === 'true' || $isSelected === 'yes');
+        }
+        $options[] = $option;
     }
 
     if (empty($options)) {
@@ -200,6 +207,7 @@ function testFilterQuery($data)
     // Check if required columns exist
     $hasValue = in_array('value', $columns);
     $hasLabel = in_array('label', $columns);
+    $hasIsSelected = in_array('is_selected', $columns);
     $warnings = array();
 
     if (!$hasValue) {
@@ -213,6 +221,7 @@ function testFilterQuery($data)
         'columns' => $columns,
         'options' => $options,
         'count' => count($options),
-        'warnings' => $warnings
+        'warnings' => $warnings,
+        'hasIsSelected' => $hasIsSelected
     ));
 }

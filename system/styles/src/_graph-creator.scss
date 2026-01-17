@@ -331,10 +331,16 @@
 
   h3 {
     margin: 0;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
     color: var(--dgc-text-primary);
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
 
     i {
-      color: var(--dgc-primary);
+      color: var(--dgc-text-secondary);
+      font-size: $font-size-sm;
     }
   }
 }
@@ -354,7 +360,43 @@
   transition: background-color 0.2s ease;
 }
 
-// Query section
+// Graph sections (vertically stacked)
+.graph-section {
+  padding: $spacing-lg;
+  border-bottom: 1px solid var(--dgc-border-color);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.graph-section-header {
+  margin-bottom: $spacing-md;
+
+  h3 {
+    margin: 0;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    color: var(--dgc-text-primary);
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    i {
+      color: var(--dgc-text-secondary);
+      font-size: $font-size-sm;
+    }
+  }
+
+  // Subtitle text below header
+  small {
+    display: block;
+    margin-top: $spacing-xs;
+    font-size: $font-size-sm;
+  }
+}
+
+// Legacy: Query section (for backward compatibility)
 .graph-query-section {
   padding: $spacing-lg;
 }
@@ -515,24 +557,9 @@
   }
 }
 
-// Data mapper
+// Data mapper (no card styling - uses graph-section-header)
 .data-mapper {
-  background: var(--dgc-bg-card);
-  border: 1px solid var(--dgc-border-color);
-  border-radius: $border-radius;
-  padding: $spacing-md;
-}
-
-.data-mapper-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: $spacing-md;
-
-  h4 {
-    margin: 0;
-    font-size: $font-size-base;
-  }
+  // No border/background - inherits from graph-section
 }
 
 .data-mapper-fields {

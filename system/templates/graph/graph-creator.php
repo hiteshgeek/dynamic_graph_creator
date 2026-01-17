@@ -188,11 +188,12 @@
                                                                 <?php foreach ($options as $index => $opt):
                                                                     $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                                                     $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                                                    $isSelected = is_array($opt) && isset($opt['is_selected']) && $opt['is_selected'];
                                                                     $optId = 'multiselect-' . $filterKeyClean . '-' . $index;
                                                                 ?>
                                                                     <div class="dropdown-item filter-multiselect-option">
                                                                         <div class="form-check">
-                                                                            <input class="form-check-input" type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>">
+                                                                            <input class="form-check-input" type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>" <?php echo $isSelected ? 'checked' : ''; ?>>
                                                                             <label class="form-check-label" for="<?php echo $optId; ?>"><?php echo htmlspecialchars($label); ?></label>
                                                                         </div>
                                                                     </div>
@@ -205,10 +206,11 @@
                                                             <?php foreach ($options as $index => $opt):
                                                                 $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                                                 $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                                                $isSelected = is_array($opt) && isset($opt['is_selected']) && $opt['is_selected'];
                                                                 $optId = 'checkbox-' . $filterKeyClean . '-' . $index;
                                                             ?>
                                                                 <div class="form-check">
-                                                                    <input class="form-check-input" type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>">
+                                                                    <input class="form-check-input" type="checkbox" name="<?php echo htmlspecialchars($filterKeyClean); ?>[]" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>" <?php echo $isSelected ? 'checked' : ''; ?>>
                                                                     <label class="form-check-label" for="<?php echo $optId; ?>"><?php echo htmlspecialchars($label); ?></label>
                                                                 </div>
                                                             <?php endforeach; ?>
@@ -219,7 +221,8 @@
                                                             <?php foreach ($options as $index => $opt):
                                                                 $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                                                 $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
-                                                                $checked = ($value == $defaultValue) ? 'checked' : '';
+                                                                $isSelected = is_array($opt) && isset($opt['is_selected']) && $opt['is_selected'];
+                                                                $checked = $isSelected || ($value == $defaultValue) ? 'checked' : '';
                                                                 $optId = 'radio-' . $filterKeyClean . '-' . $index;
                                                             ?>
                                                                 <div class="form-check">
@@ -284,7 +287,7 @@
                 <!-- Preview Card -->
                 <div class="graph-preview-card">
                     <div class="graph-preview-header">
-                        <h3>Preview</h3>
+                        <h3><i class="fas fa-chart-bar"></i> Preview</h3>
                         <div class="graph-preview-actions">
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="export-chart" title="Save chart as PNG image">
                                 <i class="fas fa-image"></i> Save Image
@@ -297,43 +300,46 @@
                     <div class="graph-preview-container"></div>
                 </div>
 
-                <!-- Query Section -->
-                <div class="graph-query-section">
-                    <div class="query-tabs">
-                        <button class="query-tab active" data-tab="query">SQL Query</button>
-                        <button class="query-tab" data-tab="mapping">Data Mapping</button>
-                    </div>
+                <!-- Data Mapping Section -->
+                <div class="graph-section">
+                    <div class="data-mapper"></div>
+                </div>
 
-                    <!-- Query Tab -->
-                    <div class="query-tab-content active" id="tab-query">
-                        <div class="query-builder">
-                            <div class="query-editor-wrapper">
-                                <textarea class="query-editor" placeholder="SELECT category, SUM(amount) as total FROM sales WHERE date >= :date_from GROUP BY category"><?php echo $graph ? htmlspecialchars($graph->getQuery()) : ''; ?></textarea>
-                            </div>
-                            <div class="query-toolbar">
-                                <div class="query-toolbar-left">
-                                    <span class="query-hint">Use <code>:placeholder</code> for filter values</span>
-                                </div>
-                                <div class="query-toolbar-right">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary copy-query-btn" title="Copy SQL">
-                                        <i class="fas fa-copy"></i> Copy
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary format-query-btn" title="Format SQL">
-                                        <i class="fas fa-align-left"></i> Format SQL
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-primary test-query-btn">
-                                        <i class="fas fa-play"></i> Test Query
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="query-test-result" style="display: none;"></div>
+                <!-- SQL Query Section -->
+                <div class="graph-section">
+                    <div class="graph-section-header">
+                        <h3><i class="fas fa-database"></i> SQL Query</h3>
+                    </div>
+                    <div class="query-builder">
+                        <div class="query-editor-wrapper">
+                            <textarea class="query-editor" placeholder="SELECT category, SUM(amount) as total FROM sales WHERE date >= :date_from GROUP BY category"><?php echo $graph ? htmlspecialchars($graph->getQuery()) : ''; ?></textarea>
                         </div>
+                        <div class="query-toolbar">
+                            <div class="query-toolbar-left">
+                                <span class="query-hint">Use <code>::placeholder</code> for filter values</span>
+                            </div>
+                            <div class="query-toolbar-right">
+                                <button type="button" class="btn btn-sm btn-outline-secondary copy-query-btn" title="Copy SQL">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary format-query-btn" title="Format SQL">
+                                    <i class="fas fa-align-left"></i> Format SQL
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary test-query-btn">
+                                    <i class="fas fa-play"></i> Test Query
+                                </button>
+                            </div>
+                        </div>
+                        <div class="query-test-result" style="display: none;"></div>
                     </div>
+                </div>
 
-                    <!-- Mapping Tab -->
-                    <div class="query-tab-content" id="tab-mapping">
-                        <div class="data-mapper"></div>
+                <!-- Graph Data Section (populated after query test) -->
+                <div class="graph-section graph-data-section" style="display: none;">
+                    <div class="graph-section-header">
+                        <h3><i class="fas fa-table"></i> Graph Data</h3>
                     </div>
+                    <div class="graph-data-content"></div>
                 </div>
             </div>
 

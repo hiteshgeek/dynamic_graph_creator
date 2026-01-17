@@ -469,20 +469,23 @@ export default class FilterFormPage {
                     this.lastQueryOptions = options;
 
                     if (options.length > 0) {
+                        const hasIsSelected = result.data.hasIsSelected || false;
+                        const colCount = hasIsSelected ? 3 : 2;
                         html += `
                             <div class="query-sample-data">
                                 <div class="query-result-table-wrapper">
                                     <table class="query-result-table">
                                         <thead>
-                                            <tr><th>Value</th><th>Label</th></tr>
+                                            <tr><th>Value</th><th>Label</th>${hasIsSelected ? '<th>Selected</th>' : ''}</tr>
                                         </thead>
                                         <tbody>
                         `;
                         options.slice(0, 10).forEach(opt => {
-                            html += `<tr><td>${this.escapeHtml(opt.value) || '-'}</td><td>${this.escapeHtml(opt.label) || '-'}</td></tr>`;
+                            const selectedIcon = opt.is_selected ? '<i class="fas fa-check text-success"></i>' : '-';
+                            html += `<tr><td>${this.escapeHtml(opt.value) || '-'}</td><td>${this.escapeHtml(opt.label) || '-'}</td>${hasIsSelected ? `<td>${selectedIcon}</td>` : ''}</tr>`;
                         });
                         if (options.length > 10) {
-                            html += `<tr><td colspan="2" class="text-muted">... and ${options.length - 10} more</td></tr>`;
+                            html += `<tr><td colspan="${colCount}" class="text-muted">... and ${options.length - 10} more</td></tr>`;
                         }
                         html += '</tbody></table></div></div>';
 
@@ -730,6 +733,9 @@ export default class FilterFormPage {
                 }
             }
         });
+
+        // Update placeholder on init to reflect any pre-selected options (from is_selected)
+        updatePlaceholder();
     }
 
     /**
@@ -771,7 +777,7 @@ export default class FilterFormPage {
                             ${options.map((opt, index) => `
                                 <div class="dropdown-item filter-multiselect-option">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="${this.escapeHtml(opt.value)}" id="preview-multiselect-${index}">
+                                        <input class="form-check-input" type="checkbox" value="${this.escapeHtml(opt.value)}" id="preview-multiselect-${index}" ${opt.is_selected ? 'checked' : ''}>
                                         <label class="form-check-label" for="preview-multiselect-${index}">${this.escapeHtml(opt.label)}</label>
                                     </div>
                                 </div>
@@ -795,7 +801,7 @@ export default class FilterFormPage {
             options.forEach((opt, index) => {
                 previewHtml += `
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="preview_checkbox" value="${this.escapeHtml(opt.value)}" id="preview-checkbox-${index}">
+                        <input class="form-check-input" type="checkbox" name="preview_checkbox" value="${this.escapeHtml(opt.value)}" id="preview-checkbox-${index}" ${opt.is_selected ? 'checked' : ''}>
                         <label class="form-check-label" for="preview-checkbox-${index}">${this.escapeHtml(opt.label)}</label>
                     </div>
                 `;
@@ -808,7 +814,7 @@ export default class FilterFormPage {
             options.forEach((opt, index) => {
                 previewHtml += `
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="preview_radio" value="${this.escapeHtml(opt.value)}" id="preview-radio-${index}">
+                        <input class="form-check-input" type="radio" name="preview_radio" value="${this.escapeHtml(opt.value)}" id="preview-radio-${index}" ${opt.is_selected ? 'checked' : ''}>
                         <label class="form-check-label" for="preview-radio-${index}">${this.escapeHtml(opt.label)}</label>
                     </div>
                 `;

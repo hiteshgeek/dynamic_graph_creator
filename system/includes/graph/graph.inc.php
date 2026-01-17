@@ -210,7 +210,10 @@ function testQuery($data)
         return "'test'";
     }, $testQuery);
 
-    // Remove existing LIMIT and add our own for sample rows
+    // Store the debug query (with placeholders replaced, but without forced LIMIT)
+    $debugQuery = $testQuery;
+
+    // Remove existing LIMIT and add our own for sample rows (for execution only)
     $testQuery = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $testQuery);
     $testQuery .= ' LIMIT 10';
 
@@ -252,7 +255,7 @@ function testQuery($data)
         'columns' => $columns,
         'rows' => $rows,
         'row_count' => count($rows),
-        'debug_query' => $testQuery
+        'debug_query' => $debugQuery
     ));
 }
 
