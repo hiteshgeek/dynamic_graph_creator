@@ -59,7 +59,7 @@
   height: fit-content;
   overflow: visible;
   position: sticky;
-  top: 0; // Account for header height + spacing
+  top: 85px; // Account for header height + spacing
   transition: all $transition-normal;
 
   &.collapsed {
@@ -306,7 +306,6 @@
 }
 
 // Center - Preview and Query (single unified card)
-// The save bar stays at top, content scrolls inside
 .graph-main {
   display: flex;
   flex-direction: column;
@@ -315,20 +314,13 @@
   border-radius: $border-radius-lg;
   box-shadow: var(--dgc-shadow-subtle);
   transition: background-color 0.2s ease;
-  // Make this sticky so it stays in viewport, with its own scroll
-  position: sticky;
-  top: 85px; // Same as collapsible-panel
-  max-height: calc(100vh - 100px); // Viewport minus header
-  overflow: hidden; // Hide overflow, content wrapper will scroll
-  align-self: flex-start; // Required for sticky to work in grid
 }
 
-// Scrollable content wrapper inside graph-main
+// Content wrapper inside graph-main
 .graph-main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-y: auto; // This area scrolls
 }
 
 .graph-preview-card {
@@ -623,32 +615,32 @@
   }
 }
 
-// Save bar (fixed at top of graph-main container)
-.graph-save-bar {
-  display: flex;
-  align-items: flex-start; // Align buttons to top
-  justify-content: space-between;
-  padding: $spacing-md $spacing-lg;
-  border-bottom: 1px solid var(--dgc-border-color);
+// Graph info section (in sidebar, above collapsible panel)
+.graph-info-section {
+  padding: $spacing-md;
   background: var(--dgc-bg-card);
-  flex-shrink: 0; // Don't shrink, stay at top
-  border-radius: $border-radius-lg $border-radius-lg 0 0;
-  gap: $spacing-md;
+  border-radius: $border-radius-lg;
+  box-shadow: var(--dgc-shadow-subtle);
+  margin-bottom: $spacing-md;
+
+  // Hide when sidebar is collapsed
+  .graph-sidebar-left.collapsed & {
+    display: none;
+  }
 }
 
-// Wrapper for name and description fields
+// Wrapper for name and description fields - stacked layout
 .graph-info-wrapper {
   display: flex;
+  flex-direction: column;
   gap: $spacing-md;
-  flex: 1;
-  min-width: 0;
 }
 
-.graph-name-wrapper {
+.graph-name-wrapper,
+.graph-description-wrapper {
   display: flex;
   flex-direction: column;
   gap: $spacing-xs;
-  flex: 0 0 280px;
 }
 
 .graph-name-label,
@@ -675,32 +667,13 @@
   }
 }
 
-// Description field
-.graph-description-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xs;
-  flex: 1;
-  min-width: 0;
-}
-
 .graph-description-input {
   width: 100%;
-  resize: none; // Disable manual resize, autosize handles it
-  min-height: 31px; // Match form-control-sm height
-  max-height: 50px; // Limit max expansion
-  overflow-y: auto !important; // Allow scroll when max height reached
+  min-height: 38px;
   line-height: 1.5;
 }
 
-.save-buttons {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  margin-top: 20px;
-}
-
-// Status indicators container (errors/warnings)
+// Status indicators container (errors/warnings) - in page header
 .status-indicators {
   display: flex;
   align-items: center;

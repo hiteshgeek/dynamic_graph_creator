@@ -5,6 +5,11 @@
 @use "loader";
 @use "code-editor";
 
+// Global textarea - disable resize handle (autosize handles it)
+textarea {
+  resize: none;
+}
+
 // Add padding for fixed header
 body {
   padding-top: 60px;

@@ -273,20 +273,12 @@ export default class GraphCreator {
     }
 
     /**
-     * Update status indicators in save bar
+     * Update status indicators in page header
      */
     updateStatusIndicators() {
-        const saveButtons = this.container.querySelector('.save-buttons');
-        if (!saveButtons) return;
-
-        // Get or create status indicators container
-        let statusContainer = saveButtons.querySelector('.status-indicators');
-        if (!statusContainer) {
-            statusContainer = document.createElement('div');
-            statusContainer.className = 'status-indicators';
-            // Insert at the beginning of save-buttons
-            saveButtons.insertBefore(statusContainer, saveButtons.firstChild);
-        }
+        // Status indicators are now in page header
+        const statusContainer = document.querySelector('.page-header-right .status-indicators');
+        if (!statusContainer) return;
 
         let html = '';
 
@@ -348,7 +340,8 @@ export default class GraphCreator {
      * Initialize save handler
      */
     initSaveHandler() {
-        const saveBtn = this.container.querySelector('.save-graph-btn');
+        // Save button is now in page header
+        const saveBtn = document.querySelector('.page-header-right .save-graph-btn');
         const nameInput = this.container.querySelector('.graph-name-input');
         const descriptionInput = this.container.querySelector('.graph-description-input');
 
@@ -501,6 +494,30 @@ export default class GraphCreator {
                 }, 350);
             });
         });
+    }
+
+    /**
+     * Expand sidebar if it's collapsed
+     */
+    expandSidebar() {
+        const sidebar = this.container.querySelector('.graph-sidebar-left');
+        const panel = this.container.querySelector('#graph-collapsible-panel');
+
+        if (sidebar && sidebar.classList.contains('collapsed')) {
+            sidebar.classList.remove('collapsed');
+            if (panel) {
+                panel.classList.remove('collapsed');
+            }
+            // Update localStorage
+            localStorage.setItem('graphCreatorSidebarCollapsed', 'false');
+
+            // Trigger chart resize after animation
+            setTimeout(() => {
+                if (this.preview) {
+                    this.preview.resize();
+                }
+            }, 350);
+        }
     }
 
     /**
@@ -1021,9 +1038,12 @@ export default class GraphCreator {
         // Validate
         if (!this.graphName.trim()) {
             Toast.error('Please enter a graph name');
+            // Expand sidebar if collapsed so user can see the name input
+            this.expandSidebar();
             if (nameInput) {
                 nameInput.classList.add('error');
-                nameInput.focus();
+                // Focus after a short delay to allow sidebar animation
+                setTimeout(() => nameInput.focus(), 100);
             }
             return;
         }

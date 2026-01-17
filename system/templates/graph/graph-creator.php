@@ -38,9 +38,10 @@
 
 <body>
     <?php
-    $rightContent = '';
+    $rightContent = '<div class="status-indicators"></div>';
+    $rightContent .= '<button type="button" class="btn btn-primary btn-sm save-graph-btn"><i class="fas fa-save"></i> Save Graph</button>';
     if ($graph) {
-        $rightContent = '<a href="?urlq=graph/view/' . $graph->getId() . '" class="btn btn-primary btn-sm btn-view-mode"><i class="fas fa-eye"></i> View Mode</a>';
+        $rightContent .= '<a href="?urlq=graph/view/' . $graph->getId() . '" class="btn btn-outline-secondary btn-sm btn-view-mode"><i class="fas fa-eye"></i> View</a>';
     }
     echo Utility::renderPageHeader([
         'title' => $graph ? $graph->getName() : 'Create Graph',
@@ -53,8 +54,22 @@
     <div class="container container-full">
         <div id="graph-creator" class="graph-creator graph-creator-single-sidebar" data-graph-id="<?php echo $graph ? $graph->getId() : ''; ?>">
 
-            <!-- Left Sidebar - Chart Type, Config & Filters -->
+            <!-- Left Sidebar - Graph Info, Chart Type, Config & Filters -->
             <div class="graph-sidebar graph-sidebar-left" id="graph-sidebar-left">
+                <!-- Graph Info Section (above collapsible) -->
+                <div class="graph-info-section">
+                    <div class="graph-info-wrapper">
+                        <div class="graph-name-wrapper">
+                            <label class="graph-name-label" for="graph-name-input">Graph Name <span class="required">*</span></label>
+                            <input type="text" class="form-control graph-name-input" id="graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
+                        </div>
+                        <div class="graph-description-wrapper">
+                            <label class="graph-description-label" for="graph-description-input">Description</label>
+                            <textarea class="form-control graph-description-input" id="graph-description-input" placeholder="Enter graph description (optional)" rows="1"><?php echo $graph ? htmlspecialchars($graph->getDescription()) : ''; ?></textarea>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="collapsible-panel" id="graph-collapsible-panel">
                     <!-- Immediately apply saved collapse state to prevent flash -->
                     <script>
@@ -277,28 +292,6 @@
 
             <!-- Center: Preview and Query -->
             <div class="graph-main">
-                <!-- Save Bar (at top, fixed within graph-main) -->
-                <div class="graph-save-bar">
-                    <div class="graph-info-wrapper">
-                        <div class="graph-name-wrapper">
-                            <label class="graph-name-label" for="graph-name-input">Graph Name <span class="required">*</span></label>
-                            <input type="text" class="form-control form-control-sm graph-name-input" id="graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
-                        </div>
-                        <div class="graph-description-wrapper">
-                            <label class="graph-description-label" for="graph-description-input">Description</label>
-                            <textarea class="form-control form-control-sm graph-description-input" id="graph-description-input" placeholder="Enter graph description (optional)" rows="1"><?php echo $graph ? htmlspecialchars($graph->getDescription()) : ''; ?></textarea>
-                        </div>
-                    </div>
-                    <div class="save-buttons">
-                        <a href="?urlq=graph" class="btn btn-secondary btn-sm">Cancel</a>
-                        <button type="button" class="btn btn-primary btn-sm save-graph-btn">
-                            <i class="fas fa-save"></i> Save Graph
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Scrollable content area -->
-                <div class="graph-main-content">
                 <!-- Preview Card -->
                 <div class="graph-preview-card">
                     <div class="graph-preview-header">
@@ -365,7 +358,6 @@
                     </div>
                     <div class="graph-data-content"></div>
                 </div>
-                </div><!-- /.graph-main-content -->
             </div>
 
         </div>

@@ -15,6 +15,9 @@
     <!-- Google Sans Font -->
     <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
+    <!-- Autosize for textarea auto-expand -->
+    <script src="https://cdn.jsdelivr.net/npm/autosize@6.0.1/dist/autosize.min.js"></script>
+
     <!-- Custom CSS -->
     <?php if ($css = Utility::getCss('common')): ?>
         <link href="<?php echo $css; ?>" rel="stylesheet">
@@ -192,6 +195,12 @@
             const container = document.getElementById('dashboard-builder');
             const templateId = parseInt(container.dataset.templateId);
             const isSystem = container.dataset.isSystem === '1';
+
+            // Initialize autosize for textareas
+            const editTemplateDescription = document.getElementById('edit-template-description');
+            const newCategoryDescription = document.getElementById('new-category-description');
+            if (editTemplateDescription) autosize(editTemplateDescription);
+            if (newCategoryDescription) autosize(newCategoryDescription);
 
             // Initialize dashboard builder in template mode
             if (typeof DashboardBuilder !== 'undefined') {

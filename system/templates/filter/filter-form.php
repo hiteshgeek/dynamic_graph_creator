@@ -35,7 +35,8 @@
     echo Utility::renderPageHeader([
         'title' => ($filter ? 'Edit' : 'Add') . ' Filter',
         'backUrl' => '?urlq=filters',
-        'backLabel' => 'Filters'
+        'backLabel' => 'Filters',
+        'rightContent' => '<button type="button" class="btn btn-primary btn-sm save-filter-btn"><i class="fas fa-save"></i> Save Filter</button>'
     ]);
     ?>
 
@@ -192,12 +193,6 @@
                             <div id="filter-preview-container" style="display: none;"></div>
                         </div>
                     </form>
-                </div>
-
-                <div class="card-footer">
-                    <button type="button" class="btn btn-primary btn-sm save-filter-btn">
-                        <i class="fas fa-save"></i> Save Filter
-                    </button>
                 </div>
             </div>
         </div>

@@ -211,15 +211,7 @@
   }
 
   form {
-    padding: $spacing-lg;
-  }
-
-  .card-footer {
-    display: flex;
-    justify-content: flex-end;
-    padding: $spacing-md $spacing-lg;
-    background: transparent;
-    border-top: 1px solid var(--dgc-border-color);
+    padding: 0;
   }
 }
 

@@ -175,6 +175,16 @@ export default class CodeMirrorEditor {
                 this.options.onChange(this.getValue());
             });
         }
+
+        // Auto-format on blur (if not read-only and format is enabled)
+        if (!this.options.readOnly && this.options.formatBtn) {
+            this.editor.on('blur', () => {
+                const query = this.getValue();
+                if (query.trim()) {
+                    this.format();
+                }
+            });
+        }
     }
 
     /**
@@ -245,6 +255,9 @@ export default class CodeMirrorEditor {
     formatSQL(query) {
         // Normalize whitespace
         query = query.replace(/\s+/g, ' ').trim();
+
+        // Fix missing spaces before keywords (e.g., `column`DESC -> `column` DESC)
+        query = query.replace(/(\S)(DESC|ASC)\b/gi, '$1 $2');
 
         // Main SQL clauses (top-level keywords that get their own line)
         const mainClauses = [

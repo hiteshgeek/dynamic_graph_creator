@@ -15,6 +15,9 @@
     <!-- Google Sans Font -->
     <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
+    <!-- Autosize for textarea auto-expand -->
+    <script src="https://cdn.jsdelivr.net/npm/autosize@6.0.1/dist/autosize.min.js"></script>
+
     <!-- Custom CSS -->
     <?php if ($css = Utility::getCss('common')): ?>
         <link href="<?php echo $css; ?>" rel="stylesheet">
@@ -133,6 +136,11 @@
             const newCategoryFields = document.getElementById('new-category-fields');
             const newCategoryNameInput = document.getElementById('new-category-name');
             const newCategoryDescInput = document.getElementById('new-category-description');
+
+            // Initialize autosize for textareas
+            const templateDescription = document.getElementById('template-description');
+            if (templateDescription) autosize(templateDescription);
+            if (newCategoryDescInput) autosize(newCategoryDescInput);
 
             // Toggle new category fields visibility
             categorySelect.addEventListener('change', function() {
