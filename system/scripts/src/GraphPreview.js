@@ -122,6 +122,9 @@ export default class GraphPreview {
 
         const option = this.buildOption();
         this.chart.setOption(option, true);
+
+        // Force resize to fit container
+        this.chart.resize();
     }
 
     /**

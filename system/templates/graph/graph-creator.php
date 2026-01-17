@@ -349,7 +349,7 @@
                 <!-- Placeholder Settings Section -->
                 <div class="graph-section placeholder-settings-section" style="display: none;">
                     <div class="graph-section-header">
-                        <h3><i class="fas fa-cog"></i> Placeholder Settings</h3>
+                        <h3><i class="fas fa-link"></i> Placeholder Settings</h3>
                         <small class="text-muted">Configure behavior when filter values are empty</small>
                     </div>
                     <div class="placeholder-settings-content">

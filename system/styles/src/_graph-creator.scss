@@ -333,8 +333,6 @@
 
 .graph-preview-card {
   padding: $spacing-lg;
-  flex: 1;
-  min-height: 400px;
   border-bottom: 1px solid var(--dgc-border-color);
 }
 
@@ -368,11 +366,12 @@
 
 .graph-preview-container {
   width: 100%;
-  height: 350px;
+  height: 350px; // Fixed height for chart container
   border: 1px solid var(--dgc-border-color);
   border-radius: $border-radius;
   background: var(--dgc-gray-50);
   transition: background-color 0.2s ease;
+  overflow: hidden; // Prevent chart from overflowing
 }
 
 // Graph sections (vertically stacked)

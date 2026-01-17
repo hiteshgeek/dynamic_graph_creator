@@ -235,9 +235,9 @@ export default class QueryBuilder {
         // Handle commas - each item on new line with indent
         query = query.replace(/,\s*/g, ',\n\t');
 
-        // Handle AND/OR - each on new line with indent
-        query = query.replace(/\s+(AND)\s+/gi, '\n\t$1 ');
-        query = query.replace(/\s+(OR)\s+/gi, '\n\t$1 ');
+        // Handle AND/OR - keep at end of line, next condition on new line
+        query = query.replace(/\s+(AND)\s+/gi, ' $1\n\t');
+        query = query.replace(/\s+(OR)\s+/gi, ' $1\n\t');
 
         // Clean up: trim lines and remove empty lines
         const lines = query.split('\n')
@@ -259,14 +259,10 @@ export default class QueryBuilder {
                 // Uppercase the keyword
                 formattedLines.push(line.toUpperCase());
             } else {
-                // Check if line starts with AND/OR
-                if (/^(AND|OR)\s/i.test(line)) {
-                    line = line.replace(/^(AND|OR)\s/i, (m) => m.toUpperCase());
-                    formattedLines.push('\t' + line);
-                } else {
-                    // Content line - indent it
-                    formattedLines.push('\t' + line);
-                }
+                // Uppercase AND/OR at end of lines
+                line = line.replace(/\s+(AND|OR)$/i, (m) => m.toUpperCase());
+                // Content line - indent it
+                formattedLines.push('\t' + line);
             }
         }
 

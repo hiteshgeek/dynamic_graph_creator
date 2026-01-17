@@ -67,7 +67,7 @@ export default class DataMapper {
 
         let html = `
             <div class="graph-section-header">
-                <h3><i class="fas fa-columns"></i> Data Mapping</h3>
+                <h3><i class="fas fa-project-diagram"></i> Data Mapping</h3>
             </div>
         `;
 
