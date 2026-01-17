@@ -28,7 +28,8 @@
     <?php
     echo Utility::renderPageHeader([
         'title' => $pageTitle,
-        'backUrl' => '?urlq=dashboard/templates'
+        'backUrl' => '?urlq=dashboard/templates',
+        'backLabel' => 'Templates'
     ]);
     ?>
 

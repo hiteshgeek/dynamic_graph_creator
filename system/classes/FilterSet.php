@@ -102,7 +102,16 @@ class FilterSet
             }
 
             // Escape the value for SQL safety
-            $escaped_value = $db->escape($value);
+            if (is_array($value)) {
+                // Handle multi-value filters (multi-select, checkbox)
+                $escaped_parts = array();
+                foreach ($value as $v) {
+                    $escaped_parts[] = "'" . $db->escapeString($v) . "'";
+                }
+                $escaped_value = implode(',', $escaped_parts);
+            } else {
+                $escaped_value = "'" . $db->escapeString($value) . "'";
+            }
 
             // Replace the placeholder in the query
             // Handle both :key and ::key formats
@@ -121,9 +130,9 @@ class FilterSet
      */
     private function cleanUnusedPlaceholders($query)
     {
-        // Replace any remaining :word placeholders with empty string or a safe default
-        // Be careful not to remove :: placeholders used by the database class
-        return preg_replace('/(?<![:\']):[a-zA-Z_][a-zA-Z0-9_]*/', "''", $query);
+        // Replace any remaining ::word placeholders with empty quoted string
+        // Pattern matches ::key format (e.g., ::category, ::year)
+        return preg_replace('/::[a-zA-Z_][a-zA-Z0-9_]*/', "''", $query);
     }
 
     /**

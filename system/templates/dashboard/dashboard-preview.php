@@ -40,6 +40,7 @@
     echo Utility::renderPageHeader([
         'title' => $dashboard->getName(),
         'backUrl' => '?urlq=dashboard',
+        'backLabel' => 'Dashboards',
         'badges' => $badges,
         'rightContent' => $rightContent
     ]);

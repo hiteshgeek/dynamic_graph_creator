@@ -30,11 +30,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const viewContainer = document.getElementById('graph-view');
     if (viewContainer) {
         const config = viewContainer.dataset.config ? JSON.parse(viewContainer.dataset.config) : {};
+        const hasFilters = viewContainer.dataset.hasFilters === '1';
         window.graphView = new GraphView(viewContainer, {
             graphId: viewContainer.dataset.graphId,
             graphType: viewContainer.dataset.graphType || 'bar',
             graphName: viewContainer.dataset.graphName || 'Chart',
-            config
+            config,
+            hasFilters
         });
     }
 });

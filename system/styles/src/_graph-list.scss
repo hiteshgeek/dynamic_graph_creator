@@ -15,16 +15,16 @@
 // Graph card style (matching dashboard cards)
 .graph-card {
   background: var(--dgc-bg-card);
-  border: 2px solid var(--dgc-border-color);
   border-radius: 8px;
   overflow: hidden;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
   padding: 1rem;
+  box-shadow: var(--dgc-shadow-1);
 
   &:hover {
-    border-color: var(--dgc-primary);
+    box-shadow: var(--dgc-shadow-2);
   }
 
   .graph-card-content {

@@ -34,7 +34,8 @@
     <?php
     echo Utility::renderPageHeader([
         'title' => ($filter ? 'Edit' : 'Add') . ' Filter',
-        'backUrl' => '?urlq=filters'
+        'backUrl' => '?urlq=filters',
+        'backLabel' => 'Filters'
     ]);
     ?>
 

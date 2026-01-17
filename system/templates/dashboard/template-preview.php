@@ -44,6 +44,7 @@
     echo Utility::renderPageHeader([
         'title' => $templateName,
         'backUrl' => '?urlq=dashboard/templates',
+        'backLabel' => 'Templates',
         'badges' => $badges,
         'rightContent' => $rightContent
     ]);

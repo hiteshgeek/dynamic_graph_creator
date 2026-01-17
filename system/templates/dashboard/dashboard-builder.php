@@ -38,6 +38,7 @@
     echo Utility::renderPageHeader([
         'title' => ($dashboard && $dashboard->getId()) ? $dashboard->getName() : 'Create Dashboard',
         'backUrl' => '?urlq=dashboard',
+        'backLabel' => 'Dashboards',
         'titleEditable' => ($dashboard && $dashboard->getId()) ? true : false,
         'titleId' => 'dashboard-name-display',
         'rightContent' => $rightContent

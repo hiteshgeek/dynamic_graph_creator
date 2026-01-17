@@ -42,6 +42,7 @@
     echo Utility::renderPageHeader([
         'title' => $graph ? $graph->getName() : 'Create Graph',
         'backUrl' => '?urlq=graph',
+        'backLabel' => 'Graphs',
         'rightContent' => $rightContent
     ]);
     ?>

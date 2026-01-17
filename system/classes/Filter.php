@@ -251,8 +251,14 @@ class Filter implements DatabaseObject
     public static function extractPlaceholders($query)
     {
         $placeholders = array();
-        if (preg_match_all('/:[a-zA-Z_][a-zA-Z0-9_]*/', $query, $matches)) {
-            $placeholders = array_unique($matches[0]);
+        // Match ::key format (double colon)
+        if (preg_match_all('/::([a-zA-Z_][a-zA-Z0-9_]*)/', $query, $matches)) {
+            // Return with :: prefix to match how filter keys are stored
+            foreach ($matches[0] as $match) {
+                if (!in_array($match, $placeholders)) {
+                    $placeholders[] = $match;
+                }
+            }
         }
         return $placeholders;
     }

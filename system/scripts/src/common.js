@@ -497,6 +497,7 @@ window.KeyboardShortcuts = {
     shortcuts: new Map(),
     enabled: true,
     initialized: false,
+    modalElement: null,
 
     init() {
         if (this.initialized) return this;
@@ -514,7 +515,8 @@ window.KeyboardShortcuts = {
             description: options.description || '',
             preventDefault: options.preventDefault !== false,
             scope: options.scope || 'global',
-            enabled: true
+            enabled: true,
+            available: options.available || null
         };
 
         if (!this.shortcuts.has(normalizedKey)) {
@@ -607,14 +609,61 @@ window.KeyboardShortcuts = {
     },
 
     registerGlobalShortcuts() {
+        // F1: Toggle keyboard shortcuts help
+        this.register('f1', () => {
+            this.toggleHelpModal();
+        }, {
+            description: 'Toggle keyboard shortcuts',
+            scope: 'global'
+        });
+
+        // Escape: Close help modal if open
+        this.register('escape', () => {
+            this.hideHelpModal();
+        }, {
+            description: 'Close modal/dialog',
+            scope: 'global',
+            preventDefault: false
+        });
+
         // Alt+M: Toggle theme (system -> light -> dark -> system)
         this.register('alt+m', () => {
             if (typeof Theme !== 'undefined' && Theme.toggle) {
                 Theme.toggle();
             }
         }, {
-            description: 'Toggle theme mode',
-            scope: 'global'
+            description: 'Cycle theme mode',
+            scope: 'theme'
+        });
+
+        // Alt+1: Set light theme
+        this.register('alt+1', () => {
+            if (typeof Theme !== 'undefined' && Theme.setMode) {
+                Theme.setMode('light', true, Theme.currentMode);
+            }
+        }, {
+            description: 'Light theme',
+            scope: 'theme'
+        });
+
+        // Alt+2: Set dark theme
+        this.register('alt+2', () => {
+            if (typeof Theme !== 'undefined' && Theme.setMode) {
+                Theme.setMode('dark', true, Theme.currentMode);
+            }
+        }, {
+            description: 'Dark theme',
+            scope: 'theme'
+        });
+
+        // Alt+3: Set system theme
+        this.register('alt+3', () => {
+            if (typeof Theme !== 'undefined' && Theme.setMode) {
+                Theme.setMode('system', true, Theme.currentMode);
+            }
+        }, {
+            description: 'System theme',
+            scope: 'theme'
         });
 
         // Alt+T: Toggle tweak switch (layout edit mode)
@@ -627,7 +676,8 @@ window.KeyboardShortcuts = {
             }
         }, {
             description: 'Toggle tweak mode',
-            scope: 'global'
+            scope: 'dashboard-builder',
+            available: () => !!document.getElementById('toggle-layout-edit-switch')
         });
 
         // Alt+V: Toggle between View Mode and Design Mode
@@ -647,10 +697,221 @@ window.KeyboardShortcuts = {
             }
         }, {
             description: 'Toggle View/Design mode',
-            scope: 'global'
+            scope: 'dashboard-builder',
+            available: () => !!(document.querySelector('.btn-view-mode') || document.querySelector('.btn-design-mode'))
+        });
+
+        // Graph Creator: Alt+O to toggle sidebar
+        this.register('alt+o', () => {
+            const sidebar = document.querySelector('.graph-creator .graph-sidebar');
+            const panel = sidebar?.querySelector('.collapsible-panel');
+            if (panel) {
+                panel.classList.toggle('collapsed');
+            }
+            if (sidebar) {
+                sidebar.classList.toggle('collapsed');
+                localStorage.setItem('graphCreatorSidebarCollapsed', sidebar.classList.contains('collapsed') ? 'true' : 'false');
+            }
+        }, {
+            description: 'Toggle options panel',
+            scope: 'graph-creator',
+            available: () => !!document.querySelector('.graph-creator .graph-sidebar')
         });
 
         return this;
+    },
+
+    /**
+     * Get all registered shortcuts with their availability status
+     * @returns {Array} Array of shortcut info objects
+     */
+    getAllShortcuts() {
+        const result = [];
+        this.shortcuts.forEach((handlers, key) => {
+            handlers.forEach(handler => {
+                // Check if shortcut is available on current page
+                let isAvailable = true;
+                if (typeof handler.available === 'function') {
+                    isAvailable = handler.available();
+                }
+                result.push({
+                    key: key,
+                    displayKey: this.formatKeyForDisplay(key),
+                    description: handler.description,
+                    scope: handler.scope,
+                    available: isAvailable
+                });
+            });
+        });
+        return result;
+    },
+
+    /**
+     * Format key combo for display (e.g., "alt+m" -> "Alt + M")
+     * @param {string} key - Normalized key string
+     * @returns {string} Formatted display string
+     */
+    formatKeyForDisplay(key) {
+        const parts = key.split('+');
+        return parts.map(part => {
+            if (part === 'alt') return 'Alt';
+            if (part === 'ctrl') return 'Ctrl';
+            if (part === 'shift') return 'Shift';
+            if (part === 'meta') return 'Cmd';
+            if (part === 'escape') return 'Esc';
+            if (part === 'f1') return 'F1';
+            return part.toUpperCase();
+        }).join(' + ');
+    },
+
+    /**
+     * Create and show the keyboard shortcuts help modal
+     */
+    showHelpModal() {
+        // Remove existing modal if any
+        this.hideHelpModal();
+
+        const shortcuts = this.getAllShortcuts();
+
+        // Group shortcuts by scope
+        const grouped = {};
+        shortcuts.forEach(shortcut => {
+            const scope = shortcut.scope || 'global';
+            if (!grouped[scope]) {
+                grouped[scope] = [];
+            }
+            grouped[scope].push(shortcut);
+        });
+
+        // Build modal HTML
+        let shortcutsHtml = '';
+        const scopeLabels = {
+            'global': 'Global',
+            'theme': 'Theme',
+            'dashboard-builder': 'Dashboard / Template / Graph',
+            'graph-creator': 'Graph Creator',
+            'filter': 'Filter Page'
+        };
+
+        // Sort scopes: global first, theme second, then alphabetically
+        const scopeOrder = ['global', 'theme'];
+        const sortedScopes = Object.keys(grouped).sort((a, b) => {
+            const aIndex = scopeOrder.indexOf(a);
+            const bIndex = scopeOrder.indexOf(b);
+            if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+            if (aIndex !== -1) return -1;
+            if (bIndex !== -1) return 1;
+            return a.localeCompare(b);
+        });
+
+        sortedScopes.forEach(scope => {
+            const scopeLabel = scopeLabels[scope] || scope;
+            shortcutsHtml += `<div class="shortcuts-group">
+                <div class="shortcuts-group-header" data-scope="${scope}">
+                    <div class="shortcuts-group-title">${scopeLabel}</div>
+                    <i class="fas fa-chevron-up shortcuts-group-toggle"></i>
+                </div>
+                <div class="shortcuts-list">`;
+
+            grouped[scope].forEach(shortcut => {
+                const disabledClass = shortcut.available ? '' : 'disabled';
+                const keyParts = shortcut.displayKey.split(' + ');
+                const keysHtml = keyParts.map(k => `<kbd>${k}</kbd>`).join('<span class="key-separator">+</span>');
+
+                shortcutsHtml += `
+                    <div class="shortcut-item ${disabledClass}">
+                        <div class="shortcut-keys">${keysHtml}</div>
+                        <div class="shortcut-description">${shortcut.description}</div>
+                    </div>`;
+            });
+
+            shortcutsHtml += `</div></div>`;
+        });
+
+        const modalHtml = `
+            <div class="modal fade" id="keyboardShortcutsModal" tabindex="-1" aria-labelledby="keyboardShortcutsModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content keyboard-shortcuts-modal">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="keyboardShortcutsModalLabel">
+                                <i class="fas fa-keyboard"></i> Keyboard Shortcuts
+                            </h5>
+                            <div class="shortcuts-expand-collapse">
+                                <button type="button" class="btn btn-sm btn-link" id="shortcuts-toggle-all">Collapse All</button>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ${shortcutsHtml}
+                            <div class="shortcuts-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Grayed out shortcuts are not available on this page
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        this.modalElement = document.getElementById('keyboardShortcutsModal');
+
+        // Add click handlers for section collapse/expand
+        this.modalElement.querySelectorAll('.shortcuts-group-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const group = header.closest('.shortcuts-group');
+                group.classList.toggle('collapsed');
+            });
+        });
+
+        // Add toggle all handler
+        const toggleBtn = this.modalElement.querySelector('#shortcuts-toggle-all');
+        toggleBtn.addEventListener('click', () => {
+            const groups = this.modalElement.querySelectorAll('.shortcuts-group');
+            const allCollapsed = Array.from(groups).every(g => g.classList.contains('collapsed'));
+
+            groups.forEach(group => {
+                if (allCollapsed) {
+                    group.classList.remove('collapsed');
+                } else {
+                    group.classList.add('collapsed');
+                }
+            });
+
+            toggleBtn.textContent = allCollapsed ? 'Collapse All' : 'Expand All';
+        });
+
+        // Show modal using Bootstrap
+        const modal = new bootstrap.Modal(this.modalElement);
+        modal.show();
+
+        // Clean up modal element when hidden
+        this.modalElement.addEventListener('hidden.bs.modal', () => {
+            this.modalElement.remove();
+            this.modalElement = null;
+        }, { once: true });
+    },
+
+    /**
+     * Hide the keyboard shortcuts help modal
+     */
+    hideHelpModal() {
+        if (this.modalElement) {
+            const modal = bootstrap.Modal.getInstance(this.modalElement);
+            if (modal) {
+                modal.hide();
+            }
+        }
+    },
+
+    /**
+     * Toggle the keyboard shortcuts help modal
+     */
+    toggleHelpModal() {
+        if (this.modalElement) {
+            this.hideHelpModal();
+        } else {
+            this.showHelpModal();
+        }
     }
 };
 

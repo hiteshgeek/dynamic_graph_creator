@@ -59,7 +59,7 @@
   height: fit-content;
   overflow: visible;
   position: sticky;
-  top: 80px; // Account for header height + spacing
+  top: 85px; // Account for header height + spacing
   transition: all $transition-normal;
 
   &.collapsed {
@@ -1201,4 +1201,240 @@
   border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
+}
+
+// ===========================================
+// Graph View Page
+// ===========================================
+
+#graph-view {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.graph-view-filters {
+  padding: $spacing-md;
+
+  .filters-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+    margin-bottom: $spacing-md;
+  }
+
+  .filter-input-item {
+    flex: 1 1 200px;
+    max-width: 300px;
+    padding: $spacing-sm;
+    background: var(--dgc-gray-50);
+    border: 1px solid var(--dgc-border-color);
+    border-radius: $border-radius;
+
+    &:hover {
+      border-color: var(--dgc-primary-light);
+    }
+  }
+
+  .filter-input-header {
+    margin-bottom: $spacing-xs;
+  }
+
+  .filter-input-label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--dgc-text-primary);
+    margin: 0;
+  }
+
+  .filter-input {
+    font-size: $font-size-sm !important;
+  }
+
+  // Multi-select dropdown styling
+  .filter-multiselect-dropdown {
+    width: 100%;
+  }
+
+  .filter-multiselect-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-xs $spacing-sm;
+    border: 1px solid var(--dgc-border-color) !important;
+    background: var(--dgc-bg-card) !important;
+    color: var(--dgc-text-primary) !important;
+    font-size: $font-size-sm;
+    text-align: left;
+
+    &:hover {
+      border-color: var(--dgc-primary-light) !important;
+    }
+
+    &:focus {
+      border-color: var(--dgc-primary) !important;
+      box-shadow: none !important;
+    }
+  }
+
+  .filter-multiselect-placeholder {
+    color: var(--dgc-text-hint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.has-selection {
+      color: var(--dgc-text-primary);
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  .filter-multiselect-options {
+    width: 100%;
+    padding: $spacing-xs 0;
+    background: var(--dgc-bg-card);
+    border: 1px solid var(--dgc-border-color);
+    box-shadow: var(--dgc-shadow-2);
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  .filter-multiselect-header {
+    position: sticky;
+    top: 0;
+    background: var(--dgc-bg-card);
+    z-index: 1;
+    padding: $spacing-xs $spacing-sm;
+    border-bottom: 1px solid var(--dgc-border-color);
+    margin-bottom: $spacing-xs;
+  }
+
+  .filter-multiselect-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-xs;
+
+    .btn-link {
+      padding: 0 $spacing-xs;
+      font-size: $font-size-sm;
+      text-decoration: none;
+      color: var(--dgc-primary);
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .filter-multiselect-divider {
+    color: var(--dgc-text-hint);
+    font-size: $font-size-sm;
+  }
+
+  .multiselect-search {
+    width: 100%;
+    padding: $spacing-xs !important;
+    font-size: $font-size-sm !important;
+  }
+
+  .filter-multiselect-option {
+    padding: $spacing-xs $spacing-sm;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--dgc-gray-50);
+    }
+
+    .form-check {
+      margin: 0;
+    }
+
+    .form-check-label {
+      font-size: $font-size-sm;
+      color: var(--dgc-text-primary);
+    }
+  }
+
+  // Checkbox and radio groups
+  .filter-checkbox-group,
+  .filter-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 120px;
+    overflow-y: auto;
+    padding: $spacing-xs;
+    background: var(--dgc-bg-card);
+    border: 1px solid var(--dgc-border-color);
+    border-radius: $border-radius;
+
+    .form-check {
+      padding: 2px 0;
+    }
+
+    .form-check-label {
+      font-size: $font-size-sm;
+      color: var(--dgc-text-secondary);
+    }
+  }
+
+  // Date range
+  .filter-date-range {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+
+    input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .date-range-separator {
+      font-size: $font-size-sm;
+      color: var(--dgc-text-hint);
+      flex-shrink: 0;
+    }
+  }
+
+  // Filter actions
+  .filter-actions {
+    display: flex;
+    justify-content: flex-start;
+    padding-top: $spacing-sm;
+    border-top: 1px solid var(--dgc-border-color);
+  }
+}
+
+// Graph filter message (shown when filters need to be applied first)
+.graph-filter-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+  text-align: center;
+  color: var(--dgc-text-secondary);
+  padding: $spacing-xl;
+
+  i {
+    font-size: 48px;
+    color: var(--dgc-primary-light);
+    margin-bottom: $spacing-md;
+    opacity: 0.7;
+  }
+
+  p {
+    font-size: $font-size-base;
+    margin: 0;
+    max-width: 300px;
+    line-height: 1.5;
+
+    strong {
+      color: var(--dgc-primary);
+    }
+  }
 }
