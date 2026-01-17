@@ -124,10 +124,33 @@ window.Ajax = {
     }
 };
 
+// Bootstrap Tooltip helper - global initialization
+window.Tooltips = {
+    init() {
+        // Dispose existing tooltips to prevent duplicates
+        const existingTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        existingTooltips.forEach(el => {
+            const tooltip = bootstrap.Tooltip.getInstance(el);
+            if (tooltip) {
+                tooltip.dispose();
+            }
+        });
+
+        // Initialize new tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(tooltipTriggerEl => {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+};
+
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize toast system
     Toast.init();
+
+    // Initialize Bootstrap tooltips globally
+    Tooltips.init();
 
     // Auto-init graph creator if container exists
     const creatorContainer = document.getElementById('graph-creator');

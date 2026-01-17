@@ -441,7 +441,7 @@ class DashboardBuilder {
                         <h3>No Sections Yet</h3>
                         <p>Start building your dashboard by adding a section or choosing a template</p>
                         <button class="btn btn-primary add-first-section-btn">
-                            <i class="fas fa-plus"></i> Add Section
+                            <i class="fas fa-circle-plus"></i> Add Section
                         </button>
                     </div>
                 </div>
@@ -479,6 +479,11 @@ class DashboardBuilder {
           }
         });
       }
+    }
+
+    // Initialize Bootstrap tooltips (use global helper)
+    if (window.Tooltips) {
+      window.Tooltips.init();
     }
   }
 
@@ -545,7 +550,7 @@ class DashboardBuilder {
 
       // Column drag handle - only show when more than one column
       const columnDragHandle = numColumns > 1
-        ? `<button class="column-drag-handle" title="Drag to reorder column">
+        ? `<button class="column-drag-handle" data-bs-toggle="tooltip" data-bs-title="Drag to reorder column">
                     <i class="fas fa-grip-vertical"></i>
                 </button>`
         : '';
@@ -554,31 +559,31 @@ class DashboardBuilder {
       const areaControls = `<div class="area-controls-overlay">
                 ${columnDragHandle}
                 <!-- Top: Add Row Above (splits column into rows) -->
-                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add row">
-                    <i class="fas fa-plus"></i> Row
+                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add row">
+                    <i class="fas fa-circle-plus"></i> Row
                 </button>
                 <!-- Bottom: Add Row Below (splits column into rows) -->
-                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add row">
-                    <i class="fas fa-plus"></i> Row
+                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add row">
+                    <i class="fas fa-circle-plus"></i> Row
                 </button>
                 <!-- Left: Add Column Left -->
-                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column" ${!canAddColLeft ? 'disabled' : ''}>
-                    <i class="fas fa-plus"></i> Column
+                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColLeft ? 'disabled' : ''}>
+                    <i class="fas fa-circle-plus"></i> Column
                 </button>
                 <!-- Right: Add Column Right -->
-                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Add column" ${!canAddColRight ? 'disabled' : ''}>
-                    <i class="fas fa-plus"></i> Column
+                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColRight ? 'disabled' : ''}>
+                    <i class="fas fa-circle-plus"></i> Column
                 </button>
                 <!-- Center: Resize buttons + Delete -->
                 <div class="center-controls">
                     <div class="center-row">
-                        <button class="center-btn col-resize resize-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-left"></i>
                         </button>
-                        <button class="center-btn delete-btn remove-col-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Remove column" ${!canRemoveColumn ? 'disabled' : ''}>
+                        <button class="center-btn delete-btn remove-col-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Remove column" ${!canRemoveColumn ? 'disabled' : ''}>
                             <i class="fas fa-trash"></i>
                         </button>
-                        <button class="center-btn col-resize resize-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-right"></i>
                         </button>
                     </div>
@@ -615,7 +620,7 @@ class DashboardBuilder {
     const dragHandleHtml =
       totalSections > 1
         ? `
-            <button class="section-control-btn drag-handle" title="Drag to reorder">
+            <button class="section-control-btn drag-handle" data-bs-toggle="tooltip" data-bs-title="Drag to reorder">
                 <i class="fas fa-grip-vertical"></i>
             </button>
         `
@@ -624,7 +629,7 @@ class DashboardBuilder {
     const topBorderControls = `
             <div class="section-top-border-controls">
                 ${dragHandleHtml}
-                <button class="section-control-btn remove-btn" data-section-id="${section.sid}" title="Remove section">
+                <button class="section-control-btn remove-btn" data-section-id="${section.sid}" data-bs-toggle="tooltip" data-bs-title="Remove section">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -632,8 +637,8 @@ class DashboardBuilder {
 
     // Add section button on top border
     const topBorderButton = `
-            <button class="add-section-border-btn add-section-top-btn" data-position="${index}" title="Add section">
-                <i class="fas fa-plus"></i>
+            <button class="add-section-border-btn add-section-top-btn" data-position="${index}" data-bs-toggle="tooltip" data-bs-title="Add section">
+                <i class="fas fa-circle-plus"></i>
                 <span>Section</span>
             </button>
         `;
@@ -642,8 +647,8 @@ class DashboardBuilder {
     const bottomBorderButton = `
             <button class="add-section-border-btn add-section-bottom-btn" data-position="${
               index + 1
-            }" title="Add section">
-                <i class="fas fa-plus"></i>
+            }" data-bs-toggle="tooltip" data-bs-title="Add section">
+                <i class="fas fa-circle-plus"></i>
                 <span>Section</span>
             </button>
         `;
@@ -712,7 +717,7 @@ class DashboardBuilder {
 
     // Column drag handle - only show when more than one column (shown in first row only)
     const columnDragHandle = numColumns > 1
-      ? `<button class="column-drag-handle" title="Drag to reorder column">
+      ? `<button class="column-drag-handle" data-bs-toggle="tooltip" data-bs-title="Drag to reorder column">
                 <i class="fas fa-grip-vertical"></i>
             </button>`
       : '';
@@ -730,7 +735,7 @@ class DashboardBuilder {
 
       // Row drag handle - only show when more than one row
       const rowDragHandle = numRows > 1
-        ? `<button class="row-drag-handle" title="Drag to reorder row">
+        ? `<button class="row-drag-handle" data-bs-toggle="tooltip" data-bs-title="Drag to reorder row">
                     <i class="fas fa-grip-horizontal"></i>
                 </button>`
         : '';
@@ -742,36 +747,36 @@ class DashboardBuilder {
                 ${isFirstRow ? columnDragHandle : ''}
                 ${rowDragHandle}
                 <!-- Column actions: Add Column Left/Right -->
-                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column" ${!canAddColLeft ? 'disabled' : ''}>
-                    <i class="fas fa-plus"></i> Column
+                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColLeft ? 'disabled' : ''}>
+                    <i class="fas fa-circle-plus"></i> Column
                 </button>
-                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Add column" ${!canAddColRight ? 'disabled' : ''}>
-                    <i class="fas fa-plus"></i> Column
+                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColRight ? 'disabled' : ''}>
+                    <i class="fas fa-circle-plus"></i> Column
                 </button>
                 <!-- Row actions: Add Row Above/Below - each row can add above or below itself -->
-                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Add row" ${!canAddRow ? 'disabled' : ''}>
-                    <i class="fas fa-plus"></i> Row
+                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Add row" ${!canAddRow ? 'disabled' : ''}>
+                    <i class="fas fa-circle-plus"></i> Row
                 </button>
-                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Add row" ${!canAddRow ? 'disabled' : ''}>
-                    <i class="fas fa-plus"></i> Row
+                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Add row" ${!canAddRow ? 'disabled' : ''}>
+                    <i class="fas fa-circle-plus"></i> Row
                 </button>
                 <!-- Center: All resize buttons + Delete buttons -->
                 <div class="center-controls">
-                    <button class="center-btn row-resize resize-row-up-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Expand row" ${!canExpandRow ? 'disabled' : ''}>
+                    <button class="center-btn row-resize resize-row-up-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Expand row" ${!canExpandRow ? 'disabled' : ''}>
                         <i class="fas fa-caret-up"></i>
                     </button>
                     <div class="center-row">
-                        <button class="center-btn col-resize resize-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-left"></i>
                         </button>
-                        <button class="center-btn delete-btn remove-row-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Remove row" ${!canRemoveRow ? 'disabled' : ''}>
+                        <button class="center-btn delete-btn remove-row-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Remove row" ${!canRemoveRow ? 'disabled' : ''}>
                             <i class="fas fa-trash"></i>
                         </button>
-                        <button class="center-btn col-resize resize-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-right"></i>
                         </button>
                     </div>
-                    <button class="center-btn row-resize resize-row-down-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Shrink row" ${!canShrinkRow ? 'disabled' : ''}>
+                    <button class="center-btn row-resize resize-row-down-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Shrink row" ${!canShrinkRow ? 'disabled' : ''}>
                         <i class="fas fa-caret-down"></i>
                     </button>
                 </div>

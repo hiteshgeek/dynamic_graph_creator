@@ -915,7 +915,31 @@ window.KeyboardShortcuts = {
     }
 };
 
+/**
+ * Tooltips - Bootstrap tooltip initialization helper
+ * Use Tooltips.init() to initialize/reinitialize all tooltips on the page
+ */
+window.Tooltips = {
+    init() {
+        // Dispose existing tooltips to prevent duplicates
+        const existingTooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        existingTooltips.forEach(el => {
+            const tooltip = bootstrap.Tooltip.getInstance(el);
+            if (tooltip) {
+                tooltip.dispose();
+            }
+        });
+
+        // Initialize new tooltips
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(tooltipTriggerEl => {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     Toast.init();
     KeyboardShortcuts.init();
+    Tooltips.init();
 });

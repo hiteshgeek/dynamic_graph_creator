@@ -767,3 +767,10 @@ option[value="__new__"] {
     padding: $spacing-md;
   }
 }
+
+// Bootstrap Tooltip customization
+.tooltip {
+  .tooltip-inner {
+    font-size: 0.75rem;
+  }
+}

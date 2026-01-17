@@ -10,10 +10,11 @@
 // Text buttons (Add Section, Add Row, Add Column, Grid Size Indicator)
 $builder-btn-padding: 0.35rem 0.85rem;
 $builder-btn-font-size: 0.85rem;
+$builder-grid-size-btn-font-size: 0.75rem;
 $builder-btn-font-weight: 500;
 $builder-btn-border-width: 2px;
 $builder-btn-border-radius: 14px;
-$builder-btn-icon-font-size: 0.8rem;
+$builder-btn-icon-font-size: 0.85rem;
 $builder-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0, 0.1);
 $builder-btn-box-shadow-hover: 0 0 12px;
 $builder-btn-transition: all 0.2s;
@@ -23,7 +24,8 @@ $builder-icon-btn-size: 28px;
 $builder-icon-btn-font-size: 0.75rem;
 $builder-icon-btn-border-width: 2px;
 $builder-icon-btn-border-radius: 50%;
-$builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0, 0.1);
+$builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15),
+  0 0 3px rgba(0, 0, 0, 0.1);
 
 // Common base mixin for all builder text buttons (section, row, column)
 @mixin builder-border-btn($color-var, $hover-shadow-color) {
@@ -62,7 +64,8 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
   &:hover:not([disabled]) {
     background: $color-var;
     color: var(--dgc-text-inverse);
-    box-shadow: $builder-btn-box-shadow-hover $hover-shadow-color, 0 0 4px rgba(0, 0, 0, 0.1);
+    box-shadow: $builder-btn-box-shadow-hover $hover-shadow-color,
+      0 0 4px rgba(0, 0, 0, 0.1);
   }
 
   &[disabled] {
@@ -97,7 +100,8 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
   &:hover:not([disabled]) {
     background: $color-var;
     color: var(--dgc-text-inverse);
-    box-shadow: $builder-btn-box-shadow-hover $hover-shadow-color, 0 0 4px rgba(0, 0, 0, 0.1);
+    box-shadow: $builder-btn-box-shadow-hover $hover-shadow-color,
+      0 0 4px rgba(0, 0, 0, 0.1);
   }
 
   &[disabled] {
@@ -551,7 +555,7 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
   &.edge-right {
     right: 0;
     top: 50%;
-    transform: translateX(50%) translateY(-50%) rotate(90deg);
+    transform: translateX(50%) translateY(-50%) rotate(-90deg);
   }
 }
 
@@ -585,7 +589,8 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
       background: var(--dgc-success);
       border-color: var(--dgc-success);
       color: var(--dgc-text-inverse);
-      box-shadow: $builder-btn-box-shadow-hover rgba(40, 167, 69, 0.4), 0 0 4px rgba(0, 0, 0, 0.1);
+      box-shadow: $builder-btn-box-shadow-hover rgba(40, 167, 69, 0.4),
+        0 0 4px rgba(0, 0, 0, 0.1);
     }
   }
 
@@ -595,7 +600,8 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
       background: var(--dgc-warning);
       border-color: var(--dgc-warning);
       color: var(--dgc-text-inverse);
-      box-shadow: $builder-btn-box-shadow-hover rgba(255, 193, 7, 0.4), 0 0 4px rgba(0, 0, 0, 0.1);
+      box-shadow: $builder-btn-box-shadow-hover rgba(255, 193, 7, 0.4),
+        0 0 4px rgba(0, 0, 0, 0.1);
     }
   }
 
@@ -629,7 +635,7 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
   border: none;
   border-radius: $builder-btn-border-radius;
   padding: $builder-btn-padding;
-  font-size: $builder-btn-font-size;
+  font-size: $builder-grid-size-btn-font-size;
   font-family: monospace;
   font-weight: $builder-btn-font-weight;
   line-height: 1;
@@ -646,7 +652,7 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
 
   // Column highlight (orange - matches column drag handlers)
   .grid-size-part {
-    padding: 0 0.25rem;
+    padding: 0.25rem;
     border-radius: 4px;
     transition: all 0.15s ease;
 
@@ -826,4 +832,3 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15), 0 0 3px rgba(0, 0, 0,
     }
   }
 }
-
