@@ -1,37 +1,37 @@
 // Dashboard Cell Empty State Styles
 // Used inside grid areas when no content is assigned
-@use '../variables' as *;
+@use "../variables" as *;
 
 .dashboard-cell-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    min-height: 150px;
-    color: var(--dgc-text-secondary);
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  //   min-height: 150px;
+  color: var(--dgc-text-secondary);
+  text-align: center;
 
+  .cell-empty-icon {
+    font-size: 1.5rem;
+    color: var(--dgc-text-hint);
+    // margin-bottom: 0.75rem;
+    transition: all 0.3s;
+  }
+
+  .cell-empty-message {
+    font-size: 1rem;
+    font-weight: 500;
+  }
+
+  &:hover {
     .cell-empty-icon {
-        font-size: 3rem;
-        color: var(--dgc-text-hint);
-        margin-bottom: 0.75rem;
-        transition: all 0.3s;
+      color: var(--dgc-primary);
     }
 
     .cell-empty-message {
-        font-size: 1rem;
-        font-weight: 500;
+      color: var(--dgc-primary);
     }
-
-    &:hover {
-        .cell-empty-icon {
-            color: var(--dgc-primary);
-        }
-
-        .cell-empty-message {
-            color: var(--dgc-primary);
-        }
-    }
+  }
 }

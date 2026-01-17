@@ -1,0 +1,15 @@
+// Layout Grid Dimensions
+// Centralized control for row heights in dashboard layouts
+
+// Sub-rows and nested area containers use data-rows for min-height
+// This allows CSS to handle min-height calculation instead of inline styles
+.dashboard-sub-row,
+.dashboard-area-nested {
+  // Row count based min-height (1-6 rows supported based on GRID_CONFIG.MAX_ROWS_PER_COLUMN)
+  &[data-rows="1"] { min-height: calc(var(--dgc-layout-row-height) * 1); }
+  &[data-rows="2"] { min-height: calc(var(--dgc-layout-row-height) * 2); }
+  &[data-rows="3"] { min-height: calc(var(--dgc-layout-row-height) * 3); }
+  &[data-rows="4"] { min-height: calc(var(--dgc-layout-row-height) * 4); }
+  &[data-rows="5"] { min-height: calc(var(--dgc-layout-row-height) * 5); }
+  &[data-rows="6"] { min-height: calc(var(--dgc-layout-row-height) * 6); }
+}

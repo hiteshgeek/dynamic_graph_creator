@@ -99,6 +99,9 @@ $dashboard-grid-gap: 1.5rem;
 // Template preview gap (used for template preview grid spacing)
 $template-preview-gap: 2px;
 
+// Layout row height (base height for 1fr row unit in dashboard layouts)
+$layout-row-height: 150px;
+
 // Transitions
 $transition-fast: 0.15s ease;
 $transition-normal: 0.25s ease;

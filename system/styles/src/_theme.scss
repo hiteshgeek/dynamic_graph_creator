@@ -93,6 +93,9 @@
   // Toggle switch
   --dgc-toggle-inactive: #{$gray-300};
 
+  // Layout grid
+  --dgc-layout-row-height: #{$layout-row-height};
+
   // CodeMirror syntax highlighting (light mode)
   --dgc-cm-keyword: #7c3aed;
   --dgc-cm-variable: #0891b2;

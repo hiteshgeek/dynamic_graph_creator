@@ -73,13 +73,19 @@
                                         return isset($row['height']) ? $row['height'] : '1fr';
                                     }, $area['subRows']);
                                     $rowHeightsStr = implode(' ', $rowHeights);
+                                    // Calculate total fr for data-rows attribute
+                                    $totalFr = array_reduce($area['subRows'], function ($sum, $row) {
+                                        return $sum + (isset($row['height']) ? intval($row['height']) : 1);
+                                    }, 0);
                                     ?>
                                     <div class="dashboard-area dashboard-area-nested"
                                         data-area-id="<?php echo htmlspecialchars($area['aid']); ?>"
+                                        data-rows="<?php echo $totalFr; ?>"
                                         style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>; grid-template-rows: <?php echo $rowHeightsStr; ?>;">
 
                                         <?php foreach ($area['subRows'] as $subRow): ?>
-                                            <div class="dashboard-sub-row" data-row-id="<?php echo htmlspecialchars($subRow['rowId']); ?>">
+                                            <?php $rowFr = isset($subRow['height']) ? intval($subRow['height']) : 1; ?>
+                                            <div class="dashboard-sub-row" data-row-id="<?php echo htmlspecialchars($subRow['rowId']); ?>" data-rows="<?php echo $rowFr ?: 1; ?>">
                                                 <?php if (isset($subRow['content']) && $subRow['content']['type'] === 'empty'): ?>
                                                     <?php
                                                     $icon = isset($subRow['emptyState']['icon']) ? $subRow['emptyState']['icon'] : 'fa-plus-circle';

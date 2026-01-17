@@ -844,11 +844,9 @@ class DashboardBuilder {
                 </div>
             </div>`;
 
-      // Calculate min-height based on fr value (150px per fr unit, matching .dashboard-area min-height)
+      // Row fr value for data-rows attribute (CSS handles min-height via _layout-grid.scss)
       const rowFr = parseInt(subRow.height) || 1;
-      const minRowHeight = rowFr * 150;
-
-      subRowsHtml += `<div class="dashboard-sub-row" data-row-id="${subRow.rowId}" data-row-index="${rowIndex}" style="min-height: ${minRowHeight}px;">
+      subRowsHtml += `<div class="dashboard-sub-row" data-row-id="${subRow.rowId}" data-row-index="${rowIndex}" data-rows="${rowFr}">
                 ${controls}
                 ${
                   subRow.content && subRow.content.type === "empty"
@@ -858,12 +856,10 @@ class DashboardBuilder {
             </div>`;
     });
 
-    // Calculate min-height for the nested container based on total fr (150px per fr unit)
-    // This gives the grid actual space to distribute among rows
+    // Total fr for data-rows attribute (CSS handles min-height via _layout-grid.scss)
     const totalFrForHeight = heights.reduce((sum, h) => sum + h, 0);
-    const nestedMinHeight = totalFrForHeight * 150;
 
-    return `<div class="dashboard-area dashboard-area-nested" data-area-id="${area.aid}" data-area-index="${areaIndex}" style="grid-template-rows: ${rowHeights}; min-height: ${nestedMinHeight}px;">
+    return `<div class="dashboard-area dashboard-area-nested" data-area-id="${area.aid}" data-area-index="${areaIndex}" data-rows="${totalFrForHeight}" style="grid-template-rows: ${rowHeights};">
             ${subRowsHtml}
         </div>`;
   }
