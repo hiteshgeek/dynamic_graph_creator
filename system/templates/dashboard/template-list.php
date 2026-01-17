@@ -139,7 +139,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <?php if (!$template['is_system']): ?>
-                                <button class="btn-icon btn-warning"
+                                <button class="btn-icon btn-design"
                                         title="Design Mode"
                                         onclick="window.location='?urlq=dashboard/template/builder/<?php echo $template['dtid']; ?>'">
                                     <i class="fas fa-paint-brush"></i>

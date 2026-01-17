@@ -62,10 +62,9 @@
       }
     }
 
-    // Template selector uses .item-card with template-specific overrides
+    // Template selector uses .item-card - clickable cards for selection
     .item-card {
       cursor: pointer;
-      border: 2px solid var(--dgc-border-color);
 
       &:hover {
         border-color: var(--dgc-primary);
@@ -77,44 +76,7 @@
         margin-bottom: 0.75rem;
       }
 
-      .template-info {
-        h4 {
-          font-size: 1rem;
-          font-weight: 600;
-          margin: 0 0 0.25rem 0;
-          color: var(--dgc-text-primary);
-        }
-
-        p {
-          font-size: 0.875rem;
-          color: var(--dgc-text-secondary);
-          margin: 0;
-        }
-
-        .template-meta {
-          display: flex;
-          gap: 0.5rem;
-          flex-wrap: wrap;
-          margin-top: auto;
-          padding-top: 0.5rem;
-
-          .badge-system {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-weight: 500;
-            background: var(--dgc-info-bg);
-            color: var(--dgc-info-dark);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-
-            i {
-              font-size: 0.65rem;
-            }
-          }
-        }
-      }
+      // Uses standard .item-card-content from _base.scss
     }
   }
 }

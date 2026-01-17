@@ -251,10 +251,10 @@ class DashboardBuilder {
                         <div class="template-preview">
                             ${this.renderTemplatePreview(template)}
                         </div>
-                        <div class="template-info">
-                            <h4>${template.name}</h4>
-                            <p>${template.description || ""}</p>
-                            ${systemBadge ? `<div class="template-meta">${systemBadge}</div>` : ''}
+                        <div class="item-card-content">
+                            <h3>${template.name}</h3>
+                            ${template.description ? `<p class="item-card-description">${template.description}</p>` : ''}
+                            ${systemBadge ? `<div class="item-card-tags">${systemBadge}</div>` : ''}
                         </div>
                     </div>`;
         });
@@ -2102,10 +2102,10 @@ class DashboardBuilder {
                         <div class="template-preview">
                           ${this.renderTemplatePreview(template)}
                         </div>
-                        <div class="template-info">
-                          <h4>${template.name}</h4>
-                          <p>${template.description || ""}</p>
-                          ${systemBadge ? `<div class="template-meta">${systemBadge}</div>` : ""}
+                        <div class="item-card-content">
+                          <h3>${template.name}</h3>
+                          ${template.description ? `<p class="item-card-description">${template.description}</p>` : ""}
+                          ${systemBadge ? `<div class="item-card-tags">${systemBadge}</div>` : ""}
                         </div>
                       </div>`;
             });
