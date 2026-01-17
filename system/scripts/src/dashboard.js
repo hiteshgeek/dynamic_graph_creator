@@ -1183,6 +1183,19 @@ class DashboardBuilder {
       confirmBtn.addEventListener("click", () => this.handleAddSection());
     }
 
+    // Handle Enter key in Add Section modal
+    const addSectionModal = document.getElementById("add-section-modal");
+    if (addSectionModal) {
+      addSectionModal.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (confirmBtn) {
+            confirmBtn.click();
+          }
+        }
+      });
+    }
+
     // Remove section handlers - use event delegation on container instead of document
     this.container.addEventListener("click", (e) => {
       if (e.target.closest(".remove-btn")) {

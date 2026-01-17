@@ -289,6 +289,26 @@
 
             // Save template details
             const saveDetailsBtn = document.getElementById('save-template-details-btn');
+
+            // Handle Enter key in modal inputs
+            const editTemplateModal = document.getElementById('edit-template-details-modal');
+            if (editTemplateModal) {
+                editTemplateModal.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        const target = e.target;
+                        // Don't submit if in textarea (allow newlines)
+                        if (target.tagName === 'TEXTAREA') return;
+                        // Don't submit if in select
+                        if (target.tagName === 'SELECT') return;
+
+                        e.preventDefault();
+                        if (saveDetailsBtn && !saveDetailsBtn.disabled) {
+                            saveDetailsBtn.click();
+                        }
+                    }
+                });
+            }
+
             if (saveDetailsBtn) {
                 saveDetailsBtn.addEventListener('click', async function() {
                     const nameInput = document.getElementById('edit-template-name');

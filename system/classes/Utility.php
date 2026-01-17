@@ -290,11 +290,6 @@ class Utility
             $html .= '<h1>' . htmlspecialchars($title) . '</h1>';
         }
 
-        // Theme toggle button
-        $html .= '<button type="button" class="theme-toggle-btn" title="Toggle theme">';
-        $html .= '<i class="fas fa-desktop"></i>';
-        $html .= '</button>';
-
         // Badges
         foreach ($badges as $badge) {
             $badgeClass = isset($badge['class']) ? $badge['class'] : 'badge-secondary';
@@ -314,11 +309,18 @@ class Utility
         $html .= '</div>'; // End page-header-left
 
         // Right section
+        $html .= '<div class="page-header-right">';
         if ($rightContent) {
-            $html .= '<div class="page-header-right">';
             $html .= $rightContent;
-            $html .= '</div>';
         }
+
+        // Theme toggle (always last, with separator)
+        $html .= '<div class="header-separator"></div>';
+        $html .= '<button type="button" class="theme-toggle-btn" title="Toggle theme">';
+        $html .= '<i class="fas fa-desktop"></i>';
+        $html .= '</button>';
+
+        $html .= '</div>'; // End page-header-right
 
         $html .= '</div>'; // End page-header
 

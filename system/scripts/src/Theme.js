@@ -59,24 +59,25 @@ window.Theme = {
     toggle() {
         switch (this.currentMode) {
             case this.MODES.SYSTEM:
-                this.setMode(this.MODES.LIGHT);
+                this.setMode(this.MODES.LIGHT, true);
                 break;
             case this.MODES.LIGHT:
-                this.setMode(this.MODES.DARK);
+                this.setMode(this.MODES.DARK, true);
                 break;
             case this.MODES.DARK:
-                this.setMode(this.MODES.SYSTEM);
+                this.setMode(this.MODES.SYSTEM, true);
                 break;
             default:
-                this.setMode(this.MODES.SYSTEM);
+                this.setMode(this.MODES.SYSTEM, true);
         }
     },
 
     /**
      * Set the theme mode
      * @param {string} mode - 'system', 'light', or 'dark'
+     * @param {boolean} animate - Whether to animate the icon change
      */
-    setMode(mode) {
+    setMode(mode, animate = false) {
         if (!Object.values(this.MODES).includes(mode)) {
             mode = this.MODES.SYSTEM;
         }
@@ -88,7 +89,7 @@ window.Theme = {
         // Update toggle button
         const toggleBtn = document.querySelector('.theme-toggle-btn');
         if (toggleBtn) {
-            this.updateToggleButton(toggleBtn);
+            this.updateToggleButton(toggleBtn, animate);
         }
     },
 
@@ -145,32 +146,55 @@ window.Theme = {
     /**
      * Update the toggle button icon and title
      * @param {HTMLElement} btn - The toggle button element
+     * @param {boolean} animate - Whether to animate the icon change
      */
-    updateToggleButton(btn) {
+    updateToggleButton(btn, animate = false) {
         const icon = btn.querySelector('i');
         if (!icon) return;
 
-        // Remove all theme icons
-        icon.classList.remove('fa-desktop', 'fa-sun', 'fa-moon');
+        const updateIcon = () => {
+            // Remove all theme icons
+            icon.classList.remove('fa-desktop', 'fa-sun', 'fa-moon');
 
-        // Set icon and title based on current mode
-        switch (this.currentMode) {
-            case this.MODES.SYSTEM:
-                icon.classList.add('fa-desktop');
-                btn.title = 'Theme: System (click for Light)';
-                break;
-            case this.MODES.LIGHT:
-                icon.classList.add('fa-sun');
-                btn.title = 'Theme: Light (click for Dark)';
-                break;
-            case this.MODES.DARK:
-                icon.classList.add('fa-moon');
-                btn.title = 'Theme: Dark (click for System)';
-                break;
+            // Set icon and title based on current mode
+            switch (this.currentMode) {
+                case this.MODES.SYSTEM:
+                    icon.classList.add('fa-desktop');
+                    btn.title = 'Theme: System (click for Light)';
+                    break;
+                case this.MODES.LIGHT:
+                    icon.classList.add('fa-sun');
+                    btn.title = 'Theme: Light (click for Dark)';
+                    break;
+                case this.MODES.DARK:
+                    icon.classList.add('fa-moon');
+                    btn.title = 'Theme: Dark (click for System)';
+                    break;
+            }
+
+            // Update data attribute on button
+            btn.setAttribute('data-mode', this.currentMode);
+        };
+
+        if (animate) {
+            // Phase 1: Slide out old icon to the left
+            btn.classList.remove('icon-slide-in');
+            btn.classList.add('icon-slide-out');
+
+            // Phase 2: After slide out, change icon and slide in from right
+            setTimeout(() => {
+                updateIcon();
+                btn.classList.remove('icon-slide-out');
+                btn.classList.add('icon-slide-in');
+
+                // Clean up animation class
+                setTimeout(() => {
+                    btn.classList.remove('icon-slide-in');
+                }, 150);
+            }, 150);
+        } else {
+            updateIcon();
         }
-
-        // Update data attribute on button
-        btn.setAttribute('data-mode', this.currentMode);
     },
 
     /**

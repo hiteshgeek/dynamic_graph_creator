@@ -73,8 +73,8 @@ window.ConfirmDialog = {
                             <p class="confirm-message">Are you sure?</p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary cancel-delete" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-danger confirm-delete">Confirm</button>
+                            <button type="button" class="btn btn-sm btn-secondary cancel-delete" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-danger confirm-delete">Confirm</button>
                         </div>
                     </div>
                 </div>
@@ -104,7 +104,7 @@ window.ConfirmDialog = {
 
         // Update button class
         const confirmBtn = this.modalElement.querySelector('.confirm-delete');
-        confirmBtn.className = `btn ${confirmClass} confirm-delete`;
+        confirmBtn.className = `btn btn-sm ${confirmClass} confirm-delete`;
 
         return new Promise((resolve) => {
             const modal = new bootstrap.Modal(this.modalElement);
@@ -595,8 +595,8 @@ window.KeyboardShortcuts = {
         for (const shortcut of shortcuts) {
             if (!shortcut.enabled) continue;
 
-            // Allow Escape and shortcuts with Ctrl/Meta even in inputs
-            const hasModifier = keyCombo.includes('ctrl+') || keyCombo.includes('meta+');
+            // Allow Escape and shortcuts with Ctrl/Meta/Alt even in inputs
+            const hasModifier = keyCombo.includes('ctrl+') || keyCombo.includes('meta+') || keyCombo.includes('alt+');
             if (isInput && keyCombo !== 'escape' && !hasModifier) continue;
 
             if (shortcut.preventDefault) {
@@ -607,7 +607,49 @@ window.KeyboardShortcuts = {
     },
 
     registerGlobalShortcuts() {
-        // Add global shortcuts here as needed
+        // Alt+M: Toggle theme (system -> light -> dark -> system)
+        this.register('alt+m', () => {
+            if (typeof Theme !== 'undefined' && Theme.toggle) {
+                Theme.toggle();
+            }
+        }, {
+            description: 'Toggle theme mode',
+            scope: 'global'
+        });
+
+        // Alt+T: Toggle tweak switch (layout edit mode)
+        this.register('alt+t', () => {
+            const tweakSwitch = document.getElementById('toggle-layout-edit-switch');
+            if (tweakSwitch) {
+                tweakSwitch.checked = !tweakSwitch.checked;
+                // Trigger change event for any listeners
+                tweakSwitch.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }, {
+            description: 'Toggle tweak mode',
+            scope: 'global'
+        });
+
+        // Alt+V: Toggle between View Mode and Design Mode
+        this.register('alt+v', () => {
+            // Look for View Mode button first (we're in design/edit mode)
+            const viewModeBtn = document.querySelector('.btn-view-mode');
+            if (viewModeBtn) {
+                viewModeBtn.click();
+                return;
+            }
+
+            // Look for Design Mode button (we're in view/preview mode)
+            const designModeBtn = document.querySelector('.btn-design-mode');
+            if (designModeBtn) {
+                designModeBtn.click();
+                return;
+            }
+        }, {
+            description: 'Toggle View/Design mode',
+            scope: 'global'
+        });
+
         return this;
     }
 };
