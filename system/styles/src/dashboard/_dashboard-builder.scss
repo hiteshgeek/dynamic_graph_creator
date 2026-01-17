@@ -2,6 +2,101 @@
 @use "sass:color";
 @use "../variables" as *;
 
+// ==========================================
+// Common Button Variables (centralized)
+// ==========================================
+// Change these to update all section/row/column buttons at once
+
+// Text buttons (Add Section, Add Row, Add Column, Grid Size Indicator)
+$builder-btn-padding: 0.25rem 0.75rem;
+$builder-btn-font-size: 0.75rem;
+$builder-btn-font-weight: 500;
+$builder-btn-border-width: 2px;
+$builder-btn-border-radius: 14px;
+$builder-btn-icon-font-size: 0.7rem;
+$builder-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+$builder-btn-box-shadow-hover: 0 3px 8px;
+$builder-btn-transition: all 0.2s;
+
+// Icon buttons (Drag handles, Delete, Resize arrows)
+$builder-icon-btn-size: 28px;
+$builder-icon-btn-font-size: 0.75rem;
+$builder-icon-btn-border-width: 2px;
+$builder-icon-btn-border-radius: 50%;
+$builder-icon-btn-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+// Common base mixin for all builder text buttons (section, row, column)
+@mixin builder-border-btn($color-var, $hover-shadow-color) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $builder-btn-padding;
+  background: var(--dgc-bg-card);
+  // border: $builder-btn-border-width dotted $color-var;
+  border: none;
+  border-radius: $builder-btn-border-radius;
+  color: $color-var;
+  cursor: pointer;
+  font-size: $builder-btn-font-size;
+  font-weight: $builder-btn-font-weight;
+  transition: $builder-btn-transition;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+
+  i {
+    font-size: $builder-btn-icon-font-size;
+  }
+
+  &:hover:not([disabled]) {
+    background: $color-var;
+    color: var(--dgc-text-inverse);
+    box-shadow: 0 4px 12px $hover-shadow-color, 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--dgc-bg-elevated);
+    color: var(--dgc-text-hint);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Common base mixin for icon buttons (drag handles, delete, resize)
+@mixin builder-icon-btn($color-var, $hover-shadow-color) {
+  width: $builder-icon-btn-size;
+  height: $builder-icon-btn-size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dgc-bg-card);
+  // border: $builder-icon-btn-border-width dotted $color-var;
+  border: none;
+  border-radius: $builder-icon-btn-border-radius;
+  color: $color-var;
+  cursor: pointer;
+  transition: $builder-btn-transition;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  i {
+    font-size: $builder-icon-btn-font-size;
+  }
+
+  &:hover:not([disabled]) {
+    background: $color-var;
+    color: var(--dgc-text-inverse);
+    box-shadow: 0 4px 12px $hover-shadow-color, 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  &[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--dgc-bg-elevated);
+    color: var(--dgc-text-hint);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+}
+
 .dashboard-builder {
   min-height: calc(100vh - 60px);
 
@@ -36,81 +131,50 @@
     }
   }
 
-  // Add Section Border Buttons (on section borders)
+  // Add Section Border Buttons (on section borders) - Blue/Primary
   .add-section-border-btn {
+    @include builder-border-btn(var(--dgc-primary), rgba(0, 123, 255, 0.3));
     position: absolute;
     left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.25rem 0.625rem;
-    background: var(--dgc-bg-card);
-    border: 2px solid var(--dgc-primary);
-    border-radius: 12px;
-    color: var(--dgc-primary);
-    cursor: pointer;
-    font-size: 0.65rem;
-    font-weight: 500;
-    transition: all 0.2s;
+    transform: translateX(-50%) translateY(-50%);
     opacity: 0;
     pointer-events: none;
     z-index: 10;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    white-space: nowrap;
 
-    // Hide the + icon
+    // Hide the + icon for section buttons
     i {
       display: none;
-    }
-
-    &:hover {
-      background: var(--dgc-primary);
-      color: var(--dgc-text-inverse);
-      box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
     }
   }
 
   // Top border button
   .add-section-top-btn {
-    top: -12px; // Half of button height to center on border
+    top: 0;
   }
 
   // Bottom border button
   .add-section-bottom-btn {
-    bottom: -12px; // Half of button height to center on border
+    bottom: 0;
+    transform: translateX(-50%) translateY(50%);
   }
 
   // Section top border controls (reorder/delete)
   .section-top-border-controls {
     position: absolute;
-    top: -16px;
+    top: 0;
+    transform: translateY(-50%);
     right: 1rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
     opacity: 0;
     pointer-events: none;
-    transition: all 0.2s;
+    transition: $builder-btn-transition;
     z-index: 11;
 
     .section-control-btn {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--dgc-bg-card);
-      border: 2px solid var(--dgc-border-color);
-      border-radius: 50%;
+      @include builder-icon-btn(var(--dgc-border-color), rgba(0, 0, 0, 0.2));
       color: var(--dgc-text-secondary);
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-      i {
-        font-size: 0.875rem;
-      }
 
       &.drag-handle {
         cursor: grab;
@@ -123,7 +187,7 @@
 
         &:hover {
           background: var(--dgc-primary);
-          color: var(--dgc-text-inverse);
+          box-shadow: $builder-btn-box-shadow-hover rgba(0, 123, 255, 0.3);
         }
       }
 
@@ -133,7 +197,7 @@
 
         &:hover {
           background: var(--dgc-error);
-          color: var(--dgc-text-inverse);
+          box-shadow: $builder-btn-box-shadow-hover rgba(244, 67, 54, 0.3);
         }
       }
     }
@@ -160,74 +224,40 @@
   // Column drag handle - positioned at top left of column
   // Shape: Square with rounded corners, Color: Orange/Warning
   .column-drag-handle {
+    @include builder-icon-btn(var(--dgc-warning), rgba(255, 193, 7, 0.4));
     position: absolute;
-    top: -16px;
-    left: -16px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--dgc-bg-card);
-    border: 2px solid var(--dgc-warning);
-    border-radius: 6px; // Square with rounded corners
-    color: var(--dgc-warning);
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
+    border-radius: 6px; // Square with rounded corners (override circle)
     cursor: grab;
-    transition: all 0.2s;
     z-index: 15;
     opacity: 0;
     pointer-events: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-    i {
-      font-size: 0.875rem;
-    }
 
     &:active {
       cursor: grabbing;
-    }
-
-    &:hover {
-      background: var(--dgc-warning);
-      color: var(--dgc-text-inverse);
-      box-shadow: 0 3px 8px rgba(255, 193, 7, 0.4);
     }
   }
 
   // Row drag handle - positioned at top right of row
   // Shape: Pill/Stadium, Color: Green/Success
   .row-drag-handle {
+    @include builder-icon-btn(var(--dgc-success), rgba(40, 167, 69, 0.4));
     position: absolute;
-    top: -14px;
-    right: -20px;
-    width: 40px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--dgc-bg-card);
-    border: 2px solid var(--dgc-success);
-    border-radius: 14px; // Pill shape
-    color: var(--dgc-success);
+    top: 0;
+    right: 0;
+    transform: translate(50%, -50%);
+    width: 34px; // Wider for pill shape
+    height: $builder-icon-btn-size;
+    border-radius: 12px; // Pill shape (override circle)
     cursor: grab;
-    transition: all 0.2s;
     z-index: 15;
     opacity: 0;
     pointer-events: none;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-    i {
-      font-size: 0.875rem;
-    }
 
     &:active {
       cursor: grabbing;
-    }
-
-    &:hover {
-      background: var(--dgc-success);
-      color: var(--dgc-text-inverse);
-      box-shadow: 0 3px 8px rgba(40, 167, 69, 0.4);
     }
   }
 
@@ -451,69 +481,67 @@
 }
 
 // Edge buttons (Add Row / Add Column) - positioned on border edges like section buttons
+// Uses common mixin but with position-specific overrides for colors
 .edge-btn {
+  @include builder-border-btn(var(--dgc-primary), rgba(0, 123, 255, 0.3));
   position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 0.25rem;
-  padding: 0.25rem 0.625rem;
-  background: var(--dgc-bg-card);
-  border: 2px solid var(--dgc-primary);
-  border-radius: 12px;
-  font-size: 0.65rem;
-  font-weight: 500;
-  color: var(--dgc-primary);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.2s;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 10;
 
-  i {
-    font-size: 0.6rem;
-  }
-
-  &:hover:not([disabled]) {
-    background: var(--dgc-primary);
-    color: var(--dgc-text-inverse);
-    box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3);
-  }
-
-  &[disabled] {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: var(--dgc-bg-elevated);
-    border-color: var(--dgc-border-color);
-    color: var(--dgc-text-hint);
-  }
-
-  // Top edge - centered on top border
+  // Top edge - centered on top border (Row - Green/Success)
   &.edge-top {
-    top: -12px;
+    top: 0;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(-50%);
+    border-color: var(--dgc-success);
+    color: var(--dgc-success);
+
+    &:hover:not([disabled]) {
+      background: var(--dgc-success);
+      box-shadow: $builder-btn-box-shadow-hover rgba(40, 167, 69, 0.4);
+    }
   }
 
-  // Bottom edge - centered on bottom border
+  // Bottom edge - centered on bottom border (Row - Green/Success)
   &.edge-bottom {
-    bottom: -12px;
+    bottom: 0;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(50%);
+    border-color: var(--dgc-success);
+    color: var(--dgc-success);
+
+    &:hover:not([disabled]) {
+      background: var(--dgc-success);
+      box-shadow: $builder-btn-box-shadow-hover rgba(40, 167, 69, 0.4);
+    }
   }
 
-  // Left edge - centered on left border (rotated text reads bottom-to-top)
+  // Left edge - centered on left border (Column - Orange/Warning)
   &.edge-left {
     left: 0;
     top: 50%;
     transform: translateX(-50%) translateY(-50%) rotate(-90deg);
+    border-color: var(--dgc-warning);
+    color: var(--dgc-warning);
+
+    &:hover:not([disabled]) {
+      background: var(--dgc-warning);
+      box-shadow: $builder-btn-box-shadow-hover rgba(255, 193, 7, 0.4);
+    }
   }
 
-  // Right edge - centered on right border (rotated text reads top-to-bottom)
+  // Right edge - centered on right border (Column - Orange/Warning)
   &.edge-right {
     right: 0;
     top: 50%;
     transform: translateX(50%) translateY(-50%) rotate(90deg);
+    border-color: var(--dgc-warning);
+    color: var(--dgc-warning);
+
+    &:hover:not([disabled]) {
+      background: var(--dgc-warning);
+      box-shadow: $builder-btn-box-shadow-hover rgba(255, 193, 7, 0.4);
+    }
   }
 }
 
@@ -535,67 +563,72 @@
   gap: 6px;
 }
 
+// Center button (resize arrows) - uses shared icon button styles
 .center-btn {
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--dgc-bg-card);
-  border: 1px solid var(--dgc-border-color);
-  border-radius: 50%;
+  @include builder-icon-btn(var(--dgc-border-color), rgba(0, 123, 255, 0.3));
+  border-width: 1px; // Thinner border for arrows
   color: var(--dgc-text-primary);
-  cursor: pointer;
-  font-size: 0.875rem;
-  transition: all 0.15s;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 
-  // Arrow buttons turn primary on hover
-  &:hover:not([disabled]) {
+  // Row resize buttons (up/down) - Green/Success
+  &.row-resize {
+    &:hover:not([disabled]) {
+      background: var(--dgc-success);
+      border-color: var(--dgc-success);
+      color: var(--dgc-text-inverse);
+      box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  // Column resize buttons (left/right) - Orange/Warning
+  &.col-resize {
+    &:hover:not([disabled]) {
+      background: var(--dgc-warning);
+      border-color: var(--dgc-warning);
+      color: var(--dgc-text-inverse);
+      box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  // Fallback for arrows without specific class - primary
+  &:hover:not([disabled]):not(.row-resize):not(.col-resize):not(.delete-btn) {
     background: var(--dgc-primary);
-    color: var(--dgc-text-inverse);
     border-color: var(--dgc-primary);
   }
 
-  &[disabled] {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: var(--dgc-bg-elevated);
-    color: var(--dgc-text-hint);
-  }
-
-  // Delete button in center - visible red border, red hover
+  // Delete button in center - visible colored border, colored hover
   &.delete-btn {
-    border: 2px solid var(--dgc-error);
+    border-width: $builder-icon-btn-border-width;
+    border-color: var(--dgc-error);
     color: var(--dgc-error);
 
     &:hover:not([disabled]) {
       background: var(--dgc-error);
-      color: var(--dgc-text-inverse);
       border-color: var(--dgc-error);
+      box-shadow: $builder-btn-box-shadow-hover rgba(244, 67, 54, 0.3);
     }
   }
 }
 
-// Grid size indicator (positioned at bottom-right on section border, matching Add Section button height)
+// Grid size indicator (positioned at bottom-right on section border, using shared button variables)
 .grid-size-indicator {
   position: absolute;
-  bottom: -16px;
+  bottom: 0;
+  transform: translateY(50%);
   right: 1rem;
   background: var(--dgc-bg-card);
-  border: 1px solid var(--dgc-border-color);
-  border-radius: 20px;
-  padding: 0.375rem 1rem;
-  font-size: 0.8rem;
+  border: none;
+  border-radius: $builder-btn-border-radius;
+  padding: $builder-btn-padding;
+  font-size: $builder-btn-font-size;
   font-family: monospace;
-  font-weight: 500;
+  font-weight: $builder-btn-font-weight;
   color: var(--dgc-text-secondary);
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
-  transition: all 0.2s;
+  transition: $builder-btn-transition;
   z-index: 10;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -657,25 +690,17 @@
   z-index: 12;
 
   &.nested-area-controls {
-    top: -12px;
+    top: 0;
+    transform: translateY(-50%);
     right: 4px;
   }
 }
 
+// Area control buttons (split, remove column) - uses shared icon button styles
 .area-control-btn {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--dgc-bg-card);
-  border: 1px solid var(--dgc-border-color);
-  border-radius: 50%;
+  @include builder-icon-btn(var(--dgc-border-color), rgba(0, 0, 0, 0.2));
+  border-width: 1px;
   color: var(--dgc-text-secondary);
-  cursor: pointer;
-  font-size: 0.7rem;
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   &.split-column-btn {
     border-color: var(--dgc-primary);
@@ -683,7 +708,7 @@
 
     &:hover {
       background: var(--dgc-primary);
-      color: var(--dgc-text-inverse);
+      box-shadow: $builder-btn-box-shadow-hover rgba(0, 123, 255, 0.3);
     }
   }
 
@@ -693,7 +718,7 @@
 
     &:hover {
       background: var(--dgc-error);
-      color: var(--dgc-text-inverse);
+      box-shadow: $builder-btn-box-shadow-hover rgba(244, 67, 54, 0.3);
     }
   }
 }
@@ -713,25 +738,12 @@
   z-index: 12;
 }
 
+// Row control button (delete row) - uses shared icon button styles
 .row-control-btn {
-  width: 20px;
+  @include builder-icon-btn(var(--dgc-error), rgba(244, 67, 54, 0.3));
+  width: 20px; // Slightly smaller
   height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--dgc-bg-card);
-  border: 1px solid var(--dgc-error);
-  border-radius: 50%;
-  color: var(--dgc-error);
-  cursor: pointer;
-  font-size: 0.6rem;
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-  &:hover {
-    background: var(--dgc-error);
-    color: var(--dgc-text-inverse);
-  }
+  border-width: 1px;
 }
 
 // Show controls on hover (desktop)

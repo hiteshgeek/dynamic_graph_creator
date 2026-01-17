@@ -41,7 +41,7 @@
     }
     $rightContent .= '<a href="?urlq=dashboard/template/preview/' . $template->getId() . '" class="btn btn-primary btn-sm btn-view-mode" title="View Mode"><i class="fas fa-eye"></i> View Mode</a>';
     if (!$template->getIsSystem()) {
-        $rightContent .= '<div class="toggle-with-label"><span class="toggle-label">Tweak</span><div class="form-check form-switch custom-switch custom-switch-warning"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"></div></div>';
+        $rightContent .= '<div class="form-check form-switch text-switch text-switch-purple"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"><div class="text-switch-track"><span class="text-switch-knob"></span><span class="text-switch-label label-text">Tweak</span></div></div>';
     }
 
     echo Utility::renderPageHeader([

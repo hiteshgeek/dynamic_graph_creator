@@ -572,13 +572,13 @@ class DashboardBuilder {
                 <!-- Center: Resize buttons + Delete -->
                 <div class="center-controls">
                     <div class="center-row">
-                        <button class="center-btn resize-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-left"></i>
                         </button>
                         <button class="center-btn delete-btn remove-col-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Remove column" ${!canRemoveColumn ? 'disabled' : ''}>
                             <i class="fas fa-trash"></i>
                         </button>
-                        <button class="center-btn resize-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-right"></i>
                         </button>
                     </div>
@@ -757,21 +757,21 @@ class DashboardBuilder {
                 </button>
                 <!-- Center: All resize buttons + Delete buttons -->
                 <div class="center-controls">
-                    <button class="center-btn resize-row-up-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Expand row" ${!canExpandRow ? 'disabled' : ''}>
+                    <button class="center-btn row-resize resize-row-up-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Expand row" ${!canExpandRow ? 'disabled' : ''}>
                         <i class="fas fa-caret-up"></i>
                     </button>
                     <div class="center-row">
-                        <button class="center-btn resize-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-left"></i>
                         </button>
                         <button class="center-btn delete-btn remove-row-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Remove row" ${!canRemoveRow ? 'disabled' : ''}>
                             <i class="fas fa-trash"></i>
                         </button>
-                        <button class="center-btn resize-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
                             <i class="fas fa-caret-right"></i>
                         </button>
                     </div>
-                    <button class="center-btn resize-row-down-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Shrink row" ${!canShrinkRow ? 'disabled' : ''}>
+                    <button class="center-btn row-resize resize-row-down-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" title="Shrink row" ${!canShrinkRow ? 'disabled' : ''}>
                         <i class="fas fa-caret-down"></i>
                     </button>
                 </div>

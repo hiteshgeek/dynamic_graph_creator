@@ -43,7 +43,7 @@ $grid-gap: $spacing-md;
 .dashboard-sections {
   display: flex;
   flex-direction: column;
-  gap: $spacing-md;
+  gap: $spacing-xl;
 }
 
 .dashboard-section {
@@ -54,7 +54,7 @@ $grid-gap: $spacing-md;
   background: var(--dgc-bg-card);
   border: 2px solid var(--dgc-border-color);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 2rem;
   transition: all 0.3s;
 
   &:hover {

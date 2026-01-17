@@ -30,7 +30,7 @@
     if ($dashboard && $dashboard->getId()) {
         $rightContent .= '<div class="save-indicator saved" style="display: flex;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
         $rightContent .= '<a href="?urlq=dashboard/preview/' . $dashboard->getId() . '" class="btn btn-primary btn-sm btn-view-mode"><i class="fas fa-eye"></i> View Mode</a>';
-        $rightContent .= '<div class="toggle-with-label"><span class="toggle-label">Tweak</span><div class="form-check form-switch custom-switch custom-switch-warning"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"></div></div>';
+        $rightContent .= '<div class="form-check form-switch text-switch text-switch-purple"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"><div class="text-switch-track"><span class="text-switch-knob"></span><span class="text-switch-label label-text">Tweak</span></div></div>';
     } else {
         $rightContent .= '<div class="save-indicator" style="display: none;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
     }
