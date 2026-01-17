@@ -163,4 +163,5 @@ After deployment:
 3. Monitor error logs for issues
 4. Verify asset caching headers are correct
 
-Add permission in dashboard
+Add permission in dashboard.inc.php
+Add permission in graph.inc.php

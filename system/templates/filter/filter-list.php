@@ -93,8 +93,8 @@
                         </div>
                     </div>
                     <div class="filter-card-actions">
-                        <a href="?urlq=filters/edit/<?php echo $filter['fid']; ?>" class="btn-icon btn-warning" title="Edit">
-                            <i class="fas fa-pencil"></i>
+                        <a href="?urlq=filters/edit/<?php echo $filter['fid']; ?>" class="btn-icon btn-design" title="Design">
+                            <i class="fas fa-paint-brush"></i>
                         </a>
                         <button type="button" class="btn-icon btn-danger delete-filter-btn"
                                 data-id="<?php echo $filter['fid']; ?>"
@@ -112,7 +112,7 @@
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="delete-modal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Delete Filter</h5>
@@ -123,8 +123,8 @@
                     <p class="text-muted"><small>This will also remove it from any graphs using it.</small></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger confirm-delete-btn">Delete</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-danger confirm-delete-btn">Delete</button>
                 </div>
             </div>
         </div>

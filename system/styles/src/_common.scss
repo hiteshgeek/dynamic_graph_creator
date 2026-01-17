@@ -589,7 +589,7 @@ option[value="__new__"] {
     height: 24px;
     margin: 0;
     cursor: pointer;
-    background-color: $gray-300;
+    background-color: var(--dgc-toggle-inactive);
     border: none;
     border-radius: 24px;
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='white'/%3e%3c/svg%3e");

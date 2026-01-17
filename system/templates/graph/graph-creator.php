@@ -253,9 +253,11 @@
                                         <p>No filters available</p>
                                     </div>
                                 <?php endif; ?>
+                                <?php if ($canCreateFilter): ?>
                                 <a href="?urlq=filters/add" class="btn btn-sm btn-outline-secondary filters-manage-btn">
                                     <i class="fas fa-plus"></i> Create Filter
                                 </a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>

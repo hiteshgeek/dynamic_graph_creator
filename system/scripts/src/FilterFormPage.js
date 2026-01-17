@@ -25,6 +25,26 @@ export default class FilterFormPage {
     init() {
         this.initCodeMirror();
         this.bindEvents();
+        this.initPreview();
+    }
+
+    /**
+     * Initialize preview on page load (for edit mode)
+     */
+    initPreview() {
+        const dataSource = document.getElementById('data-source')?.value;
+
+        if (dataSource === 'static') {
+            // Show static preview immediately if options exist
+            this.updateStaticPreview();
+        } else if (dataSource === 'query') {
+            // Auto-run test query if there's a query (edit mode)
+            const query = this.queryEditor ? this.queryEditor.getValue() : document.getElementById('data-query')?.value;
+            if (query && query.trim()) {
+                // Small delay to ensure CodeMirror is ready
+                setTimeout(() => this.testQuery(), 100);
+            }
+        }
     }
 
     /**

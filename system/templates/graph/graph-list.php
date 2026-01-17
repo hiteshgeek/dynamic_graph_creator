@@ -94,7 +94,7 @@
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="delete-modal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Delete Graph</h5>
@@ -105,8 +105,8 @@
                     <p class="text-muted"><small>This action cannot be undone.</small></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger confirm-delete-btn">Delete</button>
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sm btn-danger confirm-delete-btn">Delete</button>
                 </div>
             </div>
         </div>

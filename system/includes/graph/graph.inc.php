@@ -75,6 +75,9 @@ function showCreator($graphId = null)
     // Get all available filters for selection
     $allFilters = Filter::getAll();
 
+    // Permission to create filters (replace with actual framework permission check)
+    $canCreateFilter = true;
+
     require_once SystemConfig::templatesPath() . 'graph/graph-creator.php';
 }
 
@@ -185,7 +188,7 @@ function testQuery($data)
     $testQuery = $query;
 
     // Replace placeholders with actual filter values or dummy values
-    $testQuery = preg_replace_callback('/::([a-zA-Z_][a-zA-Z0-9_]*)/', function($matches) use ($filters, $db) {
+    $testQuery = preg_replace_callback('/::([a-zA-Z_][a-zA-Z0-9_]*)/', function ($matches) use ($filters, $db) {
         $placeholder = '::' . $matches[1];
 
         if (isset($filters[$placeholder])) {
@@ -193,7 +196,7 @@ function testQuery($data)
 
             // Handle array values (multi-select, checkbox)
             if (is_array($value)) {
-                $escaped = array_map(function($v) use ($db) {
+                $escaped = array_map(function ($v) use ($db) {
                     return "'" . $db->escapeString($v) . "'";
                 }, $value);
                 return implode(',', $escaped);
