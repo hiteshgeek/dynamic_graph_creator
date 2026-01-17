@@ -21,6 +21,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
 
+    <!-- Daterangepicker Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
+
     <!-- Custom CSS -->
     <?php if ($css = Utility::getCss('common')): ?>
         <link href="<?php echo $css; ?>" rel="stylesheet">
@@ -121,8 +126,10 @@
                         ?>
 
                         <div id="data-source-section" style="<?php echo $showDataSource ? '' : 'display: none;'; ?>">
-                            <h4>Data Source</h4>
-                            <p class="text-muted">How to get the filter options</p>
+                            <div class="section-header">
+                                <i class="fas fa-database"></i>
+                                <span>Data Source</span>
+                            </div>
 
                             <div class="form-group">
                                 <div class="data-source-tabs">
@@ -190,8 +197,14 @@
                                 </div>
                             </div>
 
-                            <!-- Filter Preview -->
-                            <div id="filter-preview-container" style="display: none;"></div>
+                        </div>
+
+                        <!-- Filter Preview Section -->
+                        <div id="filter-preview-section" style="display: none;">
+                            <div class="section-header">
+                                <i class="fas fa-eye"></i>
+                                <span>Filter Preview</span>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -201,6 +214,9 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Daterangepicker JS (after jQuery) -->
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
     <!-- Custom JS -->
     <?php if ($js = Utility::getJs('common')): ?>

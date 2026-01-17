@@ -439,16 +439,11 @@ export default class FilterManager {
 
         switch (filter.filter_type) {
             case 'date':
-                inputHtml = `<input type="date" class="form-control" id="${inputId}" data-filter-key="${key}" value="${defaultVal}">`;
+                inputHtml = `<input type="text" class="form-control dgc-datepicker" id="${inputId}" data-filter-key="${key}" data-picker-type="single" value="${defaultVal}" placeholder="Select date" autocomplete="off">`;
                 break;
 
             case 'date_range':
-                inputHtml = `
-                    <div class="filter-input-group-date-range">
-                        <input type="date" class="form-control" data-filter-key="${key}_from" placeholder="From">
-                        <input type="date" class="form-control" data-filter-key="${key}_to" placeholder="To">
-                    </div>
-                `;
+                inputHtml = `<input type="text" class="form-control dgc-datepicker" id="${inputId}" data-filter-key="${key}" data-picker-type="range" placeholder="Select date range" autocomplete="off">`;
                 break;
 
             case 'number':

@@ -76,11 +76,16 @@ export default class GraphView {
     }
 
     /**
-     * Initialize filter components (multi-select dropdowns, etc.)
+     * Initialize filter components (multi-select dropdowns, datepickers, etc.)
      */
     initFilters() {
         const filtersContainer = this.container.querySelector('#graph-filters');
         if (!filtersContainer) return;
+
+        // Initialize date pickers
+        if (typeof DatePickerInit !== 'undefined') {
+            DatePickerInit.init(filtersContainer);
+        }
 
         // Initialize multi-select dropdowns
         const multiSelectDropdowns = filtersContainer.querySelectorAll('.filter-multiselect-dropdown');

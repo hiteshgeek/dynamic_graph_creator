@@ -651,25 +651,6 @@
   // Filter Preview
   .filter-preview {
     margin-top: $spacing-md;
-    padding: $spacing-md;
-    background: var(--dgc-gray-50);
-    border: 1px solid var(--dgc-border-color);
-    border-radius: $border-radius;
-  }
-
-  .filter-preview-header {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-    font-weight: $font-weight-medium;
-    color: var(--dgc-text-secondary);
-    margin-bottom: $spacing-md;
-    padding-bottom: $spacing-sm;
-    border-bottom: 1px solid var(--dgc-border-color);
-
-    i {
-      color: var(--dgc-primary);
-    }
   }
 
   .filter-preview-content {
@@ -861,5 +842,32 @@
 
   #filter-preview-container {
     margin-top: $spacing-lg;
+  }
+
+  // Section header with icon (like Graph Settings, Options)
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding-top: $spacing-lg;
+    margin-top: $spacing-lg;
+    margin-bottom: $spacing-md;
+    border-top: 1px solid var(--dgc-border-color);
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    color: var(--dgc-text-primary);
+
+    i {
+      color: var(--dgc-text-hint);
+      font-size: 14px;
+    }
+  }
+
+  // Remove default h4 margin since we use section-header now
+  #data-source-section,
+  #filter-preview-section {
+    h4 {
+      margin-top: 0;
+    }
   }
 }

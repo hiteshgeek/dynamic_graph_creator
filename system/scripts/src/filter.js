@@ -5,10 +5,12 @@
 import FilterManagerPage from './FilterManagerPage.js';
 import FilterFormPage from './FilterFormPage.js';
 import FilterListPage from './FilterListPage.js';
+import DatePickerInit from './DatePickerInit.js';
 
 window.FilterManagerPage = FilterManagerPage;
 window.FilterFormPage = FilterFormPage;
 window.FilterListPage = FilterListPage;
+window.DatePickerInit = DatePickerInit;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Filter manager page (embedded in graphs)

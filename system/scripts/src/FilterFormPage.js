@@ -34,7 +34,14 @@ export default class FilterFormPage {
      * Initialize preview on page load (for edit mode)
      */
     initPreview() {
+        const filterType = document.getElementById('filter-type')?.value;
         const dataSource = document.getElementById('data-source')?.value;
+
+        // Show preview for date types immediately (they don't need options)
+        if (filterType === 'date' || filterType === 'date_range') {
+            this.showFilterPreview([]);
+            return;
+        }
 
         if (dataSource === 'static') {
             // Show static preview immediately if options exist
@@ -145,6 +152,7 @@ export default class FilterFormPage {
         const dataSourceSection = document.getElementById('data-source-section');
         const selectConfigSection = document.getElementById('select-config-section');
         const checkboxRadioConfigSection = document.getElementById('checkbox-radio-config-section');
+        const previewSection = document.getElementById('filter-preview-section');
 
         if (dataSourceSection) {
             dataSourceSection.style.display = this.typesWithOptions.includes(filterType) ? 'block' : 'none';
@@ -158,8 +166,18 @@ export default class FilterFormPage {
             selectConfigSection.style.display = filterType === 'select' ? 'block' : 'none';
         }
 
-        // Update preview when filter type changes
-        this.updatePreview();
+        // Show preview for date types immediately (they don't need options)
+        if (filterType === 'date' || filterType === 'date_range') {
+            this.showFilterPreview([]);
+        } else if (!this.typesWithOptions.includes(filterType)) {
+            // Hide preview for non-option types like text/number
+            if (previewSection) {
+                previewSection.style.display = 'none';
+            }
+        } else {
+            // Update preview when filter type changes for option-based types
+            this.updatePreview();
+        }
     }
 
     /**
@@ -192,7 +210,7 @@ export default class FilterFormPage {
      * Update filter preview when switching data source
      */
     updatePreviewOnSourceChange(source) {
-        const previewContainer = document.getElementById('filter-preview-container');
+        const previewSection = document.getElementById('filter-preview-section');
         const queryResultDiv = document.getElementById('query-result');
 
         if (source === 'static') {
@@ -205,13 +223,13 @@ export default class FilterFormPage {
             const options = this.getStaticOptions();
             if (options.length > 0) {
                 this.showFilterPreview(options);
-            } else if (previewContainer) {
-                previewContainer.style.display = 'none';
+            } else if (previewSection) {
+                previewSection.style.display = 'none';
             }
         } else {
             // Switching to query - hide preview until query is tested
-            if (previewContainer) {
-                previewContainer.style.display = 'none';
+            if (previewSection) {
+                previewSection.style.display = 'none';
             }
         }
     }
@@ -259,9 +277,9 @@ export default class FilterFormPage {
         if (options.length > 0) {
             this.showFilterPreview(options);
         } else {
-            const container = document.getElementById('filter-preview-container');
-            if (container) {
-                container.style.display = 'none';
+            const section = document.getElementById('filter-preview-section');
+            if (section) {
+                section.style.display = 'none';
             }
         }
     }
@@ -468,17 +486,31 @@ export default class FilterFormPage {
     }
 
     /**
-     * Show filter preview in dedicated container
+     * Show filter preview in dedicated section
      */
     showFilterPreview(options) {
-        const container = document.getElementById('filter-preview-container');
-        if (!container) return;
+        const section = document.getElementById('filter-preview-section');
+        if (!section) return;
 
-        container.innerHTML = this.renderFilterPreview(options);
-        container.style.display = 'block';
+        // Remove existing preview if any
+        const existingPreview = section.querySelector('.filter-preview');
+        if (existingPreview) {
+            existingPreview.remove();
+        }
+
+        // Append new preview
+        section.insertAdjacentHTML('beforeend', this.renderFilterPreview(options));
+
+        // Show the section
+        section.style.display = 'block';
 
         // Bind multiselect dropdown toggle
-        this.bindMultiselectDropdown(container);
+        this.bindMultiselectDropdown(section);
+
+        // Initialize date pickers if present
+        if (typeof DatePickerInit !== 'undefined') {
+            DatePickerInit.init(section);
+        }
     }
 
     /**
@@ -606,15 +638,22 @@ export default class FilterFormPage {
 
         let previewHtml = `
             <div class="filter-preview">
-                <div class="filter-preview-header">
-                    <i class="fas fa-filter"></i> Filter Preview
-                </div>
                 <div class="filter-preview-content">
                     <label class="filter-preview-label">${this.escapeHtml(filterLabel)}</label>
         `;
 
         // Render different preview based on filter type
-        if (filterType === 'select') {
+        if (filterType === 'date') {
+            // Single date picker
+            previewHtml += `
+                <input type="text" class="form-control dgc-datepicker" data-picker-type="single" placeholder="Select date" autocomplete="off" id="filter-preview-date">
+            `;
+        } else if (filterType === 'date_range') {
+            // Date range picker
+            previewHtml += `
+                <input type="text" class="form-control dgc-datepicker" data-picker-type="range" placeholder="Select date range" autocomplete="off" id="filter-preview-date-range">
+            `;
+        } else if (filterType === 'select') {
             if (isMultiple) {
                 // Multi-select dropdown with checkboxes using Bootstrap dropdown
                 previewHtml += `

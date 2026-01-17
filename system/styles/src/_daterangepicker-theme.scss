@@ -1,0 +1,330 @@
+// Daterangepicker Theme Overrides
+// Custom styles to match DGC theme (light/dark mode)
+
+@use "variables" as *;
+
+// Base styles
+.daterangepicker {
+  font-family: $font-family;
+  font-size: $font-size-sm;
+  background-color: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-3;
+  z-index: $z-dropdown + 10;
+
+  // Arrow
+  &::before,
+  &::after {
+    border-bottom-color: var(--dgc-border-color);
+  }
+
+  &.drop-up::before,
+  &.drop-up::after {
+    border-top-color: var(--dgc-border-color);
+  }
+
+  // Calendar container
+  .drp-calendar {
+    max-width: none;
+    padding: $spacing-sm;
+
+    &.left {
+      border-right: 1px solid var(--dgc-border-color);
+    }
+  }
+
+  // Calendar table
+  .calendar-table {
+    background-color: var(--dgc-bg-card);
+    border: none;
+
+    th,
+    td {
+      font-size: $font-size-sm;
+      padding: 6px;
+      min-width: 32px;
+      height: 32px;
+      border-radius: $border-radius;
+    }
+
+    // Header (month/year)
+    th {
+      color: var(--dgc-text-primary);
+      font-weight: $font-weight-medium;
+    }
+
+    // Day cells
+    td {
+      color: var(--dgc-text-primary);
+      transition: background-color 0.15s, color 0.15s;
+
+      &:hover {
+        background-color: var(--dgc-gray-100);
+        cursor: pointer;
+      }
+
+      // Days from other months
+      &.off,
+      &.off.in-range,
+      &.off.start-date,
+      &.off.end-date {
+        color: var(--dgc-text-hint);
+        background-color: transparent;
+      }
+
+      // Disabled dates
+      &.disabled {
+        color: var(--dgc-text-disabled);
+        cursor: not-allowed;
+
+        &:hover {
+          background-color: transparent;
+        }
+      }
+
+      // Today
+      &.today {
+        font-weight: $font-weight-bold;
+        color: var(--dgc-primary);
+      }
+
+      // In range (selected range)
+      &.in-range {
+        background-color: rgba(var(--dgc-primary-rgb, 0, 123, 255), 0.1);
+        color: var(--dgc-text-primary);
+        border-radius: 0;
+      }
+
+      // Start and end dates
+      &.active,
+      &.active:hover,
+      &.start-date,
+      &.end-date {
+        background-color: var(--dgc-primary);
+        color: var(--dgc-text-inverse);
+        border-radius: $border-radius;
+      }
+
+      &.start-date {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      &.end-date {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      &.start-date.end-date {
+        border-radius: $border-radius;
+      }
+    }
+  }
+
+  // Month/year selects
+  .monthselect,
+  .yearselect {
+    font-size: $font-size-sm;
+    padding: 4px 8px;
+    border: 1px solid var(--dgc-border-color);
+    border-radius: $border-radius;
+    background-color: var(--dgc-bg-card);
+    color: var(--dgc-text-primary);
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+      border-color: var(--dgc-primary);
+    }
+  }
+
+  // Navigation arrows
+  th.prev,
+  th.next {
+    &:hover {
+      background-color: var(--dgc-gray-100);
+    }
+
+    span {
+      border-color: var(--dgc-text-secondary);
+    }
+  }
+
+  // Preset ranges sidebar
+  .ranges {
+    ul {
+      padding: $spacing-xs 0;
+      width: 160px;
+
+      li {
+        font-size: $font-size-sm;
+        padding: $spacing-xs $spacing-md;
+        color: var(--dgc-text-primary);
+        cursor: pointer;
+        transition: background-color 0.15s;
+
+        &:hover {
+          background-color: var(--dgc-gray-100);
+        }
+
+        &.active {
+          background-color: var(--dgc-primary);
+          color: var(--dgc-text-inverse);
+        }
+      }
+    }
+  }
+
+  // Input fields in picker
+  .drp-selected {
+    font-size: $font-size-sm;
+    color: var(--dgc-text-secondary);
+    padding: $spacing-xs $spacing-sm;
+  }
+
+  // Buttons
+  .drp-buttons {
+    border-top: 1px solid var(--dgc-border-color);
+    padding: $spacing-sm;
+
+    .btn {
+      font-size: $font-size-sm;
+      padding: 6px 12px;
+      border-radius: $border-radius;
+      transition: all 0.15s;
+    }
+
+    .cancelBtn {
+      background-color: transparent;
+      border: 1px solid var(--dgc-border-color);
+      color: var(--dgc-text-secondary);
+
+      &:hover {
+        background-color: var(--dgc-gray-100);
+        color: var(--dgc-text-primary);
+      }
+    }
+
+    .applyBtn {
+      background-color: var(--dgc-primary);
+      border: 1px solid var(--dgc-primary);
+      color: var(--dgc-text-inverse);
+
+      &:hover {
+        background-color: var(--dgc-primary-dark);
+        border-color: var(--dgc-primary-dark);
+      }
+    }
+  }
+
+  // Time picker
+  .calendar-time {
+    border-top: 1px solid var(--dgc-border-color);
+    padding: $spacing-sm;
+    text-align: center;
+
+    select {
+      font-size: $font-size-sm;
+      padding: 4px 8px;
+      border: 1px solid var(--dgc-border-color);
+      border-radius: $border-radius;
+      background-color: var(--dgc-bg-card);
+      color: var(--dgc-text-primary);
+    }
+  }
+}
+
+// Dark mode overrides
+:root.theme-dark .daterangepicker {
+  background-color: var(--dgc-bg-card);
+  border-color: var(--dgc-border-color);
+
+  &::before {
+    border-bottom-color: var(--dgc-border-color);
+  }
+
+  &::after {
+    border-bottom-color: var(--dgc-bg-card);
+  }
+
+  .calendar-table {
+    background-color: var(--dgc-bg-card);
+
+    th {
+      color: var(--dgc-text-primary);
+    }
+
+    td {
+      color: var(--dgc-text-primary);
+
+      &:hover {
+        background-color: var(--dgc-gray-700);
+      }
+
+      &.off {
+        color: var(--dgc-text-hint);
+      }
+
+      &.disabled {
+        color: var(--dgc-text-disabled);
+      }
+
+      &.in-range {
+        background-color: rgba(0, 123, 255, 0.2);
+      }
+    }
+  }
+
+  .monthselect,
+  .yearselect {
+    background-color: var(--dgc-bg-card);
+    border-color: var(--dgc-border-color);
+    color: var(--dgc-text-primary);
+  }
+
+  th.prev:hover,
+  th.next:hover {
+    background-color: var(--dgc-gray-700);
+  }
+
+  .ranges ul li {
+    color: var(--dgc-text-primary);
+
+    &:hover {
+      background-color: var(--dgc-gray-700);
+    }
+  }
+
+  .drp-buttons {
+    border-top-color: var(--dgc-border-color);
+
+    .cancelBtn {
+      border-color: var(--dgc-border-color);
+      color: var(--dgc-text-secondary);
+
+      &:hover {
+        background-color: var(--dgc-gray-700);
+      }
+    }
+  }
+
+  .calendar-time {
+    border-top-color: var(--dgc-border-color);
+
+    select {
+      background-color: var(--dgc-bg-card);
+      border-color: var(--dgc-border-color);
+      color: var(--dgc-text-primary);
+    }
+  }
+}
+
+// Input field styling
+.dgc-datepicker {
+  cursor: pointer;
+
+  &:read-only {
+    background-color: var(--dgc-bg-card);
+  }
+}

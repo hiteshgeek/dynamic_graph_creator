@@ -12,6 +12,7 @@ import FilterManager from './FilterManager.js';
 import ConfigPanel from './ConfigPanel.js';
 import GraphView from './GraphView.js';
 import FilterManagerPage from './FilterManagerPage.js';
+import DatePickerInit from './DatePickerInit.js';
 
 // Make classes available globally
 window.GraphCreator = GraphCreator;
@@ -23,6 +24,7 @@ window.FilterManager = FilterManager;
 window.ConfigPanel = ConfigPanel;
 window.GraphView = GraphView;
 window.FilterManagerPage = FilterManagerPage;
+window.DatePickerInit = DatePickerInit;
 
 // Toast notification helper
 window.Toast = {
@@ -183,8 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const graphId = viewContainer.dataset.graphId;
         const graphType = viewContainer.dataset.graphType || 'bar';
         const graphName = viewContainer.dataset.graphName || 'Chart';
+        const hasFilters = viewContainer.dataset.hasFilters === '1';
         const config = viewContainer.dataset.config ? JSON.parse(viewContainer.dataset.config) : {};
-        window.graphView = new GraphView(viewContainer, { graphId, graphType, graphName, config });
+        window.graphView = new GraphView(viewContainer, { graphId, graphType, graphName, config, hasFilters });
     }
 
     // Auto-init filter manager page

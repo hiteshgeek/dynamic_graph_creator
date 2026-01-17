@@ -70,13 +70,34 @@ export default class FilterUtils {
             return { ['::' + filterKey]: radioChecked.value };
         }
 
-        // Text/number/date input
-        const textInput = item.querySelector('input.filter-input');
+        // Date range picker (single input with data attributes)
+        const dateRangePicker = item.querySelector('.dgc-datepicker[data-picker-type="range"]');
+        if (dateRangePicker) {
+            const from = dateRangePicker.dataset.from;
+            const to = dateRangePicker.dataset.to;
+
+            if (from || to) {
+                const result = {};
+                if (from) result['::' + filterKey + '_from'] = from;
+                if (to) result['::' + filterKey + '_to'] = to;
+                return result;
+            }
+            return null;
+        }
+
+        // Single date picker
+        const singleDatePicker = item.querySelector('.dgc-datepicker[data-picker-type="single"]');
+        if (singleDatePicker && singleDatePicker.value) {
+            return { ['::' + filterKey]: singleDatePicker.value };
+        }
+
+        // Text/number input (non-datepicker)
+        const textInput = item.querySelector('input.filter-input:not(.dgc-datepicker)');
         if (textInput && textInput.value) {
             return { ['::' + filterKey]: textInput.value };
         }
 
-        // Date range
+        // Legacy: Date range with two separate inputs (fallback)
         const dateFrom = item.querySelector('input[name$="_from"]');
         const dateTo = item.querySelector('input[name$="_to"]');
         if (dateFrom && dateTo) {
