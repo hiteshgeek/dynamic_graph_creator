@@ -276,9 +276,15 @@
             <div class="graph-main">
                 <!-- Save Bar (at top, fixed within graph-main) -->
                 <div class="graph-save-bar">
-                    <div class="graph-name-wrapper">
-                        <label class="graph-name-label" for="graph-name-input">Graph Name <span class="required">*</span></label>
-                        <input type="text" class="form-control form-control-sm graph-name-input" id="graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
+                    <div class="graph-info-wrapper">
+                        <div class="graph-name-wrapper">
+                            <label class="graph-name-label" for="graph-name-input">Graph Name <span class="required">*</span></label>
+                            <input type="text" class="form-control form-control-sm graph-name-input" id="graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
+                        </div>
+                        <div class="graph-description-wrapper">
+                            <label class="graph-description-label" for="graph-description-input">Description</label>
+                            <textarea class="form-control form-control-sm graph-description-input" id="graph-description-input" placeholder="Enter graph description (optional)" rows="1"><?php echo $graph ? htmlspecialchars($graph->getDescription()) : ''; ?></textarea>
+                        </div>
                     </div>
                     <div class="save-buttons">
                         <a href="?urlq=graph" class="btn btn-secondary btn-sm">Cancel</a>

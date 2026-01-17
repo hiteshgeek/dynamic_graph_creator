@@ -627,24 +627,33 @@
 // Save bar (fixed at top of graph-main container)
 .graph-save-bar {
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start; // Align buttons to top
   justify-content: space-between;
   padding: $spacing-md $spacing-lg;
   border-bottom: 1px solid var(--dgc-border-color);
   background: var(--dgc-bg-card);
   flex-shrink: 0; // Don't shrink, stay at top
   border-radius: $border-radius-lg $border-radius-lg 0 0;
+  gap: $spacing-md;
+}
+
+// Wrapper for name and description fields
+.graph-info-wrapper {
+  display: flex;
+  gap: $spacing-md;
+  flex: 1;
+  min-width: 0;
 }
 
 .graph-name-wrapper {
   display: flex;
   flex-direction: column;
   gap: $spacing-xs;
-  flex: 1;
-  max-width: 400px;
+  flex: 0 0 280px;
 }
 
-.graph-name-label {
+.graph-name-label,
+.graph-description-label {
   font-size: $font-size-sm;
   font-weight: $font-weight-medium;
   color: var(--dgc-text-secondary);
@@ -667,10 +676,70 @@
   }
 }
 
+// Description field
+.graph-description-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  flex: 1;
+  min-width: 0;
+}
+
+.graph-description-input {
+  width: 100%;
+  resize: none; // Disable manual resize, autosize handles it
+  min-height: 31px; // Match form-control-sm height
+  max-height: 50px; // Limit max expansion
+  overflow-y: auto !important; // Allow scroll when max height reached
+  line-height: 1.5;
+}
+
 .save-buttons {
   display: flex;
   align-items: center;
   gap: $spacing-sm;
+  margin-top: 20px;
+}
+
+// Status indicators container (errors/warnings)
+.status-indicators {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+// Small status box for error/warning indicators
+.status-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $border-radius;
+  cursor: help;
+  transition: all $transition-fast;
+
+  i {
+    font-size: 14px;
+  }
+
+  &.status-error {
+    background: rgba($error, 0.1);
+    color: $error;
+
+    &:hover {
+      background: rgba($error, 0.2);
+    }
+  }
+
+  &.status-warning {
+    background: rgba($warning, 0.1);
+    color: $warning;
+
+    &:hover {
+      background: rgba($warning, 0.2);
+    }
+  }
 }
 
 // Save Indicator (matches btn-sm sizing)
@@ -1555,6 +1624,28 @@
 
   i {
     margin-right: $spacing-xs;
+  }
+}
+
+// Warning indicator for missing filters
+.placeholder-filter-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  color: var(--dgc-warning);
+  font-weight: $font-weight-medium;
+
+  i {
+    font-size: 12px;
+  }
+}
+
+// Row highlight for missing filter
+.placeholder-row-warning {
+  background-color: rgba($warning, 0.05);
+
+  &:hover {
+    background-color: rgba($warning, 0.1) !important;
   }
 }
 

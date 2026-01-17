@@ -68,14 +68,24 @@ export default class PlaceholderSettings {
         let html = '';
         this.placeholders.forEach(placeholder => {
             const filter = matchedFilters[placeholder];
-            const filterLabel = filter ? filter.filter_label : '<span class="text-muted">Not linked</span>';
             const isAllowEmpty = this.settings[placeholder]?.allowEmpty !== false;
             const checkboxId = `allow-empty-${placeholder.replace(/::/g, '')}`;
 
+            // Show warning if filter not found
+            let filterCell;
+            if (filter) {
+                filterCell = this.escapeHtml(filter.filter_label);
+            } else {
+                filterCell = `<span class="placeholder-filter-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Filter not found
+                </span>`;
+            }
+
             html += `
-                <tr data-placeholder="${this.escapeHtml(placeholder)}">
+                <tr data-placeholder="${this.escapeHtml(placeholder)}"${!filter ? ' class="placeholder-row-warning"' : ''}>
                     <td><code>${this.escapeHtml(placeholder)}</code></td>
-                    <td>${filter ? this.escapeHtml(filterLabel) : filterLabel}</td>
+                    <td>${filterCell}</td>
                     <td>
                         <div class="form-check">
                             <input class="form-check-input allow-empty-checkbox" type="checkbox"

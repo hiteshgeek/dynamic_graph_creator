@@ -10,6 +10,7 @@ import DataMapper from './DataMapper.js';
 import FilterManager from './FilterManager.js';
 import ConfigPanel from './ConfigPanel.js';
 import PlaceholderSettings from './PlaceholderSettings.js';
+import autosize from 'autosize';
 
 export default class GraphCreator {
     constructor(container, options = {}) {
@@ -35,6 +36,10 @@ export default class GraphCreator {
 
         // Unsaved changes tracking
         this.hasUnsavedChanges = false;
+
+        // Status tracking for errors/warnings
+        this.queryError = null;
+        this.placeholderWarnings = [];
         this.savedState = null;
     }
 
@@ -198,6 +203,7 @@ export default class GraphCreator {
     /**
      * Get matched filters for placeholders in query
      * Returns object mapping placeholder keys to filter info
+     * Only includes filters that are currently selected/active for this graph
      */
     getMatchedFilters() {
         const matchedFilters = {};
@@ -208,7 +214,8 @@ export default class GraphCreator {
         filterItems.forEach(item => {
             const filterKey = item.dataset.filterKey;
             const filterLabel = item.querySelector('.filter-input-label')?.textContent || filterKey;
-            if (filterKey) {
+            // Only include filter if it's in the selectedFilters list (active for this graph)
+            if (filterKey && this.selectedFilters && this.selectedFilters.includes(filterKey)) {
                 matchedFilters['::' + filterKey] = {
                     filter_key: filterKey,
                     filter_label: filterLabel
@@ -228,6 +235,92 @@ export default class GraphCreator {
         const placeholders = this.queryBuilder.getPlaceholders();
         const matchedFilters = this.getMatchedFilters();
         this.placeholderSettings.setPlaceholders(placeholders, matchedFilters);
+
+        // Update warnings for missing filters
+        this.updatePlaceholderWarnings(placeholders, matchedFilters);
+    }
+
+    /**
+     * Update placeholder warnings list
+     */
+    updatePlaceholderWarnings(placeholders, matchedFilters) {
+        this.placeholderWarnings = [];
+        placeholders.forEach(placeholder => {
+            if (!matchedFilters[placeholder]) {
+                this.placeholderWarnings.push(placeholder);
+            }
+        });
+        this.updateStatusIndicators();
+    }
+
+    /**
+     * Set query error message
+     */
+    setQueryError(error) {
+        this.queryError = error;
+        this.updateStatusIndicators();
+    }
+
+    /**
+     * Clear query error
+     */
+    clearQueryError() {
+        this.queryError = null;
+        this.updateStatusIndicators();
+    }
+
+    /**
+     * Update status indicators in save bar
+     */
+    updateStatusIndicators() {
+        const saveButtons = this.container.querySelector('.save-buttons');
+        if (!saveButtons) return;
+
+        // Get or create status indicators container
+        let statusContainer = saveButtons.querySelector('.status-indicators');
+        if (!statusContainer) {
+            statusContainer = document.createElement('div');
+            statusContainer.className = 'status-indicators';
+            // Insert at the beginning of save-buttons
+            saveButtons.insertBefore(statusContainer, saveButtons.firstChild);
+        }
+
+        let html = '';
+
+        // Error indicator
+        if (this.queryError) {
+            html += `<span class="status-box status-error" title="${this.escapeHtml(this.queryError)}">
+                <i class="fas fa-times-circle"></i>
+            </span>`;
+        }
+
+        // Warning indicator for missing filters
+        if (this.placeholderWarnings.length > 0) {
+            const warningText = `Filter not found: ${this.placeholderWarnings.join(', ')}`;
+            html += `<span class="status-box status-warning" title="${this.escapeHtml(warningText)}">
+                <i class="fas fa-exclamation-triangle"></i>
+            </span>`;
+        }
+
+        statusContainer.innerHTML = html;
+
+        // Initialize tooltips (Bootstrap)
+        const tooltipElements = statusContainer.querySelectorAll('[title]');
+        tooltipElements.forEach(el => {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                new bootstrap.Tooltip(el, { placement: 'bottom' });
+            }
+        });
+    }
+
+    /**
+     * Escape HTML for tooltip
+     */
+    escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     /**
@@ -254,6 +347,7 @@ export default class GraphCreator {
     initSaveHandler() {
         const saveBtn = this.container.querySelector('.save-graph-btn');
         const nameInput = this.container.querySelector('.graph-name-input');
+        const descriptionInput = this.container.querySelector('.graph-description-input');
 
         if (saveBtn) {
             saveBtn.addEventListener('click', (e) => {
@@ -268,6 +362,20 @@ export default class GraphCreator {
 
             nameInput.addEventListener('input', (e) => {
                 this.graphName = e.target.value;
+                this.checkForChanges();
+            });
+        }
+
+        if (descriptionInput) {
+            // Read initial value from input (for edit mode where value is pre-filled)
+            this.graphDescription = descriptionInput.value || '';
+
+            // Initialize autosize for description textarea
+            autosize(descriptionInput);
+
+            descriptionInput.addEventListener('input', (e) => {
+                this.graphDescription = e.target.value;
+                this.checkForChanges();
             });
         }
     }
@@ -502,6 +610,9 @@ export default class GraphCreator {
                 item.style.display = 'none';
             }
         });
+
+        // Update placeholder settings to reflect new filter selection
+        this.updatePlaceholderSettings();
     }
 
     /**
@@ -700,6 +811,9 @@ export default class GraphCreator {
             this.dataMapper.setColumns(columns);
         }
 
+        // Clear any previous error
+        this.clearQueryError();
+
         Toast.success(`Query valid. Found ${columns.length} columns.`);
 
         // Automatically update preview after successful query test
@@ -715,6 +829,9 @@ export default class GraphCreator {
         if (this.dataMapper) {
             this.dataMapper.setColumns([]);
         }
+
+        // Set error for status indicator
+        this.setQueryError(error);
 
         Toast.error(error);
     }
@@ -868,11 +985,20 @@ export default class GraphCreator {
 
                 // Set graph properties
                 this.graphName = graph.name;
+                this.graphDescription = graph.description || '';
                 this.graphType = graph.graph_type;
 
                 // Update name input
                 const nameInput = this.container.querySelector('.graph-name-input');
                 if (nameInput) nameInput.value = graph.name;
+
+                // Update description input
+                const descriptionInput = this.container.querySelector('.graph-description-input');
+                if (descriptionInput) {
+                    descriptionInput.value = this.graphDescription;
+                    // Trigger autosize update
+                    autosize.update(descriptionInput);
+                }
 
                 // Update type selector (supports both old and new class names)
                 const typeItems = this.container.querySelectorAll('.graph-type-item, .chart-type-item');
@@ -1083,6 +1209,7 @@ export default class GraphCreator {
     getCurrentState() {
         return {
             name: this.graphName,
+            description: this.graphDescription,
             graphType: this.graphType,
             query: this.queryBuilder ? this.queryBuilder.getQuery() : '',
             mapping: this.dataMapper ? JSON.stringify(this.dataMapper.getMapping()) : '{}',
@@ -1104,6 +1231,7 @@ export default class GraphCreator {
         const currentState = this.getCurrentState();
         const hasChanges =
             currentState.name !== this.savedState.name ||
+            currentState.description !== this.savedState.description ||
             currentState.graphType !== this.savedState.graphType ||
             currentState.query !== this.savedState.query ||
             currentState.mapping !== this.savedState.mapping ||

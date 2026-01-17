@@ -12,6 +12,7 @@
     "sass": "^1.69.0"
   },
   "dependencies": {
+    "autosize": "^6.0.1",
     "sortablejs": "^1.15.6"
   }
 }

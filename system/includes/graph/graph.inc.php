@@ -165,10 +165,44 @@ function deleteGraph($data)
 }
 
 /**
+ * Validate that required placeholders have values
+ * Returns array of missing required placeholders, or empty array if all valid
+ *
+ * @param string $query The SQL query with placeholders
+ * @param array $filters Filter values keyed by placeholder
+ * @param array $placeholderSettings Settings per placeholder
+ * @return array Array of missing required placeholder names (without ::)
+ */
+function validateRequiredPlaceholders($query, $filters, $placeholderSettings)
+{
+    $missing = array();
+
+    // Find all placeholders in the query
+    preg_match_all('/::([a-zA-Z_][a-zA-Z0-9_]*)/', $query, $matches);
+    $placeholders = array_unique($matches[0]);
+
+    foreach ($placeholders as $placeholder) {
+        $settings = isset($placeholderSettings[$placeholder]) ? $placeholderSettings[$placeholder] : array();
+        $allowEmpty = isset($settings['allowEmpty']) ? $settings['allowEmpty'] : true;
+
+        // If allowEmpty is false, check if filter has a value
+        if (!$allowEmpty) {
+            $filterValue = isset($filters[$placeholder]) ? $filters[$placeholder] : null;
+            if (isFilterValueEmpty($filterValue)) {
+                // Remove :: prefix for display
+                $missing[] = ltrim($placeholder, ':');
+            }
+        }
+    }
+
+    return $missing;
+}
+
+/**
  * Replace placeholders in query with filter values
  * Handles empty values based on placeholder settings:
  * - If allowEmpty is true (default): replace condition with 1=1
- * - If allowEmpty is false (required): use dummy value for testing
+ * - If allowEmpty is false (required): should be validated before calling this
  *
  * @param string $query The SQL query with placeholders
  * @param array $filters Filter values keyed by placeholder (e.g., ['::category' => 'value'])
@@ -207,14 +241,12 @@ function replaceQueryPlaceholders($query, $filters, $placeholderSettings, $db)
             if ($allowEmpty) {
                 // Replace the entire condition containing this placeholder with 1=1
                 $query = replaceConditionWithTrueValue($query, $placeholder);
-            } else {
-                // Required but empty - use dummy value for testing
-                $query = str_replace($placeholder, "'test'", $query);
             }
+            // If not allowEmpty and empty, validation should have caught this
         }
     }
 
-    // Handle any remaining placeholders not in filters (use dummy values)
+    // Handle any remaining placeholders not in filters
     $query = preg_replace_callback('/::([a-zA-Z_][a-zA-Z0-9_]*)/', function ($matches) use ($placeholderSettings) {
         $placeholder = '::' . $matches[1];
         $settings = isset($placeholderSettings[$placeholder]) ? $placeholderSettings[$placeholder] : array();
@@ -224,7 +256,8 @@ function replaceQueryPlaceholders($query, $filters, $placeholderSettings, $db)
             // Will be handled by condition replacement below
             return $placeholder;
         }
-        return "'test'";
+        // Required but not in filters - validation should have caught this
+        return $placeholder;
     }, $query);
 
     // Final pass: replace any remaining placeholders with allowEmpty=true using 1=1
@@ -325,6 +358,13 @@ function testQuery($data)
 
     if (empty($query)) {
         Utility::ajaxResponseFalse('Please enter a SQL query');
+    }
+
+    // Validate required placeholders have values
+    $missingRequired = validateRequiredPlaceholders($query, $filters, $placeholderSettings);
+    if (!empty($missingRequired)) {
+        $filterNames = implode(', ', $missingRequired);
+        Utility::ajaxResponseFalse('Required filter(s) missing value: ' . $filterNames);
     }
 
     $db = Rapidkart::getInstance()->getDB();
@@ -431,6 +471,13 @@ function previewGraph($data)
 
         if (empty($query)) {
             Utility::ajaxResponseFalse('No query provided');
+        }
+
+        // Validate required placeholders have values
+        $missingRequired = validateRequiredPlaceholders($query, $filters, $placeholderSettings);
+        if (!empty($missingRequired)) {
+            $filterNames = implode(', ', $missingRequired);
+            Utility::ajaxResponseFalse('Required filter(s) missing value: ' . $filterNames);
         }
 
         $db = Rapidkart::getInstance()->getDB();
