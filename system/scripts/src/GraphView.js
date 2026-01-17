@@ -5,6 +5,7 @@
 
 import GraphPreview from './GraphPreview.js';
 import GraphExporter from './GraphExporter.js';
+import FilterUtils from './FilterUtils.js';
 
 // Use global helpers from main.js
 const Ajax = window.Ajax;
@@ -254,63 +255,7 @@ export default class GraphView {
      * Get filter values from inputs
      */
     getFilterValues() {
-        const filterValues = {};
         const filtersContainer = this.container.querySelector('#graph-filters');
-
-        if (!filtersContainer) return filterValues;
-
-        const filterItems = filtersContainer.querySelectorAll('.filter-input-item');
-
-        filterItems.forEach(item => {
-            const filterKey = item.dataset.filterKey;
-            if (!filterKey) return;
-
-            // Single select
-            const select = item.querySelector('select.filter-input');
-            if (select && select.value) {
-                filterValues['::' + filterKey] = select.value;
-                return;
-            }
-
-            // Multi-select dropdown (checkboxes)
-            const multiSelectChecked = item.querySelectorAll('.filter-multiselect-options input[type="checkbox"]:checked');
-            if (multiSelectChecked.length > 0) {
-                const values = Array.from(multiSelectChecked).map(cb => cb.value);
-                filterValues['::' + filterKey] = values;
-                return;
-            }
-
-            // Checkbox group
-            const checkboxChecked = item.querySelectorAll('.filter-checkbox-group input[type="checkbox"]:checked');
-            if (checkboxChecked.length > 0) {
-                const values = Array.from(checkboxChecked).map(cb => cb.value);
-                filterValues['::' + filterKey] = values;
-                return;
-            }
-
-            // Radio group
-            const radioChecked = item.querySelector('.filter-radio-group input[type="radio"]:checked');
-            if (radioChecked) {
-                filterValues['::' + filterKey] = radioChecked.value;
-                return;
-            }
-
-            // Text/number/date input
-            const textInput = item.querySelector('input.filter-input');
-            if (textInput && textInput.value) {
-                filterValues['::' + filterKey] = textInput.value;
-                return;
-            }
-
-            // Date range
-            const dateFrom = item.querySelector('input[name$="_from"]');
-            const dateTo = item.querySelector('input[name$="_to"]');
-            if (dateFrom && dateTo) {
-                if (dateFrom.value) filterValues['::' + filterKey + '_from'] = dateFrom.value;
-                if (dateTo.value) filterValues['::' + filterKey + '_to'] = dateTo.value;
-            }
-        });
-
-        return filterValues;
+        return FilterUtils.getValues(filtersContainer, { visibleOnly: false });
     }
 }

@@ -1,55 +1,12 @@
 // Query Builder Styles
+// Note: Base CodeMirror styling is in _code-editor.scss (shared component)
 @use 'variables' as *;
 
 .query-builder {
     position: relative;
 }
 
-.query-editor-wrapper {
-    position: relative;
-    border: 1px solid var(--dgc-border-color);
-    border-radius: $border-radius;
-
-    // Copy button positioned in top-right corner
-    .copy-query-btn {
-        position: absolute;
-        top: $spacing-xs;
-        right: $spacing-xs;
-        z-index: 10;
-        font-size: $font-size-sm;
-        padding: 0.25rem 0.5rem;
-        background: var(--dgc-bg-card);
-        border-color: var(--dgc-border-color);
-        opacity: 0.85;
-        transition: opacity $transition-fast;
-
-        &:hover {
-            opacity: 1;
-            background: var(--dgc-bg-card);
-        }
-    }
-
-    // Auto-height CodeMirror (no scrolling)
-    .CodeMirror {
-        height: auto !important;
-        border-radius: $border-radius;
-
-        .CodeMirror-scroll {
-            height: auto !important;
-            overflow: visible !important;
-            min-height: 150px;
-        }
-
-        .CodeMirror-sizer {
-            min-height: 150px !important;
-        }
-
-        .CodeMirror-gutters {
-            height: auto !important;
-        }
-    }
-}
-
+// Textarea fallback (before CodeMirror initializes)
 .query-editor {
     width: 100%;
     min-height: 150px;
@@ -68,89 +25,11 @@
     }
 }
 
-// CodeMirror customizations
-.CodeMirror {
-    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
-    font-size: 13px;
-    line-height: 1.6;
-    height: auto;
-    min-height: 200px;
-    border: none;
-    background: var(--dgc-code-bg);
-    color: var(--dgc-text-primary);
-
-    &-focused {
-        background: var(--dgc-bg-input);
-    }
-
-    .CodeMirror-gutters {
-        background: var(--dgc-gray-100);
-        border-right: 1px solid var(--dgc-border-color);
-    }
-
-    .CodeMirror-linenumber {
-        color: var(--dgc-text-hint);
-        padding: 0 8px;
-    }
-
-    .CodeMirror-cursor {
-        border-left-color: var(--dgc-text-primary);
-    }
-
-    .CodeMirror-selected {
-        background: var(--dgc-gray-200);
-    }
-
-    .CodeMirror-lines {
-        color: var(--dgc-text-primary);
-    }
-
-    // SQL Syntax highlighting - use CSS variables for dark mode compatibility
-    .cm-keyword {
-        color: var(--dgc-cm-keyword, #7c3aed);
-        font-weight: 500;
-    }
-
-    .cm-def,
-    .cm-variable-2 {
-        color: var(--dgc-cm-variable, #0891b2);
-    }
-
-    .cm-string {
-        color: var(--dgc-cm-string, #059669);
-    }
-
-    .cm-number {
-        color: var(--dgc-cm-number, #d97706);
-    }
-
-    .cm-comment {
-        color: var(--dgc-text-hint);
-        font-style: italic;
-    }
-
-    .cm-operator {
-        color: var(--dgc-text-primary);
-    }
-
-    .cm-builtin {
-        color: var(--dgc-cm-builtin, #dc2626);
-    }
-}
-
-.query-toolbar {
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-sm;
-    padding: $spacing-md;
-    background: var(--dgc-gray-100);
-    border-top: 1px solid var(--dgc-border-color);
-}
-
-.query-toolbar-left {
+// Query hint (placeholder syntax help)
+.query-hint {
     font-size: $font-size-sm;
     color: var(--dgc-text-hint);
-    line-height: 1.5;
+    padding: $spacing-sm $spacing-md;
 
     code {
         background: var(--dgc-gray-200);
@@ -161,64 +40,7 @@
     }
 }
 
-.query-toolbar-right {
-    display: flex;
-    gap: $spacing-sm;
-
-    .btn {
-        white-space: nowrap;
-    }
-}
-
-.query-hint {
-    font-size: $font-size-sm;
-    color: var(--dgc-text-hint);
-    margin-top: $spacing-sm;
-
-    code {
-        background: var(--dgc-gray-200);
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-size: 12px;
-    }
-}
-
-// Query test results
-.query-test-result {
-    margin-top: $spacing-md;
-    padding: $spacing-md;
-    border-radius: $border-radius;
-    font-size: $font-size-sm;
-
-    &.success {
-        background: var(--dgc-success-bg);
-        border: 1px solid var(--dgc-success-border);
-        color: var(--dgc-success-dark);
-    }
-
-    &.error {
-        background: var(--dgc-error-bg);
-        border: 1px solid var(--dgc-error-border);
-        color: var(--dgc-error-dark);
-    }
-}
-
-.query-result-header {
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-
-    i {
-        font-size: 16px;
-    }
-
-    .query-row-count {
-        margin-left: auto;
-        font-size: $font-size-sm;
-        opacity: 0.8;
-    }
-}
-
+// Debug query wrapper (read-only CodeMirror for test results)
 .query-debug {
     margin-top: $spacing-md;
     padding: $spacing-sm;
@@ -244,33 +66,6 @@
         word-break: break-all;
         color: var(--dgc-text-secondary);
     }
-
-    // CodeMirror styling for debug query (read-only)
-    .CodeMirror {
-        border: 1px solid var(--dgc-border-color);
-        border-radius: $border-radius;
-        font-size: 12px;
-        background: var(--dgc-gray-100);
-        cursor: default;
-
-        .CodeMirror-scroll {
-            background: var(--dgc-gray-100);
-        }
-
-        .CodeMirror-gutters {
-            background: var(--dgc-gray-200);
-            border-right: 1px solid var(--dgc-border-color);
-        }
-
-        .CodeMirror-linenumber {
-            color: var(--dgc-text-muted);
-        }
-
-        // Hide cursor for read-only
-        .CodeMirror-cursor {
-            display: none !important;
-        }
-    }
 }
 
 // Debug query wrapper with copy button overlay
@@ -295,6 +90,7 @@
         }
     }
 
+    // Read-only CodeMirror styling
     .CodeMirror {
         height: auto !important;
         border: 1px solid var(--dgc-border-color);
@@ -330,61 +126,7 @@
     }
 }
 
-.query-sample-data {
-    margin-top: $spacing-md;
-
-    strong {
-        display: block;
-        margin-bottom: $spacing-sm;
-        color: var(--dgc-success-dark);
-    }
-}
-
-.query-result-table-wrapper {
-    max-height: 250px;
-    overflow: auto;
-    border-radius: $border-radius;
-    border: 1px solid var(--dgc-success-border);
-}
-
-.query-result-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-    background: var(--dgc-bg-card);
-
-    th, td {
-        padding: $spacing-xs $spacing-sm;
-        text-align: left;
-        border-bottom: 1px solid var(--dgc-border-color);
-        white-space: nowrap;
-        max-width: 200px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    th {
-        background: var(--dgc-gray-100);
-        font-weight: $font-weight-medium;
-        color: var(--dgc-text-primary);
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
-
-    td {
-        color: var(--dgc-text-secondary);
-    }
-
-    tbody tr:hover {
-        background: var(--dgc-bg-hover);
-    }
-
-    tbody tr:last-child td {
-        border-bottom: none;
-    }
-}
-
+// Query columns result display
 .query-columns-result {
     margin-top: $spacing-sm;
 

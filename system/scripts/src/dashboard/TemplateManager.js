@@ -1,4 +1,5 @@
-import Sortable from "sortablejs";
+// Use Sortable from CDN (global)
+const Sortable = window.Sortable;
 
 /**
  * Template Manager

@@ -3,6 +3,7 @@
 
 @use "variables" as *;
 @use "loader";
+@use "code-editor";
 
 // Add padding for fixed header
 body {

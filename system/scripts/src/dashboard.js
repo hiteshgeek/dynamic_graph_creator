@@ -3,7 +3,9 @@
  * Simplified version for initial implementation
  */
 
-import Sortable from "sortablejs";
+// Use Sortable from CDN (global)
+const Sortable = window.Sortable;
+
 import { TemplateManager } from "./dashboard/TemplateManager.js";
 
 // Use globals from common.js (Toast, Loading, Ajax, ConfirmDialog)

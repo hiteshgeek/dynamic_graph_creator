@@ -10,7 +10,10 @@ import DataMapper from './DataMapper.js';
 import FilterManager from './FilterManager.js';
 import ConfigPanel from './ConfigPanel.js';
 import PlaceholderSettings from './PlaceholderSettings.js';
-import autosize from 'autosize';
+import FilterUtils from './FilterUtils.js';
+
+// Use autosize from CDN (global)
+const autosize = window.autosize;
 
 export default class GraphCreator {
     constructor(container, options = {}) {
@@ -847,76 +850,13 @@ export default class GraphCreator {
      * Get current filter values from sidebar inputs (only from selected/visible filters)
      */
     getSidebarFilterValues() {
-        const filterValues = {};
-
         // Try to find filters container - check both within container and globally
         let filtersContainer = this.container.querySelector('#graph-filters');
         if (!filtersContainer) {
             filtersContainer = document.getElementById('graph-filters');
         }
 
-        if (!filtersContainer) {
-            return filterValues;
-        }
-
-        // Only get VISIBLE filter items (selected filters that are displayed)
-        const filterItems = filtersContainer.querySelectorAll('.filter-input-item');
-
-        filterItems.forEach(item => {
-            // Skip hidden/non-selected filters
-            if (item.style.display === 'none') return;
-
-            const filterKey = item.dataset.filterKey;
-            if (!filterKey) return;
-
-            // Check different input types
-            // Single select
-            const select = item.querySelector('select.filter-input');
-            if (select && select.value) {
-                filterValues['::' + filterKey] = select.value;
-                return;
-            }
-
-            // Multi-select dropdown (checkboxes)
-            const multiSelectChecked = item.querySelectorAll('.filter-multiselect-options input[type="checkbox"]:checked');
-            if (multiSelectChecked.length > 0) {
-                const values = Array.from(multiSelectChecked).map(cb => cb.value);
-                filterValues['::' + filterKey] = values;
-                return;
-            }
-
-            // Checkbox group
-            const checkboxChecked = item.querySelectorAll('.filter-checkbox-group input[type="checkbox"]:checked');
-            if (checkboxChecked.length > 0) {
-                const values = Array.from(checkboxChecked).map(cb => cb.value);
-                filterValues['::' + filterKey] = values;
-                return;
-            }
-
-            // Radio group
-            const radioChecked = item.querySelector('.filter-radio-group input[type="radio"]:checked');
-            if (radioChecked) {
-                filterValues['::' + filterKey] = radioChecked.value;
-                return;
-            }
-
-            // Text/number/date input
-            const textInput = item.querySelector('input.filter-input');
-            if (textInput && textInput.value) {
-                filterValues['::' + filterKey] = textInput.value;
-                return;
-            }
-
-            // Date range
-            const dateFrom = item.querySelector('input[name$="_from"]');
-            const dateTo = item.querySelector('input[name$="_to"]');
-            if (dateFrom && dateTo) {
-                if (dateFrom.value) filterValues['::' + filterKey + '_from'] = dateFrom.value;
-                if (dateTo.value) filterValues['::' + filterKey + '_to'] = dateTo.value;
-            }
-        });
-
-        return filterValues;
+        return FilterUtils.getValues(filtersContainer, { visibleOnly: true });
     }
 
     /**

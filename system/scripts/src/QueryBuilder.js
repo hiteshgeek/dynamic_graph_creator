@@ -3,6 +3,8 @@
  * Handles query input and testing
  */
 
+import CodeMirrorEditor from './CodeMirrorEditor.js';
+
 export default class QueryBuilder {
     constructor(container, options = {}) {
         this.container = container;
@@ -13,11 +15,11 @@ export default class QueryBuilder {
         this.getPlaceholderSettings = options.getPlaceholderSettings || (() => ({}));
 
         this.textarea = null;
-        this.testBtn = null;
         this.resultContainer = null;
         this.graphDataSection = null;
         this.graphDataContent = null;
         this.editor = null; // CodeMirror instance
+        this.codeEditor = null; // CodeMirrorEditor instance
 
         this.init();
     }
@@ -27,9 +29,6 @@ export default class QueryBuilder {
      */
     init() {
         this.textarea = this.container.querySelector('.query-editor');
-        this.testBtn = this.container.querySelector('.test-query-btn');
-        this.formatBtn = this.container.querySelector('.format-query-btn');
-        this.copyBtn = this.container.querySelector('.copy-query-btn');
         this.resultContainer = this.container.querySelector('.query-test-result');
 
         // Find the graph data section (sibling section for displaying query results)
@@ -37,18 +36,6 @@ export default class QueryBuilder {
         if (graphMain) {
             this.graphDataSection = graphMain.querySelector('.graph-data-section');
             this.graphDataContent = graphMain.querySelector('.graph-data-content');
-        }
-
-        if (this.testBtn) {
-            this.testBtn.addEventListener('click', () => this.testQuery());
-        }
-
-        if (this.formatBtn) {
-            this.formatBtn.addEventListener('click', () => this.formatQuery());
-        }
-
-        if (this.copyBtn) {
-            this.copyBtn.addEventListener('click', () => this.copyQuery());
         }
 
         // Initialize CodeMirror if available
@@ -59,113 +46,50 @@ export default class QueryBuilder {
     }
 
     /**
-     * Initialize CodeMirror editor
+     * Initialize CodeMirror editor using shared CodeMirrorEditor component
      */
     initCodeMirror() {
         if (!this.textarea || typeof CodeMirror === 'undefined') return;
 
-        this.editor = CodeMirror.fromTextArea(this.textarea, {
-            mode: 'text/x-sql',
-            theme: 'default',
-            lineNumbers: true,
-            lineWrapping: true,
-            indentWithTabs: true,
-            smartIndent: true,
-            matchBrackets: true,
-            autofocus: false,
-            extraKeys: {
+        // Use shared CodeMirrorEditor for consistent styling
+        this.codeEditor = new CodeMirrorEditor(this.textarea, {
+            copyBtn: true,
+            formatBtn: true,
+            testBtn: true,
+            minHeight: 150,
+            onTest: () => this.testQuery(),
+            onChange: () => this.onChange()
+        });
+
+        // Keep reference to CodeMirror instance
+        this.editor = this.codeEditor.editor;
+
+        // Add keyboard shortcuts
+        if (this.editor) {
+            this.editor.setOption('extraKeys', {
                 'Ctrl-Enter': () => this.testQuery(),
                 'Cmd-Enter': () => this.testQuery()
-            }
-        });
-
-        // Sync CodeMirror with textarea and trigger onChange
-        this.editor.on('change', () => {
-            this.editor.save();
-            this.onChange();
-        });
-
-        // Auto-height: show full content without scrolling
-        this.editor.setSize(null, 'auto');
+            });
+        }
     }
 
     /**
      * Add hint about filter placeholders
      */
     addPlaceholderHint() {
-        const hint = this.container.querySelector('.query-hint');
-        if (!hint) return;
-
-        hint.innerHTML = `
-            Use <code>::placeholder_name</code> for filter values.
-            Example: <code>WHERE date >= ::date_from AND status IN (::status_ids)</code>
-        `;
-    }
-
-    /**
-     * Copy query to clipboard
-     */
-    copyQuery() {
-        const query = this.getQuery();
-
-        if (!query.trim()) {
-            this.showCopyFeedback('Nothing to copy', false);
-            return;
+        // CodeMirrorEditor adds a toolbar, so we add the hint after it
+        if (this.codeEditor && this.codeEditor.wrapper) {
+            const existingHint = this.codeEditor.wrapper.querySelector('.query-hint');
+            if (!existingHint) {
+                const hint = document.createElement('div');
+                hint.className = 'query-hint';
+                hint.innerHTML = `
+                    Use <code>::placeholder_name</code> for filter values.
+                    Example: <code>WHERE date >= ::date_from AND status IN (::status_ids)</code>
+                `;
+                this.codeEditor.wrapper.appendChild(hint);
+            }
         }
-
-        navigator.clipboard.writeText(query).then(() => {
-            this.showCopyFeedback('Copied!', true);
-        }).catch(() => {
-            this.showCopyFeedback('Failed', false);
-        });
-    }
-
-    /**
-     * Show animated copy feedback near button
-     */
-    showCopyFeedback(message, success) {
-        if (!this.copyBtn) return;
-
-        // Remove existing feedback
-        const existing = this.copyBtn.querySelector('.copy-feedback');
-        if (existing) existing.remove();
-
-        // Create feedback element
-        const feedback = document.createElement('span');
-        feedback.className = `copy-feedback ${success ? 'success' : 'error'}`;
-        feedback.textContent = message;
-        this.copyBtn.appendChild(feedback);
-
-        // Animate and remove
-        setTimeout(() => feedback.classList.add('show'), 10);
-        setTimeout(() => {
-            feedback.classList.remove('show');
-            setTimeout(() => feedback.remove(), 200);
-        }, 1500);
-    }
-
-    /**
-     * Show animated copy feedback for debug query button
-     */
-    showDebugCopyFeedback(button, message, success) {
-        if (!button) return;
-
-        // Remove existing feedback
-        const existing = button.querySelector('.copy-feedback');
-        if (existing) existing.remove();
-
-        // Create feedback element
-        const feedback = document.createElement('span');
-        feedback.className = `copy-feedback ${success ? 'success' : 'error'}`;
-        feedback.textContent = message;
-        button.appendChild(feedback);
-
-        // Animate and remove
-        setTimeout(() => feedback.classList.add('show'), 10);
-        setTimeout(() => {
-            feedback.classList.remove('show');
-            setTimeout(() => feedback.remove(), 200);
-        }, 1500);
     }
 
     /**
@@ -193,80 +117,11 @@ export default class QueryBuilder {
      * Refresh CodeMirror (call after container becomes visible)
      */
     refresh() {
-        if (this.editor) {
+        if (this.codeEditor) {
+            this.codeEditor.refresh();
+        } else if (this.editor) {
             this.editor.refresh();
         }
-    }
-
-    /**
-     * Format SQL query - phpMyAdmin style formatting
-     * Keywords on their own line, content indented below
-     */
-    formatQuery() {
-        let query = this.getQuery();
-        if (!query.trim()) return;
-
-        // Normalize whitespace first
-        query = query.replace(/\s+/g, ' ').trim();
-
-        // Major clauses - keyword on its own line, content indented below
-        const majorClauses = [
-            'SELECT', 'FROM', 'WHERE', 'ORDER BY', 'GROUP BY', 'HAVING',
-            'LIMIT', 'SET', 'VALUES', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN',
-            'INNER JOIN', 'OUTER JOIN', 'CROSS JOIN', 'INSERT INTO',
-            'UPDATE', 'DELETE FROM', 'UNION ALL', 'UNION'
-        ];
-
-        // Sort by length descending to match longer keywords first
-        majorClauses.sort((a, b) => b.length - a.length);
-
-        // Add line break before each major clause keyword
-        majorClauses.forEach(clause => {
-            const regex = new RegExp('\\s+(' + clause.replace(/ /g, '\\s+') + ')\\b', 'gi');
-            query = query.replace(regex, '\n$1');
-        });
-
-        // Now separate keyword from its content (keyword on own line, content indented)
-        majorClauses.forEach(clause => {
-            const regex = new RegExp('^(' + clause.replace(/ /g, '\\s+') + ')\\s+(.+)$', 'gim');
-            query = query.replace(regex, '$1\n\t$2');
-        });
-
-        // Handle commas - each item on new line with indent
-        query = query.replace(/,\s*/g, ',\n\t');
-
-        // Handle AND/OR - keep at end of line, next condition on new line
-        query = query.replace(/\s+(AND)\s+/gi, ' $1\n\t');
-        query = query.replace(/\s+(OR)\s+/gi, ' $1\n\t');
-
-        // Clean up: trim lines and remove empty lines
-        const lines = query.split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0);
-
-        // Rebuild with proper indentation
-        const formattedLines = [];
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
-
-            // Check if line is a major clause keyword only
-            const isKeywordOnly = majorClauses.some(clause => {
-                const regex = new RegExp('^' + clause.replace(/ /g, '\\s*') + '$', 'i');
-                return regex.test(line);
-            });
-
-            if (isKeywordOnly) {
-                // Uppercase the keyword
-                formattedLines.push(line.toUpperCase());
-            } else {
-                // Uppercase AND/OR at end of lines
-                line = line.replace(/\s+(AND|OR)$/i, (m) => m.toUpperCase());
-                // Content line - indent it
-                formattedLines.push('\t' + line);
-            }
-        }
-
-        this.setQuery(formattedLines.join('\n'));
     }
 
     /**
@@ -274,7 +129,9 @@ export default class QueryBuilder {
      */
     async testQuery() {
         // Auto-format query before testing
-        this.formatQuery();
+        if (this.codeEditor) {
+            this.codeEditor.format();
+        }
 
         const query = this.getQuery();
 
@@ -284,10 +141,11 @@ export default class QueryBuilder {
             return;
         }
 
-        // Show loading state
-        if (this.testBtn) {
-            this.testBtn.disabled = true;
-            this.testBtn.innerHTML = '<span class="spinner"></span> Testing...';
+        // Show loading state on the test button in CodeMirrorEditor toolbar
+        const testBtn = this.codeEditor?.wrapper?.querySelector('.code-editor-toolbar .btn-primary');
+        if (testBtn) {
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<span class="spinner"></span> Testing...';
         }
 
         try {
@@ -317,9 +175,9 @@ export default class QueryBuilder {
             this.onError(message);
         } finally {
             // Reset button
-            if (this.testBtn) {
-                this.testBtn.disabled = false;
-                this.testBtn.innerHTML = '<i class="fas fa-play"></i> Test Query';
+            if (testBtn) {
+                testBtn.disabled = false;
+                testBtn.innerHTML = '<i class="fas fa-play"></i> Test Query';
             }
         }
     }
@@ -352,7 +210,7 @@ export default class QueryBuilder {
                 dataHtml += `
                     <div class="debug-query-wrapper">
                         <button type="button" class="btn btn-sm btn-outline-secondary copy-debug-query-btn" title="Copy SQL">
-                            <i class="fas fa-copy"></i> Copy
+                            <i class="fas fa-copy"></i>
                         </button>
                         <textarea class="query-debug-textarea" style="display:none;">${this.escapeHtml(debugQuery)}</textarea>
                     </div>
@@ -418,7 +276,7 @@ export default class QueryBuilder {
                             navigator.clipboard.writeText(debugQuery).then(() => {
                                 this.showDebugCopyFeedback(copyDebugBtn, 'Copied!', true);
                             }).catch(() => {
-                                this.showDebugCopyFeedback(copyDebugBtn, 'Failed', false);
+                                this.showDebugCopyFeedback(copyDebugBtn, 'Copied!', false);
                             });
                         });
                     }
@@ -427,6 +285,31 @@ export default class QueryBuilder {
                 this.graphDataSection.style.display = 'none';
             }
         }
+    }
+
+    /**
+     * Show animated copy feedback for debug query button
+     */
+    showDebugCopyFeedback(button, message, success) {
+        if (!button) return;
+
+        // Remove existing feedback
+        const existing = button.querySelector('.copy-feedback');
+        if (existing) existing.remove();
+
+        // Create feedback element
+        const feedback = document.createElement('span');
+        feedback.className = `copy-feedback ${success ? 'success' : 'error'}`;
+        feedback.textContent = message;
+        button.style.position = 'relative';
+        button.appendChild(feedback);
+
+        // Animate and remove
+        setTimeout(() => feedback.classList.add('show'), 10);
+        setTimeout(() => {
+            feedback.classList.remove('show');
+            setTimeout(() => feedback.remove(), 200);
+        }, 1500);
     }
 
     /**

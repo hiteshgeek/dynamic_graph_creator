@@ -1,0 +1,285 @@
+// CodeMirrorEditor - Reusable Code Editor Styles
+// Use this for consistent CodeMirror styling across the app
+@use 'variables' as *;
+
+// Main wrapper
+.code-editor-wrapper {
+    position: relative;
+    border: 1px solid var(--dgc-border-color);
+    border-radius: $border-radius;
+    background: var(--dgc-code-bg);
+    transition: border-color $transition-fast;
+
+    &:focus-within {
+        border-color: var(--dgc-primary);
+    }
+
+    &.read-only {
+        background: var(--dgc-gray-100);
+
+        .CodeMirror {
+            background: var(--dgc-gray-100);
+            cursor: default;
+        }
+
+        .CodeMirror-cursor {
+            display: none !important;
+        }
+    }
+
+    // CodeMirror base styling - auto height
+    .CodeMirror {
+        height: auto !important;
+        min-height: var(--editor-min-height, 100px);
+        border-radius: $border-radius;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        background: var(--dgc-code-bg);
+        color: var(--dgc-text-primary);
+    }
+
+    .CodeMirror-scroll {
+        height: auto !important;
+        overflow: visible !important;
+        min-height: var(--editor-min-height, 100px);
+    }
+
+    .CodeMirror-sizer {
+        min-height: calc(var(--editor-min-height, 100px) - 20px) !important;
+    }
+
+    .CodeMirror-gutters {
+        height: auto !important;
+        background: var(--dgc-gray-100);
+        border-right: 1px solid var(--dgc-border-color);
+        border-radius: $border-radius 0 0 $border-radius;
+    }
+
+    .CodeMirror-linenumber {
+        color: var(--dgc-text-hint);
+        padding: 0 $spacing-sm;
+    }
+
+    .CodeMirror-cursor {
+        border-left-color: var(--dgc-text-primary);
+    }
+
+    .CodeMirror-selected {
+        background: var(--dgc-gray-200);
+    }
+
+    .CodeMirror-focused {
+        background: var(--dgc-bg-input);
+    }
+
+    // SQL Syntax highlighting - CSS variables for dark mode
+    .cm-keyword {
+        color: var(--dgc-cm-keyword, #7c3aed);
+        font-weight: 500;
+    }
+
+    .cm-def,
+    .cm-variable-2 {
+        color: var(--dgc-cm-variable, #0891b2);
+    }
+
+    .cm-string {
+        color: var(--dgc-cm-string, #059669);
+    }
+
+    .cm-number {
+        color: var(--dgc-cm-number, #d97706);
+    }
+
+    .cm-comment {
+        color: var(--dgc-text-hint);
+        font-style: italic;
+    }
+
+    .cm-operator {
+        color: var(--dgc-text-primary);
+    }
+
+    .cm-builtin {
+        color: var(--dgc-cm-builtin, #dc2626);
+    }
+
+    // MySQL CASE keywords - may be classified as cm-type or cm-builtin
+    .cm-type {
+        color: var(--dgc-cm-keyword, #7c3aed);
+        font-weight: 500;
+    }
+}
+
+// Floating buttons (copy button in top-right corner)
+.code-editor-floating-btns {
+    position: absolute;
+    top: $spacing-xs;
+    right: $spacing-xs;
+    z-index: 10;
+    display: flex;
+    gap: $spacing-xs;
+}
+
+.code-editor-copy-btn {
+    padding: 0.25rem 0.5rem;
+    background: var(--dgc-bg-card);
+    border-color: var(--dgc-border-color);
+    opacity: 0.7;
+    transition: opacity $transition-fast, background $transition-fast;
+
+    &:hover {
+        opacity: 1;
+        background: var(--dgc-bg-card);
+    }
+
+    i {
+        font-size: 12px;
+    }
+}
+
+// Bottom toolbar
+.code-editor-toolbar {
+    display: flex;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: var(--dgc-gray-100);
+    border-top: 1px solid var(--dgc-border-color);
+    border-radius: 0 0 $border-radius $border-radius;
+}
+
+// Copy feedback animation
+.copy-feedback {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%) translateY(5px);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: $font-weight-medium;
+    white-space: nowrap;
+    opacity: 0;
+    transition: all 0.2s ease;
+    pointer-events: none;
+
+    &.success {
+        background: var(--dgc-success);
+        color: white;
+    }
+
+    &.error {
+        background: var(--dgc-error);
+        color: white;
+    }
+
+    &.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+// Query test results (shared styling)
+.query-test-result {
+    margin-top: $spacing-md;
+    padding: $spacing-md;
+    border-radius: $border-radius;
+    font-size: $font-size-sm;
+
+    &.success {
+        background: var(--dgc-success-bg);
+        border: 1px solid var(--dgc-success-border);
+        color: var(--dgc-success-dark);
+    }
+
+    &.error {
+        background: var(--dgc-error-bg);
+        border: 1px solid var(--dgc-error-border);
+        color: var(--dgc-error-dark);
+
+        i {
+            margin-right: $spacing-xs;
+        }
+    }
+}
+
+.query-result-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    i {
+        font-size: 16px;
+    }
+
+    .query-row-count {
+        margin-left: auto;
+        font-size: $font-size-sm;
+        opacity: 0.8;
+    }
+}
+
+.query-warnings {
+    margin-top: $spacing-sm;
+    padding: $spacing-sm;
+    background: var(--dgc-warning-bg);
+    border: 1px solid var(--dgc-warning-border);
+    border-radius: $border-radius;
+    color: var(--dgc-warning-dark);
+
+    ul {
+        margin: 0;
+        padding-left: $spacing-md;
+    }
+}
+
+.query-sample-data {
+    margin-top: $spacing-md;
+}
+
+.query-result-table-wrapper {
+    max-height: 250px;
+    overflow: auto;
+    border-radius: $border-radius;
+    border: 1px solid var(--dgc-success-border);
+}
+
+.query-result-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: var(--dgc-bg-card);
+
+    th,
+    td {
+        padding: $spacing-xs $spacing-sm;
+        text-align: left;
+        border-bottom: 1px solid var(--dgc-border-color);
+        white-space: nowrap;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    th {
+        background: var(--dgc-gray-100);
+        font-weight: $font-weight-medium;
+        color: var(--dgc-text-primary);
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    td {
+        color: var(--dgc-text-secondary);
+    }
+
+    tbody tr:hover {
+        background: var(--dgc-bg-hover);
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+}

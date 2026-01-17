@@ -183,6 +183,9 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- SortableJS for drag-and-drop -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
     <!-- Custom JS -->
     <?php if ($js = Utility::getJs('common')): ?>
     <script src="<?php echo $js; ?>"></script>

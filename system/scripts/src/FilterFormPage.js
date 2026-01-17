@@ -3,6 +3,8 @@
  * Handles filter form functionality including CodeMirror, options management, and save
  */
 
+import CodeMirrorEditor from './CodeMirrorEditor.js';
+
 const Ajax = window.Ajax;
 const Loading = window.Loading;
 const Toast = window.Toast;
@@ -48,17 +50,21 @@ export default class FilterFormPage {
     }
 
     /**
-     * Initialize CodeMirror for SQL query
+     * Initialize CodeMirror for SQL query using reusable CodeMirrorEditor
      */
     initCodeMirror() {
         const queryTextarea = document.getElementById('data-query');
         if (queryTextarea && typeof CodeMirror !== 'undefined') {
-            this.queryEditor = CodeMirror.fromTextArea(queryTextarea, {
-                mode: 'text/x-sql',
-                theme: 'default',
-                lineNumbers: true,
-                lineWrapping: true
+            this.codeEditor = new CodeMirrorEditor(queryTextarea, {
+                copyBtn: true,
+                formatBtn: true,
+                testBtn: true,
+                minHeight: 100,
+                onTest: () => this.testQuery(),
+                onFormat: (query) => this.formatQueryString(query)
             });
+            // Keep reference for backward compatibility
+            this.queryEditor = this.codeEditor.editor;
         }
     }
 
@@ -100,23 +106,7 @@ export default class FilterFormPage {
             optionsList.addEventListener('input', () => this.updateStaticPreview());
         }
 
-        // Copy query button
-        const copyQueryBtn = document.getElementById('copy-query-btn');
-        if (copyQueryBtn) {
-            copyQueryBtn.addEventListener('click', () => this.copyQuery());
-        }
-
-        // Format query button
-        const formatQueryBtn = document.getElementById('format-query-btn');
-        if (formatQueryBtn) {
-            formatQueryBtn.addEventListener('click', () => this.formatQuery());
-        }
-
-        // Test query button
-        const testQueryBtn = document.getElementById('test-query-btn');
-        if (testQueryBtn) {
-            testQueryBtn.addEventListener('click', () => this.testQuery());
-        }
+        // Note: Copy, Format, and Test buttons are now handled by CodeMirrorEditor
 
         // Inline checkbox - update preview when changed
         const inlineCheckbox = document.getElementById('filter-inline');
@@ -189,8 +179,8 @@ export default class FilterFormPage {
         document.getElementById('query-options-section').style.display = source === 'query' ? 'block' : 'none';
 
         // Refresh CodeMirror when switching to query
-        if (source === 'query' && this.queryEditor) {
-            this.queryEditor.refresh();
+        if (source === 'query' && this.codeEditor) {
+            this.codeEditor.refresh();
         }
 
         // Update filter preview based on data source
@@ -276,161 +266,27 @@ export default class FilterFormPage {
     }
 
     /**
-     * Copy SQL query to clipboard
+     * Format SQL query string - returns formatted query
+     * Used by CodeMirrorEditor's onFormat callback
+     * @param {string} query - The SQL query to format
+     * @returns {string} Formatted SQL query
      */
-    copyQuery() {
-        const query = this.queryEditor ? this.queryEditor.getValue() : document.getElementById('data-query').value;
-        const btn = document.getElementById('copy-query-btn');
+    formatQueryString(query) {
+        if (!query || !query.trim()) return query;
 
-        if (!query.trim()) {
-            this.showCopyFeedback(btn, 'Nothing to copy', false);
-            return;
-        }
-
-        navigator.clipboard.writeText(query).then(() => {
-            this.showCopyFeedback(btn, 'Copied!', true);
-        }).catch(() => {
-            this.showCopyFeedback(btn, 'Failed', false);
-        });
-    }
-
-    /**
-     * Show animated copy feedback near button
-     */
-    showCopyFeedback(btn, message, success) {
-        if (!btn) return;
-
-        // Remove existing feedback
-        const existing = btn.querySelector('.copy-feedback');
-        if (existing) existing.remove();
-
-        // Create feedback element
-        const feedback = document.createElement('span');
-        feedback.className = `copy-feedback ${success ? 'success' : 'error'}`;
-        feedback.textContent = message;
-        btn.style.position = 'relative';
-        btn.appendChild(feedback);
-
-        // Animate and remove
-        setTimeout(() => feedback.classList.add('show'), 10);
-        setTimeout(() => {
-            feedback.classList.remove('show');
-            setTimeout(() => feedback.remove(), 200);
-        }, 1500);
-    }
-
-    /**
-     * Format SQL query - put keywords on their own lines
-     */
-    formatQuery() {
-        let query = this.queryEditor ? this.queryEditor.getValue() : document.getElementById('data-query').value;
-        if (!query.trim()) return;
-
-        // Normalize whitespace first
-        query = query.replace(/\s+/g, ' ').trim();
-
-        // Keywords that should be on their own line (keyword only, content on next line)
-        const standaloneKeywords = ['SELECT', 'FROM', 'WHERE', 'ORDER BY', 'GROUP BY', 'HAVING', 'LIMIT', 'SET', 'VALUES'];
-
-        // All keywords to add line breaks before
-        const allKeywords = [
-            'SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'ORDER BY', 'GROUP BY',
-            'HAVING', 'LIMIT', 'OFFSET', 'JOIN', 'LEFT JOIN', 'RIGHT JOIN',
-            'INNER JOIN', 'OUTER JOIN', 'CROSS JOIN', 'ON', 'SET', 'VALUES',
-            'INSERT INTO', 'UPDATE', 'DELETE FROM', 'UNION', 'UNION ALL'
-        ];
-
-        allKeywords.forEach(keyword => {
-            const regex = new RegExp('\\s+(' + keyword.replace(/ /g, '\\s+') + ')\\b', 'gi');
-            query = query.replace(regex, '\n$1');
-        });
-
-        // Handle SELECT at the start
-        if (/^SELECT\s+/i.test(query)) {
-            query = query.replace(/^SELECT\s+/i, 'SELECT\n    ');
-        }
-
-        // Put content after standalone keywords on new line with indent
-        standaloneKeywords.forEach(keyword => {
-            const regex = new RegExp('\\n(' + keyword.replace(/ /g, '\\s+') + ')\\s+', 'gi');
-            query = query.replace(regex, '\n$1\n    ');
-        });
-
-        // Handle commas - put each item on new line
-        query = query.replace(/,\s*/g, ',\n    ');
-
-        // Indent AND/OR
-        query = query.replace(/\n(AND|OR)\s+/gi, '\n    $1 ');
-
-        // Clean up multiple newlines
-        query = query.replace(/\n\s*\n/g, '\n');
-
-        // Trim each line and rebuild
-        query = query.split('\n').map(line => line.trim()).filter(line => line).join('\n');
-
-        // Re-add proper indentation
-        const lines = query.split('\n');
-        const formatted = [];
-
-        lines.forEach((line, index) => {
-            // Check if this is a standalone keyword line
-            const isKeywordLine = standaloneKeywords.some(kw =>
-                new RegExp('^' + kw.replace(/ /g, '\\s*') + '$', 'i').test(line)
-            );
-
-            // Check if previous line was a standalone keyword
-            const prevLine = index > 0 ? lines[index - 1].toUpperCase().trim() : '';
-            const prevIsKeyword = standaloneKeywords.some(kw =>
-                new RegExp('^' + kw.replace(/ /g, '\\s*') + '$', 'i').test(prevLine)
-            );
-
-            // Check for AND/OR lines
-            const isAndOr = /^(AND|OR)\s/i.test(line);
-
-            if (isKeywordLine) {
-                formatted.push(line.toUpperCase());
-            } else if (prevIsKeyword || isAndOr) {
-                formatted.push('    ' + line);
-            } else if (!isKeywordLine && index > 0) {
-                const lastFormatted = formatted[formatted.length - 1];
-                if (lastFormatted && lastFormatted.startsWith('    ')) {
-                    formatted.push('    ' + line);
-                } else {
-                    formatted.push(line);
-                }
-            } else {
-                formatted.push(line);
-            }
-        });
-
-        const result = formatted.join('\n');
-        if (this.queryEditor) {
-            this.queryEditor.setValue(result);
-        } else {
-            document.getElementById('data-query').value = result;
-        }
-
-        // Show success message
-        const resultDiv = document.getElementById('query-result');
-        if (resultDiv) {
-            resultDiv.className = 'query-test-result success';
-            resultDiv.innerHTML = `
-                <div class="query-result-header">
-                    <i class="fas fa-check-circle"></i>
-                    SQL formatted successfully
-                </div>
-            `;
-            resultDiv.style.display = 'block';
-        }
-        Toast.success('SQL formatted');
+        // Use CodeMirrorEditor's built-in formatter
+        // This method is called by the editor, so just return the formatted result
+        return this.codeEditor ? this.codeEditor.formatSQL(query) : query;
     }
 
     /**
      * Test the SQL query
      */
     testQuery() {
-        // Auto-format query before testing
-        this.formatQuery();
+        // Format query before testing
+        if (this.codeEditor) {
+            this.codeEditor.format();
+        }
 
         const query = this.queryEditor ? this.queryEditor.getValue() : document.getElementById('data-query').value;
 
