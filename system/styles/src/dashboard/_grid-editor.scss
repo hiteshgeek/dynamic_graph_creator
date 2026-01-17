@@ -156,7 +156,8 @@ $grid-gap: $spacing-md;
   }
 
   // View mode - no border, subtle shadow, keep same dimensions
-  .dashboard-preview-page &:not(.dashboard-area-nested) {
+  .dashboard-preview-page &:not(.dashboard-area-nested),
+  .template-preview-page &:not(.dashboard-area-nested) {
     border: none;
     background: var(--dgc-bg-card);
     box-shadow: $shadow-subtle;
@@ -170,7 +171,8 @@ $grid-gap: $spacing-md;
     }
   }
 
-  .dashboard-preview-page &.dashboard-area-nested {
+  .dashboard-preview-page &.dashboard-area-nested,
+  .template-preview-page &.dashboard-area-nested {
     background: transparent;
     box-shadow: none;
     padding: 0;

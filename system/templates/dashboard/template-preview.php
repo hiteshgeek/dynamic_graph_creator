@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php';
+// Template preview component is used for thumbnail previews in template list, not here
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -50,22 +50,71 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
     ?>
 
     <div class="container-fluid">
-        <div class="template-preview-page">
-            <div class="template-preview-container">
-                <div class="template-preview-card">
-                    <div class="template-preview">
-                        <?php
-                        $structure = $template->getStructureArray();
-                        echo renderTemplatePreview($structure);
-                        ?>
+        <div id="template-preview" class="dashboard-preview" data-template-id="<?php echo $template->getId(); ?>">
+            <div class="dashboard-sections">
+                <?php
+                $structure = $template->getStructureArray();
+                if (isset($structure['sections']) && count($structure['sections']) > 0):
+                    foreach ($structure['sections'] as $section):
+                ?>
+                    <div class="dashboard-section"
+                        data-section-id="<?php echo htmlspecialchars($section['sid']); ?>"
+                        style="grid-template-columns: <?php echo htmlspecialchars($section['gridTemplate']); ?>;">
+
+                        <?php foreach ($section['areas'] as $area): ?>
+                            <?php
+                            // Check if area has sub-rows (nested structure)
+                            $hasSubRows = isset($area['hasSubRows']) && $area['hasSubRows'] && isset($area['subRows']) && count($area['subRows']) > 0;
+                            ?>
+
+                            <?php if ($hasSubRows): ?>
+                                <!-- Area with sub-rows -->
+                                <?php
+                                $rowHeights = array_map(function ($row) {
+                                    return isset($row['height']) ? $row['height'] : '1fr';
+                                }, $area['subRows']);
+                                $rowHeightsStr = implode(' ', $rowHeights);
+                                ?>
+                                <div class="dashboard-area dashboard-area-nested"
+                                    data-area-id="<?php echo htmlspecialchars($area['aid']); ?>"
+                                    style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>; grid-template-rows: <?php echo $rowHeightsStr; ?>;">
+
+                                    <?php foreach ($area['subRows'] as $subRow): ?>
+                                        <div class="dashboard-sub-row" data-row-id="<?php echo htmlspecialchars($subRow['rowId']); ?>">
+                                            <?php
+                                            $icon = isset($subRow['emptyState']['icon']) ? $subRow['emptyState']['icon'] : 'fa-plus-circle';
+                                            $message = isset($subRow['emptyState']['message']) ? $subRow['emptyState']['message'] : 'Empty cell';
+                                            echo Utility::renderDashboardCellEmpty($icon, $message);
+                                            ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+
+                            <?php else: ?>
+                                <!-- Regular single area -->
+                                <div class="dashboard-area"
+                                    data-area-id="<?php echo htmlspecialchars($area['aid']); ?>"
+                                    style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>;">
+
+                                    <?php
+                                    $icon = isset($area['emptyState']['icon']) ? $area['emptyState']['icon'] : 'fa-plus-circle';
+                                    $message = isset($area['emptyState']['message']) ? $area['emptyState']['message'] : 'Empty cell';
+                                    echo Utility::renderDashboardCellEmpty($icon, $message);
+                                    ?>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
                     </div>
-                    <div class="template-info">
-                        <h2><?php $name = $template->getName(); echo htmlspecialchars($name ? $name : 'Template'); ?></h2>
-                        <?php $desc = $template->getDescription(); if (!empty($desc)): ?>
-                        <p><?php echo htmlspecialchars($desc); ?></p>
-                        <?php endif; ?>
-                    </div>
-                </div>
+                <?php
+                endforeach;
+            else:
+                echo Utility::renderEmptyState(
+                    'fa-th-large',
+                    'This Template is Empty',
+                    'No sections have been added to this template yet.<br>Use the "Design Mode" button above to add sections.'
+                );
+            endif;
+                ?>
             </div>
         </div>
     </div>
