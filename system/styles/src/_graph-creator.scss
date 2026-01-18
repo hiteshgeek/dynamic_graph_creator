@@ -1878,7 +1878,7 @@
   right: $spacing-lg;
   background: var(--dgc-bg-card);
   border-radius: $border-radius-lg;
-  box-shadow: var(--dgc-shadow-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15);
   z-index: 100;
   display: none; // Instant hide
   opacity: 0;
@@ -2097,7 +2097,7 @@
   background: var(--dgc-bg-card);
   border: 1px solid var(--dgc-border-color);
   border-radius: $border-radius-lg;
-  box-shadow: var(--dgc-shadow-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 100;
   cursor: pointer;
   display: none; // Instant hide
@@ -2108,7 +2108,7 @@
   &:hover {
     background: var(--dgc-bg-elevated);
     color: var(--dgc-primary);
-    box-shadow: var(--dgc-shadow-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15);
   }
 
   &.visible {
