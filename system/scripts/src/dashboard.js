@@ -7,6 +7,7 @@
 const Sortable = window.Sortable;
 
 import { TemplateManager } from "./dashboard/TemplateManager.js";
+import { keyboardNavigation } from "./dashboard/KeyboardNavigation.js";
 
 // Use globals from common.js (Toast, Loading, Ajax, ConfirmDialog)
 const Toast = window.Toast;
@@ -158,6 +159,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+
+  // Initialize keyboard navigation module
+  keyboardNavigation.init();
 });
 
 // Grid configuration constants
@@ -192,6 +196,7 @@ class DashboardBuilder {
     this.eventHandlersInitialized = false;
     this.autoSaveTimeout = null;
     this.templateSelectorMode = "create-dashboard"; // or 'add-section'
+    this.lastFocusedCell = null; // Track cell that had focus before modal opened
   }
 
   init() {
@@ -657,8 +662,8 @@ class DashboardBuilder {
                         </div>
                         <h3>No Sections Yet</h3>
                         <p>Start building your dashboard by adding a section or choosing a template</p>
-                        <button class="btn btn-primary add-first-section-btn">
-                            <i class="fas fa-circle-plus"></i> Add Section
+                        <button class="btn btn-primary btn-sm add-first-section-btn">
+                            <i class="fas fa-plus"></i> Add Section
                         </button>
                     </div>
                 </div>
@@ -712,6 +717,12 @@ class DashboardBuilder {
           const position = parseInt(btn.dataset.position);
           // Store the position for the add section handler
           this.pendingAddPosition = position;
+
+          // Track the currently focused cell to restore focus on cancel
+          const focusedCell = document.activeElement?.closest(".dashboard-cell-empty");
+          if (focusedCell) {
+            this.lastFocusedCell = focusedCell;
+          }
 
           if (this.mode === "template") {
             // In template mode, show simple add section modal
@@ -775,7 +786,7 @@ class DashboardBuilder {
           : "";
 
       // Area controls - edge buttons and center resize/delete
-      const areaControls = `<div class="area-controls-overlay">
+      const areaControls = `<div class="area-controls-overlay" tabindex="0">
                 ${columnDragHandle}
                 <!-- Top: Add Row Above (splits column into rows) -->
                 <button class="edge-btn edge-top add-row-top-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add row">
@@ -967,7 +978,7 @@ class DashboardBuilder {
       // All controls inside each sub-row - both column and row actions
       // Each row shows Add Row Above (inserts above this row) and Add Row Below (inserts below this row)
       // Column drag handle only shown in first row
-      const controls = `<div class="area-controls-overlay">
+      const controls = `<div class="area-controls-overlay" tabindex="0">
                 ${isFirstRow ? columnDragHandle : ""}
                 ${rowDragHandle}
                 <!-- Column actions: Add Column Left/Right -->
@@ -1415,6 +1426,14 @@ class DashboardBuilder {
       // Load templates when modal is shown
       addSectionModal.addEventListener("show.bs.modal", () => {
         this.loadTemplatesForAddSectionModal();
+      });
+
+      // Restore focus when modal is hidden (cancelled)
+      addSectionModal.addEventListener("hidden.bs.modal", () => {
+        if (this.lastFocusedCell && document.body.contains(this.lastFocusedCell)) {
+          this.lastFocusedCell.focus();
+        }
+        this.lastFocusedCell = null;
       });
 
       // Handle empty column button clicks

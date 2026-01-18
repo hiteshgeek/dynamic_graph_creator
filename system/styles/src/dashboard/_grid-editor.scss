@@ -252,6 +252,20 @@ $grid-gap: $spacing-md;
     }
   }
 
+  // Regular (non-nested) area focus (keyboard navigation)
+  .dashboard-area:not(.dashboard-area-nested):focus {
+    outline: none;
+    background: var(--dgc-bg-elevated);
+    border-color: var(--dgc-primary);
+    box-shadow: $focus-shadow;
+
+    // Fade inner content to highlight controls
+    .empty-state,
+    .area-content {
+      opacity: 0.4;
+    }
+  }
+
   // Nested area hover - fade sub-rows
   .dashboard-area-nested:hover {
     > .dashboard-sub-row {
@@ -265,5 +279,28 @@ $grid-gap: $spacing-md;
     background: var(--dgc-bg-card);
     border-color: var(--dgc-primary);
     box-shadow: 0 2px 6px rgba(0, 123, 255, 0.1);
+  }
+
+  // Sub-row focus (keyboard navigation) - highlight with focus shadow
+  .dashboard-sub-row:focus {
+    outline: none;
+    opacity: 1 !important;
+    background: var(--dgc-bg-card);
+    border-color: var(--dgc-primary);
+    box-shadow: $focus-shadow;
+  }
+}
+
+// Dark mode focus shadow for areas
+:root.theme-dark {
+  .dashboard-builder-page,
+  .template-builder-page {
+    .dashboard-area:not(.dashboard-area-nested):focus {
+      box-shadow: $focus-shadow-dark;
+    }
+
+    .dashboard-sub-row:focus {
+      box-shadow: $focus-shadow-dark;
+    }
   }
 }

@@ -485,6 +485,11 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15),
   z-index: 15;
   background: var(--dgc-bg-card);
   border-radius: 6px;
+
+  &:focus,
+  &:focus-visible {
+    outline: none;
+  }
 }
 
 // Edge buttons (Add Row / Add Column) - positioned on border edges like section buttons
@@ -782,6 +787,18 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15),
       .center-btn {
         pointer-events: auto;
       }
+    }
+  }
+
+  // Show controls when parent area is focused (keyboard navigation)
+  .dashboard-area:focus > .area-controls-overlay,
+  .dashboard-sub-row:focus > .area-controls-overlay {
+    opacity: 1;
+    pointer-events: auto;
+
+    .edge-btn,
+    .center-btn {
+      pointer-events: auto;
     }
   }
 }

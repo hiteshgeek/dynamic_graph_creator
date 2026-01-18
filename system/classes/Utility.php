@@ -167,12 +167,12 @@ class Utility
         if (!empty($buttonText)) {
             // Use button element if URL is empty or '#', otherwise use anchor
             if (empty($buttonUrl) || $buttonUrl === '#') {
-                $btnClass = 'btn btn-primary' . ($buttonClass ? ' ' . htmlspecialchars($buttonClass) : '');
+                $btnClass = 'btn btn-primary btn-sm' . ($buttonClass ? ' ' . htmlspecialchars($buttonClass) : '');
                 $html .= '<button type="button" class="' . $btnClass . '">';
                 $html .= '<i class="fas fa-plus"></i> ' . htmlspecialchars($buttonText);
                 $html .= '</button>';
             } else {
-                $btnClass = 'btn btn-primary' . ($buttonClass ? ' ' . htmlspecialchars($buttonClass) : '');
+                $btnClass = 'btn btn-primary btn-sm' . ($buttonClass ? ' ' . htmlspecialchars($buttonClass) : '');
                 $html .= '<a href="' . htmlspecialchars($buttonUrl) . '" class="' . $btnClass . '">';
                 $html .= '<i class="fas fa-plus"></i> ' . htmlspecialchars($buttonText);
                 $html .= '</a>';

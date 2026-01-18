@@ -41,32 +41,6 @@
       color: var(--dgc-primary);
     }
   }
-
-  &:focus {
-    outline: none;
-  }
-
-  &:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba($primary, 0.25);
-
-    .cell-empty-icon {
-      color: var(--dgc-primary);
-    }
-
-    .cell-empty-message {
-      color: var(--dgc-primary);
-    }
-  }
-}
-
-// Dark mode focus styles
-:root.theme-dark {
-  .dashboard-cell-empty {
-    &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.35);
-    }
-  }
 }
 
 // In tweak mode (no layout-edit-disabled), empty cell goes behind the overlay

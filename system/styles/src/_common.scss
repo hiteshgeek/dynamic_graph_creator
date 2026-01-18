@@ -169,11 +169,13 @@ body {
   gap: $spacing-md;
   padding: $spacing-md $spacing-lg;
   padding-left: $spacing-md;
-  background: $bg-card;
+  background: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
   border-radius: $border-radius;
-  box-shadow: $shadow-2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   min-width: 300px;
   animation: dgcSlideIn 0.3s ease;
+  color: var(--dgc-text-primary);
 
   .dgc-toast-indicator {
     width: 4px;
@@ -228,17 +230,18 @@ body {
 
   .dgc-toast-message {
     flex: 1;
+    color: var(--dgc-text-primary);
   }
 
   .dgc-toast-close {
     background: transparent;
     border: none;
-    color: $text-hint;
+    color: var(--dgc-text-hint);
     cursor: pointer;
     padding: $spacing-xs;
 
     &:hover {
-      color: $text-primary;
+      color: var(--dgc-text-primary);
     }
   }
 }
@@ -582,22 +585,22 @@ option[value="__new__"] {
   .btn {
     &:focus,
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.3);
+      box-shadow: $focus-shadow;
     }
   }
 
   .btn-primary {
     &:focus,
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.4);
+      box-shadow: 0 0 0 3px rgba($focus-color, 0.4);
     }
   }
 
   .btn-outline-primary {
     &:focus,
     &:focus-visible {
-      background-color: rgba(#60a5fa, 0.15);
-      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.25);
+      background-color: rgba($focus-color, 0.15);
+      box-shadow: 0 0 0 3px rgba($focus-color, 0.25);
     }
   }
 
@@ -672,7 +675,7 @@ option[value="__new__"] {
   // Text-switch focus styles for dark mode
   .text-switch .form-check-input {
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.35);
+      box-shadow: $focus-shadow-dark;
     }
 
     &:checked:focus-visible {
@@ -681,7 +684,7 @@ option[value="__new__"] {
   }
 
   .text-switch.text-switch-primary .form-check-input:checked:focus-visible {
-    box-shadow: 0 0 0 3px rgba(#60a5fa, 0.45);
+    box-shadow: 0 0 0 3px rgba($focus-color, 0.45);
   }
 
   .text-switch.text-switch-success .form-check-input:checked:focus-visible {
@@ -703,18 +706,18 @@ option[value="__new__"] {
   // Normal form-switch focus styles for dark mode
   .form-switch:not(.text-switch) .form-check-input {
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.35);
+      box-shadow: $focus-shadow-dark;
     }
 
     &:checked:focus-visible {
-      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.45);
+      box-shadow: 0 0 0 3px rgba($focus-color, 0.45);
     }
   }
 
   // Form control focus styles for dark mode
   .form-control {
     &:focus {
-      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.2);
+      box-shadow: 0 0 0 3px rgba($focus-color, 0.2);
     }
 
     &.is-invalid:focus {
@@ -725,7 +728,7 @@ option[value="__new__"] {
   // Form select focus styles for dark mode
   .form-select {
     &:focus {
-      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.2);
+      box-shadow: 0 0 0 3px rgba($focus-color, 0.2);
     }
 
     &.is-invalid:focus {
@@ -736,12 +739,17 @@ option[value="__new__"] {
   // Form check input focus styles for dark mode
   .form-check-input {
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.3);
+      box-shadow: $focus-shadow;
     }
 
     &:checked:focus-visible {
-      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.4);
+      box-shadow: 0 0 0 3px rgba($focus-color, 0.4);
     }
+  }
+
+  // Toast dark mode - stronger shadow for visibility
+  .dgc-toast {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
   }
 }
 

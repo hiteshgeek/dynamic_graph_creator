@@ -104,7 +104,7 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
                                     <button class="btn btn-outline-danger btn-sm delete-category-btn"
                                             data-category-id="<?php echo $categoryData['category']['dtcid']; ?>"
                                             data-category-name="<?php echo htmlspecialchars($categoryData['category']['name']); ?>">
-                                        <i class="fas fa-trash"></i> Remove
+                                        <i class="fas fa-trash"></i> Remove Category
                                     </button>
                                     <?php endif; ?>
                                 </div>
