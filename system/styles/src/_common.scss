@@ -19,9 +19,9 @@ body {
   // Applies to main content containers that come after .page-header
   > .container,
   > .container-fluid,
-  > .container-full,
-  > .dashboard-builder {
-    padding-top: $spacing-lg;
+  > .container-full {
+    --bs-gutter-x: 0;
+    padding: $spacing-lg;
   }
 }
 

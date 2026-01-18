@@ -4,40 +4,16 @@
 // Grid gap variable - shared between sections and nested areas
 $grid-gap: $spacing-md;
 
-// Preview pages - full-width content with edge-to-edge styling
-.dashboard-preview-page {
-  background: var(--dgc-bg-body);
-
-  // Container-fluid: remove all default padding, dashboard-preview handles spacing
-  .container-fluid {
-    padding: 0;
-  }
-
-  .dashboard-preview {
-    margin-top: 0;
-    padding: $spacing-lg;
-  }
-}
-
-// Template preview page - uses container-fluid with template-preview-container
+// Preview pages
+.dashboard-preview-page,
 .template-preview-page {
   background: var(--dgc-bg-body);
-
-  // Container-fluid: remove default padding, add consistent spacing
-  .container-fluid {
-    padding: $spacing-lg;
-  }
 }
 
-// Builder pages - handle their own spacing
+// Builder pages - handle their own spacing via .builder-main
 .dashboard-builder-page,
 .template-builder-page {
   background: var(--dgc-bg-body);
-
-  // Override body > .dashboard-builder padding, builder-main handles spacing
-  .dashboard-builder {
-    padding-top: 0;
-  }
 }
 
 .dashboard-sections {
