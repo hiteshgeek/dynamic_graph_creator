@@ -169,6 +169,7 @@ function showBuilder($dashboardId = 0)
     Utility::addModuleCss('dashboard');
 
     // Add libraries
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
 
     // Add page-specific JS
@@ -740,6 +741,7 @@ function showTemplateBuilder($templateId)
     Utility::addModuleCss('dashboard');
 
     // Add libraries
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
 
