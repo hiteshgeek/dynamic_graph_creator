@@ -117,3 +117,169 @@
   gap: $spacing-sm;
   margin-top: $spacing-lg;
 }
+
+// Graph view layout with sidebar
+.graph-view-layout {
+  display: flex;
+  gap: $spacing-lg;
+  padding: $spacing-lg;
+  min-height: calc(100vh - 80px);
+}
+
+.graph-view-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--dgc-bg-card);
+  border-radius: $border-radius-lg;
+  box-shadow: var(--dgc-shadow-subtle);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 110px);
+  position: sticky;
+  top: 80px;
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-md $spacing-lg;
+    border-bottom: 1px solid var(--dgc-border-color);
+    background: var(--dgc-bg-elevated);
+
+    .sidebar-title {
+      font-weight: 600;
+      color: var(--dgc-text-primary);
+    }
+
+    .sidebar-count {
+      font-size: $font-size-sm;
+      color: var(--dgc-text-secondary);
+      background: var(--dgc-bg-body);
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+  }
+
+  .graph-list-nav {
+    flex: 1;
+    overflow-y: auto;
+    padding: $spacing-sm;
+  }
+}
+
+.graph-nav-item {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $border-radius;
+  text-decoration: none;
+  color: var(--dgc-text-primary);
+  transition: all $transition-fast;
+  margin-bottom: $spacing-xs;
+  border-bottom: 1px solid var(--dgc-border-color);
+  padding-bottom: $spacing-sm;
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    background: var(--dgc-bg-elevated);
+  }
+
+  &.active {
+    background: rgba($primary, 0.1);
+
+    .graph-nav-name {
+      color: $primary;
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  .graph-type-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .graph-nav-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .graph-nav-name {
+    font-size: $font-size-sm;
+    color: var(--dgc-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .graph-nav-type {
+    font-size: 11px;
+    color: var(--dgc-text-hint);
+  }
+}
+
+.graph-view-main {
+  flex: 1;
+  min-width: 0;
+}
+
+// Responsive: adjust sidebar on smaller screens
+@media (max-width: 992px) {
+  .graph-view-layout {
+    flex-direction: column;
+  }
+
+  .graph-view-sidebar {
+    width: 100%;
+    max-height: none;
+    position: static;
+
+    .graph-list-nav {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: $spacing-sm;
+      padding: $spacing-md;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .graph-nav-item {
+      flex: 0 0 auto;
+      margin-bottom: 0;
+      padding: $spacing-sm $spacing-md;
+      background: var(--dgc-bg-elevated);
+      border: 1px solid var(--dgc-border-color);
+
+      &.active {
+        border-color: $primary;
+      }
+
+      .graph-nav-info {
+        display: flex;
+      }
+
+      // Hide chart type label in mobile, keep name only
+      .graph-nav-type {
+        display: none;
+      }
+
+      .graph-nav-name {
+        font-size: 0.8rem;
+      }
+
+      .graph-type-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+      }
+    }
+  }
+}

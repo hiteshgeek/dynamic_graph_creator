@@ -103,13 +103,14 @@
                                                 <?php
                                                 $filterKey = $filter['filter_key'];
                                                 $filterKeyClean = ltrim($filterKey, ':');
+                                                $filterKeyDisplay = '::' . $filterKeyClean;
                                                 ?>
                                                 <div class="filter-selector-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>">
                                                     <div class="form-check">
                                                         <input class="form-check-input filter-selector-checkbox" type="checkbox" value="<?php echo htmlspecialchars($filterKeyClean); ?>" id="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
                                                         <label class="form-check-label" for="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
                                                             <span class="filter-selector-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
-                                                            <code class="filter-selector-key"><?php echo htmlspecialchars($filterKey); ?></code>
+                                                            <code class="filter-selector-key"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
                                                         </label>
                                                     </div>
                                                 </div>
@@ -137,6 +138,7 @@
                                                 $filterType = $filter['filter_type'];
                                                 $filterKey = $filter['filter_key'];
                                                 $filterKeyClean = ltrim($filterKey, ':');
+                                                $filterKeyDisplay = '::' . $filterKeyClean;
                                                 $defaultValue = $filter['default_value'];
                                                 // Get filter config for inline display
                                                 $filterConfig = $filterObj->getFilterConfig();
@@ -146,7 +148,7 @@
                                                 <div class="filter-input-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" style="display: none;">
                                                     <div class="filter-input-header">
                                                         <label class="filter-input-label"><?php echo htmlspecialchars($filter['filter_label']); ?></label>
-                                                        <code class="filter-placeholder" title="Use in query"><?php echo htmlspecialchars($filterKey); ?></code>
+                                                        <code class="filter-placeholder" title="Use in query"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
                                                     </div>
 
                                                     <?php if ($filterType === 'select'): ?>

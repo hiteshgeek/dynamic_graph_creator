@@ -105,6 +105,10 @@ function showFilterForm($filterId = null)
         }
     }
 
+    // Get all filters for sidebar navigation
+    $allFilters = Filter::getAll();
+    $totalFilters = count($allFilters);
+
     $theme->setPageTitle(($filter ? 'Edit' : 'Create') . ' Filter - Dynamic Graph Creator');
 
     ob_start();

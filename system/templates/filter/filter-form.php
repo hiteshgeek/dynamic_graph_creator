@@ -7,8 +7,34 @@
     ]);
     ?>
 
-    <div class="container">
-        <div class="filter-form-page" data-filter-id="<?php echo $filter ? $filter->getId() : ''; ?>">
+    <div class="filter-form-layout<?php echo ($totalFilters == 0) ? ' no-sidebar' : ''; ?>">
+        <?php if ($totalFilters > 0): ?>
+        <!-- Sidebar with filter list -->
+        <aside class="filter-form-sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-title">All Filters</span>
+                <span class="sidebar-count"><?php echo $totalFilters; ?></span>
+            </div>
+            <div class="filter-list-nav">
+                <?php foreach ($allFilters as $f): ?>
+                    <a href="?urlq=filters/edit/<?php echo $f['fid']; ?>"
+                       class="filter-nav-item <?php echo ($filter && $f['fid'] == $filter->getId()) ? 'active' : ''; ?>">
+                        <span class="filter-nav-icon">
+                            <i class="fas fa-filter"></i>
+                        </span>
+                        <span class="filter-nav-info">
+                            <span class="filter-nav-name"><?php echo htmlspecialchars($f['filter_label']); ?></span>
+                            <span class="filter-nav-key"><?php echo htmlspecialchars($f['filter_key']); ?></span>
+                        </span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </aside>
+        <?php endif; ?>
+
+        <!-- Main content -->
+        <main class="filter-form-main">
+            <div class="filter-form-page" data-filter-id="<?php echo $filter ? $filter->getId() : ''; ?>">
             <div class="card">
                 <div class="card-body">
                     <form id="filter-form">
@@ -172,5 +198,6 @@
                 </div>
             </div>
         </div>
+        </main>
     </div>
 

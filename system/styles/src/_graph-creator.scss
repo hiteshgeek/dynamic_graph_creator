@@ -324,9 +324,33 @@
   &.active {
     border-color: var(--dgc-primary);
     background: rgba(0, 123, 255, 0.05);
+  }
+
+  // Graph type specific colors when selected
+  &.active[data-type="bar"] {
+    border-color: $graph-color-bar;
+    background: rgba($graph-color-bar, 0.05);
 
     .graph-type-icon {
-      color: var(--dgc-primary);
+      color: $graph-color-bar;
+    }
+  }
+
+  &.active[data-type="line"] {
+    border-color: $graph-color-line;
+    background: rgba($graph-color-line, 0.05);
+
+    .graph-type-icon {
+      color: $graph-color-line;
+    }
+  }
+
+  &.active[data-type="pie"] {
+    border-color: $graph-color-pie;
+    background: rgba($graph-color-pie, 0.05);
+
+    .graph-type-icon {
+      color: $graph-color-pie;
     }
   }
 }
@@ -1440,6 +1464,37 @@
 
     &:focus-visible {
       box-shadow: 0 0 0 3px rgba($primary, 0.35);
+    }
+  }
+
+  // Graph type specific colors when selected
+  &.active[data-type="bar"] {
+    border-color: $graph-color-bar;
+    background: rgba($graph-color-bar, 0.08);
+
+    i,
+    span {
+      color: $graph-color-bar;
+    }
+  }
+
+  &.active[data-type="line"] {
+    border-color: $graph-color-line;
+    background: rgba($graph-color-line, 0.08);
+
+    i,
+    span {
+      color: $graph-color-line;
+    }
+  }
+
+  &.active[data-type="pie"] {
+    border-color: $graph-color-pie;
+    background: rgba($graph-color-pie, 0.08);
+
+    i,
+    span {
+      color: $graph-color-pie;
     }
   }
 }

@@ -161,6 +161,27 @@ function showView($graphId)
 
     $theme->setPageTitle('Graphs - ' . htmlspecialchars($graph->getName()) . ' - Dynamic Graph Creator');
 
+    // Get all graphs for navigation
+    $allGraphs = Graph::getAll();
+    $totalGraphs = count($allGraphs);
+    $currentIndex = 0;
+    $prevGraphId = null;
+    $nextGraphId = null;
+
+    // Find current graph position and prev/next IDs
+    foreach ($allGraphs as $index => $g) {
+        if ($g->getId() == $graphId) {
+            $currentIndex = $index + 1; // 1-based for display
+            if ($index > 0) {
+                $prevGraphId = $allGraphs[$index - 1]->getId();
+            }
+            if ($index < $totalGraphs - 1) {
+                $nextGraphId = $allGraphs[$index + 1]->getId();
+            }
+            break;
+        }
+    }
+
     // Extract placeholders from the graph query and find matching filters
     $placeholders = Filter::extractPlaceholders($graph->getQuery());
     $matchedFilters = Filter::getByKeys($placeholders);
