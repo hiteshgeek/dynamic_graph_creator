@@ -609,6 +609,35 @@ window.KeyboardShortcuts = {
         }
     },
 
+    /**
+     * Navigate to previous or next item in sidebar navigation
+     * @param {string} direction - 'prev' or 'next'
+     */
+    navigateSidebarItem(direction) {
+        // Find all nav items (graph view or filter form)
+        const items = document.querySelectorAll('.graph-nav-item, .filter-nav-item');
+        if (items.length === 0) return;
+
+        // Find current active item
+        const activeItem = document.querySelector('.graph-nav-item.active, .filter-nav-item.active');
+        if (!activeItem) return;
+
+        const itemsArray = Array.from(items);
+        const currentIndex = itemsArray.indexOf(activeItem);
+
+        let targetIndex;
+        if (direction === 'prev') {
+            targetIndex = currentIndex > 0 ? currentIndex - 1 : itemsArray.length - 1;
+        } else {
+            targetIndex = currentIndex < itemsArray.length - 1 ? currentIndex + 1 : 0;
+        }
+
+        const targetItem = itemsArray[targetIndex];
+        if (targetItem && targetItem.href) {
+            window.location.href = targetItem.href;
+        }
+    },
+
     registerGlobalShortcuts() {
         // F1: Toggle keyboard shortcuts help
         this.register('f1', () => {
@@ -714,6 +743,36 @@ window.KeyboardShortcuts = {
             available: () => !!document.querySelector('[data-save-btn]')
         });
 
+        // Alt+B: Go back to list page
+        this.register('alt+b', () => {
+            const backBtn = document.querySelector('[data-back-to-list]');
+            if (backBtn) {
+                backBtn.click();
+            }
+        }, {
+            description: 'Back to list',
+            scope: 'global',
+            available: () => !!document.querySelector('[data-back-to-list]')
+        });
+
+        // Alt+Up: Navigate to previous item in sidebar
+        this.register('alt+arrowup', () => {
+            this.navigateSidebarItem('prev');
+        }, {
+            description: 'Previous item',
+            scope: 'global',
+            available: () => !!document.querySelector('.graph-nav-item, .filter-nav-item')
+        });
+
+        // Alt+Down: Navigate to next item in sidebar
+        this.register('alt+arrowdown', () => {
+            this.navigateSidebarItem('next');
+        }, {
+            description: 'Next item',
+            scope: 'global',
+            available: () => !!document.querySelector('.graph-nav-item, .filter-nav-item')
+        });
+
         // Graph Creator: Alt+O to toggle sidebar
         this.register('alt+o', () => {
             const sidebar = document.querySelector('.graph-creator .graph-sidebar-left');
@@ -779,6 +838,10 @@ window.KeyboardShortcuts = {
             if (part === 'meta') return 'Cmd';
             if (part === 'escape') return 'Esc';
             if (part === 'f1') return 'F1';
+            if (part === 'arrowup') return '↑';
+            if (part === 'arrowdown') return '↓';
+            if (part === 'arrowleft') return '←';
+            if (part === 'arrowright') return '→';
             return part.toUpperCase();
         }).join(' + ');
     },

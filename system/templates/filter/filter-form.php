@@ -17,16 +17,33 @@
                 <span class="sidebar-count"><?php echo $totalFilters; ?></span>
             </div>
             <div class="filter-list-nav">
-                <?php foreach ($allFilters as $f): ?>
+                <?php
+                $typeIcons = array(
+                    'text' => 'font',
+                    'number' => 'hashtag',
+                    'date' => 'calendar',
+                    'date_range' => 'calendar-week',
+                    'select' => 'list',
+                    'multi_select' => 'list-check',
+                    'checkbox' => 'check-square',
+                    'radio' => 'circle-dot',
+                    'tokeninput' => 'tags'
+                );
+                foreach ($allFilters as $f):
+                    $typeIcon = isset($typeIcons[$f['filter_type']]) ? $typeIcons[$f['filter_type']] : 'filter';
+                ?>
                     <a href="?urlq=filters/edit/<?php echo $f['fid']; ?>"
                        class="filter-nav-item <?php echo ($filter && $f['fid'] == $filter->getId()) ? 'active' : ''; ?>">
-                        <span class="filter-nav-icon">
-                            <i class="fas fa-filter"></i>
+                        <span class="filter-nav-icon <?php echo $f['filter_type']; ?>">
+                            <i class="fas fa-<?php echo $typeIcon; ?>"></i>
                         </span>
                         <span class="filter-nav-info">
                             <span class="filter-nav-name"><?php echo htmlspecialchars($f['filter_label']); ?></span>
                             <span class="filter-nav-key"><?php echo htmlspecialchars($f['filter_key']); ?></span>
                         </span>
+                        <?php if ($f['data_source'] === 'query'): ?>
+                        <span class="filter-nav-source" title="Query"><i class="fas fa-database"></i></span>
+                        <?php endif; ?>
                     </a>
                 <?php endforeach; ?>
             </div>
@@ -44,8 +61,14 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="form-label" for="filter-key">Filter Key <span class="required">*</span></label>
-                                <input type="text" id="filter-key" class="form-control" placeholder="::placeholder_name" value="<?php echo $filter ? htmlspecialchars($filter->getFilterKey()) : ''; ?>" required>
-                                <small class="form-hint">Placeholder used in SQL queries (e.g., ::year, ::date_from, ::status)</small>
+                                <?php
+                                // Strip :: prefix for display (will be auto-added on save)
+                                $filterKeyValue = $filter ? $filter->getFilterKey() : '';
+                                $filterKeyValue = ltrim($filterKeyValue, ':');
+                                ?>
+                                <input type="text" id="filter-key" class="form-control" placeholder="year" value="<?php echo htmlspecialchars($filterKeyValue); ?>" required>
+                                <small class="form-hint">Only letters, numbers, and underscores. <code>::</code> prefix is added automatically.</small>
+                                <div class="invalid-feedback">Only letters, numbers, and underscores allowed</div>
                             </div>
 
                             <div class="form-group">

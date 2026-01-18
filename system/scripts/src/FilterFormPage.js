@@ -134,6 +134,12 @@ export default class FilterFormPage {
             filterLabelInput.addEventListener('input', () => this.updatePreview());
         }
 
+        // Filter key input - validate on input
+        const filterKeyInput = document.getElementById('filter-key');
+        if (filterKeyInput) {
+            filterKeyInput.addEventListener('input', () => this.validateFilterKey());
+        }
+
         // Save filter button
         const saveBtn = document.querySelector('.save-filter-btn');
         if (saveBtn) {
@@ -384,6 +390,32 @@ export default class FilterFormPage {
     }
 
     /**
+     * Validate filter key format (real-time validation)
+     * @returns {boolean} True if valid
+     */
+    validateFilterKey() {
+        const filterKeyInput = document.getElementById('filter-key');
+        if (!filterKeyInput) return true;
+
+        const value = filterKeyInput.value.trim();
+
+        // Empty is handled by required validation
+        if (!value) {
+            filterKeyInput.classList.remove('is-invalid');
+            return true;
+        }
+
+        // Only alphanumeric and underscores allowed
+        if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+            filterKeyInput.classList.add('is-invalid');
+            return false;
+        }
+
+        filterKeyInput.classList.remove('is-invalid');
+        return true;
+    }
+
+    /**
      * Save the filter
      */
     saveFilter() {
@@ -398,15 +430,24 @@ export default class FilterFormPage {
             return;
         }
 
+        // Validate filter key format (only alphanumeric and underscores allowed)
+        if (!/^[a-zA-Z0-9_]+$/.test(filterKey)) {
+            Toast.error('Filter key can only contain letters, numbers, and underscores');
+            document.getElementById('filter-key').classList.add('is-invalid');
+            document.getElementById('filter-key').focus();
+            return;
+        }
+
+        // Remove invalid class if validation passes
+        document.getElementById('filter-key').classList.remove('is-invalid');
+
         if (!filterLabel) {
             Toast.error('Filter label is required');
             return;
         }
 
-        // Ensure filter key starts with ::
-        if (!filterKey.startsWith('::')) {
-            filterKey = filterKey.startsWith(':') ? ':' + filterKey : '::' + filterKey;
-        }
+        // Automatically prepend :: to the filter key
+        filterKey = '::' + filterKey;
 
         // Handle select with multiple option
         let actualFilterType = filterType;

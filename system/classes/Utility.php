@@ -317,7 +317,7 @@ class Utility
 
         // Back button
         if ($backUrl) {
-            $html .= '<a href="' . htmlspecialchars($backUrl) . '" class="btn btn-secondary btn-sm">';
+            $html .= '<a href="' . htmlspecialchars($backUrl) . '" class="btn btn-secondary btn-sm" data-back-to-list>';
             $html .= '<i class="fas fa-arrow-left"></i> ' . htmlspecialchars($backLabel);
             $html .= '</a>';
         }

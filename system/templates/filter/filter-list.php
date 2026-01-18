@@ -53,11 +53,11 @@
                             <code><?php echo htmlspecialchars($filter['filter_key']); ?></code>
                         </div>
                         <div class="item-card-meta">
-                            <span class="meta-item">
+                            <span class="meta-item data-source-icon <?php echo $filter['data_source']; ?>" title="<?php echo $filter['data_source'] === 'query' ? 'Query' : 'Static'; ?>">
                                 <?php if ($filter['data_source'] === 'query'): ?>
-                                <i class="fas fa-database"></i> Query
+                                <i class="fas fa-database"></i>
                                 <?php else: ?>
-                                <i class="fas fa-list"></i> Static
+                                <i class="fas fa-list-ul"></i>
                                 <?php endif; ?>
                             </span>
                             <?php if ($filter['is_required']): ?>

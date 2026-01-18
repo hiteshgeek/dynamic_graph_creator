@@ -11,7 +11,6 @@ export default class FilterListPage {
     constructor(container) {
         this.container = container;
         this.deleteModalElement = null;
-        this.deleteModal = null;
         this.filterIdToDelete = null;
 
         if (this.container) {
@@ -24,33 +23,45 @@ export default class FilterListPage {
      */
     init() {
         this.deleteModalElement = document.getElementById('delete-modal');
-        if (this.deleteModalElement) {
-            this.deleteModal = new bootstrap.Modal(this.deleteModalElement);
-        }
         this.bindEvents();
+    }
+
+    /**
+     * Get or create the modal instance
+     */
+    getModal() {
+        if (!this.deleteModalElement) return null;
+        return bootstrap.Modal.getOrCreateInstance(this.deleteModalElement);
     }
 
     /**
      * Bind all event listeners
      */
     bindEvents() {
-        // Delete filter buttons
-        this.container.querySelectorAll('.delete-filter-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                this.filterIdToDelete = e.currentTarget.dataset.id;
+        // Check if already bound to avoid duplicate listeners
+        if (this.container.dataset.bound) return;
+        this.container.dataset.bound = 'true';
+
+        // Use event delegation for delete buttons
+        this.container.addEventListener('click', (e) => {
+            const deleteBtn = e.target.closest('.delete-filter-btn');
+            if (deleteBtn) {
+                this.filterIdToDelete = deleteBtn.dataset.id;
                 const filterName = this.deleteModalElement.querySelector('.filter-name');
                 if (filterName) {
-                    filterName.textContent = e.currentTarget.dataset.label;
+                    filterName.textContent = deleteBtn.dataset.label;
                 }
-                if (this.deleteModal) {
-                    this.deleteModal.show();
+                const modal = this.getModal();
+                if (modal) {
+                    modal.show();
                 }
-            });
+            }
         });
 
-        // Confirm delete button
+        // Confirm delete button - check if already bound
         const confirmDeleteBtn = document.querySelector('.confirm-delete-btn');
-        if (confirmDeleteBtn) {
+        if (confirmDeleteBtn && !confirmDeleteBtn.dataset.bound) {
+            confirmDeleteBtn.dataset.bound = 'true';
             confirmDeleteBtn.addEventListener('click', () => this.deleteFilter());
         }
     }
@@ -66,8 +77,9 @@ export default class FilterListPage {
         Ajax.post('delete_filter', { id: this.filterIdToDelete })
             .then(result => {
                 Loading.hide();
-                if (this.deleteModal) {
-                    this.deleteModal.hide();
+                const modal = this.getModal();
+                if (modal) {
+                    modal.hide();
                 }
                 if (result.success) {
                     Toast.success('Filter deleted');
@@ -78,8 +90,9 @@ export default class FilterListPage {
             })
             .catch(() => {
                 Loading.hide();
-                if (this.deleteModal) {
-                    this.deleteModal.hide();
+                const modal = this.getModal();
+                if (modal) {
+                    modal.hide();
                 }
                 Toast.error('Failed to delete filter');
             });

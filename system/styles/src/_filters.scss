@@ -21,6 +21,17 @@
   .item-card-meta .meta-item.required {
     color: var(--dgc-error);
   }
+
+  // Data source icon styling
+  .item-card-meta .meta-item.data-source-icon {
+    &.query {
+      color: $primary;
+    }
+
+    &.static {
+      color: $gray-500;
+    }
+  }
 }
 
 // Filter type icon (larger icon in card header)
@@ -962,8 +973,40 @@
     border-radius: $border-radius;
     font-size: 14px;
     flex-shrink: 0;
+
+    // Default (fallback)
     background: rgba($primary, 0.1);
     color: $primary;
+
+    // Type-specific colors (match filter-type-icon)
+    &.text,
+    &.number {
+      background: rgba($gray-600, 0.1);
+      color: $gray-600;
+    }
+
+    &.select,
+    &.multi_select {
+      background: rgba($primary, 0.1);
+      color: $primary;
+    }
+
+    &.date,
+    &.date_range {
+      background: rgba($success, 0.1);
+      color: $success;
+    }
+
+    &.checkbox,
+    &.radio {
+      background: rgba($warning, 0.1);
+      color: $warning-dark;
+    }
+
+    &.tokeninput {
+      background: rgba($info, 0.1);
+      color: $info-dark;
+    }
   }
 
   .filter-nav-info {
@@ -984,6 +1027,13 @@
     font-size: 11px;
     color: var(--dgc-text-hint);
     font-family: monospace;
+  }
+
+  .filter-nav-source {
+    font-size: 10px;
+    color: var(--dgc-text-hint);
+    margin-left: auto;
+    flex-shrink: 0;
   }
 }
 
