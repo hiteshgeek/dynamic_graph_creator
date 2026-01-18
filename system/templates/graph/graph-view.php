@@ -129,10 +129,10 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-header-left">
-                        <span class="text-muted">
+                        <span class="graph-type-icon <?php echo $graph->getGraphType(); ?>">
                             <i class="fas fa-chart-<?php echo $graph->getGraphType(); ?>"></i>
-                            <?php echo ucfirst($graph->getGraphType()); ?> Chart
                         </span>
+                        <span class="text-muted"><?php echo ucfirst($graph->getGraphType()); ?> Chart</span>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-secondary" id="export-chart" title="Save chart as PNG image">
                         <i class="fas fa-image"></i> Save Image

@@ -16,18 +16,18 @@
   font-size: 18px;
 
   &.bar {
-    background: rgba(#1976d2, 0.1);
-    color: #1976d2;
+    background: rgba($graph-color-bar, 0.1);
+    color: $graph-color-bar;
   }
 
   &.line {
-    background: rgba(#4caf50, 0.1);
-    color: #4caf50;
+    background: rgba($graph-color-line, 0.1);
+    color: $graph-color-line;
   }
 
   &.pie {
-    background: rgba(#ff9800, 0.1);
-    color: #ff9800;
+    background: rgba($graph-color-pie, 0.1);
+    color: $graph-color-pie;
   }
 }
 
@@ -41,18 +41,33 @@
   font-weight: 500;
 
   &.bar {
-    background: rgba(#1976d2, 0.1);
-    color: #1976d2;
+    background: rgba($graph-color-bar, 0.1);
+    color: $graph-color-bar;
   }
 
   &.line {
-    background: rgba(#4caf50, 0.1);
-    color: #4caf50;
+    background: rgba($graph-color-line, 0.1);
+    color: $graph-color-line;
   }
 
   &.pie {
-    background: rgba(#ff9800, 0.1);
-    color: #ff9800;
+    background: rgba($graph-color-pie, 0.1);
+    color: $graph-color-pie;
+  }
+}
+
+// Apply graph type colors to chart icons in card headers
+.card-header-left {
+  .fa-chart-bar {
+    color: $graph-color-bar;
+  }
+
+  .fa-chart-line {
+    color: $graph-color-line;
+  }
+
+  .fa-chart-pie {
+    color: $graph-color-pie;
   }
 }
 
