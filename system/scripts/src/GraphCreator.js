@@ -83,6 +83,9 @@ export default class GraphCreator {
 
         // Show initial status indicators
         this.updateStatusIndicators();
+
+        // Initialize mini chart preview (shows when main chart scrolls out of view)
+        this.initMiniPreview();
     }
 
     /**
@@ -582,6 +585,274 @@ export default class GraphCreator {
     }
 
     /**
+     * Initialize mini chart preview that shows when main chart is scrolled out of view
+     */
+    initMiniPreview() {
+        const previewCard = this.container.querySelector('.graph-preview-card');
+        if (!previewCard || !this.preview) return;
+
+        // Store reference to preview card for scrolling
+        this.previewCard = previewCard;
+
+        // Mini preview size state: 'compact', 'expanded'
+        this.miniPreviewSize = 'compact';
+
+        // Mini preview opacity (0.5 to 1.0, default 1.0) - load from localStorage
+        var savedOpacity = localStorage.getItem('miniPreviewOpacity');
+        this.miniPreviewOpacity = savedOpacity ? parseFloat(savedOpacity) : 1.0;
+
+        // Create mini preview container
+        this.miniPreviewEl = document.createElement('div');
+        this.miniPreviewEl.className = 'mini-chart-preview size-compact';
+        this.miniPreviewEl.style.opacity = this.miniPreviewOpacity;
+        this.miniPreviewEl.innerHTML = `
+            <div class="mini-chart-header">
+                <div class="mini-chart-size-buttons">
+                    <button type="button" class="mini-size-btn active" data-size="compact" title="Compact">Compact</button>
+                    <button type="button" class="mini-size-btn" data-size="expanded" title="Expanded">Expanded</button>
+                </div>
+                <div class="mini-chart-opacity-slider">
+                    <input type="range" min="50" max="100" value="${Math.round(this.miniPreviewOpacity * 100)}" class="mini-opacity-input" title="Opacity">
+                </div>
+                <button type="button" class="mini-chart-close" title="Minimize">
+                    <i class="fas fa-minus"></i>
+                </button>
+            </div>
+            <div class="mini-chart-content"></div>
+        `;
+        document.body.appendChild(this.miniPreviewEl);
+
+        // Create minimized toggle button (shown when mini preview is dismissed)
+        this.miniToggleBtn = document.createElement('button');
+        this.miniToggleBtn.type = 'button';
+        this.miniToggleBtn.className = 'mini-chart-toggle';
+        this.miniToggleBtn.innerHTML = '<i class="fas ' + this.getChartTypeIcon() + '"></i>';
+        this.miniToggleBtn.title = 'Show mini preview';
+        document.body.appendChild(this.miniToggleBtn);
+
+        // Mini chart instance (ECharts)
+        this.miniChart = null;
+        this.miniPreviewVisible = false;
+        this.miniPreviewDismissed = false;
+        this.miniToggleVisible = false;
+
+        // Initialize ECharts on mini chart container
+        const chartContainer = this.miniPreviewEl.querySelector('.mini-chart-content');
+        if (typeof echarts !== 'undefined') {
+            this.miniChart = echarts.init(chartContainer);
+        }
+
+        // Close/minimize button - hides preview and shows toggle button
+        const closeBtn = this.miniPreviewEl.querySelector('.mini-chart-close');
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.miniPreviewDismissed = true;
+            this.hideMiniPreview();
+            this.showMiniToggle();
+        });
+
+        // Toggle button click - restore mini preview
+        this.miniToggleBtn.addEventListener('click', () => {
+            this.miniPreviewDismissed = false;
+            this.hideMiniToggle();
+            if (this.preview && this.preview.chart) {
+                this.showMiniPreview();
+            }
+        });
+
+        // Size buttons
+        const sizeButtons = this.miniPreviewEl.querySelectorAll('.mini-size-btn');
+        sizeButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const size = btn.dataset.size;
+                this.setMiniPreviewSize(size);
+            });
+        });
+
+        // Opacity slider - update live as user drags and save to localStorage
+        const opacitySlider = this.miniPreviewEl.querySelector('.mini-opacity-input');
+        if (opacitySlider) {
+            opacitySlider.addEventListener('input', (e) => {
+                this.miniPreviewOpacity = parseInt(e.target.value, 10) / 100;
+                this.miniPreviewEl.style.opacity = this.miniPreviewOpacity;
+                localStorage.setItem('miniPreviewOpacity', this.miniPreviewOpacity);
+            });
+        }
+
+        // Click on mini chart to scroll to main chart
+        chartContainer.addEventListener('click', () => {
+            previewCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        // Set up intersection observer to detect when main chart is out of view
+        this.previewObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Main chart is visible, hide mini preview and toggle
+                    this.hideMiniPreview();
+                    this.hideMiniToggle();
+                } else {
+                    // Main chart is out of view
+                    if (this.preview && this.preview.chart) {
+                        if (this.miniPreviewDismissed) {
+                            // Show toggle button if dismissed
+                            this.showMiniToggle();
+                        } else {
+                            // Show mini preview if not dismissed
+                            this.showMiniPreview();
+                        }
+                    }
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '-60px 0px 0px 0px' // Account for header
+        });
+
+        this.previewObserver.observe(previewCard);
+
+        // Register callback to update mini chart when main chart renders
+        this.preview.onRender(() => {
+            if (this.miniPreviewVisible) {
+                this.updateMiniChart();
+            }
+        });
+    }
+
+    /**
+     * Set mini preview size
+     */
+    setMiniPreviewSize(size) {
+        if (!this.miniPreviewEl) return;
+
+        this.miniPreviewSize = size;
+
+        // Show loading overlay before resize
+        this.miniPreviewEl.classList.add('resizing');
+
+        // Remove all size classes and add the new one
+        this.miniPreviewEl.classList.remove('size-compact', 'size-expanded');
+        this.miniPreviewEl.classList.add('size-' + size);
+
+        // Update active button
+        const sizeButtons = this.miniPreviewEl.querySelectorAll('.mini-size-btn');
+        sizeButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.size === size);
+        });
+
+        // Resize ECharts after CSS transition completes (transition is 250ms)
+        if (this.miniChart) {
+            var self = this;
+            setTimeout(function() {
+                self.miniChart.resize();
+                // Re-apply the chart option to ensure proper rendering
+                self.updateMiniChart();
+                // Remove loading overlay after chart is updated
+                self.miniPreviewEl.classList.remove('resizing');
+            }, 300);
+        } else {
+            // No chart, just remove loading state
+            this.miniPreviewEl.classList.remove('resizing');
+        }
+    }
+
+    /**
+     * Show mini chart preview
+     */
+    showMiniPreview() {
+        if (this.miniPreviewVisible || !this.miniPreviewEl || !this.preview || !this.preview.chart) return;
+
+        this.miniPreviewVisible = true;
+        this.miniPreviewEl.classList.add('visible');
+
+        // Update mini chart with current data
+        this.updateMiniChart();
+    }
+
+    /**
+     * Hide mini chart preview
+     */
+    hideMiniPreview() {
+        if (!this.miniPreviewVisible || !this.miniPreviewEl) return;
+
+        this.miniPreviewVisible = false;
+        this.miniPreviewEl.classList.remove('visible');
+    }
+
+    /**
+     * Show mini toggle button
+     */
+    showMiniToggle() {
+        if (this.miniToggleVisible || !this.miniToggleBtn) return;
+
+        this.miniToggleVisible = true;
+        this.miniToggleBtn.classList.add('visible');
+    }
+
+    /**
+     * Hide mini toggle button
+     */
+    hideMiniToggle() {
+        if (!this.miniToggleVisible || !this.miniToggleBtn) return;
+
+        this.miniToggleVisible = false;
+        this.miniToggleBtn.classList.remove('visible');
+    }
+
+    /**
+     * Update mini chart with current preview data
+     */
+    updateMiniChart() {
+        if (!this.preview || !this.preview.chart || !this.miniChart) return;
+
+        // Get current option from main chart (deep clone)
+        const mainOption = this.preview.chart.getOption();
+        if (!mainOption) return;
+
+        // Deep clone the entire option - keep everything exactly as main chart
+        const miniOption = JSON.parse(JSON.stringify(mainOption));
+
+        // Only disable animation and tooltip interaction
+        miniOption.animation = false;
+        if (miniOption.tooltip) {
+            if (Array.isArray(miniOption.tooltip)) {
+                miniOption.tooltip.forEach(function(t) { t.show = false; });
+            } else {
+                miniOption.tooltip.show = false;
+            }
+        }
+
+        // Set option on mini chart - exact same as main chart
+        this.miniChart.setOption(miniOption, true);
+        this.miniChart.resize();
+    }
+
+    /**
+     * Get Font Awesome icon class for current chart type
+     */
+    getChartTypeIcon() {
+        var iconMap = {
+            'bar': 'fa-chart-bar',
+            'line': 'fa-chart-line',
+            'pie': 'fa-chart-pie'
+        };
+        return iconMap[this.graphType] || 'fa-chart-bar';
+    }
+
+    /**
+     * Update mini toggle button icon to match current chart type
+     */
+    updateMiniToggleIcon() {
+        if (this.miniToggleBtn) {
+            var icon = this.miniToggleBtn.querySelector('i');
+            if (icon) {
+                icon.className = 'fas ' + this.getChartTypeIcon();
+            }
+        }
+    }
+
+    /**
      * Initialize filter selector (choose which filters to use)
      */
     initFilterSelector() {
@@ -877,6 +1148,9 @@ export default class GraphCreator {
                 this.updatePreview();
             }
         }
+
+        // Update mini toggle button icon
+        this.updateMiniToggleIcon();
 
         // Check for unsaved changes
         this.checkForChanges();

@@ -155,7 +155,7 @@ body {
 // Toast notifications (using dgc- prefix to avoid Bootstrap conflict)
 .dgc-toast-container {
   position: fixed;
-  top: calc(60px + #{$spacing-lg}); // Below the page header (60px height)
+  top: 65px; // 5px below the header (60px height)
   right: $spacing-lg;
   z-index: $z-tooltip;
   display: flex;

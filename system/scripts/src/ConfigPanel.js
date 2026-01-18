@@ -355,7 +355,7 @@ export default class ConfigPanel {
             });
         });
 
-        // Range sliders
+        // Range sliders - update live while dragging
         this.container.querySelectorAll('input[type="range"][data-config]').forEach(input => {
             input.addEventListener('input', (e) => {
                 const key = e.target.dataset.config;
@@ -368,10 +368,8 @@ export default class ConfigPanel {
                     const suffix = key.includes('Width') || key.includes('Radius') ? '%' : 'px';
                     valueSpan.textContent = value + suffix;
                 }
-            });
 
-            // Only trigger onChange on mouseup to avoid too many updates
-            input.addEventListener('change', () => {
+                // Trigger live update while dragging
                 this.onChange();
             });
         });

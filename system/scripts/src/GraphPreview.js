@@ -115,6 +115,13 @@ export default class GraphPreview {
     }
 
     /**
+     * Set callback to be called after render
+     */
+    onRender(callback) {
+        this.renderCallback = callback;
+    }
+
+    /**
      * Render chart with current data and config
      */
     render() {
@@ -125,6 +132,11 @@ export default class GraphPreview {
 
         // Force resize to fit container
         this.chart.resize();
+
+        // Notify listeners that chart was rendered
+        if (this.renderCallback) {
+            this.renderCallback();
+        }
     }
 
     /**
