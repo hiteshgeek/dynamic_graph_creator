@@ -155,7 +155,7 @@ body {
 // Toast notifications (using dgc- prefix to avoid Bootstrap conflict)
 .dgc-toast-container {
   position: fixed;
-  top: $spacing-lg;
+  top: calc(60px + #{$spacing-lg}); // Below the page header (60px height)
   right: $spacing-lg;
   z-index: $z-tooltip;
   display: flex;
@@ -168,14 +168,24 @@ body {
   align-items: center;
   gap: $spacing-md;
   padding: $spacing-md $spacing-lg;
+  padding-left: $spacing-md;
   background: $bg-card;
   border-radius: $border-radius;
   box-shadow: $shadow-2;
   min-width: 300px;
   animation: dgcSlideIn 0.3s ease;
 
+  .dgc-toast-indicator {
+    width: 4px;
+    align-self: stretch;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
   &.success {
-    border-left: 4px solid $success;
+    .dgc-toast-indicator {
+      background-color: $success;
+    }
 
     i {
       color: $success;
@@ -183,7 +193,9 @@ body {
   }
 
   &.error {
-    border-left: 4px solid $error;
+    .dgc-toast-indicator {
+      background-color: $error;
+    }
 
     i {
       color: $error;
@@ -191,10 +203,22 @@ body {
   }
 
   &.warning {
-    border-left: 4px solid $warning;
+    .dgc-toast-indicator {
+      background-color: $warning;
+    }
 
     i {
       color: $warning;
+    }
+  }
+
+  &.info {
+    .dgc-toast-indicator {
+      background-color: $info;
+    }
+
+    i {
+      color: $info;
     }
   }
 
@@ -274,14 +298,15 @@ body {
     color: var(--dgc-text-hint);
   }
 
-  &:hover {
+  &:hover:not(:focus) {
     border-color: var(--dgc-primary-light);
   }
 
   &:focus {
+    outline: none;
     background-color: var(--dgc-bg-card);
     border-color: var(--dgc-primary);
-    box-shadow: none;
+    box-shadow: 0 0 0 3px rgba($primary, 0.15);
     color: var(--dgc-text-primary);
   }
 
@@ -298,20 +323,50 @@ body {
   color: var(--dgc-text-primary);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 
-  &:hover {
+  &:hover:not(:focus) {
     border-color: var(--dgc-primary-light);
   }
 
   &:focus {
+    outline: none;
     background-color: var(--dgc-bg-card);
     border-color: var(--dgc-primary);
-    box-shadow: none;
+    box-shadow: 0 0 0 3px rgba($primary, 0.15);
     color: var(--dgc-text-primary);
   }
 
   &:disabled {
     background-color: var(--dgc-bg-elevated);
     color: var(--dgc-text-secondary);
+  }
+}
+
+// Textarea specific styles
+textarea.form-control {
+  &:focus {
+    box-shadow: 0 0 0 3px rgba($primary, 0.15);
+  }
+}
+
+// Form check inputs (checkbox and radio)
+.form-check-input {
+  &:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: var(--dgc-primary);
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba($primary, 0.25);
+  }
+
+  &:checked {
+    background-color: $primary;
+    border-color: $primary;
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($primary, 0.35);
+    }
   }
 }
 
@@ -613,6 +668,81 @@ option[value="__new__"] {
       box-shadow: 0 0 0 3px rgba(#a78bfa, 0.5);
     }
   }
+
+  // Text-switch focus styles for dark mode
+  .text-switch .form-check-input {
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.35);
+    }
+
+    &:checked:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#a78bfa, 0.45);
+    }
+  }
+
+  .text-switch.text-switch-primary .form-check-input:checked:focus-visible {
+    box-shadow: 0 0 0 3px rgba(#60a5fa, 0.45);
+  }
+
+  .text-switch.text-switch-success .form-check-input:checked:focus-visible {
+    box-shadow: 0 0 0 3px rgba(#4ade80, 0.45);
+  }
+
+  .text-switch.text-switch-warning .form-check-input:checked:focus-visible {
+    box-shadow: 0 0 0 3px rgba(#fbbf24, 0.45);
+  }
+
+  .text-switch.text-switch-danger .form-check-input:checked:focus-visible {
+    box-shadow: 0 0 0 3px rgba(#f87171, 0.45);
+  }
+
+  .text-switch.text-switch-purple .form-check-input:checked:focus-visible {
+    box-shadow: 0 0 0 3px rgba(#a78bfa, 0.45);
+  }
+
+  // Normal form-switch focus styles for dark mode
+  .form-switch:not(.text-switch) .form-check-input {
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.35);
+    }
+
+    &:checked:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.45);
+    }
+  }
+
+  // Form control focus styles for dark mode
+  .form-control {
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.2);
+    }
+
+    &.is-invalid:focus {
+      box-shadow: 0 0 0 3px rgba(#f87171, 0.2);
+    }
+  }
+
+  // Form select focus styles for dark mode
+  .form-select {
+    &:focus {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.2);
+    }
+
+    &.is-invalid:focus {
+      box-shadow: 0 0 0 3px rgba(#f87171, 0.2);
+    }
+  }
+
+  // Form check input focus styles for dark mode
+  .form-check-input {
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.3);
+    }
+
+    &:checked:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.4);
+    }
+  }
 }
 
 // Common Empty State
@@ -883,16 +1013,24 @@ option[value="__new__"] {
     border: none;
     border-radius: 28px;
     background-image: none;
-    transition: background-color 0.25s ease;
+    transition: background-color 0.25s ease, box-shadow 0.2s ease;
     box-shadow: none;
 
     &:focus {
-      box-shadow: none;
       outline: none;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($primary, 0.25);
     }
 
     &:checked {
       background-color: #6f42c1; // Default purple
+    }
+
+    &:checked:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#6f42c1, 0.35);
     }
   }
 
@@ -953,25 +1091,72 @@ option[value="__new__"] {
     }
   }
 
-  // Color variants
-  &.text-switch-primary .form-check-input:checked {
-    background-color: $primary;
+  // Color variants with focus styles
+  &.text-switch-primary .form-check-input {
+    &:checked {
+      background-color: $primary;
+    }
+    &:checked:focus-visible {
+      box-shadow: 0 0 0 3px rgba($primary, 0.35);
+    }
   }
 
-  &.text-switch-success .form-check-input:checked {
-    background-color: $success;
+  &.text-switch-success .form-check-input {
+    &:checked {
+      background-color: $success;
+    }
+    &:checked:focus-visible {
+      box-shadow: 0 0 0 3px rgba($success, 0.35);
+    }
   }
 
-  &.text-switch-warning .form-check-input:checked {
-    background-color: $warning;
+  &.text-switch-warning .form-check-input {
+    &:checked {
+      background-color: $warning;
+    }
+    &:checked:focus-visible {
+      box-shadow: 0 0 0 3px rgba($warning, 0.35);
+    }
   }
 
-  &.text-switch-danger .form-check-input:checked {
-    background-color: $error;
+  &.text-switch-danger .form-check-input {
+    &:checked {
+      background-color: $error;
+    }
+    &:checked:focus-visible {
+      box-shadow: 0 0 0 3px rgba($error, 0.35);
+    }
   }
 
-  &.text-switch-purple .form-check-input:checked {
-    background-color: #6f42c1;
+  &.text-switch-purple .form-check-input {
+    &:checked {
+      background-color: #6f42c1;
+    }
+    &:checked:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#6f42c1, 0.35);
+    }
+  }
+}
+
+// Normal Bootstrap form-switch focus styles
+.form-switch:not(.text-switch) {
+  .form-check-input {
+    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+    &:focus {
+      outline: none;
+      box-shadow: none;
+      border-color: var(--dgc-border-color);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba($primary, 0.25);
+    }
+
+    &:checked:focus-visible {
+      box-shadow: 0 0 0 3px rgba($primary, 0.35);
+    }
   }
 }
 

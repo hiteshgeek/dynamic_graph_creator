@@ -12,6 +12,13 @@
   //   min-height: 150px;
   color: var(--dgc-text-secondary);
   text-align: center;
+  cursor: pointer;
+  border-radius: $border-radius;
+  transition: all 0.2s;
+  position: relative;
+  // Default: above overlay for click handling (when tweak mode is OFF)
+  z-index: 16;
+  pointer-events: auto;
 
   .cell-empty-icon {
     font-size: 1.5rem;
@@ -33,5 +40,40 @@
     .cell-empty-message {
       color: var(--dgc-primary);
     }
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($primary, 0.25);
+
+    .cell-empty-icon {
+      color: var(--dgc-primary);
+    }
+
+    .cell-empty-message {
+      color: var(--dgc-primary);
+    }
+  }
+}
+
+// Dark mode focus styles
+:root.theme-dark {
+  .dashboard-cell-empty {
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.35);
+    }
+  }
+}
+
+// In tweak mode (no layout-edit-disabled), empty cell goes behind the overlay
+// Only applies to builder pages which have the tweak toggle
+.dashboard-builder:not(.layout-edit-disabled) {
+  .dashboard-cell-empty {
+    z-index: 1;
+    pointer-events: none;
   }
 }

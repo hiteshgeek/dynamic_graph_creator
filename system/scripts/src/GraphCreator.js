@@ -324,14 +324,30 @@ export default class GraphCreator {
     initGraphTypeSelector() {
         // Support both .graph-type-item (old) and .chart-type-item (new single sidebar)
         const typeItems = this.container.querySelectorAll('.graph-type-item, .chart-type-item');
-        typeItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const type = item.dataset.type;
-                this.setGraphType(type);
 
-                // Update active state
-                typeItems.forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
+        const selectType = (item) => {
+            const type = item.dataset.type;
+            this.setGraphType(type);
+
+            // Update active state and aria-checked
+            typeItems.forEach(i => {
+                i.classList.remove('active');
+                i.setAttribute('aria-checked', 'false');
+            });
+            item.classList.add('active');
+            item.setAttribute('aria-checked', 'true');
+        };
+
+        typeItems.forEach(item => {
+            // Click handler
+            item.addEventListener('click', () => selectType(item));
+
+            // Keyboard handler (Enter/Space)
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    selectType(item);
+                }
             });
         });
     }

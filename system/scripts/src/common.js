@@ -13,15 +13,16 @@ window.Toast = {
         if (!this.container) this.init();
         const toast = document.createElement('div');
         toast.className = `dgc-toast ${type}`;
-        const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-        toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i><span class="dgc-toast-message">${message}</span><button class="dgc-toast-close"><i class="fas fa-times"></i></button>`;
+        const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+        toast.innerHTML = `<span class="dgc-toast-indicator"></span><i class="fas ${icons[type] || icons.success}"></i><span class="dgc-toast-message">${message}</span><button class="dgc-toast-close"><i class="fas fa-times"></i></button>`;
         toast.querySelector('.dgc-toast-close').addEventListener('click', () => toast.remove());
         this.container.appendChild(toast);
         if (duration > 0) setTimeout(() => toast.remove(), duration);
     },
     success(message) { this.show(message, 'success'); },
     error(message) { this.show(message, 'error', 5000); },
-    warning(message) { this.show(message, 'warning', 4000); }
+    warning(message) { this.show(message, 'warning', 4000); },
+    info(message) { this.show(message, 'info'); }
 };
 
 window.Loading = {

@@ -566,6 +566,94 @@
   }
 }
 
+// Config slider (range input)
+.config-slider {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+
+  input[type="range"] {
+    flex: 1;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--dgc-gray-200);
+    border-radius: 3px;
+    cursor: pointer;
+
+    // Webkit (Chrome, Safari, Edge)
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: $primary;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: box-shadow 0.15s ease;
+    }
+
+    // Firefox
+    &::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: $primary;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: box-shadow 0.15s ease;
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: none;
+
+      &::-webkit-slider-thumb {
+        box-shadow: 0 0 0 3px rgba($primary, 0.25);
+      }
+
+      &::-moz-range-thumb {
+        box-shadow: 0 0 0 3px rgba($primary, 0.25);
+      }
+    }
+  }
+
+  .slider-value {
+    min-width: 45px;
+    font-size: $font-size-sm;
+    color: var(--dgc-text-secondary);
+    text-align: right;
+  }
+}
+
+// Dark mode for config slider
+:root.theme-dark {
+  .config-slider input[type="range"] {
+    background: var(--dgc-gray-600);
+
+    &::-webkit-slider-thumb {
+      background: #60a5fa;
+    }
+
+    &::-moz-range-thumb {
+      background: #60a5fa;
+    }
+
+    &:focus-visible {
+      &::-webkit-slider-thumb {
+        box-shadow: 0 0 0 3px rgba(#60a5fa, 0.35);
+      }
+
+      &::-moz-range-thumb {
+        box-shadow: 0 0 0 3px rgba(#60a5fa, 0.35);
+      }
+    }
+  }
+}
+
 // Toggle switch
 .toggle-switch {
   position: relative;
@@ -1219,10 +1307,36 @@
     background: var(--dgc-gray-100);
   }
 
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($primary, 0.25);
+  }
+
   &.active {
     color: var(--dgc-primary);
     background: rgba(0, 123, 255, 0.08);
     border-color: var(--dgc-primary);
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($primary, 0.35);
+    }
+  }
+}
+
+// Dark mode focus for sidebar tabs
+:root.theme-dark {
+  .sidebar-tab {
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.35);
+    }
+
+    &.active:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.45);
+    }
   }
 }
 
@@ -1245,7 +1359,9 @@
   display: flex;
   gap: $spacing-sm;
   overflow-x: auto;
-  padding-bottom: 4px;
+  // Padding to prevent focus ring clipping
+  padding: 4px;
+  margin: -4px;
 
   // Hide scrollbar but allow scrolling
   scrollbar-width: thin;
@@ -1301,6 +1417,15 @@
     }
   }
 
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba($primary, 0.25);
+  }
+
   &.active {
     border-color: var(--dgc-primary);
     background: rgba(0, 123, 255, 0.08);
@@ -1311,6 +1436,23 @@
 
     span {
       color: var(--dgc-primary);
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba($primary, 0.35);
+    }
+  }
+}
+
+// Dark mode focus styles for chart type items
+:root.theme-dark {
+  .chart-type-item {
+    &:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.35);
+    }
+
+    &.active:focus-visible {
+      box-shadow: 0 0 0 3px rgba(#60a5fa, 0.45);
     }
   }
 }

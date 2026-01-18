@@ -112,17 +112,17 @@
                         <!-- Chart Tab Content -->
                         <div class="sidebar-tab-content active" id="sidebar-tab-config">
                             <!-- Chart Type Selector - Horizontal Scroll -->
-                            <div class="chart-type-selector">
+                            <div class="chart-type-selector" role="radiogroup" aria-label="Chart type">
                                 <div class="chart-type-scroll">
-                                    <div class="chart-type-item <?php echo (!$graph || $graph->getGraphType() === 'bar') ? 'active' : ''; ?>" data-type="bar" title="Bar Chart">
+                                    <div class="chart-type-item <?php echo (!$graph || $graph->getGraphType() === 'bar') ? 'active' : ''; ?>" data-type="bar" title="Bar Chart" tabindex="0" role="radio" aria-checked="<?php echo (!$graph || $graph->getGraphType() === 'bar') ? 'true' : 'false'; ?>">
                                         <i class="fas fa-chart-bar"></i>
                                         <span>Bar</span>
                                     </div>
-                                    <div class="chart-type-item <?php echo ($graph && $graph->getGraphType() === 'line') ? 'active' : ''; ?>" data-type="line" title="Line Chart">
+                                    <div class="chart-type-item <?php echo ($graph && $graph->getGraphType() === 'line') ? 'active' : ''; ?>" data-type="line" title="Line Chart" tabindex="0" role="radio" aria-checked="<?php echo ($graph && $graph->getGraphType() === 'line') ? 'true' : 'false'; ?>">
                                         <i class="fas fa-chart-line"></i>
                                         <span>Line</span>
                                     </div>
-                                    <div class="chart-type-item <?php echo ($graph && $graph->getGraphType() === 'pie') ? 'active' : ''; ?>" data-type="pie" title="Pie Chart">
+                                    <div class="chart-type-item <?php echo ($graph && $graph->getGraphType() === 'pie') ? 'active' : ''; ?>" data-type="pie" title="Pie Chart" tabindex="0" role="radio" aria-checked="<?php echo ($graph && $graph->getGraphType() === 'pie') ? 'true' : 'false'; ?>">
                                         <i class="fas fa-chart-pie"></i>
                                         <span>Pie</span>
                                     </div>

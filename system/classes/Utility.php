@@ -195,7 +195,7 @@ class Utility
      */
     public static function renderDashboardCellEmpty($icon = 'fa-plus-circle', $message = 'Add content here')
     {
-        $html = '<div class="dashboard-cell-empty">';
+        $html = '<div class="dashboard-cell-empty" tabindex="0" role="button">';
         $html .= '<div class="cell-empty-icon">';
         $html .= '<i class="fas ' . htmlspecialchars($icon) . '"></i>';
         $html .= '</div>';

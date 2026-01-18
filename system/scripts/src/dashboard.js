@@ -14,6 +14,152 @@ const Loading = window.Loading;
 const Ajax = window.Ajax;
 const ConfirmDialog = window.ConfirmDialog;
 
+/**
+ * Get the max total row height (fr) across all columns in a section
+ * This represents the "perspective height" of the section
+ * @param {HTMLElement} section - The dashboard-section element
+ * @returns {number} The maximum total row fr across all columns
+ */
+function getSectionMaxRowFr(section) {
+  if (!section) return 1;
+
+  const areas = section.querySelectorAll(":scope > .dashboard-area");
+  let maxRowFr = 1;
+
+  areas.forEach((area) => {
+    // Check if area has nested rows (data-rows attribute stores total)
+    const areaRows = parseInt(area.dataset.rows) || 1;
+    if (areaRows > maxRowFr) {
+      maxRowFr = areaRows;
+    }
+  });
+
+  return maxRowFr;
+}
+
+/**
+ * Get the grid dimensions (fr units) for a cell
+ * @param {HTMLElement} cell - The cell element (can be empty cell or any element inside an area)
+ * @returns {{ colFr: number, rowFr: number, perspectiveHeight: number }} The column fr, row fr, and perspective height
+ */
+function getCellGridDimensions(cell) {
+  const area = cell.closest(".dashboard-area");
+  const subRow = cell.closest(".dashboard-sub-row");
+  const section = cell.closest(".dashboard-section");
+
+  // Get column width (fr) from section's grid-template-columns
+  let colFr = 1;
+  if (section && area) {
+    const areaIndex = parseInt(area.dataset.areaIndex) || 0;
+    const gridTemplate = section.style.gridTemplateColumns;
+    if (gridTemplate) {
+      // Parse "1fr 2fr 1fr" into array of numbers [1, 2, 1]
+      const frValues = gridTemplate.split(/\s+/).map((val) => {
+        const match = val.match(/^(\d+)fr$/);
+        return match ? parseInt(match[1]) : 1;
+      });
+      colFr = frValues[areaIndex] || 1;
+    }
+  }
+
+  // Get row height (fr) for this specific cell
+  let rowFr = 1;
+  if (subRow) {
+    // Cell is in a sub-row, get its specific height
+    rowFr = parseInt(subRow.dataset.rows) || 1;
+  } else if (area) {
+    // For non-nested areas, get area's total height (or 1 if not set)
+    rowFr = parseInt(area.dataset.rows) || 1;
+  }
+
+  // Calculate perspective height
+  // For sub-rows: use the row's own height (it's a slice of the column)
+  // For non-nested areas: use the section's max row fr
+  let perspectiveHeight;
+  if (subRow) {
+    // Sub-row perspective height is just its own height
+    perspectiveHeight = rowFr;
+  } else {
+    // Non-nested area uses section's max row height
+    perspectiveHeight = getSectionMaxRowFr(section);
+  }
+
+  return { colFr, rowFr, perspectiveHeight };
+}
+
+function handleEmptyCellAction(cell) {
+  // Get context information from the cell's parent elements
+  const area = cell.closest(".dashboard-area");
+  const subRow = cell.closest(".dashboard-sub-row");
+  const section = cell.closest(".dashboard-section");
+
+  // Get grid dimensions (includes perspective height)
+  const { colFr, rowFr, perspectiveHeight } = getCellGridDimensions(cell);
+
+  const context = {
+    cell,
+    areaId: area?.dataset.areaId || null,
+    areaIndex: area?.dataset.areaIndex || null,
+    rowId: subRow?.dataset.rowId || null,
+    rowIndex: subRow?.dataset.rowIndex || null,
+    sectionId: section?.dataset.sectionId || null,
+    colFr,
+    rowFr,
+    perspectiveHeight,
+  };
+
+  // Dispatch custom event so any page can listen and handle it
+  const event = new CustomEvent("emptyCellClick", {
+    detail: context,
+    bubbles: true,
+  });
+  cell.dispatchEvent(event);
+
+  // TODO: Implement default action (e.g., open widget selector)
+  if (window.Toast) {
+    window.Toast.info(`Perspective: ${colFr}w x ${perspectiveHeight}h | Actual: ${colFr}w x ${rowFr}h`);
+    console.log(context);
+  }
+}
+
+/**
+ * Check if tweak mode is enabled (layout editing controls visible)
+ * @param {HTMLElement} cell - Element to check from
+ * @returns {boolean} True if tweak mode is ON (controls visible)
+ */
+function isTweakModeEnabled(cell) {
+  // Tweak mode only exists on builder pages (.dashboard-builder)
+  // Preview pages don't have tweak mode, so always return false for them
+  const builder = cell.closest(".dashboard-builder");
+  if (!builder) return false;
+  // Tweak mode is ON when builder does NOT have layout-edit-disabled class
+  return !builder.classList.contains("layout-edit-disabled");
+}
+
+// Global event listeners for empty cell (works on any page)
+document.addEventListener("DOMContentLoaded", () => {
+  // Click handler
+  document.addEventListener("click", (e) => {
+    const cell = e.target.closest(".dashboard-cell-empty");
+    // Skip if in tweak mode (layout controls are active)
+    if (cell && !isTweakModeEnabled(cell)) {
+      handleEmptyCellAction(cell);
+    }
+  });
+
+  // Keyboard handler (Enter/Space)
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      const cell = e.target.closest(".dashboard-cell-empty");
+      // Skip if in tweak mode (layout controls are active)
+      if (cell && !isTweakModeEnabled(cell)) {
+        e.preventDefault();
+        handleEmptyCellAction(cell);
+      }
+    }
+  });
+});
+
 // Grid configuration constants
 // Max total fr for a section is MAX_COLUMNS (6fr), not numColumns * MAX_FR_UNITS
 const GRID_CONFIG = {
@@ -120,7 +266,9 @@ class DashboardBuilder {
     const modalElement = document.getElementById("template-modal");
     if (!modalElement) return;
 
-    const nameInputWrapper = modalElement.querySelector(".dashboard-name-input");
+    const nameInputWrapper = modalElement.querySelector(
+      ".dashboard-name-input",
+    );
     const nameInput = document.getElementById("new-dashboard-name");
     const modalTitle = modalElement.querySelector(".modal-title");
     const hrDivider = modalElement.querySelector(".modal-body > hr");
@@ -237,24 +385,23 @@ class DashboardBuilder {
         html += `<div class="template-category">
                     <div class="template-category-header">
                         <h3>${categoryName.toUpperCase()}</h3>
-                        ${categoryDescription ? `<p>${categoryDescription}</p>` : ''}
+                        ${categoryDescription ? `<p>${categoryDescription}</p>` : ""}
                     </div>
                     <div class="item-card-grid">`;
 
         categoryData.templates.forEach((template) => {
-          const systemBadge = template.is_system == 1
-            ? '<span class="badge badge-system"><i class="fas fa-lock"></i> System</span>'
-            : '';
-          html += `<div class="item-card" data-template-id="${
-            template.dtid
-          }">
+          const systemBadge =
+            template.is_system == 1
+              ? '<span class="badge badge-system"><i class="fas fa-lock"></i> System</span>'
+              : "";
+          html += `<div class="item-card" data-template-id="${template.dtid}">
                         <div class="template-preview">
                             ${this.renderTemplatePreview(template)}
                         </div>
                         <div class="item-card-content">
                             <h3>${template.name}</h3>
-                            ${template.description ? `<p class="item-card-description">${template.description}</p>` : ''}
-                            ${systemBadge ? `<div class="item-card-tags">${systemBadge}</div>` : ''}
+                            ${template.description ? `<p class="item-card-description">${template.description}</p>` : ""}
+                            ${systemBadge ? `<div class="item-card-tags">${systemBadge}</div>` : ""}
                         </div>
                     </div>`;
         });
@@ -406,7 +553,7 @@ class DashboardBuilder {
 
       // Add View Mode button
       const existingViewBtn = headerRight.querySelector(
-        'a[href*="dashboard/preview"]'
+        'a[href*="dashboard/preview"]',
       );
       if (!existingViewBtn) {
         const viewBtn = document.createElement("a");
@@ -421,10 +568,13 @@ class DashboardBuilder {
       }
 
       // Add Tweak switch
-      const existingTweakSwitch = headerRight.querySelector("#toggle-layout-edit-switch");
+      const existingTweakSwitch = headerRight.querySelector(
+        "#toggle-layout-edit-switch",
+      );
       if (!existingTweakSwitch) {
         const tweakDiv = document.createElement("div");
-        tweakDiv.className = "form-check form-switch text-switch text-switch-purple";
+        tweakDiv.className =
+          "form-check form-switch text-switch text-switch-purple";
         tweakDiv.innerHTML = `
           <input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch">
           <div class="text-switch-track">
@@ -439,8 +589,11 @@ class DashboardBuilder {
         }
 
         // Initialize tweak switch functionality
-        const tweakSwitch = tweakDiv.querySelector("#toggle-layout-edit-switch");
-        const tweakEnabled = localStorage.getItem("dashboardTweakEnabled") === "true";
+        const tweakSwitch = tweakDiv.querySelector(
+          "#toggle-layout-edit-switch",
+        );
+        const tweakEnabled =
+          localStorage.getItem("dashboardTweakEnabled") === "true";
         tweakSwitch.checked = tweakEnabled;
         if (!tweakEnabled) {
           this.container.classList.add("layout-edit-disabled");
@@ -475,7 +628,9 @@ class DashboardBuilder {
   }
 
   renderDashboard() {
-    const sectionsContainer = this.container.querySelector(".dashboard-sections");
+    const sectionsContainer = this.container.querySelector(
+      ".dashboard-sections",
+    );
     if (!sectionsContainer) return;
 
     // Dispose all tooltips before re-rendering to prevent orphaned tooltips
@@ -522,7 +677,7 @@ class DashboardBuilder {
     } else {
       // Attach event listener to add first section button
       const addFirstBtn = sectionsContainer.querySelector(
-        ".add-first-section-btn"
+        ".add-first-section-btn",
       );
       if (addFirstBtn) {
         addFirstBtn.addEventListener("click", async () => {
@@ -531,7 +686,7 @@ class DashboardBuilder {
           if (this.mode === "template") {
             // In template mode, show simple add section modal
             const modal = new bootstrap.Modal(
-              document.getElementById("add-section-modal")
+              document.getElementById("add-section-modal"),
             );
             modal.show();
           } else {
@@ -561,7 +716,7 @@ class DashboardBuilder {
           if (this.mode === "template") {
             // In template mode, show simple add section modal
             const modal = new bootstrap.Modal(
-              document.getElementById("add-section-modal")
+              document.getElementById("add-section-modal"),
             );
             modal.show();
           } else {
@@ -596,14 +751,15 @@ class DashboardBuilder {
       // Shrink (minus): can decrease if current size > MIN
       // Expand (plus): can increase if current size < MAX AND total has room
       const canShrinkCol = widths[areaIndex] > GRID_CONFIG.MIN_FR_UNITS;
-      const canExpandCol = widths[areaIndex] < GRID_CONFIG.MAX_COL_FR_UNITS && hasRoomToGrowResize;
+      const canExpandCol =
+        widths[areaIndex] < GRID_CONFIG.MAX_COL_FR_UNITS && hasRoomToGrowResize;
       const hasResizeOptions = canShrinkCol || canExpandCol;
 
       // Calculate add column options
       // Can add if: under max columns AND (there's room to grow OR ANY column can give 1fr)
       // Max total is always MAX_COLUMNS (4fr) regardless of column count
       const hasRoomToGrow = totalFr < maxTotalFr;
-      const anyColumnCanGive = widths.some(w => w > GRID_CONFIG.MIN_FR_UNITS);
+      const anyColumnCanGive = widths.some((w) => w > GRID_CONFIG.MIN_FR_UNITS);
       const canAddCol = canAddColumn && (hasRoomToGrow || anyColumnCanGive);
 
       // Both left and right add column buttons use the same logic
@@ -611,11 +767,12 @@ class DashboardBuilder {
       const canAddColRight = canAddCol;
 
       // Column drag handle - only show when more than one column
-      const columnDragHandle = numColumns > 1
-        ? `<button class="column-drag-handle" data-bs-toggle="tooltip" data-bs-title="Drag to reorder column">
+      const columnDragHandle =
+        numColumns > 1
+          ? `<button class="column-drag-handle" data-bs-toggle="tooltip" data-bs-title="Drag to reorder column">
                     <i class="fas fa-grip-vertical"></i>
                 </button>`
-        : '';
+          : "";
 
       // Area controls - edge buttons and center resize/delete
       const areaControls = `<div class="area-controls-overlay">
@@ -629,23 +786,23 @@ class DashboardBuilder {
                     <i class="fas fa-circle-plus"></i> Row
                 </button>
                 <!-- Left: Add Column Left -->
-                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColLeft ? 'disabled' : ''}>
+                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColLeft ? "disabled" : ""}>
                     <i class="fas fa-circle-plus"></i> Column
                 </button>
                 <!-- Right: Add Column Right -->
-                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColRight ? 'disabled' : ''}>
+                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColRight ? "disabled" : ""}>
                     <i class="fas fa-circle-plus"></i> Column
                 </button>
                 <!-- Center: Resize buttons + Delete -->
                 <div class="center-controls">
                     <div class="center-row">
-                        <button class="center-btn col-resize resize-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Shrink column" ${!canShrinkCol ? "disabled" : ""}>
                             <i class="fas fa-caret-left"></i>
                         </button>
-                        <button class="center-btn delete-btn remove-col-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Remove column" ${!canRemoveColumn ? 'disabled' : ''}>
+                        <button class="center-btn delete-btn remove-col-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Remove column" ${!canRemoveColumn ? "disabled" : ""}>
                             <i class="fas fa-trash"></i>
                         </button>
-                        <button class="center-btn col-resize resize-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Expand column" ${!canExpandCol ? "disabled" : ""}>
                             <i class="fas fa-caret-right"></i>
                         </button>
                     </div>
@@ -663,7 +820,7 @@ class DashboardBuilder {
           canAddColRight,
           canShrinkCol,
           canExpandCol,
-          numColumns
+          numColumns,
         );
       } else {
         // Regular single area with controls inside
@@ -723,10 +880,12 @@ class DashboardBuilder {
       const colWidth = columnWidths[idx];
       const areaId = area.aid;
       if (area.hasSubRows && area.subRows && area.subRows.length > 0) {
-        const rowHeightParts = area.subRows.map((r) => {
-          const height = r.height || '1fr';
-          return `<span class="grid-size-row" data-row-id="${r.rowId}">${height}</span>`;
-        }).join('<span class="grid-size-row-sep">/</span>');
+        const rowHeightParts = area.subRows
+          .map((r) => {
+            const height = r.height || "1fr";
+            return `<span class="grid-size-row" data-row-id="${r.rowId}">${height}</span>`;
+          })
+          .join('<span class="grid-size-row-sep">/</span>');
         return `<span class="grid-size-part grid-size-part-nested" data-area-id="${areaId}">${colWidth} (${rowHeightParts})</span>`;
       }
       return `<span class="grid-size-part" data-area-id="${areaId}">${colWidth}</span>`;
@@ -757,7 +916,7 @@ class DashboardBuilder {
     canAddColRight = false,
     canShrinkCol = false,
     canExpandCol = false,
-    numColumns = 1
+    numColumns = 1,
   ) {
     // Build grid-template-rows from sub-row heights
     const rowHeights = area.subRows.map((row) => row.height || "1fr").join(" ");
@@ -778,11 +937,12 @@ class DashboardBuilder {
     const canAddRow = hasRoomToGrowRows || anyRowCanGive;
 
     // Column drag handle - only show when more than one column (shown in first row only)
-    const columnDragHandle = numColumns > 1
-      ? `<button class="column-drag-handle" data-bs-toggle="tooltip" data-bs-title="Drag to reorder column">
+    const columnDragHandle =
+      numColumns > 1
+        ? `<button class="column-drag-handle" data-bs-toggle="tooltip" data-bs-title="Drag to reorder column">
                 <i class="fas fa-grip-vertical"></i>
             </button>`
-      : '';
+        : "";
 
     let subRowsHtml = "";
 
@@ -792,53 +952,55 @@ class DashboardBuilder {
       // Row resize conditions
       // Expand (plus on top): can increase if current size < MAX AND total has room
       // Shrink (minus on bottom): can decrease if current size > MIN
-      const canExpandRow = heights[rowIndex] < GRID_CONFIG.MAX_ROW_FR_UNITS && hasRoomToGrowRows;
+      const canExpandRow =
+        heights[rowIndex] < GRID_CONFIG.MAX_ROW_FR_UNITS && hasRoomToGrowRows;
       const canShrinkRow = heights[rowIndex] > GRID_CONFIG.MIN_FR_UNITS;
 
       // Row drag handle - only show when more than one row
-      const rowDragHandle = numRows > 1
-        ? `<button class="row-drag-handle" data-bs-toggle="tooltip" data-bs-title="Drag to reorder row">
+      const rowDragHandle =
+        numRows > 1
+          ? `<button class="row-drag-handle" data-bs-toggle="tooltip" data-bs-title="Drag to reorder row">
                     <i class="fas fa-grip-horizontal"></i>
                 </button>`
-        : '';
+          : "";
 
       // All controls inside each sub-row - both column and row actions
       // Each row shows Add Row Above (inserts above this row) and Add Row Below (inserts below this row)
       // Column drag handle only shown in first row
       const controls = `<div class="area-controls-overlay">
-                ${isFirstRow ? columnDragHandle : ''}
+                ${isFirstRow ? columnDragHandle : ""}
                 ${rowDragHandle}
                 <!-- Column actions: Add Column Left/Right -->
-                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColLeft ? 'disabled' : ''}>
+                <button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColLeft ? "disabled" : ""}>
                     <i class="fas fa-circle-plus"></i> Column
                 </button>
-                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColRight ? 'disabled' : ''}>
+                <button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColRight ? "disabled" : ""}>
                     <i class="fas fa-circle-plus"></i> Column
                 </button>
                 <!-- Row actions: Add Row Above/Below - each row can add above or below itself -->
-                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Add row" ${!canAddRow ? 'disabled' : ''}>
+                <button class="edge-btn edge-top add-row-top-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Add row" ${!canAddRow ? "disabled" : ""}>
                     <i class="fas fa-circle-plus"></i> Row
                 </button>
-                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Add row" ${!canAddRow ? 'disabled' : ''}>
+                <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Add row" ${!canAddRow ? "disabled" : ""}>
                     <i class="fas fa-circle-plus"></i> Row
                 </button>
                 <!-- Center: All resize buttons + Delete buttons -->
                 <div class="center-controls">
-                    <button class="center-btn row-resize resize-row-up-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Expand row" ${!canExpandRow ? 'disabled' : ''}>
+                    <button class="center-btn row-resize resize-row-up-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Expand row" ${!canExpandRow ? "disabled" : ""}>
                         <i class="fas fa-caret-up"></i>
                     </button>
                     <div class="center-row">
-                        <button class="center-btn col-resize resize-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Shrink column" ${!canShrinkCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Shrink column" ${!canShrinkCol ? "disabled" : ""}>
                             <i class="fas fa-caret-left"></i>
                         </button>
-                        <button class="center-btn delete-btn remove-row-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Remove row" ${!canRemoveRow ? 'disabled' : ''}>
+                        <button class="center-btn delete-btn remove-row-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Remove row" ${!canRemoveRow ? "disabled" : ""}>
                             <i class="fas fa-trash"></i>
                         </button>
-                        <button class="center-btn col-resize resize-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Expand column" ${!canExpandCol ? 'disabled' : ''}>
+                        <button class="center-btn col-resize resize-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Expand column" ${!canExpandCol ? "disabled" : ""}>
                             <i class="fas fa-caret-right"></i>
                         </button>
                     </div>
-                    <button class="center-btn row-resize resize-row-down-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Shrink row" ${!canShrinkRow ? 'disabled' : ''}>
+                    <button class="center-btn row-resize resize-row-down-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Shrink row" ${!canShrinkRow ? "disabled" : ""}>
                         <i class="fas fa-caret-down"></i>
                     </button>
                 </div>
@@ -865,7 +1027,7 @@ class DashboardBuilder {
   }
 
   renderEmptyState(emptyState) {
-    return `<div class="dashboard-cell-empty">
+    return `<div class="dashboard-cell-empty" tabindex="0" role="button">
             <div class="cell-empty-icon">
                 <i class="fas ${emptyState?.icon || "fa-plus-circle"}"></i>
             </div>
@@ -882,17 +1044,19 @@ class DashboardBuilder {
   }
 
   initDragDrop() {
-    const sectionsContainer = this.container.querySelector(".dashboard-sections");
+    const sectionsContainer = this.container.querySelector(
+      ".dashboard-sections",
+    );
 
     // Destroy existing sortable instances
     if (this.sortableInstance) {
       this.sortableInstance.destroy();
     }
     if (this.columnSortables) {
-      this.columnSortables.forEach(s => s.destroy());
+      this.columnSortables.forEach((s) => s.destroy());
     }
     if (this.rowSortables) {
-      this.rowSortables.forEach(s => s.destroy());
+      this.rowSortables.forEach((s) => s.destroy());
     }
     this.columnSortables = [];
     this.rowSortables = [];
@@ -910,7 +1074,9 @@ class DashboardBuilder {
     const sections = this.container.querySelectorAll(".dashboard-section");
     sections.forEach((section) => {
       const sectionId = section.dataset.sectionId;
-      const columnCount = section.querySelectorAll(":scope > .dashboard-area").length;
+      const columnCount = section.querySelectorAll(
+        ":scope > .dashboard-area",
+      ).length;
 
       // Only enable column sorting if more than one column
       if (columnCount > 1) {
@@ -926,7 +1092,9 @@ class DashboardBuilder {
     });
 
     // Row sortables - one for each nested area with sub-rows
-    const nestedAreas = this.container.querySelectorAll(".dashboard-area-nested");
+    const nestedAreas = this.container.querySelectorAll(
+      ".dashboard-area-nested",
+    );
     nestedAreas.forEach((nestedArea) => {
       const areaId = nestedArea.dataset.areaId;
       const sectionWrapper = nestedArea.closest(".dashboard-section-wrapper");
@@ -950,7 +1118,7 @@ class DashboardBuilder {
   async onSectionsReorder() {
     const sections = this.container.querySelectorAll(".dashboard-section");
     const order = Array.from(sections).map(
-      (section) => section.dataset.sectionId
+      (section) => section.dataset.sectionId,
     );
 
     Loading.show("Reordering...");
@@ -998,7 +1166,7 @@ class DashboardBuilder {
   async onColumnsReorder(sectionId, evt) {
     // Get new order of columns from DOM
     const section = this.container.querySelector(
-      `.dashboard-section[data-section-id="${sectionId}"]`
+      `.dashboard-section[data-section-id="${sectionId}"]`,
     );
     const columns = section.querySelectorAll(":scope > .dashboard-area");
     const newOrder = Array.from(columns).map((col) => col.dataset.areaId);
@@ -1060,7 +1228,7 @@ class DashboardBuilder {
   async onRowsReorder(sectionId, areaId, evt) {
     // Get new order of rows from DOM
     const nestedArea = this.container.querySelector(
-      `.dashboard-area-nested[data-area-id="${areaId}"]`
+      `.dashboard-area-nested[data-area-id="${areaId}"]`,
     );
     const rows = nestedArea.querySelectorAll(".dashboard-sub-row");
     const newOrder = Array.from(rows).map((row) => row.dataset.rowId);
@@ -1090,9 +1258,7 @@ class DashboardBuilder {
       });
 
       // Reorder rows based on new order
-      const newRows = newOrder
-        .map((rowId) => rowMap[rowId])
-        .filter((r) => r);
+      const newRows = newOrder.map((rowId) => rowMap[rowId]).filter((r) => r);
 
       areaData.subRows = newRows;
 
@@ -1151,7 +1317,7 @@ class DashboardBuilder {
           Toast.success(
             this.mode === "template"
               ? "Template saved successfully"
-              : "Dashboard saved successfully"
+              : "Dashboard saved successfully",
           );
         }
       } else {
@@ -1165,7 +1331,7 @@ class DashboardBuilder {
       Toast.error(
         this.mode === "template"
           ? "Failed to save template"
-          : "Failed to save dashboard"
+          : "Failed to save dashboard",
       );
     } finally {
       this.isSaving = false;
@@ -1293,8 +1459,13 @@ class DashboardBuilder {
       }
 
       // Remove column (both old and new class names)
-      if (e.target.closest(".remove-column-btn") || e.target.closest(".remove-col-btn")) {
-        const btn = e.target.closest(".remove-column-btn") || e.target.closest(".remove-col-btn");
+      if (
+        e.target.closest(".remove-column-btn") ||
+        e.target.closest(".remove-col-btn")
+      ) {
+        const btn =
+          e.target.closest(".remove-column-btn") ||
+          e.target.closest(".remove-col-btn");
         const sectionId = btn.dataset.sectionId;
         const areaIndex = parseInt(btn.dataset.areaIndex);
         this.removeColumn(sectionId, areaIndex);
@@ -1305,7 +1476,10 @@ class DashboardBuilder {
         const btn = e.target.closest(".add-row-top-btn");
         const sectionId = btn.dataset.sectionId;
         const areaIndex = parseInt(btn.dataset.areaIndex);
-        const rowIndex = btn.dataset.rowIndex !== undefined ? parseInt(btn.dataset.rowIndex) : 0;
+        const rowIndex =
+          btn.dataset.rowIndex !== undefined
+            ? parseInt(btn.dataset.rowIndex)
+            : 0;
         this.addRowAt(sectionId, areaIndex, rowIndex); // Insert at this position (pushes current down)
       }
 
@@ -1314,7 +1488,10 @@ class DashboardBuilder {
         const btn = e.target.closest(".add-row-bottom-btn");
         const sectionId = btn.dataset.sectionId;
         const areaIndex = parseInt(btn.dataset.areaIndex);
-        const rowIndex = btn.dataset.rowIndex !== undefined ? parseInt(btn.dataset.rowIndex) : -1;
+        const rowIndex =
+          btn.dataset.rowIndex !== undefined
+            ? parseInt(btn.dataset.rowIndex)
+            : -1;
         // Insert after this row: if rowIndex is defined, insert at rowIndex + 1, otherwise -1 means at end
         const insertPosition = rowIndex >= 0 ? rowIndex + 1 : -1;
         this.addRowAt(sectionId, areaIndex, insertPosition);
@@ -1374,7 +1551,9 @@ class DashboardBuilder {
       if (sectionWrapper && areaId) {
         const indicator = sectionWrapper.querySelector(".grid-size-indicator");
         if (indicator) {
-          const part = indicator.querySelector(`.grid-size-part[data-area-id="${areaId}"]`);
+          const part = indicator.querySelector(
+            `.grid-size-part[data-area-id="${areaId}"]`,
+          );
           if (part) {
             if (add) {
               part.classList.add("active");
@@ -1391,7 +1570,9 @@ class DashboardBuilder {
       if (sectionWrapper && rowId) {
         const indicator = sectionWrapper.querySelector(".grid-size-indicator");
         if (indicator) {
-          const rowPart = indicator.querySelector(`.grid-size-row[data-row-id="${rowId}"]`);
+          const rowPart = indicator.querySelector(
+            `.grid-size-row[data-row-id="${rowId}"]`,
+          );
           if (rowPart) {
             if (add) {
               rowPart.classList.add("active");
@@ -1416,7 +1597,11 @@ class DashboardBuilder {
       // Regular dashboard-area (non-nested only)
       const area = e.target.closest(".dashboard-area");
       if (area && !area.classList.contains("dashboard-area-nested")) {
-        highlightIndicatorPart(area.dataset.areaId, area.closest(".dashboard-section-wrapper"), true);
+        highlightIndicatorPart(
+          area.dataset.areaId,
+          area.closest(".dashboard-section-wrapper"),
+          true,
+        );
       }
     });
 
@@ -1433,7 +1618,11 @@ class DashboardBuilder {
       // Regular dashboard-area (non-nested only)
       const area = e.target.closest(".dashboard-area");
       if (area && !area.classList.contains("dashboard-area-nested")) {
-        highlightIndicatorPart(area.dataset.areaId, area.closest(".dashboard-section-wrapper"), false);
+        highlightIndicatorPart(
+          area.dataset.areaId,
+          area.closest(".dashboard-section-wrapper"),
+          false,
+        );
       }
     });
   }
@@ -1455,7 +1644,10 @@ class DashboardBuilder {
     let changed = false;
     if (direction === "increase") {
       // Increase this column's width by 1fr
-      if (widths[areaIndex] < GRID_CONFIG.MAX_COL_FR_UNITS && totalFr < maxTotalFr) {
+      if (
+        widths[areaIndex] < GRID_CONFIG.MAX_COL_FR_UNITS &&
+        totalFr < maxTotalFr
+      ) {
         widths[areaIndex]++;
         changed = true;
       }
@@ -1508,7 +1700,10 @@ class DashboardBuilder {
     let changed = false;
     if (direction === "increase") {
       // Increase this row's height by 1fr
-      if (heights[rowIndex] < GRID_CONFIG.MAX_ROW_FR_UNITS && totalFr < maxTotalFr) {
+      if (
+        heights[rowIndex] < GRID_CONFIG.MAX_ROW_FR_UNITS &&
+        totalFr < maxTotalFr
+      ) {
         heights[rowIndex]++;
         changed = true;
       }
@@ -1662,7 +1857,10 @@ class DashboardBuilder {
 
         // Add removed width to recipient, but cap at MAX_COL_FR_UNITS
         const newWidth = widths[recipientIndex] + removedWidth;
-        widths[recipientIndex] = Math.min(newWidth, GRID_CONFIG.MAX_COL_FR_UNITS);
+        widths[recipientIndex] = Math.min(
+          newWidth,
+          GRID_CONFIG.MAX_COL_FR_UNITS,
+        );
       }
     }
 
@@ -2033,7 +2231,9 @@ class DashboardBuilder {
    * @param {HTMLElement} modal - The modal element containing the buttons container
    */
   generateEmptyColumnButtons(modal) {
-    const container = modal.querySelector(".add-section-empty-columns .d-flex.gap-2");
+    const container = modal.querySelector(
+      ".add-section-empty-columns .d-flex.gap-2",
+    );
     if (!container) return;
 
     // Clear existing buttons
@@ -2070,17 +2270,21 @@ class DashboardBuilder {
         let html = "";
 
         // Iterate through each category group
-        for (const [categorySlug, categoryData] of Object.entries(result.data)) {
+        for (const [categorySlug, categoryData] of Object.entries(
+          result.data,
+        )) {
           // Filter out current template if in template mode
           const filteredTemplates = categoryData.templates
             ? categoryData.templates.filter(
-                (t) => !(this.mode === "template" && t.dtid === this.templateId)
+                (t) =>
+                  !(this.mode === "template" && t.dtid === this.templateId),
               )
             : [];
 
           if (filteredTemplates.length > 0) {
             const categoryName = categoryData.category?.name || categorySlug;
-            const categoryDescription = categoryData.category?.description || "";
+            const categoryDescription =
+              categoryData.category?.description || "";
 
             html += `<div class="template-category">
                       <div class="template-category-header">
@@ -2210,7 +2414,7 @@ class DashboardBuilder {
 
         const sectionCount = templateStructure.sections.length;
         Toast.success(
-          `Added ${sectionCount} section${sectionCount > 1 ? "s" : ""} from template`
+          `Added ${sectionCount} section${sectionCount > 1 ? "s" : ""} from template`,
         );
       } else {
         // In dashboard mode, use API call
@@ -2278,7 +2482,7 @@ class DashboardBuilder {
   async removeSection(sectionId) {
     const confirmed = await ConfirmDialog.delete(
       "Remove this section?",
-      "Confirm Delete"
+      "Confirm Delete",
     );
     if (!confirmed) return;
 
@@ -2286,10 +2490,12 @@ class DashboardBuilder {
 
     try {
       // Use appropriate endpoint based on mode
-      const action = this.mode === "template" ? "remove_template_section" : "remove_section";
-      const idParam = this.mode === "template"
-        ? { template_id: this.templateId }
-        : { dashboard_id: this.dashboardId };
+      const action =
+        this.mode === "template" ? "remove_template_section" : "remove_section";
+      const idParam =
+        this.mode === "template"
+          ? { template_id: this.templateId }
+          : { dashboard_id: this.dashboardId };
 
       const result = await Ajax.post(action, {
         ...idParam,
