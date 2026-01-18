@@ -86,7 +86,7 @@ export class KeyboardNavigation {
     }
 
     // Tweak mode keyboard shortcuts
-    if (isTweakMode && e.altKey) {
+    if (isTweakMode && e.altKey && !e.shiftKey) {
       // Alt+Home/End - Add row above/below
       if (e.key === "Home" || e.key === "End") {
         this.handleTweakAddRow(e.key === "Home" ? "above" : "below");
@@ -102,17 +102,56 @@ export class KeyboardNavigation {
       }
 
       // Alt+Backspace - Delete selected column or row
-      if (e.key === "Backspace") {
+      if (e.key === "Backspace" && !e.ctrlKey) {
         this.handleTweakDelete();
         e.preventDefault();
         return;
       }
 
-      // Alt+Arrows - Expand/shrink row or column
+      // Ctrl+Alt+Backspace - Delete section
+      if (e.key === "Backspace" && e.ctrlKey) {
+        this.handleDeleteSection();
+        e.preventDefault();
+        return;
+      }
+
+      // Alt+Arrows (without Shift) - Expand/shrink row or column
       if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
         this.handleTweakResize(e.key.replace("Arrow", "").toLowerCase());
         e.preventDefault();
         return;
+      }
+    }
+
+    // Dragging/moving shortcuts (require navigation mode and tweak mode)
+    if (isTweakMode && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+      const direction = e.key.replace("Arrow", "").toLowerCase();
+
+      // Shift+Arrow - Move sections up/down
+      if (e.shiftKey && !e.ctrlKey && !e.altKey) {
+        if (direction === "up" || direction === "down") {
+          this.handleMoveSection(direction);
+          e.preventDefault();
+          return;
+        }
+      }
+
+      // Shift+Ctrl+Arrow - Move columns left/right
+      if (e.shiftKey && e.ctrlKey && !e.altKey) {
+        if (direction === "left" || direction === "right") {
+          this.handleMoveColumn(direction);
+          e.preventDefault();
+          return;
+        }
+      }
+
+      // Shift+Alt+Arrow - Move rows up/down
+      if (e.shiftKey && e.altKey && !e.ctrlKey) {
+        if (direction === "up" || direction === "down") {
+          this.handleMoveRow(direction);
+          e.preventDefault();
+          return;
+        }
       }
     }
 
@@ -122,7 +161,7 @@ export class KeyboardNavigation {
     }
 
     // Don't navigate if any modifier is pressed
-    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
 
     this.handleArrowNavigation(e);
   }
@@ -900,6 +939,177 @@ export class KeyboardNavigation {
         this.restoreFocusToArea(context.sectionId, context.areaIndex, null);
       }
     }
+  }
+
+  /**
+   * Handle delete section (Ctrl+Alt+Backspace)
+   * Deletes the entire section containing the focused area
+   */
+  async handleDeleteSection() {
+    const context = this.getFocusedAreaContext();
+    if (!context) return;
+
+    const builder = this.getDashboardBuilder();
+    if (!builder) return;
+
+    // Get section count and index before deletion
+    const container = this.getContainer();
+    if (!container) return;
+
+    const allSections = Array.from(container.querySelectorAll(".dashboard-section"));
+    const currentSection = document.querySelector(
+      `.dashboard-section[data-section-id="${context.sectionId}"]`
+    );
+    if (!currentSection) return;
+
+    const currentIndex = allSections.indexOf(currentSection);
+    const sectionCountBefore = allSections.length;
+
+    // Call removeSection (which shows confirmation dialog)
+    await builder.removeSection(context.sectionId);
+
+    // Check if section was actually deleted
+    const sectionsAfter = container.querySelectorAll(".dashboard-section");
+    const sectionCountAfter = sectionsAfter.length;
+
+    if (sectionCountAfter < sectionCountBefore) {
+      // Section was deleted
+      if (sectionCountAfter > 0) {
+        // Focus on adjacent section (previous if exists, otherwise next)
+        const newIndex = Math.min(currentIndex, sectionCountAfter - 1);
+        const newSection = sectionsAfter[newIndex];
+        if (newSection) {
+          const newSectionId = newSection.dataset.sectionId;
+          // Focus on first area of the new section
+          this.restoreFocusToArea(newSectionId, 0, null);
+        }
+      }
+      // If no sections left, nothing to focus on
+    } else {
+      // Cancelled - restore focus to the original area
+      this.restoreFocusToArea(
+        context.sectionId,
+        context.areaIndex,
+        context.isSubRow ? context.rowIndex : null
+      );
+    }
+  }
+
+  /**
+   * Handle moving section up/down (Shift+Arrow)
+   * @param {string} direction - "up" or "down"
+   */
+  async handleMoveSection(direction) {
+    const context = this.getFocusedAreaContext();
+    if (!context) return;
+
+    const builder = this.getDashboardBuilder();
+    if (!builder) return;
+
+    // Get current section index
+    const container = this.getContainer();
+    if (!container) return;
+
+    const allSections = Array.from(container.querySelectorAll(".dashboard-section"));
+    const currentSection = document.querySelector(
+      `.dashboard-section[data-section-id="${context.sectionId}"]`
+    );
+    if (!currentSection) return;
+
+    const currentIndex = allSections.indexOf(currentSection);
+    if (currentIndex === -1) return;
+
+    // Check if move is possible
+    if (direction === "up" && currentIndex === 0) return;
+    if (direction === "down" && currentIndex === allSections.length - 1) return;
+
+    // Move section
+    await builder.moveSection(context.sectionId, direction);
+
+    // Restore focus to the same area in the moved section
+    this.restoreFocusToArea(
+      context.sectionId,
+      context.areaIndex,
+      context.isSubRow ? context.rowIndex : null
+    );
+  }
+
+  /**
+   * Handle moving column left/right (Shift+Ctrl+Arrow)
+   * @param {string} direction - "left" or "right"
+   */
+  async handleMoveColumn(direction) {
+    const context = this.getFocusedAreaContext();
+    if (!context) return;
+
+    const builder = this.getDashboardBuilder();
+    if (!builder) return;
+
+    // Get current column count
+    const section = document.querySelector(
+      `.dashboard-section[data-section-id="${context.sectionId}"]`
+    );
+    if (!section) return;
+
+    const columnCount = section.querySelectorAll(":scope > .dashboard-area").length;
+
+    // Check if move is possible
+    if (direction === "left" && context.areaIndex === 0) return;
+    if (direction === "right" && context.areaIndex === columnCount - 1) return;
+
+    // Move column
+    await builder.moveColumn(context.sectionId, context.areaIndex, direction);
+
+    // Calculate new area index after move
+    const newAreaIndex = direction === "left" ? context.areaIndex - 1 : context.areaIndex + 1;
+
+    // Restore focus to the moved column
+    this.restoreFocusToArea(
+      context.sectionId,
+      newAreaIndex,
+      context.isSubRow ? context.rowIndex : null
+    );
+  }
+
+  /**
+   * Handle moving row up/down (Shift+Alt+Arrow)
+   * @param {string} direction - "up" or "down"
+   */
+  async handleMoveRow(direction) {
+    const context = this.getFocusedAreaContext();
+    if (!context) return;
+
+    // Only works for sub-rows
+    if (!context.isSubRow) return;
+
+    const builder = this.getDashboardBuilder();
+    if (!builder) return;
+
+    // Get current row count
+    const section = document.querySelector(
+      `.dashboard-section[data-section-id="${context.sectionId}"]`
+    );
+    if (!section) return;
+
+    const area = section.querySelector(
+      `.dashboard-area[data-area-index="${context.areaIndex}"]`
+    );
+    if (!area) return;
+
+    const rowCount = area.querySelectorAll(".dashboard-sub-row").length;
+
+    // Check if move is possible
+    if (direction === "up" && context.rowIndex === 0) return;
+    if (direction === "down" && context.rowIndex === rowCount - 1) return;
+
+    // Move row
+    await builder.moveRow(context.sectionId, context.areaIndex, context.rowIndex, direction);
+
+    // Calculate new row index after move
+    const newRowIndex = direction === "up" ? context.rowIndex - 1 : context.rowIndex + 1;
+
+    // Restore focus to the moved row
+    this.restoreFocusToArea(context.sectionId, context.areaIndex, newRowIndex);
   }
 
   /**

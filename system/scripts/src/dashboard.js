@@ -1369,6 +1369,117 @@ class DashboardBuilder {
     }
   }
 
+  /**
+   * Move a section up or down by one position
+   * @param {string} sectionId - The section ID
+   * @param {string} direction - "up" or "down"
+   */
+  async moveSection(sectionId, direction) {
+    try {
+      const structure = JSON.parse(this.currentDashboard.structure);
+      const currentIndex = structure.sections.findIndex(
+        (s) => s.sid === sectionId,
+      );
+
+      if (currentIndex === -1) return;
+
+      const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+      // Check bounds
+      if (newIndex < 0 || newIndex >= structure.sections.length) return;
+
+      // Swap sections
+      const temp = structure.sections[currentIndex];
+      structure.sections[currentIndex] = structure.sections[newIndex];
+      structure.sections[newIndex] = temp;
+
+      // Update structure and save
+      this.currentDashboard.structure = JSON.stringify(structure);
+      await this.saveDashboard(false);
+      this.renderDashboard();
+    } catch (error) {
+      console.error("Move section error:", error);
+      Toast.error("Failed to move section");
+    }
+  }
+
+  /**
+   * Move a column left or right by one position within a section
+   * @param {string} sectionId - The section ID
+   * @param {number} areaIndex - The current column index
+   * @param {string} direction - "left" or "right"
+   */
+  async moveColumn(sectionId, areaIndex, direction) {
+    try {
+      const structure = JSON.parse(this.currentDashboard.structure);
+      const sectionData = structure.sections.find((s) => s.sid === sectionId);
+
+      if (!sectionData) return;
+
+      const newIndex = direction === "left" ? areaIndex - 1 : areaIndex + 1;
+
+      // Check bounds
+      if (newIndex < 0 || newIndex >= sectionData.areas.length) return;
+
+      // Swap areas
+      const temp = sectionData.areas[areaIndex];
+      sectionData.areas[areaIndex] = sectionData.areas[newIndex];
+      sectionData.areas[newIndex] = temp;
+
+      // Also swap column widths
+      const widths = sectionData.gridTemplate.split(" ");
+      const tempWidth = widths[areaIndex];
+      widths[areaIndex] = widths[newIndex];
+      widths[newIndex] = tempWidth;
+      sectionData.gridTemplate = widths.join(" ");
+
+      // Update structure and save
+      this.currentDashboard.structure = JSON.stringify(structure);
+      await this.saveDashboard(false);
+      this.renderDashboard();
+    } catch (error) {
+      console.error("Move column error:", error);
+      Toast.error("Failed to move column");
+    }
+  }
+
+  /**
+   * Move a row up or down by one position within a nested area
+   * @param {string} sectionId - The section ID
+   * @param {number} areaIndex - The column index
+   * @param {number} rowIndex - The current row index
+   * @param {string} direction - "up" or "down"
+   */
+  async moveRow(sectionId, areaIndex, rowIndex, direction) {
+    try {
+      const structure = JSON.parse(this.currentDashboard.structure);
+      const sectionData = structure.sections.find((s) => s.sid === sectionId);
+
+      if (!sectionData) return;
+
+      const areaData = sectionData.areas[areaIndex];
+      if (!areaData || !areaData.subRows) return;
+
+      const newIndex = direction === "up" ? rowIndex - 1 : rowIndex + 1;
+
+      // Check bounds
+      if (newIndex < 0 || newIndex >= areaData.subRows.length) return;
+
+      // Swap rows
+      const temp = areaData.subRows[rowIndex];
+      areaData.subRows[rowIndex] = areaData.subRows[newIndex];
+      areaData.subRows[newIndex] = temp;
+
+      // Update structure and save
+      this.currentDashboard.structure = JSON.stringify(structure);
+      await this.saveDashboard(false);
+      this.renderDashboard();
+    } catch (error) {
+      console.error("Move row error:", error);
+      Toast.error("Failed to move row");
+    }
+  }
+
   async saveDashboard(showToast = false) {
     if (!this.currentDashboard || this.isSaving) return;
 
@@ -1951,8 +2062,29 @@ class DashboardBuilder {
     Toast.success("Column added");
   }
 
-  async removeColumn(sectionId, areaIndex) {
+  async removeColumn(sectionId, areaIndex, skipConfirm = false) {
     if (this.isReadOnly) return;
+
+    // Store focused element for restoration if cancelled
+    const focusedElement = document.activeElement;
+
+    if (!skipConfirm) {
+      const confirmed = await ConfirmDialog.delete(
+        "Remove this column?",
+        "Confirm Delete",
+      );
+      if (!confirmed) {
+        // Restore focus if navigation mode is on
+        if (
+          window.keyboardNavigation?.isNavigationEnabled() &&
+          focusedElement &&
+          document.contains(focusedElement)
+        ) {
+          focusedElement.focus();
+        }
+        return;
+      }
+    }
 
     const structure = JSON.parse(this.currentDashboard.structure);
     const section = structure.sections.find((s) => s.sid === sectionId);
@@ -2197,8 +2329,29 @@ class DashboardBuilder {
     await this.addRowAt(sectionId, areaIndex, -1);
   }
 
-  async removeRow(sectionId, areaIndex, rowIndex) {
+  async removeRow(sectionId, areaIndex, rowIndex, skipConfirm = false) {
     if (this.isReadOnly) return;
+
+    // Store focused element for restoration if cancelled
+    const focusedElement = document.activeElement;
+
+    if (!skipConfirm) {
+      const confirmed = await ConfirmDialog.delete(
+        "Remove this row?",
+        "Confirm Delete",
+      );
+      if (!confirmed) {
+        // Restore focus if navigation mode is on
+        if (
+          window.keyboardNavigation?.isNavigationEnabled() &&
+          focusedElement &&
+          document.contains(focusedElement)
+        ) {
+          focusedElement.focus();
+        }
+        return;
+      }
+    }
 
     const structure = JSON.parse(this.currentDashboard.structure);
     const section = structure.sections.find((s) => s.sid === sectionId);
@@ -2634,11 +2787,24 @@ class DashboardBuilder {
   }
 
   async removeSection(sectionId) {
+    // Store focused element for restoration if cancelled
+    const focusedElement = document.activeElement;
+
     const confirmed = await ConfirmDialog.delete(
       "Remove this section?",
       "Confirm Delete",
     );
-    if (!confirmed) return;
+    if (!confirmed) {
+      // Restore focus if navigation mode is on
+      if (
+        window.keyboardNavigation?.isNavigationEnabled() &&
+        focusedElement &&
+        document.contains(focusedElement)
+      ) {
+        focusedElement.focus();
+      }
+      return;
+    }
 
     Loading.show("Removing section...");
 
