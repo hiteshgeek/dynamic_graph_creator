@@ -447,7 +447,7 @@ export default class FilterManager {
                 break;
 
             case 'number':
-                inputHtml = `<input type="number" class="form-control" id="${inputId}" data-filter-key="${key}" value="${defaultVal}" onkeydown="return !['e','E','+','-'].includes(event.key)" oninput="this.value=this.value.replace(/[eE+\\-]/g,'')">`;
+                inputHtml = `<input type="text" inputmode="decimal" class="form-control" id="${inputId}" data-filter-key="${key}" value="${defaultVal}" placeholder="Enter number" oninput="this.value=this.value.replace(/[^0-9.]/g,'')">`;
                 break;
 
             case 'select':

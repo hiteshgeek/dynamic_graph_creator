@@ -1,6 +1,23 @@
 // Generic Filter Styles (Reusable)
 @use "variables" as *;
 
+// Filter key badge mixin - reusable placeholder style
+@mixin filter-key-badge {
+  display: inline-block;
+  background: $primary;
+  color: white;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: monospace;
+  font-weight: $font-weight-medium;
+}
+
+// Standalone class for filter key badge
+.filter-key-badge {
+  @include filter-key-badge;
+}
+
 // Filter List Page
 .filter-list-page {
   // Padding handled by body > .container rule in _common.scss
@@ -10,11 +27,7 @@
     margin-bottom: 0.5rem;
 
     code {
-      background: var(--dgc-gray-100);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      color: var(--dgc-text-secondary);
+      @include filter-key-badge;
     }
   }
 
@@ -1024,16 +1037,24 @@
   }
 
   .filter-nav-key {
-    font-size: 11px;
-    color: var(--dgc-text-hint);
-    font-family: monospace;
+    @include filter-key-badge;
+    font-size: 10px;
+    padding: 1px 6px;
   }
 
   .filter-nav-source {
     font-size: 10px;
-    color: var(--dgc-text-hint);
     margin-left: auto;
     flex-shrink: 0;
+
+    // Match card data source colors
+    &.query {
+      color: $primary;
+    }
+
+    &.static {
+      color: $gray-500;
+    }
   }
 }
 

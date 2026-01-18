@@ -160,11 +160,13 @@ body {
 // Toast notifications (using dgc- prefix to avoid Bootstrap conflict)
 .dgc-toast-container {
   position: fixed;
-  top: 65px; // 5px below the header (60px height)
-  right: $spacing-lg;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: $z-tooltip;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: $spacing-sm;
 }
 
@@ -253,11 +255,11 @@ body {
 
 @keyframes dgcSlideIn {
   from {
-    transform: translateX(100%);
+    transform: translateY(-20px);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: translateY(0);
     opacity: 1;
   }
 }

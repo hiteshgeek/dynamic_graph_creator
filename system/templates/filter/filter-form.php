@@ -41,9 +41,13 @@
                             <span class="filter-nav-name"><?php echo htmlspecialchars($f['filter_label']); ?></span>
                             <span class="filter-nav-key"><?php echo htmlspecialchars($f['filter_key']); ?></span>
                         </span>
-                        <?php if ($f['data_source'] === 'query'): ?>
-                        <span class="filter-nav-source" title="Query"><i class="fas fa-database"></i></span>
-                        <?php endif; ?>
+                        <span class="filter-nav-source <?php echo $f['data_source']; ?>" title="<?php echo $f['data_source'] === 'query' ? 'Query' : 'Static'; ?>">
+                            <?php if ($f['data_source'] === 'query'): ?>
+                            <i class="fas fa-database"></i>
+                            <?php else: ?>
+                            <i class="fas fa-list-ul"></i>
+                            <?php endif; ?>
+                        </span>
                     </a>
                 <?php endforeach; ?>
             </div>
