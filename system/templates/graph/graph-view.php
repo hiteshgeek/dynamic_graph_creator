@@ -12,7 +12,16 @@
         <aside class="graph-view-sidebar">
             <div class="sidebar-header">
                 <span class="sidebar-title">All Charts</span>
-                <span class="sidebar-count"><?php echo $totalGraphs; ?></span>
+                <span class="sidebar-count"><?php
+                    $currentIndex = 0;
+                    foreach ($allGraphs as $index => $g) {
+                        if ($g->getId() == $graph->getId()) {
+                            $currentIndex = $index + 1;
+                            break;
+                        }
+                    }
+                    echo $currentIndex . ' of ' . $totalGraphs;
+                ?></span>
             </div>
             <div class="graph-list-nav">
                 <?php foreach ($allGraphs as $index => $g): ?>
@@ -142,6 +151,13 @@
                             <?php endforeach; ?>
                         </div>
                         <div class="filter-actions">
+                            <div class="auto-apply-toggle">
+                                <span class="auto-apply-label">Live Filtering</span>
+                                <div class="form-check form-switch custom-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="auto-apply-switch">
+                                </div>
+                            </div>
+                            <div class="filter-actions-separator"></div>
                             <button type="button" class="btn btn-primary btn-sm filter-apply-btn">
                                 <i class="fas fa-check"></i> Apply Filters
                             </button>

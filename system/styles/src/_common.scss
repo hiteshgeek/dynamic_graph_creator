@@ -157,6 +157,56 @@ body {
   }
 }
 
+// Custom Bootstrap Tabs - minimal style with bottom border only on active
+.nav-tabs.dgc-tabs {
+  border-bottom: 1px solid var(--dgc-border-color);
+  gap: $spacing-xs;
+
+  .nav-item {
+    margin-bottom: -1px;
+  }
+
+  .nav-link {
+    color: var(--dgc-text-secondary);
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    background: none;
+    border-radius: 0;
+    transition: color $transition-fast, border-color $transition-fast;
+
+    i {
+      margin-right: $spacing-xs;
+    }
+
+    &:hover {
+      color: var(--dgc-text-primary);
+      border-bottom-color: var(--dgc-border-color);
+    }
+
+    &.active {
+      color: $primary;
+      border-bottom-color: $primary;
+      background: none;
+    }
+  }
+}
+
+// Tab content for dgc-tabs
+.dgc-tab-content {
+  padding-top: $spacing-md;
+
+  > .tab-pane {
+    display: none;
+
+    &.active {
+      display: block;
+    }
+  }
+}
+
 // Toast notifications (using dgc- prefix to avoid Bootstrap conflict)
 .dgc-toast-container {
   position: fixed;

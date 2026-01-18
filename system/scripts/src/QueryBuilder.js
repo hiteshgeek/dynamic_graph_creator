@@ -31,11 +31,17 @@ export default class QueryBuilder {
         this.textarea = this.container.querySelector('.query-editor');
         this.resultContainer = this.container.querySelector('.query-test-result');
 
-        // Find the graph data section (sibling section for displaying query results)
+        // Find elements for tabbed query display and sample data
         const graphMain = this.container.closest('.graph-main');
         if (graphMain) {
-            this.graphDataSection = graphMain.querySelector('.graph-data-section');
-            this.graphDataContent = graphMain.querySelector('.graph-data-content');
+            // Test Query tab elements
+            this.testQueryTabItem = graphMain.querySelector('#test-query-tab-item');
+            this.testQueryTab = graphMain.querySelector('#test-query-tab');
+            this.testQueryContent = graphMain.querySelector('.test-query-content');
+
+            // Sample data section (alongside data mapper)
+            this.sampleDataCol = graphMain.querySelector('.sample-data-col');
+            this.sampleDataContainer = graphMain.querySelector('.sample-data-container');
         }
 
         // Initialize CodeMirror if available
@@ -180,89 +186,89 @@ export default class QueryBuilder {
         this.resultContainer.innerHTML = statusHtml;
         this.resultContainer.style.display = 'block';
 
-        // Show debug query and data table in separate Graph Data section
-        if (this.graphDataSection && this.graphDataContent) {
-            let dataHtml = '';
+        // Show test query in Test Query tab
+        if (this.testQueryTabItem && this.testQueryContent && debugQuery) {
+            // Show the Test Query tab
+            this.testQueryTabItem.style.display = '';
 
-            // Add debug query textarea (CodeMirror will replace it) with copy button overlay
-            if (debugQuery) {
-                dataHtml += `
-                    <div class="debug-query-wrapper">
-                        <button type="button" class="btn btn-sm btn-outline-secondary copy-debug-query-btn" title="Copy SQL">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                        <textarea class="query-debug-textarea" style="display:none;">${this.escapeHtml(debugQuery)}</textarea>
-                    </div>
-                `;
-            }
+            // Build test query content with CodeMirror
+            const queryHtml = `
+                <div class="debug-query-wrapper">
+                    <button type="button" class="btn btn-sm btn-outline-secondary copy-debug-query-btn" title="Copy SQL">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                    <textarea class="query-debug-textarea" style="display:none;">${this.escapeHtml(debugQuery)}</textarea>
+                </div>
+            `;
 
-            // Add sample data table if rows exist
-            if (rows && rows.length > 0) {
-                dataHtml += `
-                    <div class="query-sample-data">
-                        <div class="query-result-table-wrapper">
-                            <table class="query-result-table">
-                                <thead>
-                                    <tr>
-                                        ${columns.map(col => `<th>${this.escapeHtml(col)}</th>`).join('')}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${rows.map(row => `
-                                        <tr>
-                                            ${columns.map(col => `<td>${this.escapeHtml(row[col])}</td>`).join('')}
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `;
-            }
+            this.testQueryContent.innerHTML = queryHtml;
 
-            if (dataHtml) {
-                // Update section header with subtitle
-                const sectionHeader = this.graphDataSection.querySelector('.graph-section-header');
-                if (sectionHeader) {
-                    sectionHeader.innerHTML = `
-                        <h3><i class="fas fa-table"></i> Graph Data</h3>
-                        <small class="text-muted">Test query (placeholders replaced)</small>
-                    `;
-                }
+            // Initialize CodeMirror for debug query display
+            if (typeof CodeMirror !== 'undefined') {
+                const debugTextarea = this.testQueryContent.querySelector('.query-debug-textarea');
+                if (debugTextarea) {
+                    this.debugEditor = CodeMirror.fromTextArea(debugTextarea, {
+                        mode: 'text/x-sql',
+                        theme: 'default',
+                        lineNumbers: true,
+                        lineWrapping: true,
+                        readOnly: true
+                    });
+                    this.debugEditor.setSize(null, 'auto');
 
-                this.graphDataContent.innerHTML = dataHtml;
-                this.graphDataSection.style.display = 'block';
-
-                // Initialize CodeMirror for debug query display
-                if (debugQuery && typeof CodeMirror !== 'undefined') {
-                    const debugTextarea = this.graphDataContent.querySelector('.query-debug-textarea');
-                    if (debugTextarea) {
-                        const debugEditor = CodeMirror.fromTextArea(debugTextarea, {
-                            mode: 'text/x-sql',
-                            theme: 'default',
-                            lineNumbers: true,
-                            lineWrapping: true,
-                            readOnly: true
-                        });
-                        // Auto-height: show full content without scrolling
-                        debugEditor.setSize(null, 'auto');
-                    }
-
-                    // Bind copy button for debug query
-                    const copyDebugBtn = this.graphDataContent.querySelector('.copy-debug-query-btn');
-                    if (copyDebugBtn) {
-                        copyDebugBtn.addEventListener('click', () => {
-                            navigator.clipboard.writeText(debugQuery).then(() => {
-                                this.showDebugCopyFeedback(copyDebugBtn, 'Copied!', true);
-                            }).catch(() => {
-                                this.showDebugCopyFeedback(copyDebugBtn, 'Copied!', false);
-                            });
+                    // Refresh CodeMirror when tab becomes visible
+                    if (this.testQueryTab) {
+                        this.testQueryTab.addEventListener('shown.bs.tab', () => {
+                            if (this.debugEditor) {
+                                this.debugEditor.refresh();
+                            }
                         });
                     }
                 }
-            } else {
-                this.graphDataSection.style.display = 'none';
+
+                // Bind copy button for debug query
+                const copyDebugBtn = this.testQueryContent.querySelector('.copy-debug-query-btn');
+                if (copyDebugBtn) {
+                    copyDebugBtn.addEventListener('click', () => {
+                        navigator.clipboard.writeText(debugQuery).then(() => {
+                            this.showDebugCopyFeedback(copyDebugBtn, 'Copied!', true);
+                        }).catch(() => {
+                            this.showDebugCopyFeedback(copyDebugBtn, 'Copied!', false);
+                        });
+                    });
+                }
             }
+        }
+
+        // Show data table alongside Data Mapping section
+        if (this.sampleDataCol && this.sampleDataContainer && rows && rows.length > 0) {
+            const tableHtml = `
+                <div class="graph-section-header">
+                    <h3><i class="fas fa-table"></i> Query Results</h3>
+                    <small class="text-muted">${rowCount} row${rowCount !== 1 ? 's' : ''} returned</small>
+                </div>
+                <div class="query-result-table-wrapper">
+                    <table class="query-result-table">
+                        <thead>
+                            <tr>
+                                ${columns.map(col => `<th>${this.escapeHtml(col)}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows.map(row => `
+                                <tr>
+                                    ${columns.map(col => `<td>${this.escapeHtml(row[col])}</td>`).join('')}
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            this.sampleDataContainer.innerHTML = tableHtml;
+            this.sampleDataCol.style.display = '';
+        } else if (this.sampleDataCol) {
+            this.sampleDataCol.style.display = 'none';
         }
     }
 

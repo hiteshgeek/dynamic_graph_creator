@@ -436,6 +436,9 @@
 }
 
 .graph-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: $spacing-md;
 
   h3 {
@@ -453,10 +456,8 @@
     }
   }
 
-  // Subtitle text below header
+  // Subtitle text inline with header
   small {
-    display: block;
-    margin-top: $spacing-xs;
     font-size: $font-size-sm;
   }
 }
@@ -493,14 +494,6 @@
   &.active {
     color: var(--dgc-primary);
     border-bottom-color: var(--dgc-primary);
-  }
-}
-
-.query-tab-content {
-  display: none;
-
-  &.active {
-    display: block;
   }
 }
 
@@ -1731,9 +1724,89 @@
   // Filter actions
   .filter-actions {
     display: flex;
-    justify-content: flex-start;
+    align-items: center;
+    gap: $spacing-md;
     padding-top: $spacing-sm;
     border-top: 1px solid var(--dgc-border-color);
+
+    .auto-apply-toggle {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+
+      .auto-apply-label {
+        font-size: $font-size-sm;
+        color: var(--dgc-text-secondary);
+      }
+    }
+
+    .filter-actions-separator {
+      width: 1px;
+      height: 20px;
+      background: var(--dgc-border-color);
+    }
+  }
+}
+
+// Split Row Layout - reusable for side-by-side sections
+.split-row {
+  display: flex;
+  gap: $spacing-lg;
+  padding: $spacing-lg;
+  border-bottom: 1px solid var(--dgc-border-color);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .split-col {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border-bottom: none;
+
+    // Add vertical separator for all columns except first
+    &:not(:first-child) {
+      padding-left: $spacing-lg;
+      border-left: 1px solid var(--dgc-border-color);
+    }
+  }
+
+  @media (max-width: 1200px) {
+    flex-direction: column;
+
+    .split-col {
+      flex: none;
+      width: 100%;
+
+      // Switch to horizontal separator on stack
+      &:not(:first-child) {
+        padding-left: 0;
+        border-left: none;
+        padding-top: $spacing-lg;
+        border-top: 1px solid var(--dgc-border-color);
+      }
+    }
+  }
+}
+
+// Query Section - uses dgc-tabs from _common.scss
+.query-section {
+  .dgc-tabs {
+    margin-bottom: $spacing-md;
+  }
+
+  .test-query-content {
+    .debug-query-wrapper {
+      position: relative;
+    }
+  }
+}
+
+// Sample Data Column (alongside Data Mapper)
+.sample-data-col {
+  .graph-section-header {
+    margin-bottom: $spacing-md;
   }
 }
 

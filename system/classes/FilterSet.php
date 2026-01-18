@@ -101,25 +101,94 @@ class FilterSet
                 $value = $filter->getDefaultValue();
             }
 
-            // Escape the value for SQL safety
-            if (is_array($value)) {
-                // Handle multi-value filters (multi-select, checkbox)
-                $escaped_parts = array();
-                foreach ($value as $v) {
-                    $escaped_parts[] = "'" . $db->escapeString($v) . "'";
-                }
-                $escaped_value = implode(',', $escaped_parts);
-            } else {
-                $escaped_value = "'" . $db->escapeString($value) . "'";
-            }
+            // Check if value is empty
+            $isEmpty = $this->isValueEmpty($value);
 
-            // Replace the placeholder in the query
-            // Handle both :key and ::key formats
-            $query = str_replace($key, $escaped_value, $query);
+            if (!$isEmpty) {
+                // Escape the value for SQL safety
+                if (is_array($value)) {
+                    // Handle multi-value filters (multi-select, checkbox)
+                    $escaped_parts = array();
+                    foreach ($value as $v) {
+                        $escaped_parts[] = "'" . $db->escapeString($v) . "'";
+                    }
+                    $escaped_value = implode(',', $escaped_parts);
+                } else {
+                    $escaped_value = "'" . $db->escapeString($value) . "'";
+                }
+
+                // Replace the placeholder in the query
+                $query = str_replace($key, $escaped_value, $query);
+            } else {
+                // Value is empty - if filter is not required, replace condition with 1=1
+                if (!$filter->getIsRequired()) {
+                    $query = $this->replaceConditionWithTrue($query, $key);
+                }
+                // If required but empty, validation should have caught this
+            }
         }
 
         // Clean up any remaining placeholders that weren't matched
         return $this->cleanUnusedPlaceholders($query);
+    }
+
+    /**
+     * Check if a filter value is empty
+     *
+     * @param mixed $value
+     * @return bool
+     */
+    private function isValueEmpty($value)
+    {
+        if ($value === null || $value === '') {
+            return true;
+        }
+        if (is_array($value)) {
+            $filtered = array_filter($value, function ($v) {
+                return $v !== null && $v !== '';
+            });
+            return empty($filtered);
+        }
+        return false;
+    }
+
+    /**
+     * Replace a condition containing a placeholder with 1=1
+     *
+     * @param string $query
+     * @param string $placeholder
+     * @return string
+     */
+    private function replaceConditionWithTrue($query, $placeholder)
+    {
+        // Pattern to match common SQL conditions containing the placeholder
+        // Matches: column = ::placeholder, column IN (::placeholder), column LIKE ::placeholder, etc.
+        $patterns = array(
+            // column IN (::placeholder)
+            '/\b\w+\s+IN\s*\(\s*' . preg_quote($placeholder, '/') . '\s*\)/i',
+            // column NOT IN (::placeholder)
+            '/\b\w+\s+NOT\s+IN\s*\(\s*' . preg_quote($placeholder, '/') . '\s*\)/i',
+            // column = ::placeholder
+            '/\b\w+\s*=\s*' . preg_quote($placeholder, '/') . '/i',
+            // column != ::placeholder or column <> ::placeholder
+            '/\b\w+\s*(<>|!=)\s*' . preg_quote($placeholder, '/') . '/i',
+            // column LIKE ::placeholder
+            '/\b\w+\s+LIKE\s+' . preg_quote($placeholder, '/') . '/i',
+            // column >= ::placeholder
+            '/\b\w+\s*>=\s*' . preg_quote($placeholder, '/') . '/i',
+            // column <= ::placeholder
+            '/\b\w+\s*<=\s*' . preg_quote($placeholder, '/') . '/i',
+            // column > ::placeholder
+            '/\b\w+\s*>\s*' . preg_quote($placeholder, '/') . '/i',
+            // column < ::placeholder
+            '/\b\w+\s*<\s*' . preg_quote($placeholder, '/') . '/i',
+        );
+
+        foreach ($patterns as $pattern) {
+            $query = preg_replace($pattern, '1=1', $query);
+        }
+
+        return $query;
     }
 
     /**
@@ -130,9 +199,12 @@ class FilterSet
      */
     private function cleanUnusedPlaceholders($query)
     {
-        // Replace any remaining ::word placeholders with empty quoted string
-        // Pattern matches ::key format (e.g., ::category, ::year)
-        return preg_replace('/::[a-zA-Z_][a-zA-Z0-9_]*/', "''", $query);
+        // For any remaining placeholders, replace the entire condition with 1=1
+        preg_match_all('/::[a-zA-Z_][a-zA-Z0-9_]*/', $query, $matches);
+        foreach ($matches[0] as $placeholder) {
+            $query = $this->replaceConditionWithTrue($query, $placeholder);
+        }
+        return $query;
     }
 
     /**

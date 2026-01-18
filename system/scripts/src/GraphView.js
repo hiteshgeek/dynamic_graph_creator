@@ -42,6 +42,9 @@ export default class GraphView {
         this.initFilters();
         this.bindEvents();
 
+        // Restore auto-apply setting from localStorage
+        this.restoreAutoApplySetting();
+
         // Always initialize preview and load graph data
         // Filter values will be automatically picked up from pre-selected options (is_selected)
         this.initPreview();
@@ -131,6 +134,7 @@ export default class GraphView {
                         }
                     });
                     updatePlaceholder();
+                    this.onFilterChange();
                 });
             }
 
@@ -146,6 +150,7 @@ export default class GraphView {
                         }
                     });
                     updatePlaceholder();
+                    this.onFilterChange();
                 });
             }
 
@@ -190,9 +195,113 @@ export default class GraphView {
         }
 
         // Apply filters button
-        const applyBtn = this.container.querySelector('.filter-apply-btn');
-        if (applyBtn) {
-            applyBtn.addEventListener('click', () => this.loadGraphData());
+        this.applyBtn = this.container.querySelector('.filter-apply-btn');
+        if (this.applyBtn) {
+            this.applyBtn.addEventListener('click', () => this.loadGraphData());
+        }
+
+        // Auto-apply switch
+        this.autoApplySwitch = this.container.querySelector('#auto-apply-switch');
+        if (this.autoApplySwitch) {
+            this.autoApplySwitch.addEventListener('change', () => this.toggleAutoApply());
+        }
+
+        // Bind filter inputs for auto-apply
+        this.bindFilterInputs();
+    }
+
+    /**
+     * Bind filter inputs for auto-apply functionality
+     */
+    bindFilterInputs() {
+        // Bind standard filter inputs
+        const filterInputs = this.container.querySelectorAll('.filter-input');
+        filterInputs.forEach(input => {
+            // For select, checkbox, radio - trigger on change
+            if (input.tagName === 'SELECT' || input.type === 'checkbox' || input.type === 'radio') {
+                input.addEventListener('change', () => this.onFilterChange());
+            } else {
+                // For text/number inputs - trigger on change (blur) and debounced input
+                input.addEventListener('change', () => this.onFilterChange());
+                input.addEventListener('input', () => this.onFilterInputDebounced());
+            }
+        });
+
+        // Bind checkbox group inputs
+        const checkboxInputs = this.container.querySelectorAll('.filter-checkbox-group input[type="checkbox"], .filter-radio-group input[type="radio"]');
+        checkboxInputs.forEach(input => {
+            input.addEventListener('change', () => this.onFilterChange());
+        });
+
+        // Bind multi-select checkbox inputs
+        const multiSelectInputs = this.container.querySelectorAll('.filter-multiselect-options input[type="checkbox"]');
+        multiSelectInputs.forEach(input => {
+            input.addEventListener('change', () => this.onFilterChange());
+        });
+    }
+
+    /**
+     * Debounced filter input handler
+     */
+    onFilterInputDebounced() {
+        if (!this.autoApplyEnabled) return;
+
+        clearTimeout(this.filterDebounceTimer);
+        this.filterDebounceTimer = setTimeout(() => {
+            this.loadGraphData();
+        }, 500);
+    }
+
+    /**
+     * Handle filter change
+     */
+    onFilterChange() {
+        if (this.autoApplyEnabled) {
+            this.loadGraphData();
+        }
+    }
+
+    /**
+     * Toggle auto-apply mode
+     */
+    toggleAutoApply() {
+        this.autoApplyEnabled = this.autoApplySwitch?.checked || false;
+
+        // Save setting to localStorage
+        localStorage.setItem('dgc_auto_apply_filters', this.autoApplyEnabled ? '1' : '0');
+
+        // Hide/show apply button and separator
+        this.updateAutoApplyUI();
+
+        // If auto-apply is enabled, apply immediately
+        if (this.autoApplyEnabled) {
+            this.loadGraphData();
+        }
+    }
+
+    /**
+     * Restore auto-apply setting from localStorage
+     */
+    restoreAutoApplySetting() {
+        const saved = localStorage.getItem('dgc_auto_apply_filters');
+        if (saved === '1' && this.autoApplySwitch) {
+            this.autoApplySwitch.checked = true;
+            this.autoApplyEnabled = true;
+            this.updateAutoApplyUI();
+        }
+    }
+
+    /**
+     * Update UI based on auto-apply state
+     */
+    updateAutoApplyUI() {
+        if (this.applyBtn) {
+            this.applyBtn.style.display = this.autoApplyEnabled ? 'none' : '';
+        }
+
+        const separator = this.container.querySelector('.filter-actions-separator');
+        if (separator) {
+            separator.style.display = this.autoApplyEnabled ? 'none' : '';
         }
     }
 
