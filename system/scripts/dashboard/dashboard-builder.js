@@ -1,6 +1,6 @@
 /**
  * Dashboard Builder Page
- * Handles initialization and name editing functionality
+ * Handles initialization and dashboard details editing
  */
 document.addEventListener('DOMContentLoaded', function() {
     // Add page-specific body class for CSS targeting
@@ -10,6 +10,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!container) return;
 
     const dashboardId = container.dataset.dashboardId || null;
+
+    // Initialize autosize for description textareas
+    const newDashboardDescription = document.getElementById('new-dashboard-description');
+    const editDashboardDescription = document.getElementById('edit-dashboard-description');
+    if (newDashboardDescription) autosize(newDashboardDescription);
+    if (editDashboardDescription) autosize(editDashboardDescription);
+
+    // Initialize Bootstrap tooltips
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
 
     // Initialize dashboard builder
     if (typeof DashboardBuilder !== 'undefined') {
@@ -22,92 +32,109 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('DashboardBuilder not loaded. Make sure dashboard.js is included.');
     }
 
-    // Handle dashboard name editing
+    // Handle dashboard details editing via modal
+    const editDetailsBtn = document.getElementById('edit-dashboard-details-btn');
+    const editDetailsModal = document.getElementById('edit-dashboard-details-modal');
+    const saveDetailsBtn = document.getElementById('save-dashboard-details-btn');
     const nameDisplay = document.getElementById('dashboard-name-display');
-    const nameInput = document.getElementById('dashboard-name-input');
-    const editBtn = document.getElementById('edit-name-btn');
-    const saveBtn = document.getElementById('save-name-btn');
-    const cancelBtn = document.getElementById('cancel-name-btn');
 
-    if (nameDisplay && nameInput && editBtn && saveBtn && cancelBtn && dashboardId) {
-        // Edit button - show input, hide display
-        editBtn.addEventListener('click', function() {
-            nameDisplay.style.display = 'none';
-            nameInput.style.display = 'block';
-            nameInput.focus();
-            nameInput.select();
-            editBtn.style.display = 'none';
-            saveBtn.style.display = 'inline-flex';
-            cancelBtn.style.display = 'inline-flex';
+    if (editDetailsBtn && editDetailsModal && dashboardId) {
+        const modal = new bootstrap.Modal(editDetailsModal);
+        const nameInput = document.getElementById('edit-dashboard-name');
+        const descriptionInput = document.getElementById('edit-dashboard-description');
+
+        // Open modal on edit button click
+        editDetailsBtn.addEventListener('click', function() {
+            modal.show();
         });
 
-        // Cancel button - restore display, hide input
-        cancelBtn.addEventListener('click', function() {
-            nameInput.value = nameInput.defaultValue;
-            nameInput.style.display = 'none';
-            nameDisplay.style.display = 'block';
-            editBtn.style.display = 'inline-flex';
-            saveBtn.style.display = 'none';
-            cancelBtn.style.display = 'none';
-        });
+        // Handle Enter key in name input
+        if (nameInput) {
+            nameInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveDetailsBtn.click();
+                }
+            });
+        }
 
-        // Save button - update name
-        saveBtn.addEventListener('click', function() {
-            const newName = nameInput.value.trim();
-            if (!newName) {
-                Toast.error('Dashboard name cannot be empty');
-                return;
-            }
+        // Save details
+        if (saveDetailsBtn) {
+            saveDetailsBtn.addEventListener('click', function() {
+                const newName = nameInput.value.trim();
+                const newDescription = descriptionInput ? descriptionInput.value.trim() : '';
 
-            // Show saving state
-            saveBtn.disabled = true;
-            cancelBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                if (!newName) {
+                    nameInput.classList.add('is-invalid');
+                    Toast.error('Dashboard name cannot be empty');
+                    return;
+                }
 
-            Ajax.post('update_dashboard_name', {
-                    id: dashboardId,
-                    name: newName
-                })
-                .then(result => {
-                    if (result.success) {
-                        Toast.success('Dashboard name updated');
-                        // Update display text and default value
-                        nameDisplay.textContent = newName;
-                        nameInput.defaultValue = newName;
-                        // Switch back to display mode
-                        nameInput.style.display = 'none';
-                        nameDisplay.style.display = 'block';
-                        editBtn.style.display = 'inline-flex';
-                        saveBtn.style.display = 'none';
-                        cancelBtn.style.display = 'none';
-                        saveBtn.innerHTML = '<i class="fas fa-check"></i>';
-                        saveBtn.disabled = false;
-                        cancelBtn.disabled = false;
-                    } else {
-                        Toast.error(result.message || 'Failed to update dashboard name');
-                        saveBtn.innerHTML = '<i class="fas fa-check"></i>';
-                        saveBtn.disabled = false;
-                        cancelBtn.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    Toast.error('Failed to update dashboard name');
-                    saveBtn.innerHTML = '<i class="fas fa-check"></i>';
-                    saveBtn.disabled = false;
-                    cancelBtn.disabled = false;
-                });
-        });
+                nameInput.classList.remove('is-invalid');
 
-        // Handle Enter key to save
-        nameInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                saveBtn.click();
-            } else if (e.key === 'Escape') {
-                e.preventDefault();
-                cancelBtn.click();
-            }
-        });
+                // Show saving state
+                const originalBtnContent = saveDetailsBtn.innerHTML;
+                saveDetailsBtn.disabled = true;
+                saveDetailsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+                Ajax.post('update_dashboard_details', {
+                        id: dashboardId,
+                        name: newName,
+                        description: newDescription
+                    })
+                    .then(result => {
+                        if (result.success) {
+                            Toast.success('Dashboard details updated');
+                            // Update page title
+                            if (nameDisplay) {
+                                nameDisplay.textContent = newName;
+                            }
+                            document.title = newName + ' - Edit Dashboard';
+
+                            // Update description tooltip (convert newlines to <br> for multiline support)
+                            const tooltipEl = document.querySelector('.description-tooltip');
+                            const descriptionHtml = newDescription.replace(/\n/g, '<br>');
+                            if (newDescription) {
+                                if (tooltipEl) {
+                                    // Update existing tooltip
+                                    const tooltip = bootstrap.Tooltip.getInstance(tooltipEl);
+                                    if (tooltip) {
+                                        tooltip.setContent({ '.tooltip-inner': descriptionHtml });
+                                    }
+                                } else {
+                                    // Create new tooltip element with HTML support
+                                    const editor = document.querySelector('.dashboard-name-editor');
+                                    const newTooltip = document.createElement('span');
+                                    newTooltip.className = 'description-tooltip';
+                                    newTooltip.setAttribute('data-bs-toggle', 'tooltip');
+                                    newTooltip.setAttribute('data-bs-placement', 'bottom');
+                                    newTooltip.setAttribute('data-bs-html', 'true');
+                                    newTooltip.setAttribute('title', descriptionHtml);
+                                    newTooltip.innerHTML = '<i class="fas fa-info-circle"></i>';
+                                    editor.insertBefore(newTooltip, editor.querySelector('#edit-dashboard-details-btn'));
+                                    new bootstrap.Tooltip(newTooltip);
+                                }
+                            } else if (tooltipEl) {
+                                // Remove tooltip if description is empty
+                                const tooltip = bootstrap.Tooltip.getInstance(tooltipEl);
+                                if (tooltip) tooltip.dispose();
+                                tooltipEl.remove();
+                            }
+
+                            modal.hide();
+                        } else {
+                            Toast.error(result.message || 'Failed to update dashboard details');
+                        }
+                    })
+                    .catch(error => {
+                        Toast.error('Failed to update dashboard details');
+                    })
+                    .finally(() => {
+                        saveDetailsBtn.disabled = false;
+                        saveDetailsBtn.innerHTML = originalBtnContent;
+                    });
+            });
+        }
     }
 
     // Layout Edit Mode Toggle (Tweak Switch)

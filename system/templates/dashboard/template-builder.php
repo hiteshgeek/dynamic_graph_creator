@@ -10,9 +10,9 @@
     $rightContent = '';
     if (!$template->getIsSystem()) {
         $rightContent .= '<div class="save-indicator saved" style="display: flex;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
-        $rightContent .= '<button class="btn btn-warning btn-sm" id="edit-template-details-btn"><i class="fas fa-pencil"></i> Edit Details</button>';
+        $rightContent .= '<button class="btn-icon btn-warning" id="edit-template-details-btn" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Edit Details"><i class="fas fa-pencil"></i></button>';
     }
-    $rightContent .= '<a href="?urlq=dashboard/template/preview/' . $template->getId() . '" class="btn btn-primary btn-sm btn-view-mode" title="View Mode"><i class="fas fa-eye"></i> View Mode</a>';
+    $rightContent .= '<a href="?urlq=dashboard/template/preview/' . $template->getId() . '" class="btn-icon btn-primary btn-view-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Mode"><i class="fas fa-eye"></i></a>';
     if (!$template->getIsSystem()) {
         $rightContent .= '<div class="form-check form-switch text-switch text-switch-purple"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"><div class="text-switch-track"><span class="text-switch-knob"></span><span class="text-switch-label label-text">Tweak</span></div></div>';
     }

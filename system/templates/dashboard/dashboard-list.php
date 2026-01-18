@@ -1,8 +1,8 @@
 <?php
-    $rightContent = '<a href="?urlq=dashboard/templates" class="btn btn-secondary btn-sm"><i class="fas fa-clone"></i> Templates</a>';
-    $rightContent .= '<a href="?urlq=graph" class="btn btn-secondary btn-sm"><i class="fas fa-chart-line"></i> Graphs</a>';
+    $rightContent = '<a href="?urlq=dashboard/templates" class="btn-icon btn-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Templates"><i class="fas fa-clone"></i></a>';
+    $rightContent .= '<a href="?urlq=graph" class="btn-icon btn-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-line"></i></a>';
     if (!empty($dashboards)) {
-        $rightContent .= '<a href="?urlq=dashboard/builder" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Dashboard</a>';
+        $rightContent .= '<a href="?urlq=dashboard/builder" class="btn-icon btn-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Dashboard"><i class="fas fa-plus"></i></a>';
     }
     echo Utility::renderPageHeader([
         'title' => 'Dashboards',
@@ -38,6 +38,9 @@
                 <div class="item-card" data-dashboard-id="<?php echo $dashboard->getId(); ?>">
                     <div class="item-card-content">
                         <h3><?php echo htmlspecialchars($dashboard->getName()); ?></h3>
+                        <?php if ($dashboard->getDescription()): ?>
+                        <p class="item-card-description"><?php echo htmlspecialchars($dashboard->getDescription()); ?></p>
+                        <?php endif; ?>
                         <div class="item-card-meta">
                             <span class="meta-item">
                                 <i class="fas fa-clock"></i>
@@ -55,12 +58,14 @@
                     <div class="item-card-actions">
                         <a href="?urlq=dashboard/preview/<?php echo $dashboard->getId(); ?>"
                            class="btn-icon btn-primary"
+                           data-bs-toggle="tooltip"
                            title="View Mode">
                             <i class="fas fa-eye"></i>
                         </a>
                         <?php if (!$dashboard->getIsSystem()): ?>
                         <a href="?urlq=dashboard/builder/<?php echo $dashboard->getId(); ?>"
                            class="btn-icon btn-design"
+                           data-bs-toggle="tooltip"
                            title="Design Mode">
                             <i class="fas fa-paint-brush"></i>
                         </a>

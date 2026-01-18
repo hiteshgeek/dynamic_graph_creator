@@ -33,6 +33,9 @@ if (isset($_POST['submit'])) {
         case 'update_dashboard_name':
             updateDashboardName($_POST);
             break;
+        case 'update_dashboard_details':
+            updateDashboardDetails($_POST);
+            break;
         case 'update_area_content':
             updateAreaContent($_POST);
             break;
@@ -171,6 +174,7 @@ function showBuilder($dashboardId = 0)
     // Add libraries
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
 
     // Add page-specific JS
     Utility::addModuleJs('common');
@@ -249,6 +253,7 @@ function createFromTemplate($data)
 {
     $templateId = isset($data['template_id']) ? intval($data['template_id']) : 0;
     $name = isset($data['name']) ? $data['name'] : 'New Dashboard';
+    $description = isset($data['description']) ? $data['description'] : '';
     // TODO: Get actual user ID from session
     $userId = 1;
 
@@ -261,7 +266,7 @@ function createFromTemplate($data)
         Utility::ajaxResponseFalse('Template not found');
     }
 
-    $instance = $template->createInstance($userId, $name);
+    $instance = $template->createInstance($userId, $name, $description);
     if (!$instance->insert()) {
         Utility::ajaxResponseFalse('Failed to create dashboard');
     }
@@ -420,6 +425,50 @@ function updateDashboardName($data)
     Utility::ajaxResponseTrue('Dashboard name updated', array(
         'id' => $dashboard->getId(),
         'name' => $dashboard->getName()
+    ));
+}
+
+/**
+ * Update dashboard details (name and description)
+ */
+function updateDashboardDetails($data)
+{
+    $dashboardId = isset($data['id']) ? intval($data['id']) : 0;
+    $name = isset($data['name']) ? trim($data['name']) : '';
+    $description = isset($data['description']) ? trim($data['description']) : '';
+    // TODO: Get actual user ID from session
+    $userId = 1;
+
+    if (!$dashboardId) {
+        Utility::ajaxResponseFalse('Invalid dashboard ID');
+    }
+
+    if (empty($name)) {
+        Utility::ajaxResponseFalse('Dashboard name cannot be empty');
+    }
+
+    $dashboard = new DashboardInstance($dashboardId);
+    if (!$dashboard->getId()) {
+        Utility::ajaxResponseFalse('Dashboard not found');
+    }
+
+    // Check if user owns this dashboard
+    if ($dashboard->getUserId() != $userId) {
+        Utility::ajaxResponseFalse('Unauthorized');
+    }
+
+    $dashboard->setName($name);
+    $dashboard->setDescription($description);
+    $dashboard->setUpdatedUid($userId);
+
+    if (!$dashboard->update()) {
+        Utility::ajaxResponseFalse('Failed to update dashboard details');
+    }
+
+    Utility::ajaxResponseTrue('Dashboard details updated', array(
+        'id' => $dashboard->getId(),
+        'name' => $dashboard->getName(),
+        'description' => $dashboard->getDescription()
     ));
 }
 

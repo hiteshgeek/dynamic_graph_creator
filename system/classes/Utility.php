@@ -295,8 +295,9 @@ class Utility
      *   - 'badges' (array) Optional. Array of badge configs: ['label' => 'text', 'icon' => 'fa-icon', 'class' => 'badge-system']
      *   - 'leftContent' (string) Optional. Additional HTML for left section (after theme toggle)
      *   - 'rightContent' (string) Optional. HTML for right section (page-header-right)
-     *   - 'titleEditable' (bool) Optional. If true, title can be edited inline (default: false)
+     *   - 'titleEditable' (bool) Optional. If true, title can be edited via modal (default: false)
      *   - 'titleId' (string) Optional. ID for the title element when editable
+     *   - 'titleDescription' (string) Optional. Description to show in info tooltip
      * @return string HTML markup for the page header
      */
     public static function renderPageHeader($options)
@@ -309,6 +310,7 @@ class Utility
         $rightContent = isset($options['rightContent']) ? $options['rightContent'] : '';
         $titleEditable = isset($options['titleEditable']) ? $options['titleEditable'] : false;
         $titleId = isset($options['titleId']) ? $options['titleId'] : '';
+        $titleDescription = isset($options['titleDescription']) ? $options['titleDescription'] : '';
 
         $html = '<div class="page-header">';
         $html .= '<div class="page-header-left">';
@@ -325,12 +327,12 @@ class Utility
             $html .= '<div class="dashboard-name-editor">';
             $idAttr = $titleId ? ' id="' . htmlspecialchars($titleId) . '"' : '';
             $html .= '<h1' . $idAttr . '>' . htmlspecialchars($title) . '</h1>';
-            $inputId = $titleId ? str_replace('-display', '-input', $titleId) : '';
-            $inputIdAttr = $inputId ? ' id="' . htmlspecialchars($inputId) . '"' : '';
-            $html .= '<input type="text"' . $inputIdAttr . ' class="form-control dashboard-name-input" value="' . htmlspecialchars($title) . '" placeholder="Name" style="display: none;">';
-            $html .= '<button id="edit-name-btn" class="btn-icon btn-warning" title="Edit Name"><i class="fas fa-pencil"></i></button>';
-            $html .= '<button id="save-name-btn" class="btn-icon btn-success" title="Save Name" style="display: none;"><i class="fas fa-check"></i></button>';
-            $html .= '<button id="cancel-name-btn" class="btn-icon btn-secondary" title="Cancel" style="display: none;"><i class="fas fa-times"></i></button>';
+            // Info icon with description tooltip (supports multiline with <br>)
+            if ($titleDescription) {
+                $descriptionHtml = nl2br(htmlspecialchars($titleDescription));
+                $html .= '<span class="description-tooltip" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="' . $descriptionHtml . '"><i class="fas fa-info-circle"></i></span>';
+            }
+            $html .= '<button id="edit-dashboard-details-btn" class="btn btn-icon btn-warning" title="Edit Details"><i class="fas fa-pencil"></i></button>';
             $html .= '</div>';
         } else {
             $html .= '<h1>' . htmlspecialchars($title) . '</h1>';

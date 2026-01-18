@@ -343,56 +343,25 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15),
     line-height: 1;
   }
 
-  .dashboard-name-input {
-    // font-size: $font-size-h2;
-    font-weight: 600;
-    min-width: 250px;
+  .description-tooltip {
+    color: var(--dgc-text-secondary);
+    cursor: help;
+    font-size: 1rem;
+
+    &:hover {
+      color: var(--dgc-primary);
+    }
   }
 
   .btn-icon {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
-    padding: 0 !important;
-    border-radius: 50% !important;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--dgc-border-color);
-    background: var(--dgc-bg-card);
-    color: var(--dgc-text-secondary);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 0.875rem;
-    flex-shrink: 0;
+    @include item-card-btn-icon;
 
-    &.btn-warning {
-      border-color: var(--dgc-warning);
-      color: var(--dgc-warning);
+    &.btn-primary {
+      border-color: var(--dgc-primary);
+      color: var(--dgc-primary);
 
       &:hover {
-        background: var(--dgc-warning);
-        color: var(--dgc-text-inverse);
-      }
-    }
-
-    &.btn-success {
-      border-color: var(--dgc-success);
-      color: var(--dgc-success);
-
-      &:hover {
-        background: var(--dgc-success);
-        color: var(--dgc-text-inverse);
-      }
-    }
-
-    &.btn-secondary {
-      border-color: var(--dgc-text-secondary);
-      color: var(--dgc-text-secondary);
-
-      &:hover {
-        background: var(--dgc-text-secondary);
+        background: var(--dgc-primary);
         color: var(--dgc-text-inverse);
       }
     }

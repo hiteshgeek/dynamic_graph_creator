@@ -1,9 +1,10 @@
 <?php
+    $saveButtonClass = $filter ? 'btn-outline-warning' : 'btn-primary';
     echo Utility::renderPageHeader([
         'title' => $filter ? 'Edit Filter' : 'Create Filter',
         'backUrl' => '?urlq=filters',
         'backLabel' => 'Filters',
-        'rightContent' => '<button type="button" class="btn btn-outline-primary btn-sm save-filter-btn" data-save-btn><i class="fas fa-save"></i> ' . ($filter ? 'Save' : 'Create Filter') . '</button>'
+        'rightContent' => '<button type="button" class="btn ' . $saveButtonClass . ' btn-sm save-filter-btn" data-save-btn><i class="fas fa-save"></i> ' . ($filter ? 'Save' : 'Create Filter') . '</button>'
     ]);
     ?>
 

@@ -11,10 +11,10 @@ window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'f
         $leftContent = '<button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-all-categories" title="Collapse All"><i class="fas fa-compress-alt"></i> <span>Collapse All</span></button>';
     }
 
-    $rightContent = '<a href="?urlq=dashboard" class="btn btn-secondary btn-sm"><i class="fas fa-th-large"></i> Dashboards</a>';
-    $rightContent .= '<a href="?urlq=graph" class="btn btn-secondary btn-sm"><i class="fas fa-chart-line"></i> Graphs</a>';
+    $rightContent = '<a href="?urlq=dashboard" class="btn-icon btn-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Dashboards"><i class="fas fa-th-large"></i></a>';
+    $rightContent .= '<a href="?urlq=graph" class="btn-icon btn-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-line"></i></a>';
     if (!empty($templates)) {
-        $rightContent .= '<a href="?urlq=dashboard/template/create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Template</a>';
+        $rightContent .= '<a href="?urlq=dashboard/template/create" class="btn-icon btn-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Template"><i class="fas fa-plus"></i></a>';
     }
 
     echo Utility::renderPageHeader([
@@ -107,30 +107,34 @@ window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'f
                             </div>
                             <div class="item-card-actions">
                                 <button class="btn-icon btn-primary"
+                                        data-bs-toggle="tooltip"
                                         title="View Mode"
                                         onclick="window.location='?urlq=dashboard/template/preview/<?php echo $template['dtid']; ?>'">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 <?php if (!$template['is_system']): ?>
                                 <button class="btn-icon btn-design"
+                                        data-bs-toggle="tooltip"
                                         title="Design Mode"
                                         onclick="window.location='?urlq=dashboard/template/builder/<?php echo $template['dtid']; ?>'">
                                     <i class="fas fa-paint-brush"></i>
                                 </button>
                                 <?php endif; ?>
                                 <button class="btn-icon btn-success duplicate-template-btn"
+                                        data-bs-toggle="tooltip"
                                         title="Duplicate"
                                         data-template-id="<?php echo $template['dtid']; ?>">
                                     <i class="fas fa-copy"></i>
                                 </button>
                                 <?php if (!$template['is_system']): ?>
                                 <button class="btn-icon btn-danger delete-template-btn"
+                                        data-bs-toggle="tooltip"
                                         title="Delete"
                                         data-template-id="<?php echo $template['dtid']; ?>">
                                     <i class="fas fa-trash"></i>
                                 </button>
                                 <?php endif; ?>
-                                <div class="template-drag-handle" title="Drag to reorder">
+                                <div class="template-drag-handle" data-bs-toggle="tooltip" title="Drag to reorder">
                                     <i class="fas fa-grip-vertical"></i>
                                 </div>
                             </div>

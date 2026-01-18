@@ -6,8 +6,8 @@
 
     $rightContent = '';
     if (!$dashboard->getIsSystem()) {
-        $rightContent .= '<a href="?urlq=dashboard/builder/' . $dashboard->getId() . '" class="btn btn-design btn-sm btn-design-mode"><i class="fas fa-paint-brush"></i> Design Mode</a>';
-        $rightContent .= '<button class="btn btn-danger btn-sm delete-dashboard-btn" data-dashboard-id="' . $dashboard->getId() . '"><i class="fas fa-trash"></i> Delete Dashboard</button>';
+        $rightContent .= '<a href="?urlq=dashboard/builder/' . $dashboard->getId() . '" class="btn-icon btn-design btn-design-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Design Mode"><i class="fas fa-paint-brush"></i></a>';
+        $rightContent .= '<button class="btn-icon btn-danger delete-dashboard-btn" data-dashboard-id="' . $dashboard->getId() . '" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete Dashboard"><i class="fas fa-trash"></i></button>';
     }
 
     echo Utility::renderPageHeader([

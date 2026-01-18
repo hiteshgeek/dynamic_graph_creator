@@ -346,11 +346,12 @@ class DashboardTemplate implements DatabaseObject
     /**
      * Create instance from template
      */
-    public function createInstance($userId, $name = null)
+    public function createInstance($userId, $name = null, $description = '')
     {
         $instance = new DashboardInstance();
         $instance->setDtid($this->dtid);
         $instance->setName($name ? $name : $this->name . ' (Copy)');
+        $instance->setDescription($description);
         $instance->setStructure($this->structure);
         $instance->setUserId($userId);
         $instance->setCreatedUid($userId);

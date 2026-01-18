@@ -3,7 +3,7 @@
         'title' => $graph->getName(),
         'backUrl' => '?urlq=graph',
         'backLabel' => 'Graphs',
-        'rightContent' => '<a href="?urlq=graph/edit/' . $graph->getId() . '" class="btn btn-design btn-sm btn-design-mode"><i class="fas fa-paint-brush"></i> Design Mode</a>'
+        'rightContent' => '<a href="?urlq=graph/edit/' . $graph->getId() . '" class="btn-icon btn-design btn-design-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Design Mode"><i class="fas fa-paint-brush"></i></a>'
     ]);
     ?>
 

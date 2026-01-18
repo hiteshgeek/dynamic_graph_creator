@@ -31,11 +31,25 @@ export class TemplateModalNavigation {
       const modal = document.getElementById(id);
       if (modal) {
         modal.addEventListener("keydown", this.handleKeyDown.bind(this));
+        // Fix aria-hidden warning: blur focused element before modal hides
+        modal.addEventListener("hide.bs.modal", this.handleModalHide.bind(this));
         this.modals.push(modal);
       }
     });
 
     this.initialized = true;
+  }
+
+  /**
+   * Handle modal hide event - blur focused element to prevent aria-hidden warning
+   * @param {Event} e - Bootstrap modal hide event
+   */
+  handleModalHide(e) {
+    const modal = e.target;
+    const focusedElement = modal.querySelector(":focus");
+    if (focusedElement) {
+      focusedElement.blur();
+    }
   }
 
   /**

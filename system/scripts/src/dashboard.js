@@ -527,7 +527,9 @@ class DashboardBuilder {
   async createFromTemplate(templateId) {
     // Validate dashboard name
     const nameInput = document.getElementById("new-dashboard-name");
+    const descriptionInput = document.getElementById("new-dashboard-description");
     const dashboardName = nameInput ? nameInput.value.trim() : "";
+    const dashboardDescription = descriptionInput ? descriptionInput.value.trim() : "";
 
     if (!dashboardName) {
       if (nameInput) {
@@ -549,6 +551,7 @@ class DashboardBuilder {
       const result = await Ajax.post("create_from_template", {
         template_id: templateId,
         name: dashboardName,
+        description: dashboardDescription,
       });
 
       if (result.success) {
@@ -680,13 +683,17 @@ class DashboardBuilder {
       if (!existingViewBtn) {
         const viewBtn = document.createElement("a");
         viewBtn.href = `?urlq=dashboard/preview/${this.dashboardId}`;
-        viewBtn.className = "btn btn-primary btn-sm btn-view-mode";
-        viewBtn.innerHTML = '<i class="fas fa-eye"></i> View Mode';
+        viewBtn.className = "btn-icon btn-primary btn-view-mode";
+        viewBtn.setAttribute("data-bs-toggle", "tooltip");
+        viewBtn.title = "View Mode";
+        viewBtn.innerHTML = '<i class="fas fa-eye"></i>';
         if (headerSeparator) {
           headerRight.insertBefore(viewBtn, headerSeparator);
         } else {
           headerRight.appendChild(viewBtn);
         }
+        // Initialize tooltip for the new button
+        new bootstrap.Tooltip(viewBtn, { delay: { show: 400, hide: 100 } });
       }
 
       // Add Tweak switch
