@@ -840,6 +840,22 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15),
     display: none !important;
   }
 
+  // Dashboard area styling - primary border on hover/focus
+  .dashboard-area:not(.dashboard-area-nested) {
+    &:hover,
+    &:focus {
+      border-color: var(--dgc-primary);
+    }
+  }
+
+  // Sub-row styling - primary border on hover/focus
+  .dashboard-sub-row {
+    &:hover,
+    &:focus {
+      border-color: var(--dgc-primary);
+    }
+  }
+
   // Keep empty state visible and clickable
   .dashboard-cell-empty {
     cursor: pointer;

@@ -144,6 +144,10 @@ $grid-gap: $spacing-md;
     // padding: 1.5rem;
     min-height: 150px;
 
+    &:hover {
+      box-shadow: $shadow-2;
+    }
+
     // Pointer cursor on empty cell
     .dashboard-cell-empty {
       cursor: pointer;
@@ -197,6 +201,10 @@ $grid-gap: $spacing-md;
     background: var(--dgc-bg-card);
     box-shadow: none;
     cursor: default;
+
+    &:hover {
+      box-shadow: $shadow-2;
+    }
 
     // Pointer cursor on empty cell
     .dashboard-cell-empty {

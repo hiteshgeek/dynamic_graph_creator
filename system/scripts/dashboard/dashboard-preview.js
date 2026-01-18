@@ -2,6 +2,9 @@
  * Dashboard Preview Page - Delete functionality
  */
 document.addEventListener('DOMContentLoaded', function() {
+    // Add page-specific body class for CSS targeting
+    document.body.classList.add('dashboard-preview-page');
+
     // Handle delete dashboard using ConfirmDialog
     const deleteBtn = document.querySelector('.delete-dashboard-btn');
     if (deleteBtn) {

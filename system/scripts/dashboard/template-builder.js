@@ -3,6 +3,9 @@
  * Handles initialization and template details editing
  */
 document.addEventListener('DOMContentLoaded', function() {
+    // Add page-specific body class for CSS targeting
+    document.body.classList.add('template-builder-page');
+
     const container = document.getElementById('dashboard-builder');
     if (!container) return;
 

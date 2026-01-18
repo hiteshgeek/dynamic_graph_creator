@@ -3,6 +3,9 @@
  * Handles initialization and name editing functionality
  */
 document.addEventListener('DOMContentLoaded', function() {
+    // Add page-specific body class for CSS targeting
+    document.body.classList.add('dashboard-builder-page');
+
     const container = document.getElementById('dashboard-builder');
     if (!container) return;
 
