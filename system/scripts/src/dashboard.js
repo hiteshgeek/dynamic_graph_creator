@@ -139,11 +139,18 @@ function isTweakModeEnabled(cell) {
 
 // Global event listeners for empty cell (works on any page)
 document.addEventListener("DOMContentLoaded", () => {
-  // Click handler
+  // Click handler - trigger on dashboard-area or dashboard-sub-row
   document.addEventListener("click", (e) => {
-    const cell = e.target.closest(".dashboard-cell-empty");
+    // Check if clicked on a dashboard-area or dashboard-sub-row
+    const area = e.target.closest(".dashboard-sub-row") || e.target.closest(".dashboard-area:not(.dashboard-area-nested)");
+    if (!area) return;
+
     // Skip if in tweak mode (layout controls are active)
-    if (cell && !isTweakModeEnabled(cell)) {
+    if (isTweakModeEnabled(area)) return;
+
+    // Check if the area contains an empty cell
+    const cell = area.querySelector(".dashboard-cell-empty");
+    if (cell) {
       handleEmptyCellAction(cell);
     }
   });
@@ -151,9 +158,16 @@ document.addEventListener("DOMContentLoaded", () => {
   // Keyboard handler (Enter/Space)
   document.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
-      const cell = e.target.closest(".dashboard-cell-empty");
+      // Check if focused on a dashboard-area or dashboard-sub-row
+      const area = e.target.closest(".dashboard-sub-row") || e.target.closest(".dashboard-area:not(.dashboard-area-nested)");
+      if (!area) return;
+
       // Skip if in tweak mode (layout controls are active)
-      if (cell && !isTweakModeEnabled(cell)) {
+      if (isTweakModeEnabled(area)) return;
+
+      // Check if the area contains an empty cell
+      const cell = area.querySelector(".dashboard-cell-empty");
+      if (cell) {
         e.preventDefault();
         handleEmptyCellAction(cell);
       }
