@@ -1,8 +1,8 @@
 <?php
-    $rightContent = '<a href="?urlq=dashboard" class="btn btn-secondary btn-sm"><i class="fas fa-th-large"></i> Dashboards</a>';
-    $rightContent .= '<a href="?urlq=graph" class="btn btn-secondary btn-sm"><i class="fas fa-chart-bar"></i> Graphs</a>';
+    $rightContent = '<a href="?urlq=dashboard" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Dashboards"><i class="fas fa-th-large"></i></a>';
+    $rightContent .= '<a href="?urlq=graph" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-bar"></i></a>';
     if (!empty($filters)) {
-        $rightContent .= '<a href="?urlq=filters/create" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Create Filter</a>';
+        $rightContent .= '<a href="?urlq=filters/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Filter"><i class="fas fa-plus"></i></a>';
     }
     echo Utility::renderPageHeader([
         'title' => 'Filters',
@@ -68,12 +68,13 @@
                         </div>
                     </div>
                     <div class="item-card-actions">
-                        <a href="?urlq=filters/edit/<?php echo $filter['fid']; ?>" class="btn-icon btn-design" title="Design">
+                        <a href="?urlq=filters/edit/<?php echo $filter['fid']; ?>" class="btn btn-icon btn-outline-design" data-bs-toggle="tooltip" title="Design Mode">
                             <i class="fas fa-paint-brush"></i>
                         </a>
-                        <button type="button" class="btn-icon btn-danger delete-filter-btn"
+                        <button type="button" class="btn btn-icon btn-outline-danger delete-filter-btn"
                                 data-id="<?php echo $filter['fid']; ?>"
                                 data-label="<?php echo htmlspecialchars($filter['filter_label']); ?>"
+                                data-bs-toggle="tooltip"
                                 title="Delete">
                             <i class="fas fa-trash"></i>
                         </button>

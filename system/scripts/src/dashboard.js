@@ -683,7 +683,7 @@ class DashboardBuilder {
       if (!existingViewBtn) {
         const viewBtn = document.createElement("a");
         viewBtn.href = `?urlq=dashboard/preview/${this.dashboardId}`;
-        viewBtn.className = "btn-icon btn-primary btn-view-mode";
+        viewBtn.className = "btn btn-icon btn-outline-primary btn-view-mode";
         viewBtn.setAttribute("data-bs-toggle", "tooltip");
         viewBtn.title = "View Mode";
         viewBtn.innerHTML = '<i class="fas fa-eye"></i>';

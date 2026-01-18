@@ -7,10 +7,10 @@
         $badges[] = ['label' => 'System', 'icon' => 'fa-lock', 'class' => 'badge-system'];
     }
 
-    $rightContent = '<button class="btn-icon btn-success duplicate-template-btn" data-template-id="' . $template->getId() . '" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Duplicate Template"><i class="fas fa-copy"></i></button>';
+    $rightContent = '<button class="btn btn-icon btn-outline-success duplicate-template-btn" data-template-id="' . $template->getId() . '" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Duplicate Template"><i class="fas fa-copy"></i></button>';
     if (!$template->getIsSystem()) {
-        $rightContent .= '<a href="?urlq=dashboard/template/builder/' . $template->getId() . '" class="btn-icon btn-design btn-design-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Design Mode"><i class="fas fa-paint-brush"></i></a>';
-        $rightContent .= '<button class="btn-icon btn-danger delete-template-btn" data-template-id="' . $template->getId() . '" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete Template"><i class="fas fa-trash"></i></button>';
+        $rightContent .= '<a href="?urlq=dashboard/template/builder/' . $template->getId() . '" class="btn btn-icon btn-outline-design btn-design-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Design Mode"><i class="fas fa-paint-brush"></i></a>';
+        $rightContent .= '<button class="btn btn-icon btn-outline-danger delete-template-btn" data-template-id="' . $template->getId() . '" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete Template"><i class="fas fa-trash"></i></button>';
     }
 
     echo Utility::renderPageHeader([

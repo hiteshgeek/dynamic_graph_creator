@@ -1188,13 +1188,16 @@ export class KeyboardNavigation {
   showIndicator() {
     if (this.indicatorElement) return;
 
-    this.indicatorElement = document.createElement("div");
-    this.indicatorElement.className = "keyboard-nav-indicator";
+    this.indicatorElement = document.createElement("button");
+    this.indicatorElement.className = "btn btn-icon btn-outline-info keyboard-nav-indicator";
     this.indicatorElement.innerHTML = '<i class="fa-solid fa-arrows-up-down-left-right"></i>';
-    this.indicatorElement.title = "Keyboard Navigation Active - Click for shortcuts (Alt+N to disable)";
-    this.indicatorElement.style.cursor = "pointer";
+    this.indicatorElement.setAttribute("data-bs-toggle", "tooltip");
+    this.indicatorElement.setAttribute("data-bs-placement", "left");
+    this.indicatorElement.setAttribute("title", "Keyboard Navigation Active - Click for shortcuts (Alt+N to disable)");
     this.indicatorElement.addEventListener("click", () => this.showShortcutsModal());
     document.body.appendChild(this.indicatorElement);
+    // Initialize Bootstrap tooltip
+    new bootstrap.Tooltip(this.indicatorElement);
   }
 
   /**

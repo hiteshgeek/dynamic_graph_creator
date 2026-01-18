@@ -53,6 +53,10 @@ body {
     align-items: center;
     gap: $spacing-md;
 
+    .btn-icon {
+      @include item-card-btn-icon;
+    }
+
     .badge-system {
       font-size: 0.75rem;
       padding: 0.35rem 0.75rem;

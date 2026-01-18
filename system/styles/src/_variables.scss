@@ -216,97 +216,113 @@ $chart-colors: (
 }
 
 // Icon button for card actions
+// Mixin for circular icon buttons - only handles circular shape
+// Colors and states are handled by Bootstrap btn classes
 @mixin item-card-btn-icon {
   width: 32px;
   height: 32px;
+  padding: 0;
   border-radius: 50%;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--dgc-border-color);
-  background: var(--dgc-bg-card);
-  color: var(--dgc-text-secondary);
-  cursor: pointer;
-  transition: all 0.2s;
   font-size: 0.875rem;
-  text-decoration: none;
 
-  &:focus {
-    outline: none;
-  }
+  // Custom design color (purple) - not in Bootstrap, outline variant
+  &.btn-outline-design {
+    --bs-btn-color: #6f42c1;
+    --bs-btn-border-color: #6f42c1;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #6f42c1;
+    --bs-btn-hover-border-color: #6f42c1;
+    --bs-btn-focus-shadow-rgb: 111, 66, 193;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #5a32a3;
+    --bs-btn-active-border-color: #5a32a3;
+    --bs-btn-disabled-color: #6f42c1;
+    --bs-btn-disabled-border-color: #6f42c1;
 
-  &:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba($primary, 0.25);
-  }
-
-  &.btn-primary {
-    border-color: var(--dgc-primary);
-    color: var(--dgc-primary);
-
-    &:hover {
-      background: var(--dgc-primary);
-      color: var(--dgc-text-inverse);
-    }
-
+    &:focus,
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba($primary, 0.3);
+      color: #fff;
+      background-color: #6f42c1;
+      border-color: #6f42c1;
+      box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.5);
     }
   }
+}
 
-  &.btn-design {
-    border-color: #6f42c1;
-    color: #6f42c1;
+// Dark mode support for btn-outline-design
+[data-theme="dark"],
+:root.theme-dark {
+  .btn-outline-design,
+  .btn.btn-icon.btn-outline-design {
+    --bs-btn-color: #a78bda;
+    --bs-btn-border-color: #a78bda;
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #8b6fc7;
+    --bs-btn-hover-border-color: #8b6fc7;
+    --bs-btn-focus-shadow-rgb: 167, 139, 218;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #7c5fbf;
+    --bs-btn-active-border-color: #7c5fbf;
+    --bs-btn-disabled-color: #a78bda;
+    --bs-btn-disabled-border-color: #a78bda;
 
-    &:hover {
-      background: #6f42c1;
-      color: var(--dgc-text-inverse);
-    }
-
+    &:focus,
     &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(#6f42c1, 0.35);
+      color: #fff !important;
+      background-color: #8b6fc7 !important;
+      border-color: #8b6fc7 !important;
+      box-shadow: 0 0 0 0.25rem rgba(167, 139, 218, 0.5) !important;
     }
   }
+}
 
-  &.btn-warning {
-    border-color: var(--dgc-warning);
-    color: var(--dgc-warning);
-
-    &:hover {
-      background: var(--dgc-warning);
-      color: var(--dgc-text-inverse);
-    }
-
-    &:focus-visible {
-      box-shadow: 0 0 0 3px rgba($warning, 0.3);
-    }
+// Focus fill for Bootstrap outline buttons (match hover/active behavior)
+// Works for both light and dark modes
+.btn.btn-icon,
+[data-theme="dark"] .btn.btn-icon,
+:root.theme-dark .btn.btn-icon {
+  &.btn-outline-primary:focus,
+  &.btn-outline-primary:focus-visible {
+    color: #fff !important;
+    background-color: var(--bs-primary) !important;
+    border-color: var(--bs-primary) !important;
   }
 
-  &.btn-danger {
-    border-color: var(--dgc-error);
-    color: var(--dgc-error);
-
-    &:hover {
-      background: var(--dgc-error);
-      color: var(--dgc-text-inverse);
-    }
-
-    &:focus-visible {
-      box-shadow: 0 0 0 3px rgba($error, 0.3);
-    }
+  &.btn-outline-secondary:focus,
+  &.btn-outline-secondary:focus-visible {
+    color: #fff !important;
+    background-color: var(--bs-secondary) !important;
+    border-color: var(--bs-secondary) !important;
   }
 
-  &.btn-success {
-    border-color: var(--dgc-success);
-    color: var(--dgc-success);
+  &.btn-outline-success:focus,
+  &.btn-outline-success:focus-visible {
+    color: #fff !important;
+    background-color: var(--bs-success) !important;
+    border-color: var(--bs-success) !important;
+  }
 
-    &:hover {
-      background: var(--dgc-success);
-      color: var(--dgc-text-inverse);
-    }
+  &.btn-outline-danger:focus,
+  &.btn-outline-danger:focus-visible {
+    color: #fff !important;
+    background-color: var(--bs-danger) !important;
+    border-color: var(--bs-danger) !important;
+  }
 
-    &:focus-visible {
-      box-shadow: 0 0 0 3px rgba($success, 0.3);
-    }
+  &.btn-outline-warning:focus,
+  &.btn-outline-warning:focus-visible {
+    color: #000 !important;
+    background-color: var(--bs-warning) !important;
+    border-color: var(--bs-warning) !important;
+  }
+
+  &.btn-outline-info:focus,
+  &.btn-outline-info:focus-visible {
+    color: #fff !important;
+    background-color: var(--bs-info) !important;
+    border-color: var(--bs-info) !important;
   }
 }

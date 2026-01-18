@@ -1,9 +1,9 @@
 <?php
 // Build right content
-$rightContent = '<a href="?urlq=dashboard" class="btn-icon btn-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Dashboards"><i class="fas fa-th-large"></i></a>';
-$rightContent .= '<a href="?urlq=filters" class="btn-icon btn-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
+$rightContent = '<a href="?urlq=dashboard" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Dashboards"><i class="fas fa-th-large"></i></a>';
+$rightContent .= '<a href="?urlq=filters" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
 if (!empty($graphs)) {
-    $rightContent .= '<a href="?urlq=graph/create" class="btn-icon btn-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Graph"><i class="fas fa-plus"></i></a>';
+    $rightContent .= '<a href="?urlq=graph/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Graph"><i class="fas fa-plus"></i></a>';
 }
 echo Utility::renderPageHeader([
     'title' => 'Graphs',
@@ -47,13 +47,13 @@ echo Utility::renderPageHeader([
                     </div>
                 </div>
                 <div class="item-card-actions">
-                    <a href="?urlq=graph/view/<?php echo $g->getId(); ?>" class="btn-icon btn-primary" data-bs-toggle="tooltip" title="View Mode">
+                    <a href="?urlq=graph/view/<?php echo $g->getId(); ?>" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" title="View Mode">
                         <i class="fas fa-eye"></i>
                     </a>
-                    <a href="?urlq=graph/edit/<?php echo $g->getId(); ?>" class="btn-icon btn-design" data-bs-toggle="tooltip" title="Design Mode">
+                    <a href="?urlq=graph/edit/<?php echo $g->getId(); ?>" class="btn btn-icon btn-outline-design" data-bs-toggle="tooltip" title="Design Mode">
                         <i class="fas fa-paint-brush"></i>
                     </a>
-                    <button type="button" class="btn-icon btn-danger delete-graph-btn"
+                    <button type="button" class="btn btn-icon btn-outline-danger delete-graph-btn"
                             data-id="<?php echo $g->getId(); ?>"
                             data-name="<?php echo htmlspecialchars($g->getName()); ?>"
                             data-bs-toggle="tooltip"

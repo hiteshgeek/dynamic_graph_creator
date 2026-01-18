@@ -2,7 +2,7 @@
 $rightContent = '';
 if ($dashboard && $dashboard->getId()) {
     $rightContent .= '<div class="save-indicator saved" style="display: flex;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
-    $rightContent .= '<a href="?urlq=dashboard/preview/' . $dashboard->getId() . '" class="btn-icon btn-primary btn-view-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Mode"><i class="fas fa-eye"></i></a>';
+    $rightContent .= '<a href="?urlq=dashboard/preview/' . $dashboard->getId() . '" class="btn btn-icon btn-outline-primary btn-view-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Mode"><i class="fas fa-eye"></i></a>';
     $rightContent .= '<div class="form-check form-switch text-switch text-switch-purple"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"><div class="text-switch-track"><span class="text-switch-knob"></span><span class="text-switch-label label-text">Tweak</span></div></div>';
 } else {
     $rightContent .= '<div class="save-indicator" style="display: none;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';

@@ -129,7 +129,7 @@ export class TemplateManager {
   }
 
   /**
-   * Update the toggle all button text based on current state
+   * Update the toggle all button icon and tooltip based on current state
    */
   static updateToggleAllButton() {
     const btn = document.getElementById("toggle-all-categories");
@@ -139,16 +139,20 @@ export class TemplateManager {
     const allCollapsed = Array.from(sections).every(s => s.classList.contains("collapsed"));
 
     const icon = btn.querySelector("i");
-    const text = btn.querySelector("span");
+    const newTitle = allCollapsed ? "Expand All" : "Collapse All";
 
     if (allCollapsed) {
       icon.className = "fas fa-expand-alt";
-      text.textContent = "Expand All";
-      btn.title = "Expand All";
     } else {
       icon.className = "fas fa-compress-alt";
-      text.textContent = "Collapse All";
-      btn.title = "Collapse All";
+    }
+
+    // Update tooltip
+    btn.setAttribute("title", newTitle);
+    btn.setAttribute("data-bs-original-title", newTitle);
+    const tooltip = bootstrap.Tooltip.getInstance(btn);
+    if (tooltip) {
+      tooltip.setContent({ ".tooltip-inner": newTitle });
     }
   }
 

@@ -332,7 +332,7 @@ class Utility
                 $descriptionHtml = nl2br(htmlspecialchars($titleDescription));
                 $html .= '<span class="description-tooltip" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="' . $descriptionHtml . '"><i class="fas fa-info-circle"></i></span>';
             }
-            $html .= '<button id="edit-dashboard-details-btn" class="btn btn-icon btn-warning" title="Edit Details"><i class="fas fa-pencil"></i></button>';
+            $html .= '<button id="edit-dashboard-details-btn" class="btn btn-icon btn-outline-warning" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Edit Details"><i class="fas fa-pencil"></i></button>';
             $html .= '</div>';
         } else {
             $html .= '<h1>' . htmlspecialchars($title) . '</h1>';
