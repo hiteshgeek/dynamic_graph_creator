@@ -78,8 +78,8 @@ export class KeyboardNavigation {
     // Check if tweak mode is enabled (only for builder pages)
     const isTweakMode = this.isTweakMode();
 
-    // Handle Alt+PageUp/PageDown for section navigation (only in non-tweak mode)
-    if (!isTweakMode && e.altKey && (e.key === "PageUp" || e.key === "PageDown")) {
+    // Handle Alt+PageUp/PageDown for section navigation (works in both modes)
+    if (e.altKey && (e.key === "PageUp" || e.key === "PageDown")) {
       this.handleSectionNavigation(e.key === "PageDown" ? "next" : "prev");
       e.preventDefault();
       return;
@@ -1188,8 +1188,139 @@ export class KeyboardNavigation {
     this.indicatorElement = document.createElement("div");
     this.indicatorElement.className = "keyboard-nav-indicator";
     this.indicatorElement.innerHTML = '<i class="fa-solid fa-arrows-up-down-left-right"></i>';
-    this.indicatorElement.title = "Keyboard Navigation Active (Alt+N to disable)";
+    this.indicatorElement.title = "Keyboard Navigation Active - Click for shortcuts (Alt+N to disable)";
+    this.indicatorElement.style.cursor = "pointer";
+    this.indicatorElement.addEventListener("click", () => this.showShortcutsModal());
     document.body.appendChild(this.indicatorElement);
+  }
+
+  /**
+   * Show navigation shortcuts modal
+   */
+  showShortcutsModal() {
+    // Check if modal already exists
+    let modal = document.getElementById("nav-shortcuts-modal");
+    if (modal) {
+      const bsModal = bootstrap.Modal.getInstance(modal) || new bootstrap.Modal(modal);
+      bsModal.show();
+      return;
+    }
+
+    // Determine if tweak mode is available (builder pages only)
+    const isBuilderPage = document.querySelector(".dashboard-builder-page, .template-builder-page");
+
+    // Helper function to create shortcut item (keys on left, description on right)
+    const shortcutItem = (keys, description) => {
+      const keysHtml = keys.map(k => `<kbd>${k}</kbd>`).join('<span class="key-separator">+</span>');
+      return `<div class="shortcut-item">
+        <div class="shortcut-keys">${keysHtml}</div>
+        <div class="shortcut-description">${description}</div>
+      </div>`;
+    };
+
+    // Helper function to create collapsible group
+    const shortcutsGroup = (title, items) => `
+      <div class="shortcuts-group">
+        <div class="shortcuts-group-header">
+          <div class="shortcuts-group-title">${title}</div>
+          <i class="fas fa-chevron-up shortcuts-group-toggle"></i>
+        </div>
+        <div class="shortcuts-list">
+          ${items}
+        </div>
+      </div>`;
+
+    // Build Navigation shortcuts
+    const navigationItems =
+      shortcutItem(["Alt", "N"], "Toggle navigation mode") +
+      shortcutItem(["Arrow Keys"], "Navigate between areas") +
+      shortcutItem(["Alt", "PageUp / PageDown"], "Add section above/below");
+
+    // Build Tweak Mode - Add/Remove shortcuts
+    const tweakAddRemoveItems =
+      shortcutItem(["Alt", "Home / End"], "Add row above/below") +
+      shortcutItem(["Alt", "Insert / Delete"], "Add column left/right") +
+      shortcutItem(["Alt", "Backspace"], "Delete row or column") +
+      shortcutItem(["Ctrl", "Alt", "Backspace"], "Delete section");
+
+    // Build Tweak Mode - Resize shortcuts
+    const tweakResizeItems =
+      shortcutItem(["Alt", "← / →"], "Expand/shrink column") +
+      shortcutItem(["Alt", "↑ / ↓"], "Expand/shrink row");
+
+    // Build Tweak Mode - Move shortcuts
+    const tweakMoveItems =
+      shortcutItem(["Shift", "↑ / ↓"], "Move section up/down") +
+      shortcutItem(["Shift", "Ctrl", "← / →"], "Move column left/right") +
+      shortcutItem(["Shift", "Alt", "↑ / ↓"], "Move row up/down");
+
+    // Build all groups
+    let shortcutsHtml = shortcutsGroup("Navigation", navigationItems);
+
+    if (isBuilderPage) {
+      shortcutsHtml += shortcutsGroup("Tweak Mode - Add/Remove", tweakAddRemoveItems);
+      shortcutsHtml += shortcutsGroup("Tweak Mode - Resize", tweakResizeItems);
+      shortcutsHtml += shortcutsGroup("Tweak Mode - Move", tweakMoveItems);
+    }
+
+    // Create modal HTML using existing keyboard shortcuts modal structure
+    const modalHTML = `
+      <div class="modal fade" id="nav-shortcuts-modal" tabindex="-1" aria-labelledby="nav-shortcuts-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content keyboard-shortcuts-modal">
+            <div class="modal-header">
+              <h5 class="modal-title" id="nav-shortcuts-modal-label">
+                <i class="fas fa-keyboard"></i> Navigation Shortcuts
+              </h5>
+              <div class="shortcuts-expand-collapse">
+                <button type="button" class="btn btn-sm btn-link" id="nav-shortcuts-toggle-all">Collapse All</button>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              ${shortcutsHtml}
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+    // Insert modal into DOM
+    document.body.insertAdjacentHTML("beforeend", modalHTML);
+    modal = document.getElementById("nav-shortcuts-modal");
+
+    // Add click handlers for section collapse/expand
+    modal.querySelectorAll(".shortcuts-group-header").forEach(header => {
+      header.addEventListener("click", () => {
+        const group = header.closest(".shortcuts-group");
+        group.classList.toggle("collapsed");
+      });
+    });
+
+    // Add toggle all handler
+    const toggleBtn = modal.querySelector("#nav-shortcuts-toggle-all");
+    toggleBtn.addEventListener("click", () => {
+      const groups = modal.querySelectorAll(".shortcuts-group");
+      const allCollapsed = Array.from(groups).every(g => g.classList.contains("collapsed"));
+
+      groups.forEach(group => {
+        if (allCollapsed) {
+          group.classList.remove("collapsed");
+        } else {
+          group.classList.add("collapsed");
+        }
+      });
+
+      toggleBtn.textContent = allCollapsed ? "Collapse All" : "Expand All";
+    });
+
+    // Show modal
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+
+    // Clean up modal element when hidden
+    modal.addEventListener("hidden.bs.modal", () => {
+      modal.remove();
+    }, { once: true });
   }
 
   /**

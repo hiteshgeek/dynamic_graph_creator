@@ -162,6 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize keyboard navigation module
   keyboardNavigation.init();
+
+  // Expose to window for cross-module access
+  window.keyboardNavigation = keyboardNavigation;
 });
 
 // Grid configuration constants
@@ -471,14 +474,24 @@ class DashboardBuilder {
 
     templateList.innerHTML = html;
 
-    // Add click handlers
+    // Add click and keyboard handlers
     templateList.querySelectorAll(".item-card").forEach((card) => {
-      card.addEventListener("click", () => {
+      const selectCard = () => {
         const templateId = parseInt(card.dataset.templateId);
         if (this.templateSelectorMode === "add-section") {
           this.addSectionFromTemplate(templateId);
         } else {
           this.createFromTemplate(templateId);
+        }
+      };
+
+      card.addEventListener("click", selectCard);
+
+      // Enter key selects the card (keyboard navigation support)
+      card.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          selectCard();
         }
       });
     });
@@ -563,11 +576,14 @@ class DashboardBuilder {
   async addSectionFromTemplate(templateId) {
     Loading.show("Adding section...");
 
+    // Store position before async operations
+    const addPosition = this.pendingAddPosition;
+
     try {
       const result = await Ajax.post("add_section_from_template", {
         dashboard_id: this.dashboardId,
         template_id: templateId,
-        position: this.pendingAddPosition,
+        position: addPosition,
       });
 
       if (result.success) {
@@ -587,6 +603,20 @@ class DashboardBuilder {
         this.templateSelectorMode = "create-dashboard";
 
         Toast.success("Section added successfully");
+
+        // Focus on first area of newly added section if keyboard navigation is enabled
+        // Use setTimeout to ensure DOM is fully ready after modal close and render
+        if (window.keyboardNavigation?.isNavigationEnabled()) {
+          setTimeout(() => {
+            // Get the section at the position where we added
+            const sections = this.container.querySelectorAll(".dashboard-section");
+            const targetSection = sections[addPosition];
+            if (targetSection) {
+              const sectionId = targetSection.dataset.sectionId;
+              window.keyboardNavigation.restoreFocusToArea(sectionId, 0, null);
+            }
+          }, 100);
+        }
       } else {
         Toast.error(result.message);
       }
@@ -2704,9 +2734,15 @@ class DashboardBuilder {
         // In template mode, directly modify the structure
         const structure = JSON.parse(this.currentDashboard.structure);
 
+        // Store the first new section ID for focus
+        let firstNewSectionId = null;
+
         // Add each section from the template with new IDs
         templateStructure.sections.forEach((section, index) => {
           const newSection = this.cloneSectionWithNewIds(section);
+          if (index === 0) {
+            firstNewSectionId = newSection.sid;
+          }
           structure.sections.splice(position + index, 0, newSection);
         });
 
@@ -2723,6 +2759,9 @@ class DashboardBuilder {
         Toast.success(
           `Added ${sectionCount} section${sectionCount > 1 ? "s" : ""} from template`,
         );
+
+        // Focus on first area of newly added section
+        this.focusOnNewlyAddedSection(firstNewSectionId, null);
       } else {
         // In dashboard mode, use API call
         const apiResult = await Ajax.post("add_section_from_template", {
@@ -2734,6 +2773,9 @@ class DashboardBuilder {
         if (apiResult.success) {
           await this.loadDashboard();
           Toast.success("Sections added from template");
+
+          // Focus on first area of newly added section
+          this.focusOnNewlyAddedSection(null, position);
         } else {
           Toast.error(apiResult.message);
         }
@@ -2742,6 +2784,36 @@ class DashboardBuilder {
       console.error("Add sections from template error:", error);
       Toast.error("Failed to add sections from template");
     }
+  }
+
+  /**
+   * Focus on the first area of a section after adding (template or empty section)
+   * Used for keyboard navigation continuity
+   * @param {string|null} sectionId - Direct section ID (for template mode)
+   * @param {number|null} position - Position index to find section in DOM (for dashboard mode)
+   */
+  focusOnNewlyAddedSection(sectionId = null, position = null) {
+    if (!window.keyboardNavigation?.isNavigationEnabled()) {
+      return;
+    }
+
+    // Use setTimeout to ensure DOM is fully ready after modal close and render
+    setTimeout(() => {
+      let targetSectionId = sectionId;
+
+      // If no direct sectionId, find by position in DOM
+      if (!targetSectionId && position !== null) {
+        const sections = this.container.querySelectorAll(".dashboard-section");
+        const targetSection = sections[position];
+        if (targetSection) {
+          targetSectionId = targetSection.dataset.sectionId;
+        }
+      }
+
+      if (targetSectionId) {
+        window.keyboardNavigation.restoreFocusToArea(targetSectionId, 0, null);
+      }
+    }, 150);
   }
 
   /**
