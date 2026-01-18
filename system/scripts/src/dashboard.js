@@ -8,6 +8,7 @@ const Sortable = window.Sortable;
 
 import { TemplateManager } from "./dashboard/TemplateManager.js";
 import { keyboardNavigation } from "./dashboard/KeyboardNavigation.js";
+import templateModalNavigation from "./dashboard/TemplateModalNavigation.js";
 
 // Use globals from common.js (Toast, Loading, Ajax, ConfirmDialog)
 const Toast = window.Toast;
@@ -176,6 +177,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize keyboard navigation module
   keyboardNavigation.init();
+
+  // Initialize template modal navigation
+  templateModalNavigation.init();
 
   // Expose to window for cross-module access
   window.keyboardNavigation = keyboardNavigation;
@@ -356,31 +360,40 @@ class DashboardBuilder {
     // Track if modal was closed due to successful selection (not cancellation)
     this.templateModalSuccess = false;
 
+    // Helper to focus with visible focus ring
+    const focusWithVisible = (element) => {
+      if (!element) return;
+      element.classList.add("focus-visible");
+      element.focus();
+      element.addEventListener("blur", () => {
+        element.classList.remove("focus-visible");
+      }, { once: true });
+    };
+
     // Restore focus when modal is hidden (only if cancelled, not on success)
     modalElement.addEventListener("hidden.bs.modal", function hiddenHandler() {
       // Only restore focus if modal was cancelled (not successful selection)
       if (!this.templateModalSuccess) {
-        if (!isAddingSection) {
-          // New dashboard mode - focus the choose template button
-          const chooseTemplateBtn = document.querySelector(".choose-template-btn");
-          if (chooseTemplateBtn) {
-            chooseTemplateBtn.focus();
-          }
-        } else {
-          // Adding section mode - restore focus to previously focused cell if navigation is enabled
-          if (keyboardNavigation.isNavigationEnabled() && this.lastFocusedCell && document.body.contains(this.lastFocusedCell)) {
-            if (!this.lastFocusedCell.hasAttribute("tabindex")) {
-              this.lastFocusedCell.setAttribute("tabindex", "0");
-            }
-            this.lastFocusedCell.focus();
+        // Use setTimeout to ensure Bootstrap modal cleanup is complete
+        setTimeout(() => {
+          if (!isAddingSection) {
+            // New dashboard mode - focus the choose template button
+            const chooseTemplateBtn = document.querySelector(".choose-template-btn");
+            focusWithVisible(chooseTemplateBtn);
           } else {
-            // Fallback - focus the add section button
-            const addFirstBtn = document.querySelector(".add-first-section-btn");
-            if (addFirstBtn) {
-              addFirstBtn.focus();
+            // Adding section mode - restore focus to previously focused cell if navigation is enabled
+            if (keyboardNavigation.isNavigationEnabled() && this.lastFocusedCell && document.body.contains(this.lastFocusedCell)) {
+              if (!this.lastFocusedCell.hasAttribute("tabindex")) {
+                this.lastFocusedCell.setAttribute("tabindex", "0");
+              }
+              focusWithVisible(this.lastFocusedCell);
+            } else {
+              // Fallback - focus the add section button
+              const addFirstBtn = document.querySelector(".add-first-section-btn");
+              focusWithVisible(addFirstBtn);
             }
           }
-        }
+        });
       }
       // Reset the flag for next time
       this.templateModalSuccess = false;

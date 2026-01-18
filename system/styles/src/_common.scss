@@ -464,12 +464,13 @@ option[value="__new__"] {
 // Override Bootstrap's default focus ring with our custom design
 .btn {
   &:focus,
-  &:focus-visible {
+  &:focus-visible,
+  &.focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px rgba($primary, 0.25);
   }
 
-  &:focus:not(:focus-visible) {
+  &:focus:not(:focus-visible):not(.focus-visible) {
     box-shadow: none;
   }
 }
@@ -477,7 +478,8 @@ option[value="__new__"] {
 // Primary button focus
 .btn-primary {
   &:focus,
-  &:focus-visible {
+  &:focus-visible,
+  &.focus-visible {
     background-color: color.scale($primary, $lightness: -10%);
     border-color: color.scale($primary, $lightness: -10%);
     box-shadow: 0 0 0 3px rgba($primary, 0.35);

@@ -62,6 +62,9 @@ export class KeyboardNavigation {
     const container = this.getContainer();
     if (!container) return;
 
+    // Don't handle navigation when a modal is open
+    if (document.querySelector(".modal.show")) return;
+
     // Handle Alt+N to toggle navigation mode (works even when input is focused)
     if (e.altKey && (e.key === "n" || e.key === "N")) {
       this.toggleNavigation();

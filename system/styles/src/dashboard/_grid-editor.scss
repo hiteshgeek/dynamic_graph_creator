@@ -327,21 +327,21 @@ $grid-gap: $spacing-md;
 // Keyboard Navigation Indicator
 .keyboard-nav-indicator {
   position: fixed;
-  bottom: $spacing-lg;
-  right: $spacing-lg;
-  width: 48px;
-  height: 48px;
+  bottom: $spacing-md;
+  right: $spacing-md;
+  width: 32px;
+  height: 32px;
   background: var(--dgc-primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   animation: navIndicatorFadeIn 0.2s ease-out;
 
   i {
-    font-size: 1.25rem;
+    font-size: 0.875rem;
     color: #fff;
   }
 }
