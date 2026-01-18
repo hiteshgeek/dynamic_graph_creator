@@ -1740,10 +1740,21 @@
       }
     }
 
-    .filter-actions-separator {
+    .filter-actions-separator,
+    .filter-apply-btn {
+      // Hidden by default, JS will show if live filtering is disabled
+      display: none;
+    }
+
+    .filter-actions-separator.visible {
+      display: block;
       width: 1px;
       height: 20px;
       background: var(--dgc-border-color);
+    }
+
+    .filter-apply-btn.visible {
+      display: inline-flex;
     }
   }
 }

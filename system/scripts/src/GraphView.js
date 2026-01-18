@@ -12,6 +12,7 @@ const Ajax = window.Ajax;
 const Loading = window.Loading;
 const Toast = window.Toast;
 
+
 export default class GraphView {
     constructor(container, options = {}) {
         this.container = container;
@@ -287,21 +288,26 @@ export default class GraphView {
         if (saved === '1' && this.autoApplySwitch) {
             this.autoApplySwitch.checked = true;
             this.autoApplyEnabled = true;
-            this.updateAutoApplyUI();
         }
+        // Always call updateAutoApplyUI to show/hide elements based on state
+        this.updateAutoApplyUI();
     }
 
     /**
      * Update UI based on auto-apply state
+     * Elements are hidden by default in CSS, we add 'visible' class to show them
      */
     updateAutoApplyUI() {
-        if (this.applyBtn) {
-            this.applyBtn.style.display = this.autoApplyEnabled ? 'none' : '';
-        }
-
         const separator = this.container.querySelector('.filter-actions-separator');
-        if (separator) {
-            separator.style.display = this.autoApplyEnabled ? 'none' : '';
+
+        if (this.autoApplyEnabled) {
+            // Live filtering enabled - hide button and separator
+            if (this.applyBtn) this.applyBtn.classList.remove('visible');
+            if (separator) separator.classList.remove('visible');
+        } else {
+            // Live filtering disabled - show button and separator
+            if (this.applyBtn) this.applyBtn.classList.add('visible');
+            if (separator) separator.classList.add('visible');
         }
     }
 
