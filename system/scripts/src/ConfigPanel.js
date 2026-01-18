@@ -40,6 +40,7 @@ export default class ConfigPanel {
             // Common
             showLegend: true,
             legendPosition: 'top',
+            legendIcon: 'circle',
             showTooltip: true,
             colors: [],
 
@@ -123,6 +124,7 @@ export default class ConfigPanel {
      * Render common options
      */
     renderCommonOptions() {
+        const legendOptionsStyle = this.config.showLegend ? '' : 'display: none;';
         return `
             <div class="config-section">
                 <div class="config-section-title">
@@ -134,14 +136,27 @@ export default class ConfigPanel {
                     ${this.renderSwitch('showLegend', this.config.showLegend)}
                 </div>
 
-                <div class="config-field">
-                    <label>Legend Position</label>
-                    <select class="config-select" data-config="legendPosition">
-                        <option value="top" ${this.config.legendPosition === 'top' ? 'selected' : ''}>Top</option>
-                        <option value="bottom" ${this.config.legendPosition === 'bottom' ? 'selected' : ''}>Bottom</option>
-                        <option value="left" ${this.config.legendPosition === 'left' ? 'selected' : ''}>Left</option>
-                        <option value="right" ${this.config.legendPosition === 'right' ? 'selected' : ''}>Right</option>
-                    </select>
+                <div class="legend-options" style="${legendOptionsStyle}">
+                    <div class="config-field">
+                        <label>Legend Position</label>
+                        <select class="config-select" data-config="legendPosition">
+                            <option value="top" ${this.config.legendPosition === 'top' ? 'selected' : ''}>Top</option>
+                            <option value="bottom" ${this.config.legendPosition === 'bottom' ? 'selected' : ''}>Bottom</option>
+                            <option value="left" ${this.config.legendPosition === 'left' ? 'selected' : ''}>Left</option>
+                            <option value="right" ${this.config.legendPosition === 'right' ? 'selected' : ''}>Right</option>
+                        </select>
+                    </div>
+
+                    <div class="config-field">
+                        <label>Legend Icon</label>
+                        <select class="config-select" data-config="legendIcon">
+                            <option value="circle" ${this.config.legendIcon === 'circle' ? 'selected' : ''}>Circle</option>
+                            <option value="square" ${this.config.legendIcon === 'square' ? 'selected' : ''}>Square</option>
+                            <option value="rect" ${this.config.legendIcon === 'rect' ? 'selected' : ''}>Rectangle</option>
+                            <option value="triangle" ${this.config.legendIcon === 'triangle' ? 'selected' : ''}>Triangle</option>
+                            <option value="diamond" ${this.config.legendIcon === 'diamond' ? 'selected' : ''}>Diamond</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="config-row">
@@ -333,6 +348,15 @@ export default class ConfigPanel {
             toggle.addEventListener('change', () => {
                 const key = toggle.dataset.config;
                 this.config[key] = toggle.checked;
+
+                // Toggle legend options visibility
+                if (key === 'showLegend') {
+                    const legendOptions = this.container.querySelector('.legend-options');
+                    if (legendOptions) {
+                        legendOptions.style.display = toggle.checked ? '' : 'none';
+                    }
+                }
+
                 this.onChange();
             });
         });

@@ -208,8 +208,23 @@ export default class GraphPreview {
         // Add legend if configured
         if (this.config.showLegend !== false) {
             const legendPosition = this.config.legendPosition || 'top';
+            let legendIcon = this.config.legendIcon || 'circle';
+
+            // Square uses 'rect' icon with equal dimensions
+            const isSquare = legendIcon === 'square';
+            if (isSquare) {
+                legendIcon = 'rect';
+            }
+
+            // Set dimensions based on icon type
+            const itemWidth = (legendIcon === 'rect' && !isSquare) ? 18 : 10;
+            const itemHeight = 10;
+
             const legendConfig = {
                 show: true,
+                icon: legendIcon,
+                itemWidth: itemWidth,
+                itemHeight: itemHeight,
                 textStyle: {
                     color: textColor
                 }
@@ -222,7 +237,7 @@ export default class GraphPreview {
                 legendConfig.top = 'center';
             } else {
                 legendConfig.orient = 'horizontal';
-                legendConfig[legendPosition] = legendPosition === 'bottom' ? 'bottom' : 10;
+                legendConfig[legendPosition] = legendPosition === 'bottom' ? 15 : 10;
                 legendConfig.left = 'center';
             }
 
@@ -405,27 +420,56 @@ export default class GraphPreview {
      */
     buildPieOption(baseOption) {
         const isDonut = this.config.pieType === 'donut';
-        const innerRadius = isDonut ? (this.config.innerRadius || 40) : 0;
-        const outerRadius = this.config.outerRadius || 70;
         const textColor = this.getTextColor();
         const borderColor = this.getBorderColor();
+        const showLegend = this.config.showLegend !== false;
+        const legendPosition = this.config.legendPosition || 'top';
+        const showLabels = this.config.showLabel !== false;
+        const labelPosition = this.config.labelPosition || 'outside';
+
+        // Base radius values
+        let innerRadius = isDonut ? (this.config.innerRadius || 40) : 0;
+        let outerRadius = this.config.outerRadius || 70;
+
+        // Slightly reduce radius when labels are outside to make room
+        if (showLabels && labelPosition === 'outside') {
+            outerRadius = Math.min(outerRadius, 65);
+            if (isDonut) {
+                innerRadius = Math.min(innerRadius, 35);
+            }
+        }
+
+        // Adjust center position based on legend position to avoid overlap
+        let centerX = '50%';
+        let centerY = '50%';
+
+        if (showLegend) {
+            if (legendPosition === 'top') {
+                centerY = '55%';
+            } else if (legendPosition === 'bottom') {
+                centerY = '45%';
+            } else if (legendPosition === 'left') {
+                centerX = '55%';
+            } else if (legendPosition === 'right') {
+                centerX = '45%';
+            }
+        }
 
         return {
             ...baseOption,
             series: [{
                 type: 'pie',
                 radius: [`${innerRadius}%`, `${outerRadius}%`],
-                center: ['50%', '50%'],
+                center: [centerX, centerY],
                 data: this.data.items || [],
                 label: {
-                    show: this.config.showLabel !== false,
-                    position: this.config.labelPosition || 'outside',
+                    show: showLabels,
+                    position: labelPosition,
                     formatter: '{b}: {d}%',
                     color: textColor
                 },
                 labelLine: {
-                    show: this.config.showLabel !== false &&
-                          this.config.labelPosition !== 'inside',
+                    show: showLabels && labelPosition !== 'inside',
                     lineStyle: {
                         color: borderColor
                     }

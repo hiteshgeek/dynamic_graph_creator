@@ -706,7 +706,7 @@ export default class GraphCreator {
                 }
             });
         }, {
-            threshold: 0.1,
+            threshold: 0.9, // Show mini map when 10% or more of main chart is not visible
             rootMargin: '-60px 0px 0px 0px' // Account for header
         });
 
