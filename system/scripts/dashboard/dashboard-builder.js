@@ -48,6 +48,14 @@ document.addEventListener('DOMContentLoaded', function() {
             modal.show();
         });
 
+        // Focus on name input when modal is fully shown
+        editDetailsModal.addEventListener('shown.bs.modal', function() {
+            if (nameInput) {
+                nameInput.focus();
+                nameInput.select();
+            }
+        });
+
         // Handle Enter key in name input
         if (nameInput) {
             nameInput.addEventListener('keydown', function(e) {
