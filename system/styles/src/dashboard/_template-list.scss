@@ -377,7 +377,8 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     }
 
-    .item-card-grid {
+    // Only hide grid when collapsed
+    &.collapsed .item-card-grid {
       display: none;
     }
   }
