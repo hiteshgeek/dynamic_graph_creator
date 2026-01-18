@@ -669,11 +669,17 @@ export class TemplateManager {
                   }
                 }
 
-                // Also reorder within new category
+                // Remove empty category placeholder from target if it exists
                 const targetGridEl = droppedOnCollapsed
                   ? targetSection.querySelector(".item-card-grid")
                   : evt.to;
                 if (targetGridEl) {
+                  const emptyCard = targetGridEl.querySelector(".item-card-empty");
+                  if (emptyCard) {
+                    emptyCard.remove();
+                  }
+
+                  // Also reorder within new category
                   const templates = targetGridEl.querySelectorAll(".item-card:not(.item-card-empty)");
                   const order = Array.from(templates).map(card => card.dataset.templateId);
                   await Ajax.post("reorder_templates", { order: order });

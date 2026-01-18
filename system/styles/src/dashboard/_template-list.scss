@@ -530,8 +530,17 @@ body.template-ordering-disabled {
 
 // Category dragging state
 body.category-dragging {
+  // Prevent text selection while dragging
+  user-select: none;
+
   .template-category-section {
     transition: transform 0.15s ease;
   }
+}
+
+// Template dragging state
+body.template-dragging {
+  // Prevent text selection while dragging
+  user-select: none;
 }
 
