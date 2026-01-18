@@ -790,6 +790,15 @@ window.KeyboardShortcuts = {
         // Remove existing modal if any
         this.hideHelpModal();
 
+        // Close navigation shortcuts modal if open
+        const navModal = document.getElementById('nav-shortcuts-modal');
+        if (navModal) {
+            const navModalInstance = bootstrap.Modal.getInstance(navModal);
+            if (navModalInstance) {
+                navModalInstance.hide();
+            }
+        }
+
         const shortcuts = this.getAllShortcuts();
 
         // Group shortcuts by scope

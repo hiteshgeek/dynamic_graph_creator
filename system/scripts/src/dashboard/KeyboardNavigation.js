@@ -1198,6 +1198,15 @@ export class KeyboardNavigation {
    * Show navigation shortcuts modal
    */
   showShortcutsModal() {
+    // Close keyboard shortcuts modal if open
+    const keyboardModal = document.getElementById("keyboardShortcutsModal");
+    if (keyboardModal) {
+      const keyboardModalInstance = bootstrap.Modal.getInstance(keyboardModal);
+      if (keyboardModalInstance) {
+        keyboardModalInstance.hide();
+      }
+    }
+
     // Check if modal already exists
     let modal = document.getElementById("nav-shortcuts-modal");
     if (modal) {

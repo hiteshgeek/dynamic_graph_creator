@@ -295,7 +295,8 @@ $grid-gap: $spacing-md;
 }
 
 // View mode - focus styles for dashboard areas
-.dashboard-preview-page {
+.dashboard-preview-page,
+.template-preview-page {
   .dashboard-area:not(.dashboard-area-nested):focus {
     outline: none;
     border-color: var(--dgc-primary);
@@ -311,7 +312,8 @@ $grid-gap: $spacing-md;
 
 // Dark mode focus shadow for areas (view mode)
 :root.theme-dark {
-  .dashboard-preview-page {
+  .dashboard-preview-page,
+  .template-preview-page {
     .dashboard-area:not(.dashboard-area-nested):focus {
       box-shadow: $focus-shadow-dark;
     }

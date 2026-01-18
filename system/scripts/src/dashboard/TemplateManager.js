@@ -513,7 +513,7 @@ export class TemplateManager {
               // Add drop indicator element
               const dropIndicator = document.createElement("div");
               dropIndicator.className = "collapsed-drop-indicator";
-              dropIndicator.innerHTML = '<i class="fas fa-plus-circle"></i> Drop here to add';
+              dropIndicator.innerHTML = '<i class="fas fa-plus"></i> Drop here to add';
               header.appendChild(dropIndicator);
             }
           });

@@ -898,19 +898,19 @@ class DashboardBuilder {
                 ${columnDragHandle}
                 <!-- Top: Add Row Above (splits column into rows) -->
                 <button class="edge-btn edge-top add-row-top-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add row">
-                    <i class="fas fa-circle-plus"></i> Row
+                    <i class="fas fa-plus"></i> Row
                 </button>
                 <!-- Bottom: Add Row Below (splits column into rows) -->
                 <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add row">
-                    <i class="fas fa-circle-plus"></i> Row
+                    <i class="fas fa-plus"></i> Row
                 </button>
                 <!-- Left: Add Column Left -->
                 <button class="edge-btn edge-left add-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColLeft ? "disabled" : ""}>
-                    <i class="fas fa-circle-plus"></i> Column
+                    <i class="fas fa-plus"></i> Column
                 </button>
                 <!-- Right: Add Column Right -->
                 <button class="edge-btn edge-right add-col-right-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColRight ? "disabled" : ""}>
-                    <i class="fas fa-circle-plus"></i> Column
+                    <i class="fas fa-plus"></i> Column
                 </button>
                 <!-- Center: Resize buttons + Delete -->
                 <div class="center-controls">
@@ -976,7 +976,7 @@ class DashboardBuilder {
     // Add section button on top border
     const topBorderButton = `
             <button class="add-section-border-btn add-section-top-btn" data-position="${index}" data-bs-toggle="tooltip" data-bs-title="Add section">
-                <i class="fas fa-circle-plus"></i>
+                <i class="fas fa-plus"></i>
                 <span>Section</span>
             </button>
         `;
@@ -986,7 +986,7 @@ class DashboardBuilder {
             <button class="add-section-border-btn add-section-bottom-btn" data-position="${
               index + 1
             }" data-bs-toggle="tooltip" data-bs-title="Add section">
-                <i class="fas fa-circle-plus"></i>
+                <i class="fas fa-plus"></i>
                 <span>Section</span>
             </button>
         `;
@@ -1091,17 +1091,17 @@ class DashboardBuilder {
                 ${rowDragHandle}
                 <!-- Column actions: Add Column Left/Right -->
                 <button class="edge-btn edge-left add-col-left-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColLeft ? "disabled" : ""}>
-                    <i class="fas fa-circle-plus"></i> Column
+                    <i class="fas fa-plus"></i> Column
                 </button>
                 <button class="edge-btn edge-right add-col-right-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Add column" ${!canAddColRight ? "disabled" : ""}>
-                    <i class="fas fa-circle-plus"></i> Column
+                    <i class="fas fa-plus"></i> Column
                 </button>
                 <!-- Row actions: Add Row Above/Below - each row can add above or below itself -->
                 <button class="edge-btn edge-top add-row-top-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Add row" ${!canAddRow ? "disabled" : ""}>
-                    <i class="fas fa-circle-plus"></i> Row
+                    <i class="fas fa-plus"></i> Row
                 </button>
                 <button class="edge-btn edge-bottom add-row-bottom-btn" data-section-id="${sectionId}" data-area-index="${areaIndex}" data-row-index="${rowIndex}" data-bs-toggle="tooltip" data-bs-title="Add row" ${!canAddRow ? "disabled" : ""}>
-                    <i class="fas fa-circle-plus"></i> Row
+                    <i class="fas fa-plus"></i> Row
                 </button>
                 <!-- Center: All resize buttons + Delete buttons -->
                 <div class="center-controls">
@@ -1148,7 +1148,7 @@ class DashboardBuilder {
   renderEmptyState(emptyState) {
     return `<div class="dashboard-cell-empty" tabindex="0" role="button">
             <div class="cell-empty-icon">
-                <i class="fas ${emptyState?.icon || "fa-plus-circle"}"></i>
+                <i class="fas ${emptyState?.icon || "fa-plus"}"></i>
             </div>
             <div class="cell-empty-message">
                 ${emptyState?.message || "Add content here"}
@@ -2078,7 +2078,7 @@ class DashboardBuilder {
       aid: newAreaId,
       colSpanFr: `${GRID_CONFIG.DEFAULT_NEW_COLUMN_FR}fr`,
       content: { type: "empty" },
-      emptyState: { icon: "fa-plus-circle", message: "Add content" },
+      emptyState: { icon: "fa-plus", message: "Add content" },
     });
 
     // Update colSpanFr for all areas
@@ -2220,7 +2220,7 @@ class DashboardBuilder {
       area.hasSubRows = true;
       const existingContent = area.content || { type: "empty" };
       const existingEmptyState = area.emptyState || {
-        icon: "fa-plus-circle",
+        icon: "fa-plus",
         message: "Add content",
       };
 
@@ -2231,7 +2231,7 @@ class DashboardBuilder {
             rowId: IdGenerator.rowId(),
             height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
             content: { type: "empty" },
-            emptyState: { icon: "fa-plus-circle", message: "Add content" },
+            emptyState: { icon: "fa-plus", message: "Add content" },
           },
           {
             rowId: IdGenerator.rowId(),
@@ -2253,7 +2253,7 @@ class DashboardBuilder {
             rowId: IdGenerator.rowId(),
             height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
             content: { type: "empty" },
-            emptyState: { icon: "fa-plus-circle", message: "Add content" },
+            emptyState: { icon: "fa-plus", message: "Add content" },
           },
         ];
       }
@@ -2328,7 +2328,7 @@ class DashboardBuilder {
       rowId: newRowId,
       height: `${GRID_CONFIG.DEFAULT_NEW_ROW_FR}fr`,
       content: { type: "empty" },
-      emptyState: { icon: "fa-plus-circle", message: "Add content" },
+      emptyState: { icon: "fa-plus", message: "Add content" },
     };
 
     if (position === 0) {
@@ -2497,7 +2497,7 @@ class DashboardBuilder {
             colSpanFr: "1fr",
             content: { type: "empty" },
             emptyState: {
-              icon: "fa-plus-circle",
+              icon: "fa-plus",
               message: "Add content",
             },
           });
@@ -2835,7 +2835,7 @@ class DashboardBuilder {
           content: area.content ? { ...area.content } : { type: "empty" },
           emptyState: area.emptyState
             ? { ...area.emptyState }
-            : { icon: "fa-plus-circle", message: "Add content" },
+            : { icon: "fa-plus", message: "Add content" },
         };
 
         // Handle sub-rows if present
@@ -2847,7 +2847,7 @@ class DashboardBuilder {
             content: subRow.content ? { ...subRow.content } : { type: "empty" },
             emptyState: subRow.emptyState
               ? { ...subRow.emptyState }
-              : { icon: "fa-plus-circle", message: "Add content" },
+              : { icon: "fa-plus", message: "Add content" },
           }));
         }
 
