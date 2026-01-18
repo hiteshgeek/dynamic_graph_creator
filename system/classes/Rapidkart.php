@@ -14,6 +14,9 @@ class Rapidkart
       /* Database Object */
       private $DB;
 
+      /* Theme Registry Object */
+      private $themeRegistry = null;
+
       /**
        * Main class constructor private
        */
@@ -42,5 +45,18 @@ class Rapidkart
       public function getDB()
       {
             return $this->DB;
+      }
+
+      /**
+       * Get the theme registry instance
+       *
+       * @return ThemeRegistry
+       */
+      public function getThemeRegistry()
+      {
+            if ($this->themeRegistry === null) {
+                  $this->themeRegistry = new ThemeRegistry();
+            }
+            return $this->themeRegistry;
       }
 }

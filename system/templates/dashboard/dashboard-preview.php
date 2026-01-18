@@ -1,31 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo htmlspecialchars($dashboard->getName()); ?> - Preview</title>
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome 6 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-
-    <!-- Google Sans Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <?php if ($css = Utility::getCss('common')): ?>
-        <link href="<?php echo $css; ?>" rel="stylesheet">
-    <?php endif; ?>
-    <?php if ($css = Utility::getCss('dashboard')): ?>
-        <link href="<?php echo $css; ?>" rel="stylesheet">
-    <?php endif; ?>
-</head>
-
-<body class="dashboard-preview-page">
-    <?php
+<?php
     $badges = [];
     if ($dashboard->getIsSystem()) {
         $badges[] = ['label' => 'System', 'icon' => 'fa-lock', 'class' => 'badge-system'];
@@ -136,56 +109,3 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Custom JS -->
-    <?php if ($js = Utility::getJs('common')): ?>
-        <script src="<?php echo $js; ?>"></script>
-    <?php endif; ?>
-    <script src="system/scripts/src/Theme.js"></script>
-    <?php if ($js = Utility::getJs('dashboard')): ?>
-        <script src="<?php echo $js; ?>"></script>
-    <?php endif; ?>
-
-    <script>
-        // Handle delete dashboard
-        document.querySelector('.delete-dashboard-btn')?.addEventListener('click', async function() {
-            const dashboardId = this.dataset.dashboardId;
-
-            const confirmed = await ConfirmDialog.delete('Are you sure you want to delete this dashboard?', 'Confirm Delete');
-            if (!confirmed) return;
-
-            // Show loading state
-            const deleteBtn = this;
-            deleteBtn.disabled = true;
-            deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
-
-            Ajax.post('delete_dashboard', {
-                    id: dashboardId
-                })
-                .then(result => {
-                    if (result.success) {
-                        Toast.success('Dashboard deleted successfully');
-                        // Redirect to dashboard list after a short delay
-                        setTimeout(() => {
-                            window.location.href = '?urlq=dashboard';
-                        }, 500);
-                    } else {
-                        Toast.error(result.message || 'Failed to delete dashboard');
-                        // Restore button state on error
-                        deleteBtn.disabled = false;
-                        deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Delete Dashboard';
-                    }
-                })
-                .catch(error => {
-                    Toast.error('Failed to delete dashboard');
-                    // Restore button state on error
-                    deleteBtn.disabled = false;
-                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Delete Dashboard';
-                });
-        });
-    </script>
-</body>
-
-</html>

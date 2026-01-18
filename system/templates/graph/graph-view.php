@@ -1,39 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graphs - <?php echo htmlspecialchars($graph->getName()); ?> - Dynamic Graph Creator</title>
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome 6 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-
-    <!-- Google Sans Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <!-- ECharts -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-
-    <!-- Daterangepicker Dependencies -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
-
-    <!-- Custom CSS -->
-    <?php if ($css = Utility::getCss('common')): ?>
-        <link href="<?php echo $css; ?>" rel="stylesheet">
-    <?php endif; ?>
-    <?php if ($css = Utility::getCss('graph')): ?>
-        <link href="<?php echo $css; ?>" rel="stylesheet">
-    <?php endif; ?>
-</head>
-
-<body>
-    <?php
+<?php
     echo Utility::renderPageHeader([
         'title' => $graph->getName(),
         'backUrl' => '?urlq=graph',
@@ -178,20 +143,3 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Daterangepicker JS (after jQuery) -->
-    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-
-    <!-- Custom JS -->
-    <?php if ($js = Utility::getJs('common')): ?>
-        <script src="<?php echo $js; ?>"></script>
-    <?php endif; ?>
-    <script src="system/scripts/src/Theme.js"></script>
-    <?php if ($js = Utility::getJs('graph')): ?>
-        <script src="<?php echo $js; ?>"></script>
-    <?php endif; ?>
-</body>
-
-</html>

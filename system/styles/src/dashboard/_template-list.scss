@@ -161,6 +161,9 @@
       .item-card-grid {
         max-height: 0;
         opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+        overflow: hidden;
       }
     }
   }
@@ -345,17 +348,32 @@
 
 // Sortable drag states
 .template-list-page {
-  // Category being dragged
-  .template-category-section.sortable-ghost {
+  // Category ghost (placeholder where item will go)
+  .template-category-section.sortable-ghost,
+  .template-category-section.sortable-ghost.collapsed {
     opacity: 0.4;
     background: var(--dgc-bg-elevated);
+    gap: 0 !important;
+
+    // Hide the grid in ghost to show just the header placeholder
+    .item-card-grid {
+      display: none !important;
+      max-height: 0 !important;
+      visibility: hidden !important;
+    }
   }
 
+  // Category being chosen (before drag starts)
   .template-category-section.sortable-chosen {
     .category-header {
       border-color: var(--dgc-primary);
       box-shadow: var(--dgc-shadow-2);
     }
+  }
+
+  // Category original element while dragging (hide it)
+  .template-category-section.sortable-drag {
+    opacity: 0 !important;
   }
 
   // Item card being dragged
@@ -372,8 +390,8 @@
     }
   }
 
-  // Drag class (on original element while dragging)
-  .sortable-drag {
+  // Item card drag class (on original element while dragging)
+  .item-card.sortable-drag {
     opacity: 0 !important;
   }
 
@@ -499,6 +517,62 @@ body.template-ordering-disabled {
     .category-drag-handle,
     .template-drag-handle {
       display: none !important;
+    }
+  }
+}
+
+// Category dragging state
+body.category-dragging {
+  .template-category-section {
+    transition: transform 0.15s ease;
+  }
+}
+
+// Category sortable fallback (clone that follows cursor)
+.sortable-fallback-category,
+.sortable-fallback-category.collapsed {
+  z-index: 9999 !important;
+  cursor: grabbing !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 0 !important;
+
+  // Only show category header in the fallback
+  .category-header {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25) !important;
+    transform: rotate(1deg);
+    border: 2px solid var(--dgc-primary) !important;
+    background: var(--dgc-bg-card) !important;
+
+    .category-drag-handle {
+      opacity: 1;
+      color: var(--dgc-primary);
+    }
+
+    // Keep chevron visible in normal state for fallback
+    .category-collapse-toggle i {
+      transform: none !important;
+    }
+  }
+
+  // Hide the grid in the fallback clone - override all states
+  .item-card-grid {
+    display: none !important;
+    height: 0 !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+}
+
+// Ensure collapsed fallback also gets proper styling
+.sortable-fallback-category.collapsed {
+  .category-header {
+    .category-collapse-toggle i {
+      transform: rotate(-90deg) !important;
     }
   }
 }

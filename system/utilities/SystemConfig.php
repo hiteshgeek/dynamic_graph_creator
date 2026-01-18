@@ -221,4 +221,20 @@ class SystemConfig
     {
         return self::systemsDirPath() . "config/";
     }
+
+    /**
+     * @return String The URL of the themes directory
+     */
+    public static function themesUrl()
+    {
+        return self::baseUrl() . "themes/";
+    }
+
+    /**
+     * @return String The path of the themes directory
+     */
+    public static function themesPath()
+    {
+        return self::basePath() . "themes/";
+    }
 }

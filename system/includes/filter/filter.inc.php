@@ -46,8 +46,27 @@ switch ($action) {
  */
 function showFilterList()
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('filter');
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('filter');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'filter/filter-list.js');
+
+    $theme->setPageTitle('Filters - Dynamic Graph Creator');
+
     $filters = Filter::getAll();
+
+    ob_start();
     require_once SystemConfig::templatesPath() . 'filter/filter-list.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**
@@ -55,6 +74,27 @@ function showFilterList()
  */
 function showFilterForm($filterId = null)
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('filter');
+
+    // Add libraries
+    $theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/codemirror.min.css', 5);
+    $theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/material.min.css', 6);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/codemirror.min.js', 6);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/sql.min.js', 7);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery/jquery.min.js', 4);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment/moment.min.js', 5);
+    $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker/css/daterangepicker.css', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('filter');
+
     $filter = null;
 
     if ($filterId) {
@@ -65,7 +105,13 @@ function showFilterForm($filterId = null)
         }
     }
 
+    $theme->setPageTitle(($filter ? 'Edit' : 'Create') . ' Filter - Dynamic Graph Creator');
+
+    ob_start();
     require_once SystemConfig::templatesPath() . 'filter/filter-form.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**

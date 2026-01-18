@@ -53,8 +53,27 @@ switch ($action) {
  */
 function showList()
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
+    // Add page-specific CSS using helper functions
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('graph');
+
+    // Add page-specific JS using helper functions
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('graph');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-list.js');
+
+    $theme->setPageTitle('Graphs - Dynamic Graph Creator');
+
+    // Get content from template
     $graphs = Graph::getAll();
+    ob_start();
     require_once SystemConfig::templatesPath() . 'graph/graph-list.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**
@@ -62,6 +81,30 @@ function showList()
  */
 function showCreator($graphId = null)
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('graph');
+
+    // Add libraries
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+    $theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/codemirror.min.css', 5);
+    $theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/material.min.css', 6);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/codemirror.min.js', 6);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/sql.min.js', 7);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery/jquery.min.js', 4);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment/moment.min.js', 5);
+    $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker/css/daterangepicker.css', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('graph');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-creator.js');
+
     $graph = null;
 
     if ($graphId) {
@@ -72,13 +115,19 @@ function showCreator($graphId = null)
         }
     }
 
+    $theme->setPageTitle('Graphs - ' . ($graph ? 'Edit' : 'Create') . ' Graph - Dynamic Graph Creator');
+
     // Get all available filters for selection
     $allFilters = Filter::getAll();
 
     // Permission to create filters (replace with actual framework permission check)
     $canCreateFilter = true;
 
+    ob_start();
     require_once SystemConfig::templatesPath() . 'graph/graph-creator.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**
@@ -86,11 +135,31 @@ function showCreator($graphId = null)
  */
 function showView($graphId)
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('graph');
+
+    // Add libraries
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery/jquery.min.js', 4);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment/moment.min.js', 5);
+    $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker/css/daterangepicker.css', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('graph');
+
     $graph = new Graph($graphId);
     if (!$graph->getId()) {
         Utility::redirect('graph');
         return;
     }
+
+    $theme->setPageTitle('Graphs - ' . htmlspecialchars($graph->getName()) . ' - Dynamic Graph Creator');
 
     // Extract placeholders from the graph query and find matching filters
     $placeholders = Filter::extractPlaceholders($graph->getQuery());
@@ -102,7 +171,11 @@ function showView($graphId)
         $filters[] = $filter->toArray();
     }
 
+    ob_start();
     require_once SystemConfig::templatesPath() . 'graph/graph-view.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**

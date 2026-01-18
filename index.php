@@ -11,10 +11,12 @@ ini_set('display_errors', 1);
 
 // Load configuration and classes
 require_once __DIR__ . '/system/utilities/SystemConfig.php';
+require_once __DIR__ . '/system/utilities/SiteConfig.php';
 require_once __DIR__ . '/system/config/BaseConfig.php';
 require_once __DIR__ . '/system/utilities/SystemTables.php';
 require_once __DIR__ . '/system/interfaces/DatabaseObject.php';
 require_once __DIR__ . '/system/classes/SQLiDatabase.php';
+require_once __DIR__ . '/system/classes/ThemeRegistry.php';
 require_once __DIR__ . '/system/classes/Rapidkart.php';
 require_once __DIR__ . '/system/classes/Utility.php';
 require_once __DIR__ . '/system/classes/Filter.php';
@@ -42,3 +44,6 @@ switch ($page) {
         require_once SystemConfig::includesPath() . 'graph/graph.inc.php';
         break;
 }
+
+// Render the page
+Rapidkart::getInstance()->getThemeRegistry()->renderPage();

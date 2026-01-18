@@ -94,6 +94,52 @@ class Utility
     }
 
     /**
+     * Add CSS from dist folder to ThemeRegistry
+     * Helper function to simplify adding module CSS
+     *
+     * @param string $module Module name ('graph', 'filter', 'dashboard', 'common')
+     * @param int $weight Load order (lower = earlier)
+     *
+     * Usage in .inc.php:
+     *   Utility::addModuleCss('common');
+     *   Utility::addModuleCss('graph');
+     *
+     * TODO: When migrating to rapidkart structure, change to:
+     *   $theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css');
+     */
+    public static function addModuleCss($module, $weight = 10)
+    {
+        $theme = Rapidkart::getInstance()->getThemeRegistry();
+        $css = self::getCss($module);
+        if ($css) {
+            $theme->addCss($css, $weight);
+        }
+    }
+
+    /**
+     * Add JS from dist folder to ThemeRegistry
+     * Helper function to simplify adding module JS
+     *
+     * @param string $module Module name ('graph', 'filter', 'dashboard', 'common')
+     * @param int $weight Load order (lower = earlier)
+     *
+     * Usage in .inc.php:
+     *   Utility::addModuleJs('common');
+     *   Utility::addModuleJs('graph');
+     *
+     * TODO: When migrating to rapidkart structure, change to:
+     *   $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js');
+     */
+    public static function addModuleJs($module, $weight = 10)
+    {
+        $theme = Rapidkart::getInstance()->getThemeRegistry();
+        $js = self::getJs($module);
+        if ($js) {
+            $theme->addScript($js, $weight);
+        }
+    }
+
+    /**
      * Parse URL into segments
      * @return array
      */

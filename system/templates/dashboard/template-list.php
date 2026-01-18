@@ -1,38 +1,11 @@
 <?php
 require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Templates - Dynamic Graph Creator</title>
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome 6 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-
-    <!-- Google Sans Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <?php if ($css = Utility::getCss('common')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
-    <?php endif; ?>
-    <?php if ($css = Utility::getCss('dashboard')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
-    <?php endif; ?>
-
-    <!-- Apply collapsed state immediately to prevent flash -->
-    <script>
-    window.__collapsedCategories = JSON.parse(localStorage.getItem('collapsedTemplateCategories') || '[]');
-    window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'false'; ?>;
-    </script>
-</head>
-<body class="<?php echo $allowTemplateOrdering ? 'template-ordering-enabled' : 'template-ordering-disabled'; ?>">
-    <?php
+<script>
+window.__collapsedCategories = JSON.parse(localStorage.getItem('collapsedTemplateCategories') || '[]');
+window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'false'; ?>;
+</script>
+<?php
     $leftContent = '';
     if (!empty($templates)) {
         $leftContent = '<button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-all-categories" title="Collapse All"><i class="fas fa-compress-alt"></i> <span>Collapse All</span></button>';
@@ -180,19 +153,3 @@ require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- SortableJS for drag-and-drop -->
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-
-    <!-- Custom JS -->
-    <?php if ($js = Utility::getJs('common')): ?>
-    <script src="<?php echo $js; ?>"></script>
-    <?php endif; ?>
-    <script src="system/scripts/src/Theme.js"></script>
-    <?php if ($js = Utility::getJs('dashboard')): ?>
-    <script src="<?php echo $js; ?>"></script>
-    <?php endif; ?>
-</body>
-</html>

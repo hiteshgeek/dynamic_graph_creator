@@ -1,48 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graphs - <?php echo $graph ? 'Edit' : 'Create'; ?> Graph - Dynamic Graph Creator</title>
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome 6 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-
-    <!-- Google Sans Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <!-- ECharts -->
-    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
-
-    <!-- CodeMirror for SQL highlighting -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
-
-    <!-- Autosize for textarea auto-expand -->
-    <script src="https://cdn.jsdelivr.net/npm/autosize@6.0.1/dist/autosize.min.js"></script>
-
-    <!-- Daterangepicker Dependencies -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
-
-    <!-- Custom CSS -->
-    <?php if ($css = Utility::getCss('common')): ?>
-        <link href="<?php echo $css; ?>" rel="stylesheet">
-    <?php endif; ?>
-    <?php if ($css = Utility::getCss('graph')): ?>
-        <link href="<?php echo $css; ?>" rel="stylesheet">
-    <?php endif; ?>
-</head>
-
-<body>
-    <?php
+<?php
     $rightContent = '<div class="status-indicators"></div>';
     $rightContent .= '<button type="button" class="btn btn-outline-primary btn-sm save-graph-btn"><i class="fas fa-save"></i> ' . ($graph ? 'Save' : 'Create Graph') . '</button>';
     if ($graph) {
@@ -57,7 +13,7 @@
     ?>
 
     <div class="container container-full">
-        <div id="graph-creator" class="graph-creator graph-creator-single-sidebar" data-graph-id="<?php echo $graph ? $graph->getId() : ''; ?>">
+        <div id="graph-creator" class="graph-creator graph-creator-single-sidebar" data-graph-id="<?php echo $graph ? $graph->getId() : ''; ?>" data-graph-config="<?php echo $graph ? htmlspecialchars($graph->getConfig()) : ''; ?>">
 
             <!-- Left Sidebar - Graph Info, Chart Type, Config & Filters -->
             <div class="graph-sidebar graph-sidebar-left" id="graph-sidebar-left">
@@ -371,33 +327,3 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Daterangepicker JS (after jQuery) -->
-    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-
-    <!-- Custom JS -->
-    <?php if ($js = Utility::getJs('common')): ?>
-        <script src="<?php echo $js; ?>"></script>
-    <?php endif; ?>
-    <script src="system/scripts/src/Theme.js"></script>
-    <?php if ($js = Utility::getJs('graph')): ?>
-        <script src="<?php echo $js; ?>"></script>
-    <?php endif; ?>
-
-    <?php if ($graph): ?>
-        <!-- Set existing config if editing -->
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(function() {
-                    if (window.graphCreator && window.graphCreator.configPanel) {
-                        window.graphCreator.configPanel.setConfig(<?php echo $graph->getConfig(); ?>);
-                    }
-                }, 100);
-            });
-        </script>
-    <?php endif; ?>
-</body>
-
-</html>

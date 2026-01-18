@@ -353,6 +353,23 @@ export class TemplateManager {
   }
 
   /**
+   * Update the template count badge for a category
+   * @param {string} categoryId - The category ID to update
+   */
+  static updateCategoryCount(categoryId) {
+    if (!categoryId) return;
+
+    const section = document.querySelector(`.template-category-section[data-category-id="${categoryId}"]`);
+    if (!section) return;
+
+    const countBadge = section.querySelector(".category-template-count");
+    if (!countBadge) return;
+
+    const templateCount = section.querySelectorAll(".item-card:not(.item-card-empty)").length;
+    countBadge.textContent = templateCount;
+  }
+
+  /**
    * Create scroll function with gradual acceleration
    * Speed increases as cursor gets closer to edge
    */
@@ -395,6 +412,12 @@ export class TemplateManager {
     const categoryList = document.getElementById("category-list");
     if (!categoryList) return; // Not on template list page
 
+    // Check if Sortable library is loaded
+    if (!Sortable) {
+      console.warn("Sortable library not loaded, skipping sortable initialization");
+      return;
+    }
+
     const Toast = window.Toast;
     const Ajax = window.Ajax;
     const scrollFn = TemplateManager.createScrollFn();
@@ -416,11 +439,18 @@ export class TemplateManager {
       ghostClass: "sortable-ghost",
       chosenClass: "sortable-chosen",
       forceFallback: true,
+      fallbackOnBody: true,
+      fallbackClass: "sortable-fallback-category",
       scroll: true,
       scrollFn: scrollFn,
       scrollSensitivity: 150,
       bubbleScroll: true,
+      onStart: () => {
+        document.body.classList.add("category-dragging");
+      },
       onEnd: async (evt) => {
+        document.body.classList.remove("category-dragging");
+
         if (evt.oldIndex === evt.newIndex) return;
 
         const categories = categoryList.querySelectorAll(".template-category-section");
@@ -641,14 +671,18 @@ export class TemplateManager {
                 }
 
                 // Also reorder within new category
-                const targetGrid = droppedOnCollapsed
+                const targetGridEl = droppedOnCollapsed
                   ? targetSection.querySelector(".item-card-grid")
                   : evt.to;
-                if (targetGrid) {
-                  const templates = targetGrid.querySelectorAll(".item-card:not(.item-card-empty)");
+                if (targetGridEl) {
+                  const templates = targetGridEl.querySelectorAll(".item-card:not(.item-card-empty)");
                   const order = Array.from(templates).map(card => card.dataset.templateId);
                   await Ajax.post("reorder_templates", { order: order });
                 }
+
+                // Update template counts for both source and target categories
+                TemplateManager.updateCategoryCount(sourceCategoryId);
+                TemplateManager.updateCategoryCount(targetCategoryId);
 
                 // Check if source category is now empty (no templates left)
                 const sourceSection = document.querySelector(`.template-category-section[data-category-id="${sourceCategoryId}"]`);

@@ -132,10 +132,29 @@ switch ($action) {
  */
 function showList()
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('dashboard');
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('dashboard');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-list.js');
+
+    $theme->setPageTitle('Dashboards - Dynamic Graph Creator');
+
     // Get user's dashboards - TODO: Replace with actual user ID from session
     $userId = 1;
     $dashboards = DashboardInstance::getUserDashboards($userId);
+
+    ob_start();
     require_once SystemConfig::templatesPath() . 'dashboard/dashboard-list.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**
@@ -143,6 +162,21 @@ function showList()
  */
 function showBuilder($dashboardId = 0)
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('dashboard');
+
+    // Add libraries
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('dashboard');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-builder.js');
+
     $dashboard = null;
     $templates = DashboardTemplate::getAllGrouped();
 
@@ -154,7 +188,13 @@ function showBuilder($dashboardId = 0)
         }
     }
 
+    $theme->setPageTitle(($dashboard ? 'Edit Dashboard' : 'Create Dashboard') . ' - Dynamic Graph Creator');
+
+    ob_start();
     require_once SystemConfig::templatesPath() . 'dashboard/dashboard-builder.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**
@@ -162,13 +202,34 @@ function showBuilder($dashboardId = 0)
  */
 function showPreview($dashboardId)
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('dashboard');
+
+    // Add libraries
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('dashboard');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-preview.js');
+
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
         Utility::redirect('dashboard');
         return;
     }
 
+    $theme->setPageTitle(htmlspecialchars($dashboard->getName()) . ' - Preview');
+
+    ob_start();
     require_once SystemConfig::templatesPath() . 'dashboard/dashboard-preview.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**
@@ -554,8 +615,30 @@ function reorderSections($data)
 function showTemplateList()
 {
     global $allowTemplateOrdering;
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('dashboard');
+
+    // Add libraries
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('dashboard');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-list.js');
+
+    $theme->setPageTitle('Dashboard Templates - Dynamic Graph Creator');
+
     $templates = DashboardTemplate::getAllCategoriesWithTemplates();
+
+    ob_start();
     require_once SystemConfig::templatesPath() . 'dashboard/template-list.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**
@@ -563,10 +646,32 @@ function showTemplateList()
  */
 function showTemplateCreator()
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('dashboard');
+
+    // Add libraries
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('dashboard');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js');
+
+    $theme->setPageTitle('Create Template - Dynamic Graph Creator');
+
     $pageTitle = 'Create Template';
     $template = null;
     $categories = DashboardTemplateCategory::getAll();
+
+    ob_start();
     require_once SystemConfig::templatesPath() . 'dashboard/template-editor.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**
@@ -574,6 +679,8 @@ function showTemplateCreator()
  */
 function showTemplateEditor($templateId)
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
     if (!$templateId) {
         Utility::redirect('dashboard/templates');
         return;
@@ -585,9 +692,29 @@ function showTemplateEditor($templateId)
         return;
     }
 
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('dashboard');
+
+    // Add libraries
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('dashboard');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js');
+
+    $theme->setPageTitle('Edit Template - Dynamic Graph Creator');
+
     $pageTitle = 'Edit Template';
     $categories = DashboardTemplateCategory::getAll();
+
+    ob_start();
     require_once SystemConfig::templatesPath() . 'dashboard/template-editor.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**
@@ -595,6 +722,8 @@ function showTemplateEditor($templateId)
  */
 function showTemplateBuilder($templateId)
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
     if (!$templateId) {
         Utility::redirect('dashboard/templates');
         return;
@@ -606,8 +735,29 @@ function showTemplateBuilder($templateId)
         return;
     }
 
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('dashboard');
+
+    // Add libraries
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('dashboard');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-builder.js');
+
+    $theme->setPageTitle('Template Builder - ' . htmlspecialchars($template->getName()));
+
     $categories = DashboardTemplateCategory::getAll();
+
+    ob_start();
     require_once SystemConfig::templatesPath() . 'dashboard/template-builder.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**
@@ -615,6 +765,8 @@ function showTemplateBuilder($templateId)
  */
 function showTemplatePreview($templateId)
 {
+    $theme = Rapidkart::getInstance()->getThemeRegistry();
+
     if (!$templateId) {
         Utility::redirect('dashboard/templates');
         return;
@@ -626,7 +778,26 @@ function showTemplatePreview($templateId)
         return;
     }
 
+    // Add page-specific CSS
+    Utility::addModuleCss('common');
+    Utility::addModuleCss('dashboard');
+
+    // Add libraries
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+
+    // Add page-specific JS
+    Utility::addModuleJs('common');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+    Utility::addModuleJs('dashboard');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-preview.js');
+
+    $theme->setPageTitle('Template Preview - ' . htmlspecialchars($template->getName()));
+
+    ob_start();
     require_once SystemConfig::templatesPath() . 'dashboard/template-preview.php';
+    $content = ob_get_clean();
+
+    $theme->setContent('full_main', $content);
 }
 
 /**

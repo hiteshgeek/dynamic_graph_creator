@@ -1,32 +1,4 @@
 <?php
-// Template preview component is used for thumbnail previews in template list, not here
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php $name = $template->getName(); echo htmlspecialchars($name ? $name : 'Template'); ?> - Preview</title>
-
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Font Awesome 6 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
-
-    <!-- Google Sans Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <!-- Custom CSS -->
-    <?php if ($css = Utility::getCss('common')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
-    <?php endif; ?>
-    <?php if ($css = Utility::getCss('dashboard')): ?>
-    <link href="<?php echo $css; ?>" rel="stylesheet">
-    <?php endif; ?>
-</head>
-<body class="template-preview-page">
-    <?php
     $templateName = $template->getName();
     $templateName = $templateName ? $templateName : 'Template';
 
@@ -126,25 +98,3 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Custom JS -->
-    <?php if ($js = Utility::getJs('common')): ?>
-    <script src="<?php echo $js; ?>"></script>
-    <?php endif; ?>
-    <script src="system/scripts/src/Theme.js"></script>
-    <?php if ($js = Utility::getJs('dashboard')): ?>
-    <script src="<?php echo $js; ?>"></script>
-    <?php endif; ?>
-
-    <script>
-        // Initialize TemplateManager for delete and duplicate buttons
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.TemplateManager) {
-                TemplateManager.initTemplateList();
-            }
-        });
-    </script>
-</body>
-</html>
