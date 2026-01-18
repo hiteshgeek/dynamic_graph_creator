@@ -74,10 +74,12 @@ $grid-gap: $spacing-md;
 
   // Preview mode - clean view without editing styles
   .dashboard-preview-page &,
-  .template-preview-page & {
+  .template-preview-page &,
+  .dashboard-preview & {
     padding: 0;
     background: transparent;
     border: none;
+    box-shadow: none;
     min-height: auto;
 
     &:hover {
@@ -155,12 +157,13 @@ $grid-gap: $spacing-md;
     min-height: auto;
   }
 
-  // View mode - no border, subtle shadow, keep same dimensions
+  // View mode - white bg, solid border
   .dashboard-preview-page &:not(.dashboard-area-nested),
-  .template-preview-page &:not(.dashboard-area-nested) {
-    border: none;
+  .template-preview-page &:not(.dashboard-area-nested),
+  .dashboard-preview &:not(.dashboard-area-nested) {
+    border: 1px solid var(--dgc-border-color);
     background: var(--dgc-bg-card);
-    box-shadow: $shadow-subtle;
+    box-shadow: none;
     cursor: default;
     // padding: 1.5rem;
     min-height: 150px;
@@ -172,7 +175,8 @@ $grid-gap: $spacing-md;
   }
 
   .dashboard-preview-page &.dashboard-area-nested,
-  .template-preview-page &.dashboard-area-nested {
+  .template-preview-page &.dashboard-area-nested,
+  .dashboard-preview &.dashboard-area-nested {
     background: transparent;
     box-shadow: none;
     padding: 0;
@@ -209,12 +213,13 @@ $grid-gap: $spacing-md;
   align-items: center;
   justify-content: center;
 
-  // View mode - same styling as dashboard-area
+  // View mode - white bg, solid border (same as dashboard-area)
   .dashboard-preview-page &,
-  .template-preview-page & {
-    border: none;
+  .template-preview-page &,
+  .dashboard-preview & {
+    border: 1px solid var(--dgc-border-color);
     background: var(--dgc-bg-card);
-    box-shadow: $shadow-subtle;
+    box-shadow: none;
     cursor: default;
 
     // Pointer cursor on empty cell
