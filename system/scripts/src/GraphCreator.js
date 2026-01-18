@@ -80,6 +80,9 @@ export default class GraphCreator {
 
         // Initialize keyboard shortcuts
         this.initKeyboardShortcuts();
+
+        // Show initial status indicators
+        this.updateStatusIndicators();
     }
 
     /**
@@ -273,7 +276,7 @@ export default class GraphCreator {
     }
 
     /**
-     * Update status indicators in page header
+     * Update status indicators in page header (errors, warnings, and save status)
      */
     updateStatusIndicators() {
         // Status indicators are now in page header
@@ -281,6 +284,13 @@ export default class GraphCreator {
         if (!statusContainer) return;
 
         let html = '';
+
+        // Save indicator (always shown)
+        if (this.hasUnsavedChanges) {
+            html += `<span class="save-indicator unsaved"><i class="fas fa-circle"></i> Unsaved</span>`;
+        } else {
+            html += `<span class="save-indicator saved"><i class="fas fa-check"></i> Saved</span>`;
+        }
 
         // Error indicator
         if (this.queryError) {
@@ -1265,26 +1275,8 @@ export default class GraphCreator {
      * Update the unsaved changes indicator in the UI
      */
     updateUnsavedIndicator() {
-        let indicator = this.container.querySelector('.save-indicator');
-
-        if (!indicator) {
-            indicator = document.createElement('span');
-            indicator.className = 'save-indicator';
-
-            // Add before the Cancel button in .save-buttons
-            const saveButtons = this.container.querySelector('.save-buttons');
-            if (saveButtons && saveButtons.firstChild) {
-                saveButtons.insertBefore(indicator, saveButtons.firstChild);
-            }
-        }
-
-        if (this.hasUnsavedChanges) {
-            indicator.className = 'save-indicator unsaved';
-            indicator.innerHTML = '<i class="fas fa-circle"></i> Unsaved';
-        } else {
-            indicator.className = 'save-indicator saved';
-            indicator.innerHTML = '<i class="fas fa-check"></i> Saved';
-        }
+        // Delegate to updateStatusIndicators which handles all status displays
+        this.updateStatusIndicators();
     }
 
     /**

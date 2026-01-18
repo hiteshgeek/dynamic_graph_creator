@@ -702,6 +702,18 @@ window.KeyboardShortcuts = {
             available: () => !!(document.querySelector('.btn-view-mode') || document.querySelector('.btn-design-mode'))
         });
 
+        // Ctrl+S: Save (triggers any save button with data-save-btn attribute)
+        this.register('ctrl+s', () => {
+            const saveBtn = document.querySelector('[data-save-btn]');
+            if (saveBtn && !saveBtn.disabled) {
+                saveBtn.click();
+            }
+        }, {
+            description: 'Save',
+            scope: 'global',
+            available: () => !!document.querySelector('[data-save-btn]')
+        });
+
         // Graph Creator: Alt+O to toggle sidebar
         this.register('alt+o', () => {
             const sidebar = document.querySelector('.graph-creator .graph-sidebar-left');

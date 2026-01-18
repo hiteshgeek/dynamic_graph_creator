@@ -1,5 +1,5 @@
 <?php
-    $rightContent = '<button type="submit" form="template-editor-form" class="btn btn-sm btn-outline-primary" id="submit-btn">';
+    $rightContent = '<button type="submit" form="template-editor-form" class="btn btn-sm btn-outline-primary" id="submit-btn" data-save-btn>';
     $rightContent .= '<i class="fas fa-save"></i> ' . ($template ? 'Save' : 'Create Template') . '</button>';
     echo Utility::renderPageHeader([
         'title' => $pageTitle,

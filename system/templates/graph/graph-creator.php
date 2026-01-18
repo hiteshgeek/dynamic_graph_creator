@@ -1,6 +1,6 @@
 <?php
     $rightContent = '<div class="status-indicators"></div>';
-    $rightContent .= '<button type="button" class="btn btn-outline-primary btn-sm save-graph-btn"><i class="fas fa-save"></i> ' . ($graph ? 'Save' : 'Create Graph') . '</button>';
+    $rightContent .= '<button type="button" class="btn btn-outline-primary btn-sm save-graph-btn" data-save-btn><i class="fas fa-save"></i> ' . ($graph ? 'Save' : 'Create Graph') . '</button>';
     if ($graph) {
         $rightContent .= '<a href="?urlq=graph/view/' . $graph->getId() . '" class="btn btn-primary btn-sm btn-view-mode"><i class="fas fa-eye"></i> View Mode</a>';
     }
