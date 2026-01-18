@@ -432,15 +432,14 @@ export class TemplateManager {
     let collapsedDropHandler = null;
 
     // Category sortable - drag entire category sections
+    // Note: NOT using forceFallback for smoother native drag behavior
     TemplateManager.categorySortable = Sortable.create(categoryList, {
       animation: 150,
       handle: ".category-drag-handle",
       draggable: ".template-category-section",
-      ghostClass: "sortable-ghost",
-      chosenClass: "sortable-chosen",
-      forceFallback: true,
-      fallbackOnBody: true,
-      fallbackClass: "sortable-fallback-category",
+      ghostClass: "category-sortable-ghost",
+      chosenClass: "category-sortable-chosen",
+      dragClass: "category-sortable-drag",
       scroll: true,
       scrollFn: scrollFn,
       scrollSensitivity: 150,
