@@ -311,13 +311,65 @@ class DashboardBuilder {
       modal = new bootstrap.Modal(modalElement);
     }
 
-    // Focus on name input when modal is shown (for new dashboard only)
-    if (!isAddingSection && nameInput) {
-      modalElement.addEventListener("shown.bs.modal", function focusHandler() {
+    // Track state for focus management
+    let modalShown = false;
+    let templatesLoaded = false;
+
+    // Function to focus first card when both conditions are met
+    const focusFirstCard = () => {
+      if (isAddingSection && modalShown && templatesLoaded) {
+        const firstCard = modalElement.querySelector(".item-card");
+        if (firstCard) {
+          firstCard.focus();
+        }
+      }
+    };
+
+    // Focus handling when modal is shown
+    modalElement.addEventListener("shown.bs.modal", function focusHandler() {
+      modalShown = true;
+      if (!isAddingSection && nameInput) {
         nameInput.focus();
-        modalElement.removeEventListener("shown.bs.modal", focusHandler);
-      });
-    }
+      } else {
+        focusFirstCard();
+      }
+      modalElement.removeEventListener("shown.bs.modal", focusHandler);
+    });
+
+    // Track if modal was closed due to successful selection (not cancellation)
+    this.templateModalSuccess = false;
+
+    // Restore focus when modal is hidden (only if cancelled, not on success)
+    modalElement.addEventListener("hidden.bs.modal", function hiddenHandler() {
+      // Only restore focus if modal was cancelled (not successful selection)
+      if (!this.templateModalSuccess) {
+        if (!isAddingSection) {
+          // New dashboard mode - focus the choose template button
+          const chooseTemplateBtn = document.querySelector(".choose-template-btn");
+          if (chooseTemplateBtn) {
+            chooseTemplateBtn.focus();
+          }
+        } else {
+          // Adding section mode - restore focus to previously focused cell if navigation is enabled
+          if (keyboardNavigation.isNavigationEnabled() && this.lastFocusedCell && document.body.contains(this.lastFocusedCell)) {
+            if (!this.lastFocusedCell.hasAttribute("tabindex")) {
+              this.lastFocusedCell.setAttribute("tabindex", "0");
+            }
+            this.lastFocusedCell.focus();
+          } else {
+            // Fallback - focus the add section button
+            const addFirstBtn = document.querySelector(".add-first-section-btn");
+            if (addFirstBtn) {
+              addFirstBtn.focus();
+            }
+          }
+        }
+      }
+      // Reset the flag for next time
+      this.templateModalSuccess = false;
+      this.lastFocusedCell = null;
+      modalElement.removeEventListener("hidden.bs.modal", hiddenHandler);
+    }.bind(this));
 
     modal.show();
 
@@ -326,6 +378,8 @@ class DashboardBuilder {
 
       if (result.success) {
         this.renderTemplates(result.data);
+        templatesLoaded = true;
+        focusFirstCard();
       } else {
         Toast.error("Failed to load templates");
       }
@@ -399,7 +453,7 @@ class DashboardBuilder {
             template.is_system == 1
               ? '<span class="badge badge-system"><i class="fas fa-lock"></i> System</span>'
               : "";
-          html += `<div class="item-card" data-template-id="${template.dtid}">
+          html += `<div class="item-card" data-template-id="${template.dtid}" tabindex="0">
                         <div class="template-preview">
                             ${this.renderTemplatePreview(template)}
                         </div>
@@ -485,6 +539,9 @@ class DashboardBuilder {
         // Load the dashboard
         await this.loadDashboard();
 
+        // Mark as successful selection before closing modal
+        this.templateModalSuccess = true;
+
         // Close modal using Bootstrap API
         const modalElement = document.getElementById("template-modal");
         const modal = bootstrap.Modal.getInstance(modalElement);
@@ -515,6 +572,9 @@ class DashboardBuilder {
 
       if (result.success) {
         await this.loadDashboard();
+
+        // Mark as successful selection before closing modal
+        this.templateModalSuccess = true;
 
         // Close modal using Bootstrap API
         const modalElement = document.getElementById("template-modal");
@@ -700,6 +760,22 @@ class DashboardBuilder {
             await this.showTemplateSelector();
           }
         });
+
+        // For existing dashboards with no sections, auto-open the template selector modal
+        if (this.mode === "dashboard" && this.dashboardId !== null) {
+          // Check if modal is already open to prevent duplicate opens
+          const templateModal = document.getElementById("template-modal");
+          const isModalOpen = templateModal?.classList.contains("show");
+
+          if (!isModalOpen) {
+            this.pendingAddPosition = 0;
+            this.templateSelectorMode = "add-section";
+            this.showTemplateSelector();
+          }
+        } else {
+          // For template mode or other cases, just focus the button
+          addFirstBtn.focus();
+        }
       }
     }
 
@@ -718,10 +794,12 @@ class DashboardBuilder {
           // Store the position for the add section handler
           this.pendingAddPosition = position;
 
-          // Track the currently focused cell to restore focus on cancel
-          const focusedCell = document.activeElement?.closest(".dashboard-cell-empty");
-          if (focusedCell) {
-            this.lastFocusedCell = focusedCell;
+          // Track the currently focused area to restore focus on cancel
+          const focusedArea =
+            document.activeElement?.closest(".dashboard-sub-row") ||
+            document.activeElement?.closest(".dashboard-area");
+          if (focusedArea) {
+            this.lastFocusedCell = focusedArea;
           }
 
           if (this.mode === "template") {
@@ -1423,15 +1501,33 @@ class DashboardBuilder {
       // Generate empty column buttons dynamically based on GRID_CONFIG
       this.generateEmptyColumnButtons(addSectionModal);
 
-      // Load templates when modal is shown
+      // Track modal shown state for focus management
+      this.addSectionModalShown = false;
+
+      // Load templates when modal starts showing
       addSectionModal.addEventListener("show.bs.modal", () => {
+        this.addSectionModalShown = false;
+        this.addSectionTemplatesLoaded = false;
         this.loadTemplatesForAddSectionModal();
+      });
+
+      // Focus first card when modal is fully shown
+      addSectionModal.addEventListener("shown.bs.modal", () => {
+        this.addSectionModalShown = true;
+        this.focusFirstAddSectionCard();
       });
 
       // Restore focus when modal is hidden (cancelled)
       addSectionModal.addEventListener("hidden.bs.modal", () => {
-        if (this.lastFocusedCell && document.body.contains(this.lastFocusedCell)) {
-          this.lastFocusedCell.focus();
+        // Only restore focus if keyboard navigation mode is enabled
+        if (keyboardNavigation.isNavigationEnabled()) {
+          if (this.lastFocusedCell && document.body.contains(this.lastFocusedCell)) {
+            // Ensure element can receive focus
+            if (!this.lastFocusedCell.hasAttribute("tabindex")) {
+              this.lastFocusedCell.setAttribute("tabindex", "0");
+            }
+            this.lastFocusedCell.focus();
+          }
         }
         this.lastFocusedCell = null;
       });
@@ -1449,6 +1545,28 @@ class DashboardBuilder {
         if (templateCard) {
           const templateId = parseInt(templateCard.dataset.templateId);
           this.addSectionFromTemplateCard(templateId);
+        }
+      });
+
+      // Handle keyboard navigation for template cards and column buttons
+      addSectionModal.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          // Handle column button selection
+          const columnBtn = e.target.closest(".add-empty-columns-btn");
+          if (columnBtn) {
+            e.preventDefault();
+            const columns = parseInt(columnBtn.dataset.columns);
+            this.addEmptySection(columns);
+            return;
+          }
+
+          // Handle template card selection
+          const templateCard = e.target.closest(".item-card");
+          if (templateCard) {
+            e.preventDefault();
+            const templateId = parseInt(templateCard.dataset.templateId);
+            this.addSectionFromTemplateCard(templateId);
+          }
         }
       });
     }
@@ -2317,7 +2435,7 @@ class DashboardBuilder {
                 template.is_system == 1
                   ? '<span class="badge badge-system"><i class="fas fa-lock"></i> System</span>'
                   : "";
-              html += `<div class="item-card" data-template-id="${template.dtid}">
+              html += `<div class="item-card" data-template-id="${template.dtid}" tabindex="0">
                         <div class="template-preview">
                           ${this.renderTemplatePreview(template)}
                         </div>
@@ -2335,6 +2453,8 @@ class DashboardBuilder {
 
         if (html) {
           templateList.innerHTML = html;
+          this.addSectionTemplatesLoaded = true;
+          this.focusFirstAddSectionCard();
         } else {
           templateList.innerHTML = `<div class="empty-state">
             <i class="fas fa-th-large"></i>
@@ -2353,6 +2473,21 @@ class DashboardBuilder {
         <i class="fas fa-exclamation-triangle"></i>
         <p>Failed to load templates</p>
       </div>`;
+    }
+  }
+
+  /**
+   * Focus first item-card in add-section-modal when both modal is shown and templates are loaded
+   */
+  focusFirstAddSectionCard() {
+    if (this.addSectionModalShown && this.addSectionTemplatesLoaded) {
+      const addSectionModal = document.getElementById("add-section-modal");
+      if (addSectionModal) {
+        const firstCard = addSectionModal.querySelector(".item-card");
+        if (firstCard) {
+          firstCard.focus();
+        }
+      }
     }
   }
 

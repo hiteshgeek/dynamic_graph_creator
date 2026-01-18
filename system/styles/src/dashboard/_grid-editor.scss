@@ -291,7 +291,7 @@ $grid-gap: $spacing-md;
   }
 }
 
-// Dark mode focus shadow for areas
+// Dark mode focus shadow for areas (edit mode)
 :root.theme-dark {
   .dashboard-builder-page,
   .template-builder-page {
@@ -302,5 +302,66 @@ $grid-gap: $spacing-md;
     .dashboard-sub-row:focus {
       box-shadow: $focus-shadow-dark;
     }
+  }
+}
+
+// View mode - focus styles for dashboard areas
+.dashboard-preview-page {
+  .dashboard-area:not(.dashboard-area-nested):focus {
+    outline: none;
+    border-color: var(--dgc-primary);
+    box-shadow: $focus-shadow;
+  }
+
+  .dashboard-sub-row:focus {
+    outline: none;
+    border-color: var(--dgc-primary);
+    box-shadow: $focus-shadow;
+  }
+}
+
+// Dark mode focus shadow for areas (view mode)
+:root.theme-dark {
+  .dashboard-preview-page {
+    .dashboard-area:not(.dashboard-area-nested):focus {
+      box-shadow: $focus-shadow-dark;
+    }
+
+    .dashboard-sub-row:focus {
+      box-shadow: $focus-shadow-dark;
+    }
+  }
+}
+
+// Keyboard Navigation Indicator
+.keyboard-nav-indicator {
+  position: fixed;
+  bottom: $spacing-lg;
+  right: $spacing-lg;
+  width: 48px;
+  height: 48px;
+  background: var(--dgc-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  animation: navIndicatorFadeIn 0.2s ease-out;
+
+  i {
+    font-size: 1.25rem;
+    color: #fff;
+  }
+}
+
+@keyframes navIndicatorFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }

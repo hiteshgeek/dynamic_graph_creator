@@ -41,6 +41,41 @@
       color: var(--dgc-primary);
     }
   }
+
+  &:focus {
+    outline: none;
+    box-shadow: $focus-shadow;
+
+    .cell-empty-icon {
+      color: var(--dgc-primary);
+    }
+
+    .cell-empty-message {
+      color: var(--dgc-primary);
+    }
+  }
+}
+
+// Dark mode focus shadow for empty cell
+:root.theme-dark {
+  .dashboard-cell-empty:focus {
+    box-shadow: $focus-shadow-dark;
+  }
+}
+
+// When parent dashboard-area is focused, highlight empty cell content
+// Works across all modes: dashboard builder, template builder, dashboard preview
+.dashboard-area:focus,
+.dashboard-sub-row:focus {
+  .dashboard-cell-empty {
+    .cell-empty-icon {
+      color: var(--dgc-primary);
+    }
+
+    .cell-empty-message {
+      color: var(--dgc-primary);
+    }
+  }
 }
 
 // In tweak mode (no layout-edit-disabled), empty cell goes behind the overlay

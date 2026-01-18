@@ -70,6 +70,12 @@
         border-color: var(--dgc-primary);
       }
 
+      &:focus {
+        outline: none;
+        border-color: var(--dgc-primary);
+        box-shadow: $focus-shadow;
+      }
+
       .template-preview {
         @include template-preview-small;
         padding: 0;
@@ -77,6 +83,16 @@
       }
 
       // Uses standard .item-card-content from _base.scss
+    }
+  }
+}
+
+// Dark mode focus shadow for item-card in template selector
+:root.theme-dark {
+  #template-modal,
+  #add-section-modal {
+    .item-card:focus {
+      box-shadow: $focus-shadow-dark;
     }
   }
 }
