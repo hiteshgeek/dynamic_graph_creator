@@ -324,23 +324,10 @@ $grid-gap: $spacing-md;
   }
 }
 
-// Keyboard Navigation Indicator
-// Uses btn btn-icon btn-outline-info classes for styling
+// Keyboard Navigation Indicator - position only, btn.btn-icon handles circular styling
 .keyboard-nav-indicator {
   position: fixed;
   bottom: $spacing-md;
   right: $spacing-md;
   z-index: 1000;
-  animation: navIndicatorFadeIn 0.2s ease-out;
-}
-
-@keyframes navIndicatorFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }

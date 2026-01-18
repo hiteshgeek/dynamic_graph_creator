@@ -121,10 +121,6 @@ a {
 
   .item-card-actions {
     @include item-card-actions;
-
-    .btn-icon {
-      @include item-card-btn-icon;
-    }
   }
 }
 

@@ -353,19 +353,6 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15),
     }
   }
 
-  .btn-icon {
-    @include item-card-btn-icon;
-
-    &.btn-primary {
-      border-color: var(--dgc-primary);
-      color: var(--dgc-primary);
-
-      &:hover {
-        background: var(--dgc-primary);
-        color: var(--dgc-text-inverse);
-      }
-    }
-  }
 }
 
 // Save Indicator (matches btn-sm sizing)

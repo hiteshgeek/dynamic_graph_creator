@@ -207,7 +207,7 @@ window.Theme = {
     },
 
     /**
-     * Update the toggle button icon and title
+     * Update the toggle button icon
      * @param {HTMLElement} btn - The toggle button element
      * @param {boolean} animate - Whether to animate the icon change
      * @param {string} prevMode - Previous mode for animation direction
@@ -220,19 +220,16 @@ window.Theme = {
             // Remove all theme icons
             icon.classList.remove('fa-desktop', 'fa-sun', 'fa-moon');
 
-            // Set icon and title based on current mode
+            // Set icon based on current mode
             switch (this.currentMode) {
                 case this.MODES.SYSTEM:
                     icon.classList.add('fa-desktop');
-                    btn.title = 'Theme: System (click for Light)';
                     break;
                 case this.MODES.LIGHT:
                     icon.classList.add('fa-sun');
-                    btn.title = 'Theme: Light (click for Dark)';
                     break;
                 case this.MODES.DARK:
                     icon.classList.add('fa-moon');
-                    btn.title = 'Theme: Dark (click for System)';
                     break;
             }
 

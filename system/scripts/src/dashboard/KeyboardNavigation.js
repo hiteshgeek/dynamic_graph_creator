@@ -1189,7 +1189,7 @@ export class KeyboardNavigation {
     if (this.indicatorElement) return;
 
     this.indicatorElement = document.createElement("button");
-    this.indicatorElement.className = "btn btn-icon btn-outline-info keyboard-nav-indicator";
+    this.indicatorElement.className = "btn btn-icon btn-info keyboard-nav-indicator";
     this.indicatorElement.innerHTML = '<i class="fa-solid fa-arrows-up-down-left-right"></i>';
     this.indicatorElement.setAttribute("data-bs-toggle", "tooltip");
     this.indicatorElement.setAttribute("data-bs-placement", "left");

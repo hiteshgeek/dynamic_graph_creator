@@ -365,7 +365,7 @@ class Utility
         // Theme toggle (always last, with separator)
         // Icon is set immediately via inline script to prevent flash
         $html .= '<div class="header-separator"></div>';
-        $html .= '<button type="button" class="theme-toggle-btn" title="Toggle theme">';
+        $html .= '<button type="button" class="btn btn-icon theme-toggle-btn">';
         $html .= '<i class="fas"></i>';
         $html .= '</button>';
         $html .= '<script>(function(){var m=localStorage.getItem("dgc-theme-mode")||"light",i=document.querySelector(".theme-toggle-btn i");if(i){i.classList.add(m==="dark"?"fa-moon":m==="system"?"fa-desktop":"fa-sun");}})();</script>';

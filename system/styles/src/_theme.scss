@@ -229,21 +229,13 @@ body {
 // ===========================================
 // Theme Toggle Button
 // ===========================================
+// Uses btn btn-icon for base circular styling, this adds color/gradient theming
 
 .theme-toggle-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  background: var(--dgc-gray-100);
-  border: none;
-  border-radius: 10px;
-  color: var(--dgc-text-secondary);
-  cursor: pointer;
   position: relative;
   overflow: hidden;
+  background: var(--dgc-gray-100);
+  border: none;
 
   // Background layers for smooth gradient transition
   &::before,
@@ -262,118 +254,71 @@ body {
     opacity: 0;
   }
 
-  // Light mode gradient (amber) - uses after for light
+  // Light mode gradient (amber)
   &::after {
     background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
     opacity: 0;
   }
 
   i {
-    font-size: 16px;
     transition: color 0.3s ease;
     position: relative;
     z-index: 1;
   }
 
-  // Slide out animations - direction based on sequence
-  &.icon-slide-out-left {
-    i {
-      animation: iconSlideOutLeft 0.15s ease-in forwards;
-    }
+  // Slide animations
+  &.icon-slide-out-left i {
+    animation: iconSlideOutLeft 0.15s ease-in forwards;
   }
 
-  &.icon-slide-out-right {
-    i {
-      animation: iconSlideOutRight 0.15s ease-in forwards;
-    }
+  &.icon-slide-out-right i {
+    animation: iconSlideOutRight 0.15s ease-in forwards;
   }
 
-  // Slide in animations - direction based on sequence
-  &.icon-slide-in-right {
-    i {
-      animation: iconSlideInRight 0.15s ease-out forwards;
-    }
+  &.icon-slide-in-right i {
+    animation: iconSlideInRight 0.15s ease-out forwards;
   }
 
-  &.icon-slide-in-left {
-    i {
-      animation: iconSlideInLeft 0.15s ease-out forwards;
-    }
+  &.icon-slide-in-left i {
+    animation: iconSlideInLeft 0.15s ease-out forwards;
   }
 
-  &:focus {
-    outline: none;
-  }
-
-  &:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(#0284c7, 0.3);
-  }
-
-  // Mode-specific styling - use opacity transitions for smooth effect
+  // Mode-specific colors
   &[data-mode="system"] {
-    &::before {
-      opacity: 1;
-    }
-
-    &::after {
-      opacity: 0;
-    }
-
-    i {
-      color: #0284c7; // Sky blue for system
-    }
-
+    &::before { opacity: 1; }
+    &::after { opacity: 0; }
+    i { color: #0284c7; }
     &:hover::before {
       background: linear-gradient(135deg, #bae6fd 0%, #bfdbfe 100%);
     }
   }
 
   &[data-mode="light"] {
-    &::before {
-      opacity: 0;
-    }
-
-    &::after {
-      opacity: 1;
-    }
-
-    i {
-      color: #d97706; // Amber for light/sun
-    }
-
+    &::before { opacity: 0; }
+    &::after { opacity: 1; }
+    i { color: #d97706; }
     &:hover::after {
       background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
     }
   }
 
   &[data-mode="dark"] {
-    // Dark uses a third layer via background on the element itself
     background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-
-    &::before,
-    &::after {
-      opacity: 0;
-    }
-
-    i {
-      color: #4f46e5; // Indigo for dark/moon
-    }
-
+    &::before, &::after { opacity: 0; }
+    i { color: #4f46e5; }
     &:hover {
       background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%);
     }
   }
 }
 
-// Dark mode adjustments for theme toggle
+// Dark mode adjustments
 :root.theme-dark {
   .header-separator {
     background: var(--dgc-gray-400);
   }
 
   .theme-toggle-btn {
-    // Update pseudo-element gradients for dark mode
     &::before {
       background: linear-gradient(135deg, #0c4a6e 0%, #1e3a5f 100%);
     }
@@ -382,25 +327,15 @@ body {
       background: linear-gradient(135deg, #78350f 0%, #92400e 100%);
     }
 
-    &:focus-visible {
-      box-shadow: 0 0 0 3px rgba(#7dd3fc, 0.4);
-    }
-
     &[data-mode="system"] {
-      i {
-        color: #7dd3fc;
-      }
-
+      i { color: #7dd3fc; }
       &:hover::before {
         background: linear-gradient(135deg, #0e5a82 0%, #254670 100%);
       }
     }
 
     &[data-mode="light"] {
-      i {
-        color: #fbbf24;
-      }
-
+      i { color: #fbbf24; }
       &:hover::after {
         background: linear-gradient(135deg, #92400e 0%, #a16207 100%);
       }
@@ -408,11 +343,7 @@ body {
 
     &[data-mode="dark"] {
       background: linear-gradient(135deg, #312e81 0%, #3730a3 100%);
-
-      i {
-        color: #a5b4fc;
-      }
-
+      i { color: #a5b4fc; }
       &:hover {
         background: linear-gradient(135deg, #3730a3 0%, #4338ca 100%);
       }
