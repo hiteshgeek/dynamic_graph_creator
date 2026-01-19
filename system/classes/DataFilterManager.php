@@ -197,7 +197,7 @@ class DataFilterManager
 
         $sql .= " LIMIT 1";
         $res = $db->query($sql, $args);
-        return $db->numRows($res) > 0;
+        return $db->resultNumRows($res) > 0;
     }
 
     /**

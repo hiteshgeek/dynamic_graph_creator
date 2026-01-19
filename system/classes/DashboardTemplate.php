@@ -34,7 +34,7 @@ class DashboardTemplate implements DatabaseObject
         $db = Rapidkart::getInstance()->getDB();
         $sql = "SELECT dtid FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " WHERE dtid = '::dtid' AND dtsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::dtid' => intval($id)));
-        return $db->numRows($res) > 0;
+        return $db->resultNumRows($res) > 0;
     }
 
     public function getId() { return $this->dtid; }
@@ -148,7 +148,7 @@ class DashboardTemplate implements DatabaseObject
         $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " WHERE dtid = '::dtid' AND dtsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::dtid' => $this->dtid));
 
-        if (!$res || $db->numRows($res) < 1) {
+        if (!$res || $db->resultNumRows($res) < 1) {
             $this->dtid = null;
             return false;
         }

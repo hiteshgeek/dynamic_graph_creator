@@ -10,7 +10,7 @@ class SQLiDatabase
 {
 
       private $connection;
-      public $resultset, $last_query, $current_row, $mysql_error, $mysql_errorno;
+      public $resultset, $last_query, $current_row, $field_value, $mysql_error, $mysql_errorno;
 
       /**
        * Automatically connect to the database in the constructor
@@ -96,30 +96,12 @@ class SQLiDatabase
       }
 
       /**
-       * Fetch all rows as associative array
-       *
-       * @param $resultset The result set
-       * @return array
-       */
-      public function fetchAllAssoc($resultset = null)
-      {
-            if (!$resultset) {
-                  return array();
-            }
-            $rows = array();
-            while ($row = mysqli_fetch_assoc($resultset)) {
-                  $rows[] = $row;
-            }
-            return $rows;
-      }
-
-      /**
        * Get number of rows in resultset
        *
        * @param $resultset The result set
        * @return int
        */
-      public function numRows($resultset = null)
+      public function resultNumRows($resultset = null)
       {
             if (!$resultset) {
                   $resultset = $this->resultset;
@@ -153,7 +135,7 @@ class SQLiDatabase
        *
        * @return string
        */
-      public function getError()
+      public function getMysqlError()
       {
             return $this->mysql_error;
       }
@@ -163,8 +145,148 @@ class SQLiDatabase
        *
        * @return int
        */
-      public function getErrorNo()
+      public function getMysqlErrorNo()
       {
             return $this->mysql_errorno;
+      }
+
+      /**
+       * Try to connect to the database
+       *
+       * @return Boolean - Whether the connection was successful
+       */
+      public function tryConnect()
+      {
+            $conn = mysqli_connect(DB_SERVER, DB_USER, DB_PASS);
+            if ($conn) {
+                  $db_select = mysqli_select_db($conn, DB_NAME);
+                  if ($db_select) {
+                        return true;
+                  }
+            }
+            return false;
+      }
+
+      /**
+       * Select a database to use
+       *
+       * @param $database The name of the database
+       */
+      public function selectDatabase($database)
+      {
+            if ($database) {
+                  mysqli_select_db($this->connection, $database);
+            } else {
+                  mysqli_select_db($this->connection, DB_NAME);
+            }
+      }
+
+      /**
+       * Quickly update a field or fields in a table
+       *
+       * @param $table The table to update
+       * @param $fields_values An associative array with the key being the fieldname and the value is the value
+       * @param $where The where clause to limit the update
+       */
+      public function updateFields($table, $fields_values, $where = "1=1")
+      {
+            $sql = "UPDATE $table SET ";
+            $last_element = count($fields_values);
+            $count = 0;
+            $values = array();
+            foreach ($fields_values as $key => $value) {
+                  $count++;
+                  $s = " $key='::$count::', ";
+                  $values["::$count::"] = $value;
+                  if ($last_element == $count) {
+                        $s = " $key='::$count::'";
+                  }
+                  $sql .= $s;
+            }
+            $sql .= " WHERE $where";
+            $res = $this->query($sql, $values);
+            return $res;
+      }
+
+      /**
+       * Quickly grab the data from a field from a specified table
+       *
+       * @param $table The name of the table to update
+       * @param $field_name The field which to return
+       * @param $where The where clause to limit the resultset
+       *
+       * @return The field value for the requested field
+       */
+      public function getFieldValue($table, $field_name, $where = "1=1")
+      {
+            $sql = "SELECT $field_name FROM $table WHERE $where LIMIT 1";
+            $res = $this->fetchObject($this->query($sql));
+            if ($res) {
+                  $this->field_value = $field_name;
+                  return $res->$field_name;
+            }
+            return false;
+      }
+
+      /**
+       * Method to fetch a row from the resultset in the form of an array
+       *
+       * @param $resultset The result set from which to fetch the row
+       */
+      public function fetchArray($resultset = null)
+      {
+            if (!$resultset) {
+                  return false;
+            }
+            $this->current_row = mysqli_fetch_array($resultset);
+            return $this->current_row;
+      }
+
+      /**
+       * Set Auto Commit for transactions
+       */
+      public function autoCommit($status = false)
+      {
+            mysqli_autocommit($this->connection, $status);
+      }
+
+      /**
+       * Roll back during transaction
+       */
+      public function rollBack()
+      {
+            mysqli_rollback($this->connection);
+            mysqli_commit($this->connection);
+      }
+
+      /**
+       * Commit
+       */
+      public function commit()
+      {
+            mysqli_commit($this->connection);
+      }
+
+      /**
+       * Affected Rows
+       */
+      public function affectedRows()
+      {
+            return mysqli_affected_rows($this->connection);
+      }
+
+      public function executeTransactions($args)
+      {
+            $this->autoCommit(false);
+            foreach ($args as $value) {
+                  if ($value['object']->$value['function']()) {
+                        $this->rollBack();
+                        $this->autoCommit(true);
+                        return false;
+                  }
+            }
+            $this->commit();
+            $this->autoCommit(true);
+            return true;
       }
 }

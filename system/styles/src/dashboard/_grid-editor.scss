@@ -20,6 +20,26 @@ $grid-gap: $spacing-md;
   display: flex;
   flex-direction: column;
   gap: $spacing-md;
+
+  .loading-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-xl * 2;
+    color: var(--dgc-text-muted);
+
+    i {
+      font-size: 2rem;
+      margin-bottom: $spacing-md;
+      color: var(--dgc-primary);
+    }
+
+    p {
+      margin: 0;
+      font-size: $font-size-base;
+    }
+  }
 }
 
 .dashboard-section {

@@ -33,7 +33,7 @@ class Graph implements DatabaseObject
         $db = Rapidkart::getInstance()->getDB();
         $sql = "SELECT gid FROM " . SystemTables::DB_TBL_GRAPH . " WHERE gid = '::gid' AND gsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::gid' => intval($id)));
-        return $db->numRows($res) > 0;
+        return $db->resultNumRows($res) > 0;
     }
 
     public function getId() { return $this->gid; }
@@ -120,7 +120,7 @@ class Graph implements DatabaseObject
         $sql = "SELECT * FROM " . SystemTables::DB_TBL_GRAPH . " WHERE gid = '::gid' AND gsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::gid' => $this->gid));
 
-        if (!$res || $db->numRows($res) < 1) {
+        if (!$res || $db->resultNumRows($res) < 1) {
             $this->gid = null;
             return false;
         }
@@ -170,11 +170,14 @@ class Graph implements DatabaseObject
         $res = $db->query($query);
 
         if (!$res) {
-            return array('error' => $db->getError());
+            return array('error' => $db->getMysqlError());
         }
 
         $mapping = json_decode($this->data_mapping, true);
-        $rows = $db->fetchAllAssoc($res);
+        $rows = array();
+        while ($row = $db->fetchAssocArray($res)) {
+            $rows[] = $row;
+        }
 
         return $this->formatChartData($rows, $mapping);
     }

@@ -47,7 +47,7 @@ class DataFilter implements DatabaseObject
         $db = Rapidkart::getInstance()->getDB();
         $sql = "SELECT dfid FROM " . SystemTables::DB_TBL_DATA_FILTER . " WHERE dfid = '::dfid' AND dfsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::dfid' => intval($id)));
-        return $db->numRows($res) > 0;
+        return $db->resultNumRows($res) > 0;
     }
 
     /**
@@ -189,7 +189,7 @@ class DataFilter implements DatabaseObject
         $sql = "SELECT * FROM " . SystemTables::DB_TBL_DATA_FILTER . " WHERE dfid = '::dfid' AND dfsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::dfid' => $this->dfid));
 
-        if (!$res || $db->numRows($res) < 1) {
+        if (!$res || $db->resultNumRows($res) < 1) {
             $this->dfid = null;
             return false;
         }

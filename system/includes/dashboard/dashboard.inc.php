@@ -5,7 +5,7 @@
  * Handles dashboard builder actions
  */
 
-// Load dashboard module assets (once at top of file)
+// Load dashboard module assets
 Utility::addModuleCss('common');
 Utility::addModuleCss('dashboard');
 Utility::addModuleJs('common');
@@ -992,7 +992,7 @@ function deleteTemplate($data)
             WHERE dtid = '::dtid' AND disid != 3";
     $result = $db->query($sql, array('::dtid' => $templateId));
 
-    if ($result && $db->numRows($result) > 0) {
+    if ($result && $db->resultNumRows($result) > 0) {
         $row = $db->fetchAssocArray($result);
         if ($row && $row['count'] > 0) {
             Utility::ajaxResponseFalse(
@@ -1200,7 +1200,7 @@ function deleteCategory($data)
             WHERE dtcid = '::dtcid' AND dtsid != 3";
     $result = $db->query($sql, array('::dtcid' => $categoryId));
 
-    if ($result && $db->numRows($result) > 0) {
+    if ($result && $db->resultNumRows($result) > 0) {
         $row = $db->fetchAssocArray($result);
         if ($row && $row['count'] > 0) {
             Utility::ajaxResponseFalse(

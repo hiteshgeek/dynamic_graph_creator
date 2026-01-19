@@ -111,6 +111,10 @@ async function compileSass(scssFile, name) {
           if (selector.startsWith(".dgc-toast")) {
             return selector;
           }
+          // Don't prefix loading-overlay - it's appended to body, outside .dgc-app
+          if (selector.startsWith(".loading-overlay")) {
+            return selector;
+          }
           // Don't prefix .dgc-app itself - it's the wrapper class
           if (selector.startsWith(".dgc-app")) {
             return selector;

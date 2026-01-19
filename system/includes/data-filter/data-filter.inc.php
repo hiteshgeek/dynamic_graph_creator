@@ -5,7 +5,7 @@
  * Handles all data-filter-related actions
  */
 
-// Load data-filter module assets (once at top of file)
+// Load data-filter module assets
 Utility::addModuleCss('common');
 Utility::addModuleCss('data-filter');
 Utility::addModuleJs('common');
@@ -226,7 +226,7 @@ function testDataFilterQuery($data)
     $res = $db->query($testQuery);
 
     if (!$res) {
-        Utility::ajaxResponseFalse('Query error: ' . $db->getError());
+        Utility::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
     }
 
     $options = array();

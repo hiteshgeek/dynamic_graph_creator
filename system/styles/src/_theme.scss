@@ -1052,7 +1052,19 @@ code {
   }
 }
 
-// Bootstrap modal overrides
+// Bootstrap 5 modal overrides - ensure proper z-index when running alongside Bootstrap 3
+.modal {
+  z-index: 1060 !important;
+}
+
+.modal-backdrop {
+  z-index: 1055 !important;
+}
+
+.modal-dialog {
+  z-index: 1065 !important;
+}
+
 .modal-content {
   background-color: var(--dgc-bg-card);
   color: var(--dgc-text-primary);

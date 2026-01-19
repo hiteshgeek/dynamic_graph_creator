@@ -67,7 +67,7 @@ class DataFilterSet
             $sql = "SELECT query FROM " . SystemTables::DB_TBL_GRAPH . " WHERE gid = '::gid' LIMIT 1";
             $res = $db->query($sql, array('::gid' => $this->entity_id));
 
-            if ($res && $db->numRows($res) > 0) {
+            if ($res && $db->resultNumRows($res) > 0) {
                 $row = $db->fetchAssocArray($res);
                 return isset($row['query']) ? $row['query'] : '';
             }

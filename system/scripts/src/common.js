@@ -8,6 +8,11 @@ import './Theme.js';
 window.Toast = {
     container: null,
     init() {
+        // Check if container already exists (avoid duplicates)
+        if (this.container || document.querySelector('.dgc-toast-container')) {
+            this.container = document.querySelector('.dgc-toast-container');
+            return;
+        }
         this.container = document.createElement('div');
         this.container.className = 'dgc-toast-container';
         document.body.appendChild(this.container);

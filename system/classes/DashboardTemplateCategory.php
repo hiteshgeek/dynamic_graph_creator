@@ -57,7 +57,7 @@ class DashboardTemplateCategory implements DatabaseObject
         $db = Rapidkart::getInstance()->getDB();
         $sql = "SELECT dtcid FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " WHERE dtcid = '::dtcid' AND dtcsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::dtcid' => intval($id)));
-        return $db->numRows($res) > 0;
+        return $db->resultNumRows($res) > 0;
     }
 
     /**
@@ -76,7 +76,7 @@ class DashboardTemplateCategory implements DatabaseObject
         }
 
         $res = $db->query($sql, $args);
-        return $db->numRows($res) > 0;
+        return $db->resultNumRows($res) > 0;
     }
 
     /**
@@ -164,7 +164,7 @@ class DashboardTemplateCategory implements DatabaseObject
         $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE_CATEGORY . " WHERE dtcid = '::dtcid' AND dtcsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::dtcid' => $this->dtcid));
 
-        if ($db->numRows($res) > 0) {
+        if ($db->resultNumRows($res) > 0) {
             $row = $db->fetchAssocArray($res);
             $this->populate($row);
             return true;
@@ -255,7 +255,7 @@ class DashboardTemplateCategory implements DatabaseObject
                 WHERE slug = '::slug' AND dtcsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::slug' => $slug));
 
-        if ($db->numRows($res) > 0) {
+        if ($db->resultNumRows($res) > 0) {
             $row = $db->fetchAssocArray($res);
             return new DashboardTemplateCategory($row['dtcid']);
         }

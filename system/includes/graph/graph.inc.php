@@ -5,7 +5,7 @@
  * Handles all graph-related actions
  */
 
-// Load graph module assets (once at top of file)
+// Load graph module assets
 Utility::addModuleCss('common');
 Utility::addModuleCss('graph');
 Utility::addModuleJs('common');
@@ -466,7 +466,7 @@ function testQuery($data)
     $res = $db->query($testQuery);
 
     if (!$res) {
-        Utility::ajaxResponseFalse('Query error: ' . $db->getError());
+        Utility::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
     }
 
     // Fetch all sample rows
@@ -571,10 +571,13 @@ function previewGraph($data)
         $res = $db->query($query);
 
         if (!$res) {
-            Utility::ajaxResponseFalse('Query error: ' . $db->getError());
+            Utility::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
         }
 
-        $rows = $db->fetchAllAssoc($res);
+        $rows = array();
+        while ($row = $db->fetchAssocArray($res)) {
+            $rows[] = $row;
+        }
         $chartData = formatPreviewData($rows, $mapping, $graphType);
 
         Utility::ajaxResponseTrue('Preview generated', array('chartData' => $chartData));
