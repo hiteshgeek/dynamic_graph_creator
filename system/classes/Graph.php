@@ -212,24 +212,6 @@ class Graph implements DatabaseObject
         }
     }
 
-    /**
-     * Get all graphs
-     */
-    public static function getAll()
-    {
-        $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_GRAPH . " WHERE gsid != 3 ORDER BY updated_ts DESC";
-        $res = $db->query($sql);
-
-        $graphs = array();
-        while ($row = $db->fetchObject($res)) {
-            $graph = new Graph();
-            $graph->parse($row);
-            $graphs[] = $graph;
-        }
-        return $graphs;
-    }
-
     // Getters and Setters
     public function getName() { return $this->name; }
     public function setName($value) { $this->name = $value; }

@@ -22,6 +22,8 @@ require_once __DIR__ . '/system/classes/Utility.php';
 require_once __DIR__ . '/system/classes/DataFilter.php';
 require_once __DIR__ . '/system/classes/DataFilterSet.php';
 require_once __DIR__ . '/system/classes/Graph.php';
+require_once __DIR__ . '/system/classes/GraphManager.php';
+require_once __DIR__ . '/system/classes/DataFilterManager.php';
 require_once __DIR__ . '/system/classes/DashboardTemplateCategory.php';
 require_once __DIR__ . '/system/classes/DashboardTemplate.php';
 require_once __DIR__ . '/system/classes/DashboardInstance.php';
@@ -33,7 +35,7 @@ $page = isset($url[0]) ? $url[0] : 'graph';
 
 // Route to controller
 switch ($page) {
-    case 'data-filters':
+    case 'data-filter':
         require_once SystemConfig::includesPath() . 'data-filter/data-filter.inc.php';
         break;
     case 'dashboard':

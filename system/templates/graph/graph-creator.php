@@ -247,7 +247,7 @@ echo Utility::renderPageHeader([
                                 </div>
                             <?php endif; ?>
                             <?php if ($canCreateFilter): ?>
-                                <a href="?urlq=filters/create" class="btn btn-sm btn-outline-secondary filters-manage-btn">
+                                <a href="?urlq=data-filter/create" class="btn btn-sm btn-outline-secondary filters-manage-btn">
                                     <i class="fas fa-plus"></i> Create Filter
                                 </a>
                             <?php endif; ?>

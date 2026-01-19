@@ -2,7 +2,7 @@
     $rightContent = '<a href="?urlq=dashboard" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Dashboards"><i class="fas fa-th-large"></i></a>';
     $rightContent .= '<a href="?urlq=graph" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-bar"></i></a>';
     if (!empty($filters)) {
-        $rightContent .= '<a href="?urlq=data-filters/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Data Filter"><i class="fas fa-plus"></i></a>';
+        $rightContent .= '<a href="?urlq=data-filter/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Data Filter"><i class="fas fa-plus"></i></a>';
     }
     echo Utility::renderPageHeader([
         'title' => 'Data Filters',
@@ -18,7 +18,7 @@
                 'No Data Filters Yet',
                 'Create reusable filters for your graphs and dashboards',
                 'Create Data Filter',
-                '?urlq=data-filters/create',
+                '?urlq=data-filter/create',
                 'green'
             ); ?>
             <?php else: ?>
@@ -68,7 +68,7 @@
                         </div>
                     </div>
                     <div class="item-card-actions">
-                        <a href="?urlq=data-filters/edit/<?php echo $filter['dfid']; ?>" class="btn btn-icon btn-outline-design" data-bs-toggle="tooltip" title="Design Mode">
+                        <a href="?urlq=data-filter/edit/<?php echo $filter['dfid']; ?>" class="btn btn-icon btn-outline-design" data-bs-toggle="tooltip" title="Design Mode">
                             <i class="fas fa-paint-brush"></i>
                         </a>
                         <button type="button" class="btn btn-icon btn-outline-danger delete-filter-btn"

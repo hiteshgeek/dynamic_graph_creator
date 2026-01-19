@@ -42,7 +42,7 @@ window.Loading = {
 
 window.Ajax = {
     getBaseUrl() {
-        // Include query string to preserve routing (e.g., ?urlq=filters)
+        // Include query string to preserve routing (e.g., ?urlq=data-filter)
         return window.location.pathname + window.location.search;
     },
     async post(submit, data = {}) {

@@ -176,6 +176,96 @@ class DataFilterManager
     }
 
     /**
+     * Check if a filter key already exists
+     *
+     * @param string $key The filter key to check
+     * @param int|null $excludeId Filter ID to exclude (for updates)
+     * @return bool True if key exists, false otherwise
+     */
+    public static function keyExists($key, $excludeId = null)
+    {
+        $db = Rapidkart::getInstance()->getDB();
+
+        $sql = "SELECT dfid FROM " . SystemTables::DB_TBL_DATA_FILTER . "
+                WHERE filter_key = '::key' AND dfsid != 3";
+        $args = array('::key' => $key);
+
+        if ($excludeId !== null) {
+            $sql .= " AND dfid != '::exclude_id'";
+            $args['::exclude_id'] = intval($excludeId);
+        }
+
+        $sql .= " LIMIT 1";
+        $res = $db->query($sql, $args);
+        return $db->numRows($res) > 0;
+    }
+
+    /**
+     * Check if a filter key conflicts with existing filter keys (substring issue)
+     *
+     * @param string $key The filter key to check
+     * @param int|null $excludeId Filter ID to exclude (for updates)
+     * @return array|null Array with conflict info, or null if no conflict
+     */
+    public static function checkKeyConflict($key, $excludeId = null)
+    {
+        $db = Rapidkart::getInstance()->getDB();
+
+        $sql = "SELECT dfid, filter_key, filter_label FROM " . SystemTables::DB_TBL_DATA_FILTER . "
+                WHERE dfsid != 3";
+        $args = array();
+
+        if ($excludeId !== null) {
+            $sql .= " AND dfid != '::exclude_id'";
+            $args['::exclude_id'] = intval($excludeId);
+        }
+
+        $res = $db->query($sql, $args);
+        $conflicts = array();
+
+        while ($row = $db->fetchAssoc($res)) {
+            $existingKey = $row['filter_key'];
+            if ($existingKey === $key) {
+                continue;
+            }
+            if (strpos($existingKey, $key) !== false) {
+                $conflicts[] = "{$existingKey} ({$row['filter_label']})";
+            }
+            if (strpos($key, $existingKey) !== false) {
+                $conflicts[] = "{$existingKey} ({$row['filter_label']})";
+            }
+        }
+
+        if (!empty($conflicts)) {
+            return array(
+                'conflicts' => $conflicts,
+                'message' => "Placeholder conflicts with: " . implode(', ', $conflicts)
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * Extract placeholders from a SQL query
+     *
+     * @param string $query SQL query string
+     * @return array Array of placeholder keys found
+     */
+    public static function extractPlaceholders($query)
+    {
+        $placeholders = array();
+        if (preg_match_all('/::([a-zA-Z_][a-zA-Z0-9_]*)/', $query, $matches)) {
+            foreach ($matches[0] as $match) {
+                if (!in_array($match, $placeholders)) {
+                    $placeholders[] = $match;
+                }
+            }
+        }
+        return $placeholders;
+    }
+
+    /**
      * Extract placeholders from a SQL query and get matching filters
      *
      * @param string $query SQL query string
@@ -183,7 +273,7 @@ class DataFilterManager
      */
     public static function getFromQuery($query)
     {
-        $placeholders = DataFilter::extractPlaceholders($query);
+        $placeholders = self::extractPlaceholders($query);
         return self::getByKeys($placeholders);
     }
 

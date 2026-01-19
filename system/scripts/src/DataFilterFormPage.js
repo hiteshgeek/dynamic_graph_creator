@@ -500,7 +500,7 @@ export default class DataFilterFormPage {
                 Loading.hide();
                 if (result.success) {
                     Toast.success('Filter saved successfully');
-                    window.location.href = '?urlq=data-filters';
+                    window.location.href = '?urlq=data-filter';
                 } else {
                     Toast.error(result.message || 'Failed to save filter');
                 }

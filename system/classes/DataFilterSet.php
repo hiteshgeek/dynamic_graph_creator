@@ -43,14 +43,14 @@ class DataFilterSet
         }
 
         // Extract placeholders from query
-        $placeholders = DataFilter::extractPlaceholders($this->query);
+        $placeholders = DataFilterManager::extractPlaceholders($this->query);
 
         if (empty($placeholders)) {
             return true; // No filters needed
         }
 
         // Get filters matching these placeholders
-        $this->filters = DataFilter::getByKeys($placeholders);
+        $this->filters = DataFilterManager::getByKeys($placeholders);
 
         return true;
     }

@@ -60,7 +60,7 @@ function showDataFilterList()
 
     $theme->setPageTitle('Data Filters - Dynamic Graph Creator');
 
-    $filters = DataFilter::getAll();
+    $filters = DataFilterManager::getAllAsArray();
 
     ob_start();
     require_once SystemConfig::templatesPath() . 'data-filter/data-filter-list.php';
@@ -100,13 +100,13 @@ function showDataFilterForm($filterId = null)
     if ($filterId) {
         $filter = new DataFilter($filterId);
         if (!$filter->getId()) {
-            Utility::redirect('data-filters');
+            Utility::redirect('data-filter');
             return;
         }
     }
 
     // Get all filters for sidebar navigation
-    $allFilters = DataFilter::getAll();
+    $allFilters = DataFilterManager::getAllAsArray();
     $totalFilters = count($allFilters);
 
     $theme->setPageTitle(($filter ? 'Edit' : 'Create') . ' Data Filter - Dynamic Graph Creator');
@@ -145,13 +145,13 @@ function saveDataFilter($data)
     }
 
     // Check if filter key already exists (excluding current filter for updates)
-    if (DataFilter::keyExists($filterKey, $filterId ?: null)) {
+    if (DataFilterManager::keyExists($filterKey, $filterId ?: null)) {
         Utility::ajaxResponseFalse('A filter with this placeholder key already exists. Please use a unique key.');
     }
 
     // Check for substring conflicts with other filter keys
     // e.g., ::category and ::category_checkbox would conflict
-    $conflict = DataFilter::checkKeyConflict($filterKey, $filterId ?: null);
+    $conflict = DataFilterManager::checkKeyConflict($filterKey, $filterId ?: null);
     if ($conflict) {
         Utility::ajaxResponseFalse($conflict['message']);
     }

@@ -68,7 +68,7 @@ function showList()
     $theme->setPageTitle('Graphs - Dynamic Graph Creator');
 
     // Get content from template
-    $graphs = Graph::getAll();
+    $graphs = GraphManager::getAll();
     ob_start();
     require_once SystemConfig::templatesPath() . 'graph/graph-list.php';
     $content = ob_get_clean();
@@ -118,7 +118,7 @@ function showCreator($graphId = null)
     $theme->setPageTitle('Graphs - ' . ($graph ? 'Edit' : 'Create') . ' Graph - Dynamic Graph Creator');
 
     // Get all available filters for selection
-    $allFilters = DataFilter::getAll();
+    $allFilters = DataFilterManager::getAllAsArray();
 
     // Permission to create filters (replace with actual framework permission check)
     $canCreateFilter = true;
@@ -162,7 +162,7 @@ function showView($graphId)
     $theme->setPageTitle('Graphs - ' . htmlspecialchars($graph->getName()) . ' - Dynamic Graph Creator');
 
     // Get all graphs for navigation
-    $allGraphs = Graph::getAll();
+    $allGraphs = GraphManager::getAll();
     $totalGraphs = count($allGraphs);
     $currentIndex = 0;
     $prevGraphId = null;
@@ -183,8 +183,8 @@ function showView($graphId)
     }
 
     // Extract placeholders from the graph query and find matching filters
-    $placeholders = DataFilter::extractPlaceholders($graph->getQuery());
-    $matchedFilters = DataFilter::getByKeys($placeholders);
+    $placeholders = DataFilterManager::extractPlaceholders($graph->getQuery());
+    $matchedFilters = DataFilterManager::getByKeys($placeholders);
 
     // Convert to array format for template
     $filters = array();
@@ -642,8 +642,8 @@ function loadGraph($data)
     }
 
     // Extract placeholders and find matching filters
-    $placeholders = DataFilter::extractPlaceholders($graph->getQuery());
-    $matchedFilters = DataFilter::getByKeys($placeholders);
+    $placeholders = DataFilterManager::extractPlaceholders($graph->getQuery());
+    $matchedFilters = DataFilterManager::getByKeys($placeholders);
 
     $response = $graph->toArray();
     $response['placeholders'] = $placeholders;

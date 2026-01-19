@@ -1,6 +1,6 @@
 // Data Filter-specific styles (use with common.css)
 @use "variables" as *;
-@use "data-filters";
+@use "data-filter-styles";
 @use "query-builder";
 
 @media (max-width: 992px) {

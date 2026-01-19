@@ -21,9 +21,10 @@ $step = isset($_GET['step']) ? intval($_GET['step']) : 0;
 $steps = [
     1 => [
         'title' => 'Copy PHP Classes',
-        'description' => 'Copies 8 PHP class files to handle graphs, data filters, and dashboards.',
+        'description' => 'Copies 9 PHP class files to handle graphs, data filters, and dashboards.',
         'files' => [
             'system/classes/Graph.php',
+            'system/classes/GraphManager.php',
             'system/classes/DataFilter.php',
             'system/classes/DataFilterManager.php',
             'system/classes/DataFilterSet.php',
