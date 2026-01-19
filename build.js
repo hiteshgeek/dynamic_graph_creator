@@ -107,6 +107,18 @@ async function compileSass(scssFile, name) {
           if (selector.startsWith(":root")) {
             return selector;
           }
+          // Don't prefix dgc-toast classes - they're appended to body, outside .dgc-app
+          if (selector.startsWith(".dgc-toast")) {
+            return selector;
+          }
+          // Don't prefix .dgc-app itself - it's the wrapper class
+          if (selector.startsWith(".dgc-app")) {
+            return selector;
+          }
+          // Don't prefix Rapidkart layout elements - they're outside .dgc-app wrapper
+          if (selector.startsWith(".navbar") || selector.startsWith("#sidebar") || selector.startsWith("#main-content")) {
+            return selector;
+          }
           return prefixedSelector;
         },
       }),

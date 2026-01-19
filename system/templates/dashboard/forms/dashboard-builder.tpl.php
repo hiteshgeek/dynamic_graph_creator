@@ -1,3 +1,4 @@
+<div class="dgc-app">
 <?php
 $rightContent = '';
 if ($dashboard && $dashboard->getId()) {
@@ -139,4 +140,4 @@ echo DGCHelper::renderPageHeader([
             </div>
         </div>
     </div>
-<?php endif; ?>
+<?php endif; ?></div>

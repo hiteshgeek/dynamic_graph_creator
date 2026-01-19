@@ -142,14 +142,15 @@ $steps = [
         'description' => 'Copies JavaScript/CSS libraries to the target project.',
         'libraries' => [
             ['source' => 'themes/libraries/bootstrap5', 'target' => 'themes/libraries/bootstrap5'],
-            ['source' => 'themes/libraries/jquery', 'target' => 'themes/libraries/jquery'],
-            ['source' => 'themes/libraries/fontawesome', 'target' => 'themes/libraries/fontawesome'],
-            ['source' => 'themes/libraries/moment', 'target' => 'themes/libraries/moment'],
-            ['source' => 'themes/libraries/echarts', 'target' => 'themes/libraries/echarts'],
-            ['source' => 'themes/libraries/codemirror', 'target' => 'themes/libraries/codemirror'],
-            ['source' => 'themes/libraries/daterangepicker', 'target' => 'themes/libraries/daterangepicker'],
-            ['source' => 'themes/libraries/autosize', 'target' => 'themes/libraries/autosize'],
-            ['source' => 'themes/libraries/sortablejs', 'target' => 'themes/libraries/sortablejs'],
+            ['source' => 'themes/libraries/jquery3', 'target' => 'themes/libraries/jquery3'],
+            ['source' => 'themes/libraries/fontawesome6', 'target' => 'themes/libraries/fontawesome6'],
+            ['source' => 'themes/libraries/fonts', 'target' => 'themes/libraries/fonts'],
+            ['source' => 'themes/libraries/moment-dgc', 'target' => 'themes/libraries/moment-dgc'],
+            ['source' => 'themes/libraries/echarts-dgc', 'target' => 'themes/libraries/echarts-dgc'],
+            ['source' => 'themes/libraries/codemirror-dgc', 'target' => 'themes/libraries/codemirror-dgc'],
+            ['source' => 'themes/libraries/daterangepicker-dgc', 'target' => 'themes/libraries/daterangepicker-dgc'],
+            ['source' => 'themes/libraries/autosize-dgc', 'target' => 'themes/libraries/autosize-dgc'],
+            ['source' => 'themes/libraries/sortablejs-dgc', 'target' => 'themes/libraries/sortablejs-dgc'],
         ],
         'type' => 'copy_libraries_versioned'
     ],
@@ -1436,16 +1437,16 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-list.js');</div>
                                         </button>
                                     </div>
                                     <div class="code-block" id="graph-showCreator">// Add libraries
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
-$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/codemirror.min.css', 5);
-$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/material.min.css', 6);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/codemirror.min.js', 6);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/sql.min.js', 7);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery/jquery.min.js', 4);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment/moment.min.js', 5);
-$theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker/css/daterangepicker.css', 5);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/css/codemirror.min.css', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/css/material.min.css', 6);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/js/codemirror.min.js', 6);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/js/sql.min.js', 7);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery3/jquery.min.js', 4);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment-dgc/moment.min.js', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/css/daterangepicker.css', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 8);
 
 // Add page-specific JS
 $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-creator.js');</div>
@@ -1459,11 +1460,11 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-creator.js');</div>
                                         </button>
                                     </div>
                                     <div class="code-block" id="graph-showView">// Add libraries
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery/jquery.min.js', 4);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment/moment.min.js', 5);
-$theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker/css/daterangepicker.css', 5);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);</div>
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery3/jquery.min.js', 4);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment-dgc/moment.min.js', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/css/daterangepicker.css', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 8);</div>
                                 </div>
                             </div>
 
@@ -1505,14 +1506,14 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter-list.js'
                                         </button>
                                     </div>
                                     <div class="code-block" id="datafilter-showForm">// Add libraries
-$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/codemirror.min.css', 5);
-$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/material.min.css', 6);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/codemirror.min.js', 6);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/sql.min.js', 7);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery/jquery.min.js', 4);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment/moment.min.js', 5);
-$theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker/css/daterangepicker.css', 5);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);</div>
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/css/codemirror.min.css', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/css/material.min.css', 6);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/js/codemirror.min.js', 6);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/js/sql.min.js', 7);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery3/jquery.min.js', 4);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment-dgc/moment.min.js', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/css/daterangepicker.css', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 8);</div>
                                 </div>
                             </div>
 
@@ -1554,9 +1555,9 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-list.js');</
                                         </button>
                                     </div>
                                     <div class="code-block" id="dashboard-showBuilder">// Add libraries
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs-dgc/Sortable.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
 
 // Add page-specific JS
 $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-builder.js');</div>
@@ -1570,7 +1571,7 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-builder.js')
                                         </button>
                                     </div>
                                     <div class="code-block" id="dashboard-showPreview">// Add libraries
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
 
 // Add page-specific JS
 $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-preview.js');</div>
@@ -1584,7 +1585,7 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-preview.js')
                                         </button>
                                     </div>
                                     <div class="code-block" id="dashboard-showTemplateList">// Add libraries
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs-dgc/Sortable.min.js', 5);
 
 // Add page-specific JS
 $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-list.js');</div>
@@ -1598,7 +1599,7 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-list.js');</d
                                         </button>
                                     </div>
                                     <div class="code-block" id="dashboard-showTemplateEditor">// Add libraries
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
 
 // Add page-specific JS
 $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js');</div>
@@ -1612,9 +1613,9 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js');<
                                         </button>
                                     </div>
                                     <div class="code-block" id="dashboard-showTemplateBuilder">// Add libraries
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs-dgc/Sortable.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
 
 // Add page-specific JS
 $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-builder.js');</div>
@@ -1628,7 +1629,7 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-builder.js');
                                         </button>
                                     </div>
                                     <div class="code-block" id="dashboard-showTemplatePreview">// Add libraries
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
 
 // Add page-specific JS
 $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-preview.js');</div>

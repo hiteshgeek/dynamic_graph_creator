@@ -6,6 +6,51 @@
 @use "loader";
 @use "code-editor";
 
+// Product Sans Font - Self-hosted
+// Path is relative to compiled CSS location (dist/ folder)
+@font-face {
+  font-family: 'Product Sans';
+  src: url('../themes/libraries/fonts/product-sans/Product-Sans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Product Sans';
+  src: url('../themes/libraries/fonts/product-sans/Product-Sans-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Product Sans';
+  src: url('../themes/libraries/fonts/product-sans/Product-Sans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Product Sans';
+  src: url('../themes/libraries/fonts/product-sans/Product-Sans-Bold-Italic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+.navbar.navbar-inverse.navbar-fixed-top,
+#sidebar {
+  display: none !important;
+}
+
+#main-content > .row {
+  margin: 0;
+}
+
+
+
 // Global textarea - disable resize handle (autosize handles it)
 textarea {
   resize: none;
@@ -14,9 +59,25 @@ textarea {
 // Add padding for fixed header
 body {
   padding-top: 60px;
+}
 
-  // Consistent spacing after page-header for all page content
-  // Applies to main content containers that come after .page-header
+// Consistent spacing after page-header for all page content
+// Applies to main content containers that come after .page-header
+// Works with .dgc-app wrapper structure
+.dgc-app {
+  // Ensure DGC font-family applies within wrapper (overrides Rapidkart's Bootstrap 3 fonts)
+  font-family: $font-family !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  // Ensure all child elements inherit the font-family
+  // Exclude Font Awesome icons which need their own font-family for ::before pseudo-elements
+  *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.fat),
+  *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.fat)::before,
+  *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.fat)::after {
+    font-family: inherit !important;
+  }
+
   > .container,
   > .container-fluid,
   > .container-full {

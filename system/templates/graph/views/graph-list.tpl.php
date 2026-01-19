@@ -1,3 +1,4 @@
+<div class="dgc-app">
 <?php
 // Build right content
 $rightContent = '<a href="?urlq=dashboard" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Dashboards"><i class="fas fa-th-large"></i></a>';
@@ -86,4 +87,5 @@ echo DGCHelper::renderPageHeader([
             </div>
         </div>
     </div>
+</div>
 </div>

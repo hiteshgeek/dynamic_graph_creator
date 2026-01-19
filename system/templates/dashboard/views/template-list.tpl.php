@@ -1,5 +1,6 @@
+<div class="dgc-app">
 <?php
-require_once __DIR__ . '/../../includes/dashboard/template-preview-component.php';
+require_once __DIR__ . '/../../../includes/dashboard/template-preview-component.php';
 ?>
 <script>
 window.__collapsedCategories = JSON.parse(localStorage.getItem('collapsedTemplateCategories') || '[]');
@@ -157,3 +158,4 @@ window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'f
         </div>
     </div>
 
+</div>

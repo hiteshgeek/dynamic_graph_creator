@@ -157,16 +157,16 @@ Libraries are copied to **versioned folders** to avoid conflicts with existing l
 | Source | Target | Files | Notes |
 |--------|--------|-------|-------|
 | `bootstrap5/` | `bootstrap5/` | `css/bootstrap.min.css`, `js/bootstrap.bundle.min.js` | Bootstrap 5.3.2 |
-| `jquery/` | `jquery/` | `jquery.min.js` | jQuery 3.7.1 |
-| `fontawesome/` | `fontawesome/` | `css/all.min.css`, `webfonts/*` | Font Awesome 6.5.1 |
-| `moment/` | `moment2/` | `moment.min.js` | Moment.js 2.30.1 |
-| `echarts/` | `echarts/` | `echarts.min.js` | ECharts 5.4.3 |
-| `codemirror/` | `codemirror/` | `css/*.css`, `js/*.js` | CodeMirror 5.65.16 |
-| `daterangepicker/` | `daterangepicker/` | `css/daterangepicker.css`, `js/daterangepicker.min.js` | Daterangepicker 3.1 |
-| `autosize/` | `autosize/` | `autosize.min.js` | Autosize 6.0.1 |
-| `sortablejs/` | `sortablejs/` | `Sortable.min.js` | SortableJS 1.15.0 |
+| `jquery/` | `jquery3/` | `jquery.min.js` | jQuery 3.7.1 (renamed to avoid conflict with existing jquery/) |
+| `fontawesome/` | `fontawesome6/` | `css/all.min.css`, `webfonts/*` | Font Awesome 6.5.1 (renamed to avoid conflict with existing fontAwesome/) |
+| `moment/` | `moment-dgc/` | `moment.min.js` | Moment.js 2.30.1 |
+| `echarts/` | `echarts-dgc/` | `echarts.min.js` | ECharts 5.4.3 |
+| `codemirror/` | `codemirror-dgc/` | `css/*.css`, `js/*.js` | CodeMirror 5.65.16 |
+| `daterangepicker/` | `daterangepicker-dgc/` | `css/daterangepicker.css`, `js/daterangepicker.min.js` | Daterangepicker 3.1 |
+| `autosize/` | `autosize-dgc/` | `autosize.min.js` | Autosize 6.0.1 |
+| `sortablejs/` | `sortablejs-dgc/` | `Sortable.min.js` | SortableJS 1.15.0 |
 
-**Note:** The include files and templates reference these paths directly (e.g., `bootstrap5/`). The folder names match between DGC and Rapidkart, so no renaming is needed during migration.
+**Note:** All libraries are renamed with `-dgc` suffix or version numbers to avoid conflicts with existing Rapidkart libraries.
 
 ---
 
@@ -215,26 +215,9 @@ The `DGCHelper.php` class (copied in Step 1) contains DGC-specific UI components
 
 **Usage:** All copied template files use `DGCHelper::` directly. No Utility.php modifications needed.
 
-### Template.php (Manual Modification Required)
+### Template.php (No Modification Required)
 
-Rapidkart already has a `Template.php` class. **Do not copy** DGC's Template.php. Instead, modify Rapidkart's existing `Template.php` to add the `.dgc-app` wrapper for CSS isolation.
-
-**Add this wrapper in Rapidkart's `Template::parse()` method:**
-
-```php
-public function parse()
-{
-    if (!$this->template) return false;
-    ob_start();
-    extract($this->variables, EXTR_SKIP);
-    require $this->template;
-    $content = ob_get_clean();
-
-    // Wrap content in .dgc-app for CSS isolation
-    // This prevents DGC styles from conflicting with Rapidkart's Bootstrap 3
-    return '<div class="dgc-app">' . $content . '</div>';
-}
-```
+DGC's `Template.php` is **not copied** to Rapidkart. The CSS isolation wrapper (`.dgc-app`) is already included in each template file, so Rapidkart's existing `Template.php` works as-is.
 
 **Bootstrap:** Ensure `DGCHelper.php` is loaded in your bootstrap/autoloader:
 
@@ -356,7 +339,6 @@ $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5
 ### Phase 3: Code Changes
 
 - [ ] Add `require_once 'system/classes/DGCHelper.php'` to bootstrap
-- [ ] Modify Rapidkart's `Template.php` to add `.dgc-app` wrapper (see Section 8)
 - [ ] Add route cases to `system.inc.php` (graph, data-filter, dashboard)
 - [ ] Update include files to replace `addModuleCss/addModuleJs` with rapidkart style
 - [ ] Add menu items to navigation
@@ -383,7 +365,7 @@ DGC uses Bootstrap 5 and Font Awesome 6, which would normally conflict with Rapi
 
 1. **Build-time CSS scoping**: The build process uses `postcss-prefix-selector` to automatically prefix all DGC CSS selectors with `.dgc-app`.
 
-2. **Template wrapper**: The `Template::parse()` method automatically wraps all rendered content in `<div class="dgc-app">...</div>`.
+2. **Template wrapper**: Each `.tpl.php` template file includes `<div class="dgc-app">...</div>` wrapper around its content.
 
 3. **Result**: DGC styles only apply to elements inside the `.dgc-app` wrapper, leaving Rapidkart's Bootstrap 3 styles unaffected.
 
@@ -414,8 +396,8 @@ The following selectors are **not** prefixed (they need to work globally):
 
 This is all handled automatically:
 - Build process prefixes CSS selectors
-- Template class wraps content
-- No changes needed to template files or SCSS
+- Template files include the `.dgc-app` wrapper
+- No changes needed to Rapidkart's Template.php or SCSS
 
 ### Troubleshooting
 

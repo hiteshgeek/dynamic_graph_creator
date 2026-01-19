@@ -1,3 +1,4 @@
+<div class="dgc-app">
 <?php
     $templateName = $template->getName();
     $templateName = $templateName ? $templateName : 'Template';
@@ -144,3 +145,4 @@
         </div>
     </div>
 
+</div>

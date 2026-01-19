@@ -1,3 +1,4 @@
+<div class="dgc-app">
 <?php
 $rightContent = '<div class="status-indicators"></div>';
 $saveButtonClass = $graph ? 'btn-outline-warning' : 'btn-primary';
@@ -350,4 +351,5 @@ echo DGCHelper::renderPageHeader([
         </div>
 
     </div>
+</div>
 </div>

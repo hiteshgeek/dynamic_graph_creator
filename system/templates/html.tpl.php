@@ -24,7 +24,7 @@
 
     <!-- Core Libraries -->
     <link href="<?php echo SiteConfig::themeLibrariessUrl(); ?>bootstrap5/css/bootstrap.min.css" rel="stylesheet">
-    <link href="<?php echo SiteConfig::themeLibrariessUrl(); ?>fontawesome/css/all.min.css" rel="stylesheet">
+    <link href="<?php echo SiteConfig::themeLibrariessUrl(); ?>fontawesome6/css/all.min.css" rel="stylesheet">
 
     <!-- Page-specific CSS -->
     <?php foreach ($this->getStylesheets() as $css): ?>

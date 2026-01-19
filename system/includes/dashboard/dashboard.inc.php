@@ -169,9 +169,9 @@ function showBuilder($dashboardId = 0)
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     // Add libraries
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs-dgc/Sortable.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
 
     // Add page-specific JS
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-builder.js');
@@ -203,7 +203,7 @@ function showPreview($dashboardId)
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     // Add libraries
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
 
     // Add page-specific JS
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-preview.js');
@@ -652,7 +652,7 @@ function showTemplateList()
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     // Add libraries
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs-dgc/Sortable.min.js', 5);
 
     // Add page-specific JS
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-list.js');
@@ -673,7 +673,7 @@ function showTemplateCreator()
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     // Add libraries
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
 
     // Add page-specific JS
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js');
@@ -706,7 +706,7 @@ function showTemplateEditor($templateId)
     }
 
     // Add libraries
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
 
     // Add page-specific JS
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js');
@@ -739,9 +739,9 @@ function showTemplateBuilder($templateId)
     }
 
     // Add libraries
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs-dgc/Sortable.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
 
     // Add page-specific JS
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-builder.js');
@@ -773,7 +773,7 @@ function showTemplatePreview($templateId)
     }
 
     // Add libraries
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
 
     // Add page-specific JS
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-preview.js');

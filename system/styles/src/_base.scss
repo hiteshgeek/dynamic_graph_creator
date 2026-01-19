@@ -239,7 +239,10 @@ p {
   background: var(--dgc-bg-input);
   border: 1px solid var(--dgc-border-color);
   border-radius: $border-radius;
-  transition: border-color $transition-fast, box-shadow $transition-fast, background-color 0.2s ease;
+  transition:
+    border-color $transition-fast,
+    box-shadow $transition-fast,
+    background-color 0.2s ease;
 
   &:focus {
     outline: none;
