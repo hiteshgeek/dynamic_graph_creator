@@ -124,10 +124,10 @@ CREATE TABLE dashboard_instance (
 -- ============================================================================
 
 INSERT INTO dashboard_template_category (slug, name, description, icon, color, display_order, is_system, dtcsid) VALUES
-('columns', 'Columns', 'Simple column-based dashboards with equal or varied widths', 'fa-columns', '#007bff', 10, 1, 1),
-('rows', 'Rows', 'Row-based dashboards with stacked sections', 'fa-bars', '#d63384', 20, 1, 1),
-('mixed', 'Mixed', 'Mixed dashboards with sidebars and unequal column ratios', 'fa-table-columns', '#6610f2', 30, 1, 1),
-('advanced', 'Advanced', 'Complex multi-section dashboards with nested areas', 'fa-th', '#6f42c1', 40, 1, 1);
+('columns', 'Columns', 'Simple column-based dashboards with equal or varied widths', 'fa-columns', '#007bff', 10, 0, 1),
+('rows', 'Rows', 'Row-based dashboards with stacked sections', 'fa-bars', '#d63384', 20, 0, 1),
+('mixed', 'Mixed', 'Mixed dashboards with sidebars and unequal column ratios', 'fa-table-columns', '#6610f2', 30, 0, 1),
+('advanced', 'Advanced', 'Complex multi-section dashboards with nested areas', 'fa-th', '#6f42c1', 40, 0, 1);
 
 -- ============================================================================
 -- SYSTEM DATA - Dashboard Templates
@@ -151,7 +151,7 @@ VALUES (
     @cat_columns,
     10,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Add content here"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 2. Two Columns Template
@@ -162,7 +162,7 @@ VALUES (
     @cat_columns,
     20,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Column 1"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-pie","message":"Column 2"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 3. Four Columns Template
@@ -173,7 +173,7 @@ VALUES (
     @cat_columns,
     30,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr 1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-dollar-sign","message":"KPI 1"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-users","message":"KPI 2"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-shopping-cart","message":"KPI 3"}},{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"KPI 4"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 4. Six Columns Template
@@ -184,7 +184,7 @@ VALUES (
     @cat_columns,
     40,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr 1fr 1fr 1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Metric 1"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Metric 2"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-pie","message":"Metric 3"}},{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-area","message":"Metric 4"}},{"aid":"a5","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-dollar-sign","message":"Metric 5"}},{"aid":"a6","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-users","message":"Metric 6"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- ============================================================================
@@ -199,7 +199,7 @@ VALUES (
     @cat_rows,
     10,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Row 1"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Row 2"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 6. Three Rows Template
@@ -210,7 +210,7 @@ VALUES (
     @cat_rows,
     20,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-heading","message":"Row 1"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Row 2"}}]},{"sid":"s3","gridTemplate":"1fr","areas":[{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Row 3"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 7. Four Rows Template
@@ -221,7 +221,7 @@ VALUES (
     @cat_rows,
     30,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-heading","message":"Row 1"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Row 2"}}]},{"sid":"s3","gridTemplate":"1fr","areas":[{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Row 3"}}]},{"sid":"s4","gridTemplate":"1fr","areas":[{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Row 4"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- ============================================================================
@@ -236,7 +236,7 @@ VALUES (
     @cat_mixed,
     10,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr 3fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-bars","message":"Sidebar"}},{"aid":"a2","colSpanFr":"3fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Main Content"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 9. Right Sidebar Template
@@ -247,7 +247,7 @@ VALUES (
     @cat_mixed,
     20,
     '{"sections":[{"sid":"s1","gridTemplate":"3fr 1fr","areas":[{"aid":"a1","colSpanFr":"3fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-area","message":"Main Content"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-info-circle","message":"Info Panel"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 10. Holy Grail Template
@@ -258,7 +258,7 @@ VALUES (
     @cat_mixed,
     30,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr 2fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-list","message":"Left Nav"}},{"aid":"a2","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Main Content"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-cog","message":"Tools"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- ============================================================================
@@ -273,7 +273,7 @@ VALUES (
     @cat_advanced,
     10,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-heading","message":"Header / Title"}}]},{"sid":"s2","gridTemplate":"1fr 1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Chart 1"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-pie","message":"Chart 2"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 12. Dashboard Template (KPIs + Charts)
@@ -284,7 +284,7 @@ VALUES (
     @cat_advanced,
     20,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr 1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-dollar-sign","message":"Revenue"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-shopping-cart","message":"Orders"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-users","message":"Customers"}},{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-percent","message":"Growth"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a5","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Main Chart"}}]},{"sid":"s3","gridTemplate":"1fr 1fr","areas":[{"aid":"a6","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Chart"}},{"aid":"a7","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Table"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 13. Left Multi-Row + Right Single
@@ -295,7 +295,7 @@ VALUES (
     @cat_advanced,
     30,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr 2fr","areas":[{"aid":"a1","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Add chart here"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Add table here"}},{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Add chart here"}}]},{"aid":"a2","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-area","message":"Add main chart here"}}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 14. Right Multi-Row + Left Single
@@ -306,7 +306,7 @@ VALUES (
     @cat_advanced,
     40,
     '{"sections":[{"sid":"s1","gridTemplate":"2fr 1fr","areas":[{"aid":"a1","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-area","message":"Add main chart here"}},{"aid":"a2","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Add chart here"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Add table here"}},{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Add chart here"}}]}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 15. Two Multi-Row Columns
@@ -317,7 +317,7 @@ VALUES (
     @cat_advanced,
     50,
     '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Top chart"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Bottom table"}}]},{"aid":"a2","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Top chart"}},{"rowId":"r4","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-pie","message":"Bottom chart"}}]}]}]}',
-    1, 1
+    0, 1
 );
 
 -- 16. Focal Point with Multi-Row
@@ -328,7 +328,7 @@ VALUES (
     @cat_advanced,
     60,
     '{"sections":[{"sid":"s1","gridTemplate":"2fr 1fr","areas":[{"aid":"a1","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-area","message":"Featured Content"}},{"aid":"a2","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-dollar-sign","message":"KPI 1"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-users","message":"KPI 2"}},{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"KPI 3"}}]}]}]}',
-    1, 1
+    0, 1
 );
 
 -- ============================================================================

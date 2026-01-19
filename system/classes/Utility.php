@@ -256,20 +256,23 @@ class Utility
     /**
      * Generate a UUID v4
      * Format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+     * PHP 5.6 compatible
      *
      * @return string UUID string
      */
     public static function generateUUID()
     {
-        // Generate 16 random bytes
-        $data = random_bytes(16);
-
-        // Set version to 0100 (UUID v4)
-        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
-        // Set bits 6-7 to 10 (RFC 4122 variant)
-        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
-
-        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+        return sprintf(
+            '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+            mt_rand(0, 65535),
+            mt_rand(0, 65535),
+            mt_rand(0, 65535),
+            mt_rand(0, 4095) | 16384,
+            mt_rand(0, 16383) | 32768,
+            mt_rand(0, 65535),
+            mt_rand(0, 65535),
+            mt_rand(0, 65535)
+        );
     }
 
     /**

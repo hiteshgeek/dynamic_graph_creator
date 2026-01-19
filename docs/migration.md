@@ -100,20 +100,20 @@ Copy these folders to: `system/scripts/`
 
 ## 5. Compiled Assets (dist/)
 
-Copy to project root `dist/` with renamed files (hashes removed):
+Assets are copied to **module-specific folders** to match Rapidkart's asset structure:
 
-| Source File | Target File | Description |
-|-------------|-------------|-------------|
-| `common.abc123.css` | `common.css` | Common styles (themes, variables, base) |
-| `common.abc123.js` | `common.js` | Common JS (Theme.js, utilities) |
-| `graph.abc123.css` | `graph.css` | Graph module CSS |
-| `graph.abc123.js` | `graph.js` | Graph module JS (GraphConfig, FilterUtils) |
-| `data-filter.abc123.css` | `data-filter.css` | Data filter module CSS |
-| `data-filter.abc123.js` | `data-filter.js` | Data filter module JS (FilterManager) |
-| `dashboard.abc123.css` | `dashboard.css` | Dashboard module CSS |
-| `dashboard.abc123.js` | `dashboard.js` | Dashboard JS (dashboard, TemplateManager, TemplateBuilder) |
+| Source File (dist/) | Target Location in Rapidkart | Description |
+|---------------------|------------------------------|-------------|
+| `common.abc123.css` | `system/styles/common/common.css` | Common styles (themes, variables, base) |
+| `common.abc123.js` | `system/scripts/common/common.js` | Common JS (Theme.js, utilities) |
+| `graph.abc123.css` | `system/styles/graph/graph.css` | Graph module CSS |
+| `graph.abc123.js` | `system/scripts/graph/graph.js` | Graph module JS (GraphConfig, FilterUtils) |
+| `data-filter.abc123.css` | `system/styles/data-filter/data-filter.css` | Data filter module CSS |
+| `data-filter.abc123.js` | `system/scripts/data-filter/data-filter.js` | Data filter module JS (FilterManager) |
+| `dashboard.abc123.css` | `system/styles/dashboard/dashboard.css` | Dashboard module CSS |
+| `dashboard.abc123.js` | `system/scripts/dashboard/dashboard.js` | Dashboard JS (dashboard, TemplateManager, TemplateBuilder) |
 
-**Note:** The migration tool automatically removes content hashes from filenames. Source maps and manifest.json are skipped.
+**Note:** The migration tool automatically removes content hashes from filenames and routes files to the correct module folder. Source maps and manifest.json are skipped.
 
 ---
 
@@ -415,41 +415,101 @@ case "dashboard":
 
 ---
 
-## 11. Include File Asset Loading
+## 11. Update Asset Loading in Include Files
 
-The copied include files use helper methods `Utility::addModuleCss()` and `Utility::addModuleJs()` which need to be replaced with the rapidkart style of loading assets.
+The copied include files use helper methods `Utility::addModuleCss()` and `Utility::addModuleJs()` in each function. In Rapidkart, assets are loaded **once at the top of the file** and removed from individual functions.
 
-### Replace These Calls
+### Rapidkart Pattern
 
-In `graph.inc.php`, `data-filter.inc.php`, and `dashboard.inc.php`, replace:
-
-```php
-// Old style (needs to be replaced)
-Utility::addModuleCss('common');
-Utility::addModuleCss('graph');
-Utility::addModuleJs('common');
-Utility::addModuleJs('graph');
-```
-
-With rapidkart style:
+In Rapidkart, assets are loaded at the top of the include file (after the `<?php` tag):
 
 ```php
-// New style
-$theme->addCss(SystemConfig::baseUrl() . 'dist/common.css');
-$theme->addCss(SystemConfig::baseUrl() . 'dist/graph.css');
-$theme->addScript(SystemConfig::baseUrl() . 'dist/common.js');
-$theme->addScript(SystemConfig::baseUrl() . 'dist/graph.js');
+<?php
+// Load assets once at the top
+$theme->addCss(SystemConfig::stylesUrl() . 'module/module.css');
+$theme->addScript(SystemConfig::scriptsUrl() . 'module/module.js');
+
+function showList() {
+    // No asset loading here - already loaded at top
+}
+
+function showForm() {
+    // No asset loading here - already loaded at top
+}
 ```
 
-### Module-Specific Assets
+---
 
-| Include File             | CSS Files                    | JS Files                   |
-| ------------------------ | ---------------------------- | -------------------------- |
-| `graph.inc.php`          | `common.css`, `graph.css`    | `common.js`, `graph.js`    |
-| `data-filter.inc.php`    | `common.css`, `filter.css`   | `common.js`, `filter.js`   |
-| `dashboard.inc.php`      | `common.css`, `dashboard.css`| `common.js`, `dashboard.js`|
+### File: `system/includes/graph/graph.inc.php`
 
-**Note:** Each page function (showList, showCreator, showView, etc.) will need these replacements made.
+**Add at top of file:**
+
+```php
+// Load graph module assets
+$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
+$theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css');
+$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js');
+```
+
+**Remove from functions:**
+- `showList()` - Remove 4 `Utility::addModule*` calls
+- `showCreator()` - Remove 4 `Utility::addModule*` calls
+- `showView()` - Remove 4 `Utility::addModule*` calls
+
+---
+
+### File: `system/includes/data-filter/data-filter.inc.php`
+
+**Add at top of file:**
+
+```php
+// Load data-filter module assets
+$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
+$theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css');
+$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js');
+```
+
+**Remove from functions:**
+- `showList()` - Remove 4 `Utility::addModule*` calls
+- `showForm()` - Remove 4 `Utility::addModule*` calls
+
+---
+
+### File: `system/includes/dashboard/dashboard.inc.php`
+
+**Add at top of file:**
+
+```php
+// Load dashboard module assets
+$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
+$theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css');
+$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js');
+```
+
+**Remove from functions:**
+- `showList()` - Remove 4 `Utility::addModule*` calls
+- `showBuilder()` - Remove 4 `Utility::addModule*` calls
+- `showPreview()` - Remove 4 `Utility::addModule*` calls
+- `showTemplateList()` - Remove 4 `Utility::addModule*` calls
+- `showTemplateEditor()` - Remove 4 `Utility::addModule*` calls
+- `showTemplateCreate()` - Remove 4 `Utility::addModule*` calls
+- `showTemplateBuilder()` - Remove 4 `Utility::addModule*` calls
+- `showTemplatePreview()` - Remove 4 `Utility::addModule*` calls
+
+---
+
+### Summary
+
+| File | Add at Top | Remove from Functions |
+|------|------------|----------------------|
+| `graph.inc.php` | 4 lines | 3 functions (12 lines) |
+| `data-filter.inc.php` | 4 lines | 2 functions (8 lines) |
+| `dashboard.inc.php` | 4 lines | 8 functions (32 lines) |
+
+**Note:** The `Theme.js` file and page-specific scripts (e.g., `graph-list.js`) already use the Rapidkart pattern with `$theme->addScript()` and don't need to be changed.
 
 ---
 
@@ -469,7 +529,7 @@ $theme->addScript(SystemConfig::baseUrl() . 'dist/graph.js');
 - [ ] Copy `system/scripts/graph/` folder
 - [ ] Copy `system/scripts/data-filter/` folder
 - [ ] Copy `system/scripts/dashboard/` folder
-- [ ] Copy `dist/` folder (compiled CSS/JS)
+- [ ] Copy compiled CSS/JS to module-specific folders (see Section 5)
 - [ ] Copy new libraries to `themes/libraries/`
 
 ### Phase 3: Code Changes

@@ -97,7 +97,7 @@ $steps = [
     ],
     7 => [
         'title' => 'Copy Compiled Assets (dist/)',
-        'description' => 'Copies compiled CSS/JS bundles and renames them to remove hashes (e.g., common.abc123.css → common.css).',
+        'description' => 'Copies compiled CSS/JS bundles to module-specific folders and removes hashes (e.g., common.abc123.css → system/styles/common/common.css).',
         'folder' => 'dist',
         'type' => 'copy_dist_renamed'
     ],
@@ -174,7 +174,8 @@ if ($action === 'execute' && $step > 0 && isset($steps[$step])) {
             }
             $result = $results;
         } elseif ($stepData['type'] === 'copy_dist_renamed') {
-            $result = copyDistRenamed($sourceDir . '/' . $stepData['folder'], $targetDir . '/' . $stepData['folder']);
+            // Copy to module-specific folders (system/styles/module/ and system/scripts/module/)
+            $result = copyDistRenamed($sourceDir . '/' . $stepData['folder'], $targetDir);
         }
     } catch (Exception $e) {
         $error = $e->getMessage();
@@ -275,15 +276,11 @@ function getVersionedLibraryStatus($sourceDir, $targetDir, $sourcePath, $targetP
     return 'exists';
 }
 
-function copyDistRenamed($src, $dst) {
+function copyDistRenamed($src, $targetDir) {
     $results = ['copied' => [], 'skipped' => []];
 
     if (!is_dir($src)) {
         return ['error' => 'Source folder not found: ' . $src];
-    }
-
-    if (!is_dir($dst)) {
-        mkdir($dst, 0755, true);
     }
 
     $dir = opendir($src);
@@ -299,16 +296,38 @@ function copyDistRenamed($src, $dst) {
         }
 
         // Remove hash from filename: common.abc123.css -> common.css
-        // Pattern: name.hash.ext -> name.ext
+        // Pattern: modulename.hash.ext -> modulename.ext
+        // Route to module-specific folder: system/styles/modulename/ or system/scripts/modulename/
         if (preg_match('/^(.+)\.([a-f0-9]{8})\.([a-z]+)$/', $file, $matches)) {
-            $newName = $matches[1] . '.' . $matches[3];
-            $dstPath = $dst . '/' . $newName;
+            $moduleName = $matches[1]; // e.g., "common", "graph", "data-filter", "dashboard"
+            $ext = $matches[3];
+            $newName = $moduleName . '.' . $ext;
+
+            // Route to module-specific folder based on file type
+            if ($ext === 'css') {
+                $moduleDir = $targetDir . '/system/styles/' . $moduleName;
+            } else if ($ext === 'js') {
+                $moduleDir = $targetDir . '/system/scripts/' . $moduleName;
+            } else {
+                // Skip unknown extensions
+                $results['skipped'][] = $file;
+                continue;
+            }
+
+            // Create module directory if needed
+            if (!is_dir($moduleDir)) {
+                mkdir($moduleDir, 0755, true);
+            }
+
+            $dstPath = $moduleDir . '/' . $newName;
             copy($srcPath, $dstPath);
-            $results['copied'][$file] = $newName;
+
+            // Store with full relative path for display
+            $relativePath = ($ext === 'css' ? 'system/styles/' : 'system/scripts/') . $moduleName . '/' . $newName;
+            $results['copied'][$file] = $relativePath;
         } else {
-            // Copy as-is if no hash pattern
-            copy($srcPath, $dst . '/' . $file);
-            $results['copied'][$file] = $file;
+            // Skip files without hash pattern (shouldn't happen with build output)
+            $results['skipped'][] = $file;
         }
     }
     closedir($dir);
@@ -379,6 +398,12 @@ function copyDistRenamed($src, $dst) {
             align-items: center;
             gap: 0.5rem;
         }
+        .file-number {
+            font-size: 0.75rem;
+            color: #6c757d;
+            min-width: 1.5rem;
+            text-align: right;
+        }
         .status-badge {
             font-size: 0.75rem;
             padding: 0.2rem 0.5rem;
@@ -415,9 +440,17 @@ function copyDistRenamed($src, $dst) {
             border-radius: 8px;
             padding: 1rem;
             font-family: monospace;
-            font-size: 0.875rem;
-            overflow-x: auto;
-            white-space: pre;
+            font-size: 0.8rem;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .utility-method {
+            max-width: 100%;
+            overflow: hidden;
         }
         .target-path {
             background: #e9ecef;
@@ -516,8 +549,9 @@ function copyDistRenamed($src, $dst) {
                         }
                         ?>
                         <div class="file-list mb-3">
-                            <?php foreach ($stepData['files'] as $file): ?>
+                            <?php $fileNum = 1; foreach ($stepData['files'] as $file): ?>
                             <div class="file-item-simple">
+                                <span class="file-number"><?php echo $fileNum++; ?>.</span>
                                 <span class="status-badge status-<?php echo $fileStatuses[$file]; ?>">
                                     <?php echo $fileStatuses[$file]; ?>
                                 </span>
@@ -570,6 +604,7 @@ function copyDistRenamed($src, $dst) {
                         <div class="file-list mb-3">
                             <?php
                             $folderPath = $sourceDir . '/' . $stepData['folder'];
+                            $assetNum = 1;
                             if (is_dir($folderPath)) {
                                 $files = scandir($folderPath);
                                 // Separate CSS and JS files
@@ -578,21 +613,26 @@ function copyDistRenamed($src, $dst) {
                                 foreach ($files as $f) {
                                     if ($f === '.' || $f === '..' || strpos($f, '.map') !== false || $f === 'manifest.json') continue;
                                     if (preg_match('/^(.+)\.([a-f0-9]{8})\.([a-z]+)$/', $f, $matches)) {
-                                        $newName = $matches[1] . '.' . $matches[3];
-                                        if ($matches[3] === 'css') {
-                                            $cssFiles[] = ['source' => $f, 'target' => $newName];
-                                        } else if ($matches[3] === 'js') {
-                                            $jsFiles[] = ['source' => $f, 'target' => $newName];
+                                        $moduleName = $matches[1];
+                                        $ext = $matches[3];
+                                        $newName = $moduleName . '.' . $ext;
+                                        // Build module-specific target path
+                                        if ($ext === 'css') {
+                                            $targetPath = 'system/styles/' . $moduleName . '/' . $newName;
+                                            $cssFiles[] = ['source' => $f, 'target' => $targetPath, 'module' => $moduleName];
+                                        } else if ($ext === 'js') {
+                                            $targetPath = 'system/scripts/' . $moduleName . '/' . $newName;
+                                            $jsFiles[] = ['source' => $f, 'target' => $targetPath, 'module' => $moduleName];
                                         }
                                     }
                                 }
                                 // Display CSS files
                                 foreach ($cssFiles as $file) {
-                                    $moduleName = explode('.', $file['target'])[0];
-                                    $moduleClass = 'module-' . $moduleName;
+                                    $moduleClass = 'module-' . $file['module'];
                                     echo '<div class="file-item">';
+                                    echo '<span class="file-number">' . $assetNum++ . '.</span>';
                                     echo '<span class="type-badge type-css">CSS</span>';
-                                    echo '<span class="module-badge ' . $moduleClass . '">' . strtoupper($moduleName) . '</span>';
+                                    echo '<span class="module-badge ' . $moduleClass . '">' . strtoupper($file['module']) . '</span>';
                                     echo '<span class="text-muted">' . htmlspecialchars($file['source']) . '</span>';
                                     echo '<span>&rarr;</span>';
                                     echo '<strong>' . htmlspecialchars($file['target']) . '</strong>';
@@ -600,11 +640,11 @@ function copyDistRenamed($src, $dst) {
                                 }
                                 // Display JS files
                                 foreach ($jsFiles as $file) {
-                                    $moduleName = explode('.', $file['target'])[0];
-                                    $moduleClass = 'module-' . $moduleName;
+                                    $moduleClass = 'module-' . $file['module'];
                                     echo '<div class="file-item">';
+                                    echo '<span class="file-number">' . $assetNum++ . '.</span>';
                                     echo '<span class="type-badge type-js">JS</span>';
-                                    echo '<span class="module-badge ' . $moduleClass . '">' . strtoupper($moduleName) . '</span>';
+                                    echo '<span class="module-badge ' . $moduleClass . '">' . strtoupper($file['module']) . '</span>';
                                     echo '<span class="text-muted">' . htmlspecialchars($file['source']) . '</span>';
                                     echo '<span>&rarr;</span>';
                                     echo '<strong>' . htmlspecialchars($file['target']) . '</strong>';
@@ -615,7 +655,7 @@ function copyDistRenamed($src, $dst) {
                         </div>
                         <p class="small text-muted mb-2">
                             <i class="fas fa-info-circle me-1"></i>
-                            Files will be renamed to remove content hashes for simpler loading.
+                            Files are copied to module-specific folders matching Rapidkart's asset structure.
                         </p>
                         <?php $confirmMsg = 'Copy and rename dist files?';
                               if ($status === 'exists') $confirmMsg .= '\n\nWARNING: Folder already exists - files will be OVERWRITTEN!'; ?>
@@ -629,10 +669,11 @@ function copyDistRenamed($src, $dst) {
                         <?php if ($stepData['type'] === 'copy_folders'): ?>
                         <?php $folderExistCount = 0; ?>
                         <div class="file-list mb-3">
-                            <?php foreach ($stepData['folders'] as $folder): ?>
+                            <?php $folderNum = 1; foreach ($stepData['folders'] as $folder): ?>
                             <?php $status = $targetExists ? getFolderStatus($sourceDir, $targetDir, $folder) : 'unknown';
                                   if ($status === 'exists') $folderExistCount++; ?>
                             <div class="file-item-simple">
+                                <span class="file-number"><?php echo $folderNum++; ?>.</span>
                                 <span class="status-badge status-<?php echo $status; ?>">
                                     <?php echo $status; ?>
                                 </span>
@@ -652,10 +693,11 @@ function copyDistRenamed($src, $dst) {
                         <?php if ($stepData['type'] === 'copy_libraries'): ?>
                         <?php $libExistCount = 0; ?>
                         <div class="file-list mb-3">
-                            <?php foreach ($stepData['folders'] as $folder): ?>
+                            <?php $libNum = 1; foreach ($stepData['folders'] as $folder): ?>
                             <?php $status = $targetExists ? getFolderStatus($sourceDir, $targetDir, $folder) : 'unknown';
                                   if ($status === 'exists') $libExistCount++; ?>
                             <div class="file-item-simple">
+                                <span class="file-number"><?php echo $libNum++; ?>.</span>
                                 <span class="status-badge status-<?php echo $status; ?>">
                                     <?php echo $status; ?>
                                 </span>
@@ -675,10 +717,11 @@ function copyDistRenamed($src, $dst) {
                         <?php if ($stepData['type'] === 'copy_libraries_versioned'): ?>
                         <?php $libExistCount = 0; ?>
                         <div class="file-list mb-3">
-                            <?php foreach ($stepData['libraries'] as $lib): ?>
+                            <?php $libVerNum = 1; foreach ($stepData['libraries'] as $lib): ?>
                             <?php $status = $targetExists ? getVersionedLibraryStatus($sourceDir, $targetDir, $lib['source'], $lib['target']) : 'unknown';
                                   if ($status === 'exists') $libExistCount++; ?>
                             <div class="file-item-simple">
+                                <span class="file-number"><?php echo $libVerNum++; ?>.</span>
                                 <span class="status-badge status-<?php echo $status; ?>">
                                     <?php echo $status; ?>
                                 </span>
@@ -727,19 +770,86 @@ function copyDistRenamed($src, $dst) {
                             <p class="small text-muted mb-2">
                                 Add these 5 methods to <code>system/classes/Utility.php</code>:
                             </p>
-                            <ul class="small mb-3">
-                                <li><code>renderEmptyState()</code> - Empty state UI component</li>
-                                <li><code>renderDashboardCellEmpty()</code> - Dashboard cell empty state</li>
-                                <li><code>generateUUID()</code> - UUID v4 generation</li>
-                                <li><code>generateShortId()</code> - Short unique ID generation</li>
-                                <li><code>renderPageHeader()</code> - Page header with theme toggle</li>
-                            </ul>
+                            <?php
+                            // Read Utility.php and extract the 5 methods
+                            $utilityFile = $sourceDir . '/system/classes/Utility.php';
+                            $utilityMethods = [];
+                            if (file_exists($utilityFile)) {
+                                $utilityContent = file_get_contents($utilityFile);
+                                $methodsToExtract = [
+                                    'renderEmptyState' => 'Empty state UI component',
+                                    'renderDashboardCellEmpty' => 'Dashboard cell empty state',
+                                    'generateUUID' => 'UUID v4 generation',
+                                    'generateShortId' => 'Short unique ID generation',
+                                    'renderPageHeader' => 'Page header with theme toggle'
+                                ];
+                                foreach ($methodsToExtract as $methodName => $description) {
+                                    // Find the method signature position
+                                    $methodSignature = 'public static function ' . $methodName . '(';
+                                    $methodPos = strpos($utilityContent, $methodSignature);
+                                    if ($methodPos !== false) {
+                                        // Find the docblock before the method (search backwards)
+                                        $docBlockEnd = strrpos(substr($utilityContent, 0, $methodPos), '*/');
+                                        if ($docBlockEnd !== false) {
+                                            $docBlockStart = strrpos(substr($utilityContent, 0, $docBlockEnd), '/**');
+                                            if ($docBlockStart !== false) {
+                                                $startPos = $docBlockStart;
+                                            } else {
+                                                $startPos = $methodPos;
+                                            }
+                                        } else {
+                                            $startPos = $methodPos;
+                                        }
+
+                                        // Find the matching closing brace for the method
+                                        $braceCount = 0;
+                                        $inMethod = false;
+                                        $endPos = $methodPos;
+                                        for ($i = $methodPos; $i < strlen($utilityContent); $i++) {
+                                            if ($utilityContent[$i] === '{') {
+                                                $braceCount++;
+                                                $inMethod = true;
+                                            } elseif ($utilityContent[$i] === '}') {
+                                                $braceCount--;
+                                                if ($inMethod && $braceCount === 0) {
+                                                    $endPos = $i + 1;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        $methodCode = trim(substr($utilityContent, $startPos, $endPos - $startPos));
+                                        $utilityMethods[$methodName] = [
+                                            'code' => $methodCode,
+                                            'description' => $description
+                                        ];
+                                    }
+                                }
+                            }
+                            $methodNum = 1;
+                            foreach ($utilityMethods as $methodName => $methodData):
+                            ?>
+                            <div class="utility-method mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="small"><span class="file-number"><?php echo $methodNum++; ?>.</span> <?php echo $methodName; ?>()</strong>
+                                    <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="method-<?php echo $methodName; ?>">
+                                        <i class="fas fa-copy me-1"></i> Copy
+                                    </button>
+                                </div>
+                                <div class="code-block" id="method-<?php echo $methodName; ?>"><?php echo htmlspecialchars($methodData['code']); ?></div>
+                                <small class="text-muted"><?php echo htmlspecialchars($methodData['description']); ?></small>
+                            </div>
+                            <?php endforeach; ?>
 
                             <h6 class="text-primary"><i class="fas fa-route me-1"></i> 2. Add Routes to system.inc.php</h6>
                             <p class="small text-muted mb-2">
                                 Add these cases in the <code>switch ($url[0])</code> section of <code>system/includes/system.inc.php</code>:
                             </p>
-                            <div class="code-block mb-3">case "graph":
+                            <div class="d-flex justify-content-end mb-1">
+                                <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="routes-code">
+                                    <i class="fas fa-copy me-1"></i> Copy
+                                </button>
+                            </div>
+                            <div class="code-block mb-3" id="routes-code">case "graph":
     include_once 'graph/graph.inc.php';
     break;
 
@@ -753,18 +863,56 @@ case "dashboard":
 
                             <h6 class="text-primary mt-3"><i class="fas fa-link me-1"></i> 3. Update Asset Loading in Include Files</h6>
                             <p class="small text-muted mb-2">
-                                Replace <code>Utility::addModuleCss()</code> and <code>Utility::addModuleJs()</code> calls in the copied include files with rapidkart style:
+                                In Rapidkart, assets are loaded <strong>once at the top of the file</strong>. Add the code below at the top of each include file and remove all <code>Utility::addModule*</code> calls from functions.
                             </p>
-                            <div class="code-block mb-3">// Replace this:
-Utility::addModuleCss('common');
-Utility::addModuleJs('common');
 
-// With this:
-$theme->addCss(SystemConfig::baseUrl() . 'dist/common.css');
-$theme->addScript(SystemConfig::baseUrl() . 'dist/common.js');</div>
-                            <p class="small text-muted mb-2">
-                                Apply to all include files: <code>graph.inc.php</code>, <code>filter.inc.php</code>, <code>dashboard.inc.php</code>
-                            </p>
+                            <!-- graph.inc.php -->
+                            <div class="asset-loading-file mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="small"><i class="fas fa-file-code me-1"></i> graph.inc.php</strong>
+                                    <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="graph-assets">
+                                        <i class="fas fa-copy me-1"></i> Copy
+                                    </button>
+                                </div>
+                                <div class="code-block" id="graph-assets">// Load graph module assets
+$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
+$theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css');
+$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js');</div>
+                                <small class="text-muted">Remove from: <code>showList()</code>, <code>showCreator()</code>, <code>showView()</code></small>
+                            </div>
+
+                            <!-- data-filter.inc.php -->
+                            <div class="asset-loading-file mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="small"><i class="fas fa-file-code me-1"></i> data-filter.inc.php</strong>
+                                    <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="data-filter-assets">
+                                        <i class="fas fa-copy me-1"></i> Copy
+                                    </button>
+                                </div>
+                                <div class="code-block" id="data-filter-assets">// Load data-filter module assets
+$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
+$theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css');
+$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js');</div>
+                                <small class="text-muted">Remove from: <code>showList()</code>, <code>showForm()</code></small>
+                            </div>
+
+                            <!-- dashboard.inc.php -->
+                            <div class="asset-loading-file mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="small"><i class="fas fa-file-code me-1"></i> dashboard.inc.php</strong>
+                                    <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="dashboard-assets">
+                                        <i class="fas fa-copy me-1"></i> Copy
+                                    </button>
+                                </div>
+                                <div class="code-block" id="dashboard-assets">// Load dashboard module assets
+$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
+$theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css');
+$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js');</div>
+                                <small class="text-muted">Remove from: <code>showList()</code>, <code>showBuilder()</code>, <code>showPreview()</code>, <code>showTemplateList()</code>, <code>showTemplateEditor()</code>, <code>showTemplateCreate()</code>, <code>showTemplateBuilder()</code>, <code>showTemplatePreview()</code></small>
+                            </div>
 
                             <a href="docs/migration.md" target="_blank" class="btn btn-outline-secondary btn-sm">
                                 <i class="fas fa-book me-1"></i> View Full Documentation
@@ -792,5 +940,28 @@ $theme->addScript(SystemConfig::baseUrl() . 'dist/common.js');</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // Copy button functionality
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const codeBlock = document.getElementById(targetId);
+            if (codeBlock) {
+                const text = codeBlock.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalHtml = this.innerHTML;
+                    this.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                    this.classList.remove('btn-outline-secondary');
+                    this.classList.add('btn-success');
+                    setTimeout(() => {
+                        this.innerHTML = originalHtml;
+                        this.classList.remove('btn-success');
+                        this.classList.add('btn-outline-secondary');
+                    }, 2000);
+                });
+            }
+        });
+    });
+    </script>
 </body>
 </html>
