@@ -14,6 +14,8 @@ import DataFilterUtils from './DataFilterUtils.js';
 
 // Use autosize from CDN (global)
 const autosize = window.autosize;
+const FormValidator = window.FormValidator;
+const Toast = window.Toast;
 
 export default class GraphCreator {
     constructor(container, options = {}) {
@@ -59,6 +61,7 @@ export default class GraphCreator {
         this.initPlaceholderSettings();
         this.initGraphTypeSelector();
         this.initSaveHandler();
+        this.initFormValidation();
         this.initTabs();
         this.initSidebarTabs();
         this.initCollapsiblePanels();
@@ -403,6 +406,29 @@ export default class GraphCreator {
                 this.checkForChanges();
             });
         }
+    }
+
+    /**
+     * Initialize form validation using FormValidator
+     */
+    initFormValidation() {
+        const form = document.getElementById('graph-form');
+        if (!form) return;
+
+        this.formValidator = new FormValidator(form, {
+            rules: {
+                'graph-name-input': {
+                    required: true
+                }
+            },
+            messages: {
+                'graph-name-input': {
+                    required: 'Graph name is required'
+                }
+            },
+            validateOnBlur: true,
+            validateOnInput: true
+        });
     }
 
     /**
@@ -1365,37 +1391,26 @@ export default class GraphCreator {
      * Save graph
      */
     async save() {
-        // Clear previous errors
-        this.clearErrors();
-
-        const nameInput = this.container.querySelector('.graph-name-input');
-
-        // Validate
-        if (!this.graphName.trim()) {
-            Toast.error('Please enter a graph name');
-            // Expand sidebar if collapsed so user can see the name input
+        // Validate using FormValidator
+        if (this.formValidator && !this.formValidator.validate()) {
             this.expandSidebar();
-            if (nameInput) {
-                nameInput.classList.add('error');
-                // Focus after a short delay to allow sidebar animation
-                setTimeout(() => nameInput.focus(), 100);
-            }
+            Toast.error('Please correct the errors in the form');
             return;
         }
 
+        // Additional validations for query and mapping
         const query = this.queryBuilder ? this.queryBuilder.getQuery() : '';
         if (!query.trim()) {
-            Toast.error('Please enter a SQL query');
+            Toast.error('Please correct the errors in the form');
             return;
         }
 
         const mapping = this.dataMapper ? this.dataMapper.getMapping() : {};
         if (!this.validateMapping(mapping)) {
-            Toast.error('Please map the required columns');
+            Toast.error('Please correct the errors in the form');
             return;
         }
 
-        console.log('All validations passed, saving...');
         Loading.show('Saving graph...');
 
         try {
@@ -1447,16 +1462,6 @@ export default class GraphCreator {
             return mapping.name_column && mapping.value_column;
         } else {
             return mapping.x_column && mapping.y_column;
-        }
-    }
-
-    /**
-     * Clear all error states
-     */
-    clearErrors() {
-        const nameInput = this.container.querySelector('.graph-name-input');
-        if (nameInput) {
-            nameInput.classList.remove('error');
         }
     }
 

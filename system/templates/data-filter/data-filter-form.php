@@ -8,15 +8,15 @@
     ]);
     ?>
 
-    <div class="filter-form-layout<?php echo ($totalFilters == 0) ? ' no-sidebar' : ''; ?>">
-        <?php if ($totalFilters > 0): ?>
+    <div class="data-filter-form-layout">
         <!-- Sidebar with filter list -->
-        <aside class="filter-form-sidebar">
+        <aside class="data-filter-form-sidebar">
             <div class="sidebar-header">
                 <span class="sidebar-title">All Data Filters</span>
                 <span class="sidebar-count"><?php echo $totalFilters; ?></span>
             </div>
             <div class="filter-list-nav">
+                <?php if ($totalFilters > 0): ?>
                 <?php
                 $typeIcons = array(
                     'text' => 'font',
@@ -50,13 +50,18 @@
                         </span>
                     </a>
                 <?php endforeach; ?>
+                <?php else: ?>
+                <div class="sidebar-empty">
+                    <i class="fas fa-filter"></i>
+                    <span>No filters yet</span>
+                </div>
+                <?php endif; ?>
             </div>
         </aside>
-        <?php endif; ?>
 
         <!-- Main content -->
-        <main class="filter-form-main">
-            <div class="filter-form-page" data-filter-id="<?php echo $filter ? $filter->getId() : ''; ?>">
+        <main class="data-filter-form-main">
+            <div class="data-filter-form-page" data-filter-id="<?php echo $filter ? $filter->getId() : ''; ?>">
             <div class="card">
                 <div class="card-body">
                     <form id="filter-form">
@@ -71,7 +76,7 @@
                                 $filterKeyValue = ltrim($filterKeyValue, ':');
                                 ?>
                                 <input type="text" id="filter-key" class="form-control" placeholder="year" value="<?php echo htmlspecialchars($filterKeyValue); ?>" required>
-                                <small class="form-hint">Only letters, numbers, and underscores. <code>::</code> prefix is added automatically.</small>
+                                <small class="form-hint">Only letters, numbers, and underscores.<br><code>:: prefix will be added automatically.</code></small>
                                 <div class="invalid-feedback">Only letters, numbers, and underscores allowed</div>
                             </div>
 

@@ -8,6 +8,7 @@ import CodeMirrorEditor from './CodeMirrorEditor.js';
 const Ajax = window.Ajax;
 const Loading = window.Loading;
 const Toast = window.Toast;
+const FormValidator = window.FormValidator;
 
 export default class DataFilterFormPage {
     constructor(container) {
@@ -26,8 +27,40 @@ export default class DataFilterFormPage {
      */
     init() {
         this.initCodeMirror();
+        this.initFormValidation();
         this.bindEvents();
         this.initPreview();
+    }
+
+    /**
+     * Initialize form validation
+     */
+    initFormValidation() {
+        const form = document.getElementById('filter-form');
+        if (!form) return;
+
+        this.formValidator = new FormValidator(form, {
+            rules: {
+                'filter-key': {
+                    required: true,
+                    pattern: /^[a-zA-Z0-9_]+$/
+                },
+                'filter-label': {
+                    required: true
+                }
+            },
+            messages: {
+                'filter-key': {
+                    required: 'Filter key is required',
+                    pattern: 'Only letters, numbers, and underscores allowed'
+                },
+                'filter-label': {
+                    required: 'Label is required'
+                }
+            },
+            validateOnBlur: true,
+            validateOnInput: true
+        });
     }
 
     /**
@@ -132,12 +165,6 @@ export default class DataFilterFormPage {
         const filterLabelInput = document.getElementById('filter-label');
         if (filterLabelInput) {
             filterLabelInput.addEventListener('input', () => this.updatePreview());
-        }
-
-        // Filter key input - validate on input
-        const filterKeyInput = document.getElementById('filter-key');
-        if (filterKeyInput) {
-            filterKeyInput.addEventListener('input', () => this.validateFilterKey());
         }
 
         // Save filter button
@@ -390,61 +417,19 @@ export default class DataFilterFormPage {
     }
 
     /**
-     * Validate filter key format (real-time validation)
-     * @returns {boolean} True if valid
-     */
-    validateFilterKey() {
-        const filterKeyInput = document.getElementById('filter-key');
-        if (!filterKeyInput) return true;
-
-        const value = filterKeyInput.value.trim();
-
-        // Empty is handled by required validation
-        if (!value) {
-            filterKeyInput.classList.remove('is-invalid');
-            return true;
-        }
-
-        // Only alphanumeric and underscores allowed
-        if (!/^[a-zA-Z0-9_]+$/.test(value)) {
-            filterKeyInput.classList.add('is-invalid');
-            return false;
-        }
-
-        filterKeyInput.classList.remove('is-invalid');
-        return true;
-    }
-
-    /**
      * Save the filter
      */
     saveFilter() {
+        // Use FormValidator for validation
+        if (this.formValidator && !this.formValidator.validate()) {
+            Toast.error('Please correct the errors in the form');
+            return;
+        }
+
         let filterKey = document.getElementById('filter-key').value.trim();
         const filterLabel = document.getElementById('filter-label').value.trim();
         const filterType = document.getElementById('filter-type').value;
         const dataSource = document.getElementById('data-source').value;
-
-        // Validation
-        if (!filterKey) {
-            Toast.error('Filter key is required');
-            return;
-        }
-
-        // Validate filter key format (only alphanumeric and underscores allowed)
-        if (!/^[a-zA-Z0-9_]+$/.test(filterKey)) {
-            Toast.error('Filter key can only contain letters, numbers, and underscores');
-            document.getElementById('filter-key').classList.add('is-invalid');
-            document.getElementById('filter-key').focus();
-            return;
-        }
-
-        // Remove invalid class if validation passes
-        document.getElementById('filter-key').classList.remove('is-invalid');
-
-        if (!filterLabel) {
-            Toast.error('Filter label is required');
-            return;
-        }
 
         // Automatically prepend :: to the filter key
         filterKey = '::' + filterKey;

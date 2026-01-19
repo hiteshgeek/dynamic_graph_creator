@@ -783,15 +783,7 @@
 
 .graph-name-input {
   width: 100%;
-
-  &.error {
-    border-color: var(--dgc-error);
-
-    &:focus {
-      border-color: var(--dgc-error);
-      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
-    }
-  }
+  // Validation styles inherited from .form-control.is-invalid in _common.scss
 }
 
 .graph-description-input {

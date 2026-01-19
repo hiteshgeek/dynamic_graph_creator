@@ -39,16 +39,20 @@ echo Utility::renderPageHeader([
 
                 <!-- Graph Info Section -->
                 <div class="sidebar-section graph-info-section">
-                    <div class="graph-info-wrapper">
-                        <div class="graph-name-wrapper">
-                            <label class="graph-name-label" for="graph-name-input">Graph Name <span class="required">*</span></label>
-                            <input type="text" class="form-control graph-name-input" id="graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
+                    <form id="graph-form">
+                        <input type="hidden" id="graph-id" value="<?php echo $graph ? $graph->getId() : ''; ?>">
+                        <div class="graph-info-wrapper">
+                            <div class="graph-name-wrapper">
+                                <label class="graph-name-label" for="graph-name-input">Graph Name <span class="required">*</span></label>
+                                <input type="text" class="form-control graph-name-input" id="graph-name-input" placeholder="Enter graph name" value="<?php echo $graph ? htmlspecialchars($graph->getName()) : ''; ?>" required>
+                                <div class="invalid-feedback">Graph name is required</div>
+                            </div>
+                            <div class="graph-description-wrapper">
+                                <label class="graph-description-label" for="graph-description-input">Description</label>
+                                <textarea class="form-control graph-description-input" id="graph-description-input" placeholder="Enter graph description (optional)" rows="1"><?php echo $graph ? htmlspecialchars($graph->getDescription()) : ''; ?></textarea>
+                            </div>
                         </div>
-                        <div class="graph-description-wrapper">
-                            <label class="graph-description-label" for="graph-description-input">Description</label>
-                            <textarea class="form-control graph-description-input" id="graph-description-input" placeholder="Enter graph description (optional)" rows="1"><?php echo $graph ? htmlspecialchars($graph->getDescription()) : ''; ?></textarea>
-                        </div>
-                    </div>
+                    </form>
                 </div>
 
                 <!-- Options Section -->
