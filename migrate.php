@@ -60,7 +60,7 @@ if ($action === 'count_files') {
 $steps = [
     1 => [
         'title' => 'Copy PHP Classes',
-        'description' => 'Copies 10 PHP class files to handle graphs, data filters, dashboards, and UI components.',
+        'description' => 'Copies 10 PHP class files to handle graphs, data filters, dashboards, templates, and UI components.',
         'files' => [
             'system/classes/DGCHelper.php',
             'system/classes/Graph.php',
@@ -76,51 +76,41 @@ $steps = [
         'type' => 'copy'
     ],
     2 => [
-        'title' => 'Copy Include Files (with Asset Transformation)',
-        'description' => 'Copies 3 include folders and transforms Utility::addModule*() calls to Rapidkart-style $theme->addCss()/addScript() calls.',
-        'folders' => [
-            'system/includes/graph',
-            'system/includes/data-filter',
-            'system/includes/dashboard',
+        'title' => 'Copy Graph Templates',
+        'description' => 'Copies template files for the Graph module (views and forms).',
+        'files' => [
+            'system/templates/graph/views/graph-list.tpl.php',
+            'system/templates/graph/views/graph-view.tpl.php',
+            'system/templates/graph/forms/graph-creator.tpl.php',
         ],
-        'type' => 'copy_includes_transformed'
+        'type' => 'copy'
     ],
     3 => [
-        'title' => 'Copy Graph Templates',
-        'description' => 'Copies template files for the Graph module (list, creator, view pages).',
+        'title' => 'Copy Data Filter Templates',
+        'description' => 'Copies template files for the Data Filter module (views and forms).',
         'files' => [
-            'system/templates/graph/graph-list.php',
-            'system/templates/graph/graph-creator.php',
-            'system/templates/graph/graph-view.php',
+            'system/templates/data-filter/views/data-filter-list.tpl.php',
+            'system/templates/data-filter/forms/data-filter-form.tpl.php',
         ],
         'type' => 'copy'
     ],
     4 => [
-        'title' => 'Copy Data Filter Templates',
-        'description' => 'Copies template files for the Data Filter module (list, form pages).',
+        'title' => 'Copy Dashboard Templates',
+        'description' => 'Copies template files for the Dashboard module (views and forms).',
         'files' => [
-            'system/templates/data-filter/data-filter-list.php',
-            'system/templates/data-filter/data-filter-form.php',
+            'system/templates/dashboard/views/dashboard-list.tpl.php',
+            'system/templates/dashboard/views/dashboard-preview.tpl.php',
+            'system/templates/dashboard/views/template-list.tpl.php',
+            'system/templates/dashboard/views/template-preview.tpl.php',
+            'system/templates/dashboard/forms/dashboard-builder.tpl.php',
+            'system/templates/dashboard/forms/template-editor.tpl.php',
+            'system/templates/dashboard/forms/template-builder.tpl.php',
         ],
         'type' => 'copy'
     ],
     5 => [
-        'title' => 'Copy Dashboard Templates',
-        'description' => 'Copies template files for the Dashboard module (list, builder, preview, template management).',
-        'files' => [
-            'system/templates/dashboard/dashboard-list.php',
-            'system/templates/dashboard/dashboard-builder.php',
-            'system/templates/dashboard/dashboard-preview.php',
-            'system/templates/dashboard/template-list.php',
-            'system/templates/dashboard/template-editor.php',
-            'system/templates/dashboard/template-builder.php',
-            'system/templates/dashboard/template-preview.php',
-        ],
-        'type' => 'copy'
-    ],
-    6 => [
-        'title' => 'Copy Page Scripts',
-        'description' => 'Copies JavaScript files for page-specific functionality (delete handlers, initializers).',
+        'title' => 'Copy Page Scripts & Include Files',
+        'description' => 'Copies page-specific JS files and include files. Include files are transformed: Utility::addModule*() → $theme->addCss()/addScript().',
         'files' => [
             'system/scripts/graph/graph-list.js',
             'system/scripts/graph/graph-creator.js',
@@ -133,24 +123,28 @@ $steps = [
             'system/scripts/dashboard/template-builder.js',
             'system/scripts/dashboard/template-preview.js',
         ],
-        'type' => 'copy'
+        'include_files' => [
+            'system/includes/graph/graph.inc.php',
+            'system/includes/data-filter/data-filter.inc.php',
+            'system/includes/dashboard/dashboard.inc.php',
+            'system/includes/dashboard/template-preview-component.php',
+        ],
+        'type' => 'copy_scripts_and_includes'
     ],
-    7 => [
+    6 => [
         'title' => 'Copy Compiled Assets (dist/)',
         'description' => 'Copies compiled CSS/JS bundles to module-specific folders and removes hashes (e.g., common.abc123.css → system/styles/common/common.css).',
         'folder' => 'dist',
         'type' => 'copy_dist_renamed'
     ],
-    8 => [
+    7 => [
         'title' => 'Copy Theme Libraries',
-        'description' => 'Copies JavaScript/CSS libraries with versioned folders to avoid conflicts with existing libraries.',
+        'description' => 'Copies JavaScript/CSS libraries to the target project.',
         'libraries' => [
-            // Versioned libraries (to avoid conflicts)
-            ['source' => 'themes/libraries/bootstrap', 'target' => 'themes/libraries/bootstrap5'],
-            ['source' => 'themes/libraries/jquery', 'target' => 'themes/libraries/jquery3'],
-            ['source' => 'themes/libraries/fontawesome', 'target' => 'themes/libraries/fontawesome6'],
-            ['source' => 'themes/libraries/moment', 'target' => 'themes/libraries/moment2'],
-            // New libraries (no version conflict)
+            ['source' => 'themes/libraries/bootstrap5', 'target' => 'themes/libraries/bootstrap5'],
+            ['source' => 'themes/libraries/jquery', 'target' => 'themes/libraries/jquery'],
+            ['source' => 'themes/libraries/fontawesome', 'target' => 'themes/libraries/fontawesome'],
+            ['source' => 'themes/libraries/moment', 'target' => 'themes/libraries/moment'],
             ['source' => 'themes/libraries/echarts', 'target' => 'themes/libraries/echarts'],
             ['source' => 'themes/libraries/codemirror', 'target' => 'themes/libraries/codemirror'],
             ['source' => 'themes/libraries/daterangepicker', 'target' => 'themes/libraries/daterangepicker'],
@@ -159,12 +153,12 @@ $steps = [
         ],
         'type' => 'copy_libraries_versioned'
     ],
-    9 => [
+    8 => [
         'title' => 'Run Database Setup',
         'description' => 'Shows the SQL that needs to be executed to create tables and insert system data.',
         'type' => 'sql_preview'
     ],
-    10 => [
+    9 => [
         'title' => 'Code Modifications Required',
         'description' => 'Manual changes needed: add routes to system.inc.php and update asset loading in include files.',
         'type' => 'code_modifications'
@@ -216,14 +210,32 @@ if ($action === 'execute' && $step > 0 && isset($steps[$step])) {
                 }
             }
             $result = $results;
-        } elseif ($stepData['type'] === 'copy_includes_transformed') {
-            // Copy include folders with asset loading transformation
-            $results = [];
-            foreach ($stepData['folders'] as $folder) {
-                $srcFolder = $sourceDir . '/' . $folder;
-                $dstFolder = $targetDir . '/' . $folder;
-                if (is_dir($srcFolder)) {
-                    $results[$folder] = copyIncludesTransformed($srcFolder, $dstFolder);
+        } elseif ($stepData['type'] === 'copy_scripts_and_includes') {
+            // Copy page scripts (regular copy) and include files (with transformation)
+            $results = ['scripts' => [], 'includes' => []];
+
+            // Copy page scripts
+            if (!empty($stepData['files'])) {
+                $results['scripts'] = copyFiles($sourceDir, $targetDir, $stepData['files']);
+            }
+
+            // Copy include files with transformation
+            if (!empty($stepData['include_files'])) {
+                foreach ($stepData['include_files'] as $file) {
+                    $srcFile = $sourceDir . '/' . $file;
+                    $dstFile = $targetDir . '/' . $file;
+                    if (file_exists($srcFile)) {
+                        // Ensure target directory exists
+                        $dstDir = dirname($dstFile);
+                        if (!is_dir($dstDir)) {
+                            mkdir($dstDir, 0755, true);
+                        }
+                        // Copy with transformation
+                        $content = file_get_contents($srcFile);
+                        $content = transformAssetLoading($content);
+                        file_put_contents($dstFile, $content);
+                        $results['includes'][$file] = 'copied';
+                    }
                 }
             }
             $result = $results;
@@ -262,6 +274,34 @@ if ($action === 'execute' && $step > 0 && isset($steps[$step])) {
 }
 
 // Helper functions
+/**
+ * Transform asset loading calls from DGC style to Rapidkart style
+ * Utility::addModuleCss/Js() → $theme->addCss/Script()
+ */
+function transformAssetLoading($content) {
+    // Transform Utility::addModuleCss('module') → $theme->addCss(SystemConfig::stylesUrl() . 'module/module.css')
+    $content = preg_replace_callback(
+        "/Utility::addModuleCss\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/",
+        function($matches) {
+            $module = $matches[1];
+            return "\$theme->addCss(SystemConfig::stylesUrl() . '{$module}/{$module}.css')";
+        },
+        $content
+    );
+
+    // Transform Utility::addModuleJs('module') → $theme->addScript(SystemConfig::scriptsUrl() . 'module/module.js')
+    $content = preg_replace_callback(
+        "/Utility::addModuleJs\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/",
+        function($matches) {
+            $module = $matches[1];
+            return "\$theme->addScript(SystemConfig::scriptsUrl() . '{$module}/{$module}.js')";
+        },
+        $content
+    );
+
+    return $content;
+}
+
 function copyFiles($sourceDir, $targetDir, $files) {
     $results = [];
     foreach ($files as $file) {
@@ -939,18 +979,227 @@ function copyDistRenamed($src, $targetDir) {
                                 data-warning="<?php echo htmlspecialchars($warningMsg); ?>">
                             <i class="fas fa-folder me-1"></i> Copy &amp; Rename
                         </button>
-                        <button class="btn btn-outline-info btn-sm count-target-btn ms-1"
-                                data-path="system/styles"
-                                data-recursive="1"
-                                title="Count CSS files in system/styles">
-                            <i class="fas fa-calculator me-1"></i> Styles
+                        <div class="count-buttons-grid mt-2">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="text-muted small" style="min-width: 70px;">Styles:</span>
+                                <button class="btn btn-outline-success btn-sm count-target-btn"
+                                        data-path="system/styles/common"
+                                        data-recursive="0"
+                                        title="Count files in system/styles/common">
+                                    <i class="fas fa-calculator me-1"></i> common
+                                </button>
+                                <button class="btn btn-outline-success btn-sm count-target-btn ms-1"
+                                        data-path="system/styles/graph"
+                                        data-recursive="0"
+                                        title="Count files in system/styles/graph">
+                                    <i class="fas fa-calculator me-1"></i> graph
+                                </button>
+                                <button class="btn btn-outline-success btn-sm count-target-btn ms-1"
+                                        data-path="system/styles/data-filter"
+                                        data-recursive="0"
+                                        title="Count files in system/styles/data-filter">
+                                    <i class="fas fa-calculator me-1"></i> data-filter
+                                </button>
+                                <button class="btn btn-outline-success btn-sm count-target-btn ms-1"
+                                        data-path="system/styles/dashboard"
+                                        data-recursive="0"
+                                        title="Count files in system/styles/dashboard">
+                                    <i class="fas fa-calculator me-1"></i> dashboard
+                                </button>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="text-muted small" style="min-width: 70px;">Scripts:</span>
+                                <button class="btn btn-outline-warning btn-sm count-target-btn"
+                                        data-path="system/scripts/common"
+                                        data-recursive="0"
+                                        title="Count files in system/scripts/common">
+                                    <i class="fas fa-calculator me-1"></i> common
+                                </button>
+                                <button class="btn btn-outline-warning btn-sm count-target-btn ms-1"
+                                        data-path="system/scripts/graph"
+                                        data-recursive="0"
+                                        title="Count files in system/scripts/graph">
+                                    <i class="fas fa-calculator me-1"></i> graph
+                                </button>
+                                <button class="btn btn-outline-warning btn-sm count-target-btn ms-1"
+                                        data-path="system/scripts/data-filter"
+                                        data-recursive="0"
+                                        title="Count files in system/scripts/data-filter">
+                                    <i class="fas fa-calculator me-1"></i> data-filter
+                                </button>
+                                <button class="btn btn-outline-warning btn-sm count-target-btn ms-1"
+                                        data-path="system/scripts/dashboard"
+                                        data-recursive="0"
+                                        title="Count files in system/scripts/dashboard">
+                                    <i class="fas fa-calculator me-1"></i> dashboard
+                                </button>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php if ($stepData['type'] === 'copy_scripts_and_includes'): ?>
+                        <?php $totalFileExists = 0; $totalFolderExists = 0; ?>
+
+                        <!-- Sub-section 1: Page Scripts -->
+                        <div class="sub-section mb-4">
+                            <h6 class="text-primary mb-2"><i class="fas fa-file-code me-1"></i> Page Scripts</h6>
+                            <div class="file-list mb-2">
+                                <?php $fileNum = 1; foreach ($stepData['files'] as $file): ?>
+                                <?php $status = $targetExists ? getFileStatus($sourceDir, $targetDir, $file) : 'unknown';
+                                      if ($status === 'exists') $totalFileExists++; ?>
+                                <div class="file-item-simple">
+                                    <span class="file-number"><?php echo $fileNum++; ?>.</span>
+                                    <span class="status-badge status-<?php echo $status; ?>">
+                                        <?php echo $status; ?>
+                                    </span>
+                                    <?php echo htmlspecialchars($file); ?>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <!-- Sub-section 2: Include Files -->
+                        <div class="sub-section mb-3">
+                            <h6 class="text-info mb-2"><i class="fas fa-file-code me-1"></i> Include Files (with Transformation)</h6>
+                            <div class="file-list mb-2">
+                                <?php
+                                // Define unique module-specific transforms for each include file
+                                // (common module transforms are shared across all files)
+                                $includeTransformations = [
+                                    'system/includes/graph/graph.inc.php' => [
+                                        'module' => 'graph',
+                                        'transforms' => [
+                                            "Utility::addModuleCss('graph')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')",
+                                            "Utility::addModuleJs('graph')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')",
+                                        ]
+                                    ],
+                                    'system/includes/data-filter/data-filter.inc.php' => [
+                                        'module' => 'data-filter',
+                                        'transforms' => [
+                                            "Utility::addModuleCss('data-filter')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css')",
+                                            "Utility::addModuleJs('data-filter')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js')",
+                                        ]
+                                    ],
+                                    'system/includes/dashboard/dashboard.inc.php' => [
+                                        'module' => 'dashboard',
+                                        'transforms' => [
+                                            "Utility::addModuleCss('dashboard')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css')",
+                                            "Utility::addModuleJs('dashboard')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js')",
+                                        ]
+                                    ],
+                                    'system/includes/dashboard/template-preview-component.php' => [
+                                        'module' => 'dashboard',
+                                        'transforms' => [] // No asset loading transforms needed
+                                    ],
+                                ];
+                                $includeNum = 1;
+                                foreach ($stepData['include_files'] as $file):
+                                    $status = $targetExists ? getFileStatus($sourceDir, $targetDir, $file) : 'unknown';
+                                    if ($status === 'exists') $totalFolderExists++;
+                                    $fileTransforms = isset($includeTransformations[$file]) ? $includeTransformations[$file] : null;
+                                ?>
+                                <div class="file-item-simple">
+                                    <span class="file-number"><?php echo $includeNum++; ?>.</span>
+                                    <span class="status-badge status-<?php echo $status; ?>">
+                                        <?php echo $status; ?>
+                                    </span>
+                                    <?php echo htmlspecialchars($file); ?>
+                                    <?php if ($fileTransforms && !empty($fileTransforms['transforms'])): ?>
+                                    <span class="badge bg-info ms-2" title="Has asset loading transforms">
+                                        <i class="fas fa-magic"></i> <?php echo count($fileTransforms['transforms']); ?> transforms
+                                    </span>
+                                    <?php endif; ?>
+                                </div>
+                                <?php if ($fileTransforms && !empty($fileTransforms['transforms'])): ?>
+                                <div class="transform-details ms-4 mb-2 small" style="border-left: 2px solid #17a2b8; padding-left: 10px;">
+                                    <?php foreach ($fileTransforms['transforms'] as $from => $to): ?>
+                                    <div class="transform-row text-muted">
+                                        <code class="text-danger"><?php echo htmlspecialchars($from); ?></code>
+                                        <i class="fas fa-arrow-right mx-1"></i>
+                                        <code class="text-success"><?php echo htmlspecialchars($to); ?></code>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+                            <p class="small text-muted mb-2">
+                                <i class="fas fa-magic me-1"></i>
+                                <strong>Auto-transform:</strong> <code>Utility::addModuleCss/Js()</code> &rarr; <code>$theme->addCss/Script()</code>
+                            </p>
+                            <div class="transform-details small mb-2" style="border-left: 2px solid #6c757d; padding-left: 10px; background: #f8f9fa; padding: 8px 10px; border-radius: 4px;">
+                                <div class="text-muted mb-1"><strong>Common module (all files):</strong></div>
+                                <div class="transform-row text-muted">
+                                    <code class="text-danger">Utility::addModuleCss('common')</code>
+                                    <i class="fas fa-arrow-right mx-1"></i>
+                                    <code class="text-success">$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css')</code>
+                                </div>
+                                <div class="transform-row text-muted">
+                                    <code class="text-danger">Utility::addModuleJs('common')</code>
+                                    <i class="fas fa-arrow-right mx-1"></i>
+                                    <code class="text-success">$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js')</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php
+                              $confirmTitle = 'Copy Scripts & Includes';
+                              $confirmMsg = 'Copy page scripts and include files (with transformation)?';
+                              $hasWarning = $totalFileExists > 0 || $totalFolderExists > 0;
+                              $warningMsg = ($totalFileExists + $totalFolderExists) . ' file(s) already exist and will be OVERWRITTEN!'; ?>
+                        <button type="button" class="btn btn-primary btn-sm confirm-action-btn"
+                                data-action-url="?action=execute&step=<?php echo $num; ?>"
+                                data-step="<?php echo $num; ?>"
+                                data-title="<?php echo htmlspecialchars($confirmTitle); ?>"
+                                data-message="<?php echo htmlspecialchars($confirmMsg); ?>"
+                                data-has-warning="<?php echo $hasWarning ? '1' : '0'; ?>"
+                                data-warning="<?php echo htmlspecialchars($warningMsg); ?>">
+                            <i class="fas fa-copy me-1"></i> Copy All
                         </button>
-                        <button class="btn btn-outline-info btn-sm count-target-btn ms-1"
-                                data-path="system/scripts"
-                                data-recursive="1"
-                                title="Count JS files in system/scripts">
-                            <i class="fas fa-calculator me-1"></i> Scripts
-                        </button>
+                        <div class="count-buttons-grid mt-2">
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="text-muted small" style="min-width: 70px;">Scripts:</span>
+                                <button class="btn btn-outline-info btn-sm count-target-btn" data-path="system/scripts/common" data-recursive="1" title="Count files in system/scripts/common">
+                                    <i class="fas fa-calculator me-1"></i> common
+                                </button>
+                                <button class="btn btn-outline-info btn-sm count-target-btn ms-1" data-path="system/scripts/graph" data-recursive="1" title="Count files in system/scripts/graph">
+                                    <i class="fas fa-calculator me-1"></i> graph
+                                </button>
+                                <button class="btn btn-outline-info btn-sm count-target-btn ms-1" data-path="system/scripts/data-filter" data-recursive="1" title="Count files in system/scripts/data-filter">
+                                    <i class="fas fa-calculator me-1"></i> data-filter
+                                </button>
+                                <button class="btn btn-outline-info btn-sm count-target-btn ms-1" data-path="system/scripts/dashboard" data-recursive="1" title="Count files in system/scripts/dashboard">
+                                    <i class="fas fa-calculator me-1"></i> dashboard
+                                </button>
+                            </div>
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="text-muted small" style="min-width: 70px;">Includes:</span>
+                                <button class="btn btn-outline-secondary btn-sm count-target-btn" data-path="system/includes/graph" data-recursive="1" title="Count files in system/includes/graph">
+                                    <i class="fas fa-calculator me-1"></i> graph
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm count-target-btn ms-1" data-path="system/includes/data-filter" data-recursive="1" title="Count files in system/includes/data-filter">
+                                    <i class="fas fa-calculator me-1"></i> data-filter
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm count-target-btn ms-1" data-path="system/includes/dashboard" data-recursive="1" title="Count files in system/includes/dashboard">
+                                    <i class="fas fa-calculator me-1"></i> dashboard
+                                </button>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="text-muted small" style="min-width: 70px;">Styles:</span>
+                                <button class="btn btn-outline-success btn-sm count-target-btn" data-path="system/styles/common" data-recursive="0" title="Count files in system/styles/common">
+                                    <i class="fas fa-calculator me-1"></i> common
+                                </button>
+                                <button class="btn btn-outline-success btn-sm count-target-btn ms-1" data-path="system/styles/graph" data-recursive="0" title="Count files in system/styles/graph">
+                                    <i class="fas fa-calculator me-1"></i> graph
+                                </button>
+                                <button class="btn btn-outline-success btn-sm count-target-btn ms-1" data-path="system/styles/data-filter" data-recursive="0" title="Count files in system/styles/data-filter">
+                                    <i class="fas fa-calculator me-1"></i> data-filter
+                                </button>
+                                <button class="btn btn-outline-success btn-sm count-target-btn ms-1" data-path="system/styles/dashboard" data-recursive="0" title="Count files in system/styles/dashboard">
+                                    <i class="fas fa-calculator me-1"></i> dashboard
+                                </button>
+                            </div>
+                        </div>
                         <?php endif; ?>
 
                         <?php if ($stepData['type'] === 'copy_folders'): ?>
@@ -1077,6 +1326,23 @@ function copyDistRenamed($src, $targetDir) {
                                 <li><strong>dashboard_template</strong> - 16 system templates</li>
                                 <li><strong>dashboard_instance</strong> - User dashboards</li>
                             </ul>
+
+                            <h6 class="text-primary mt-3"><i class="fas fa-database me-1"></i> SystemTables Constants</h6>
+                            <p class="small text-muted mb-2">
+                                Add these constants to <code>system/utilities/SystemTables.php</code>:
+                            </p>
+                            <div class="d-flex justify-content-end mb-1">
+                                <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="systemtables-code">
+                                    <i class="fas fa-copy me-1"></i> Copy
+                                </button>
+                            </div>
+                            <div class="code-block mb-3" id="systemtables-code">// Dynamic Graph Creator Tables
+const DB_TBL_GRAPH = "graph";
+const DB_TBL_DATA_FILTER = "data_filter";
+const DB_TBL_DASHBOARD_TEMPLATE_CATEGORY = "dashboard_template_category";
+const DB_TBL_DASHBOARD_TEMPLATE = "dashboard_template";
+const DB_TBL_DASHBOARD_INSTANCE = "dashboard_instance";</div>
+
                             <a href="sql/install.sql" target="_blank" class="btn btn-outline-secondary btn-sm">
                                 <i class="fas fa-eye me-1"></i> View SQL File
                             </a>
@@ -1148,8 +1414,7 @@ $theme = Rapidkart::getInstance()->getThemeRegistry();
 $theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
 $theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css');
 $theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');</div>
+$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js');</div>
                                 </div>
 
                                 <div class="mb-2">
@@ -1218,8 +1483,7 @@ $theme = Rapidkart::getInstance()->getThemeRegistry();
 $theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
 $theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css');
 $theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');</div>
+$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js');</div>
                                 </div>
 
                                 <div class="mb-2">
@@ -1268,8 +1532,7 @@ $theme = Rapidkart::getInstance()->getThemeRegistry();
 $theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
 $theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css');
 $theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');</div>
+$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js');</div>
                                 </div>
 
                                 <div class="mb-2">

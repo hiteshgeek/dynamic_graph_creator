@@ -11,24 +11,18 @@
  */
 class SystemTables
 {
-
-      /**
-       * Graph Management Tables
-       */
+      // Graph table (status in gsid column: 1=active, 3=deleted)
       const DB_TBL_GRAPH = "graph";
-      const DB_TBL_GRAPH_STATUS = "graph_status";
 
-      /**
-       * DataFilter Management Tables
-       */
+      // Data filter table (status in dfsid column: 1=active, 3=deleted)
       const DB_TBL_DATA_FILTER = "data_filter";
-      const DB_TBL_DATA_FILTER_STATUS = "data_filter_status";
 
-      /**
-       * Dashboard Builder Tables
-       */
+      // Dashboard template category table (status in dtcsid column)
       const DB_TBL_DASHBOARD_TEMPLATE_CATEGORY = "dashboard_template_category";
-      const DB_TBL_DASHBOARD_TEMPLATE = "dashboard_template";
-      const DB_TBL_DASHBOARD_INSTANCE = "dashboard_instance";
 
+      // Dashboard template table (status in dtsid column)
+      const DB_TBL_DASHBOARD_TEMPLATE = "dashboard_template";
+
+      // Dashboard instance table (status in disid column)
+      const DB_TBL_DASHBOARD_INSTANCE = "dashboard_instance";
 }

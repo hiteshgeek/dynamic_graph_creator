@@ -23,7 +23,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 
     <!-- Core Libraries -->
-    <link href="<?php echo SiteConfig::themeLibrariessUrl(); ?>bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="<?php echo SiteConfig::themeLibrariessUrl(); ?>bootstrap5/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?php echo SiteConfig::themeLibrariessUrl(); ?>fontawesome/css/all.min.css" rel="stylesheet">
 
     <!-- Page-specific CSS -->
@@ -35,7 +35,7 @@
     <?php echo $this->getContent(); ?>
 
     <!-- Core Libraries JS -->
-    <script src="<?php echo SiteConfig::themeLibrariessUrl(); ?>bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="<?php echo SiteConfig::themeLibrariessUrl(); ?>bootstrap5/js/bootstrap.bundle.min.js"></script>
 
     <!-- Page-specific JS -->
     <?php foreach ($this->getScripts() as $js): ?>

@@ -227,7 +227,7 @@ class DashboardTemplate implements DatabaseObject
 
         $grouped = array();
 
-        while ($row = $db->fetchAssoc($res)) {
+        while ($row = $db->fetchAssocArray($res)) {
             // Use category slug as key, or 'uncategorized' for NULL categories
             $catKey = $row['category_slug'] ? $row['category_slug'] : 'uncategorized';
 
@@ -300,7 +300,7 @@ class DashboardTemplate implements DatabaseObject
                 ORDER BY dt.display_order ASC, dt.name ASC";
         $res = $db->query($sql);
 
-        while ($row = $db->fetchAssoc($res)) {
+        while ($row = $db->fetchAssocArray($res)) {
             $catKey = $row['category_slug'] ? $row['category_slug'] : 'uncategorized';
 
             // If template has no category or category doesn't exist, put in uncategorized

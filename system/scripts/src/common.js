@@ -2,6 +2,9 @@
  * Common utilities shared between graph and filter modules
  */
 
+// Import Theme.js - bundled into common.js
+import './Theme.js';
+
 window.Toast = {
     container: null,
     init() {

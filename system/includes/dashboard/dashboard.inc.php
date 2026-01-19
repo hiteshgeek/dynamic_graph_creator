@@ -12,7 +12,9 @@ Utility::addModuleJs('common');
 Utility::addModuleJs('dashboard');
 
 $theme = Rapidkart::getInstance()->getThemeRegistry();
-$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+
+// Bootstrap 5 JS is required for modals and tooltips
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'bootstrap5/js/bootstrap.bundle.min.js', 5);
 
 // Permission control for template ordering operations
 // Set to true to allow category reordering, template reordering, and moving templates between categories
@@ -153,13 +155,10 @@ function showList()
 
     // Get user's dashboards - TODO: Replace with actual user ID from session
     $userId = 1;
-    $dashboards = DashboardInstance::getUserDashboards($userId);
 
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'dashboard/dashboard-list.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'dashboard/views/dashboard-list');
+    $tpl->dashboards = DashboardInstance::getUserDashboards($userId);
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -190,11 +189,10 @@ function showBuilder($dashboardId = 0)
 
     $theme->setPageTitle(($dashboard ? 'Edit Dashboard' : 'Create Dashboard') . ' - Dynamic Graph Creator');
 
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'dashboard/dashboard-builder.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'dashboard/forms/dashboard-builder');
+    $tpl->dashboard = $dashboard;
+    $tpl->templates = $templates;
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -218,11 +216,9 @@ function showPreview($dashboardId)
 
     $theme->setPageTitle(htmlspecialchars($dashboard->getName()) . ' - Preview');
 
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'dashboard/dashboard-preview.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'dashboard/views/dashboard-preview');
+    $tpl->dashboard = $dashboard;
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -663,13 +659,10 @@ function showTemplateList()
 
     $theme->setPageTitle('Dashboard Templates - Dynamic Graph Creator');
 
-    $templates = DashboardTemplate::getAllCategoriesWithTemplates();
-
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'dashboard/template-list.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'dashboard/views/template-list');
+    $tpl->templates = DashboardTemplate::getAllCategoriesWithTemplates();
+    $tpl->allowTemplateOrdering = $allowTemplateOrdering;
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -687,15 +680,11 @@ function showTemplateCreator()
 
     $theme->setPageTitle('Create Template - Dynamic Graph Creator');
 
-    $pageTitle = 'Create Template';
-    $template = null;
-    $categories = DashboardTemplateCategory::getAll();
-
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'dashboard/template-editor.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'dashboard/forms/template-editor');
+    $tpl->pageTitle = 'Create Template';
+    $tpl->template = null;
+    $tpl->categories = DashboardTemplateCategory::getAll();
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -724,14 +713,11 @@ function showTemplateEditor($templateId)
 
     $theme->setPageTitle('Edit Template - Dynamic Graph Creator');
 
-    $pageTitle = 'Edit Template';
-    $categories = DashboardTemplateCategory::getAll();
-
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'dashboard/template-editor.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'dashboard/forms/template-editor');
+    $tpl->pageTitle = 'Edit Template';
+    $tpl->template = $template;
+    $tpl->categories = DashboardTemplateCategory::getAll();
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -762,13 +748,10 @@ function showTemplateBuilder($templateId)
 
     $theme->setPageTitle('Template Builder - ' . htmlspecialchars($template->getName()));
 
-    $categories = DashboardTemplateCategory::getAll();
-
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'dashboard/template-builder.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'dashboard/forms/template-builder');
+    $tpl->template = $template;
+    $tpl->categories = DashboardTemplateCategory::getAll();
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -797,11 +780,9 @@ function showTemplatePreview($templateId)
 
     $theme->setPageTitle('Template Preview - ' . htmlspecialchars($template->getName()));
 
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'dashboard/template-preview.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'dashboard/views/template-preview');
+    $tpl->template = $template;
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -1012,7 +993,7 @@ function deleteTemplate($data)
     $result = $db->query($sql, array('::dtid' => $templateId));
 
     if ($result && $db->numRows($result) > 0) {
-        $row = $db->fetchAssoc($result);
+        $row = $db->fetchAssocArray($result);
         if ($row && $row['count'] > 0) {
             Utility::ajaxResponseFalse(
                 'Cannot delete template. It is being used by ' . $row['count'] . ' dashboard(s)'
@@ -1220,7 +1201,7 @@ function deleteCategory($data)
     $result = $db->query($sql, array('::dtcid' => $categoryId));
 
     if ($result && $db->numRows($result) > 0) {
-        $row = $db->fetchAssoc($result);
+        $row = $db->fetchAssocArray($result);
         if ($row && $row['count'] > 0) {
             Utility::ajaxResponseFalse(
                 'Cannot delete category. It contains ' . $row['count'] . ' template(s). Please move or delete templates first.'

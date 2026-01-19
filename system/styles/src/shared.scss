@@ -1,6 +1,10 @@
 // Common Module SCSS Entry Point
 // Shared styles used by both graph and filter modules
 // Load this once on pages that use both modules
+//
+// IMPORTANT: All DGC styles are scoped under .dgc-app to prevent
+// conflicts with Rapidkart's Bootstrap 3 styles.
+// Wrap your template content with <div class="dgc-app">...</div>
 
 @use "variables" as *;
 @use "base";

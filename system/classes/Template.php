@@ -71,7 +71,7 @@
 
         /**
          * Passes the variables into the template and get the HTML code
-         * 
+         *
          * @return String - The HTML code for the template
          */
         public function parse()
@@ -84,7 +84,10 @@
             extract($this->variables, EXTR_SKIP);
             require $this->template;
             $content = ob_get_clean();
-            return $content;
+
+            // Wrap content in .dgc-app for CSS isolation
+            // This prevents DGC styles from conflicting with Rapidkart's Bootstrap 3
+            return '<div class="dgc-app">' . $content . '</div>';
         }
 
         /**

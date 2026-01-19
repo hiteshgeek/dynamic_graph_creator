@@ -12,7 +12,9 @@ Utility::addModuleJs('common');
 Utility::addModuleJs('data-filter');
 
 $theme = Rapidkart::getInstance()->getThemeRegistry();
-$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+
+// Bootstrap 5 JS is required for modals and tooltips
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'bootstrap5/js/bootstrap.bundle.min.js', 5);
 
 // $url is already parsed in index.php
 $action = isset($url[1]) ? $url[1] : 'list';
@@ -62,13 +64,9 @@ function showDataFilterList()
 
     $theme->setPageTitle('Data Filters - Dynamic Graph Creator');
 
-    $filters = DataFilterManager::getAllAsArray();
-
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'data-filter/data-filter-list.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'data-filter/views/data-filter-list');
+    $tpl->filters = DataFilterManager::getAllAsArray();
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -104,11 +102,11 @@ function showDataFilterForm($filterId = null)
 
     $theme->setPageTitle(($filter ? 'Edit' : 'Create') . ' Data Filter - Dynamic Graph Creator');
 
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'data-filter/data-filter-form.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'data-filter/forms/data-filter-form');
+    $tpl->filter = $filter;
+    $tpl->allFilters = $allFilters;
+    $tpl->totalFilters = $totalFilters;
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -234,7 +232,7 @@ function testDataFilterQuery($data)
     $options = array();
     $columns = array();
 
-    while ($row = $db->fetchAssoc($res)) {
+    while ($row = $db->fetchAssocArray($res)) {
         if (empty($columns)) {
             $columns = array_keys($row);
         }

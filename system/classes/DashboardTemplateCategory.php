@@ -165,7 +165,7 @@ class DashboardTemplateCategory implements DatabaseObject
         $res = $db->query($sql, array('::dtcid' => $this->dtcid));
 
         if ($db->numRows($res) > 0) {
-            $row = $db->fetchAssoc($res);
+            $row = $db->fetchAssocArray($res);
             $this->populate($row);
             return true;
         }
@@ -212,7 +212,7 @@ class DashboardTemplateCategory implements DatabaseObject
         $res = $db->query($sql);
 
         $categories = array();
-        while ($row = $db->fetchAssoc($res)) {
+        while ($row = $db->fetchAssocArray($res)) {
             $category = new DashboardTemplateCategory();
             $category->populate($row);
             $categories[] = $category;
@@ -256,7 +256,7 @@ class DashboardTemplateCategory implements DatabaseObject
         $res = $db->query($sql, array('::slug' => $slug));
 
         if ($db->numRows($res) > 0) {
-            $row = $db->fetchAssoc($res);
+            $row = $db->fetchAssocArray($res);
             return new DashboardTemplateCategory($row['dtcid']);
         }
 

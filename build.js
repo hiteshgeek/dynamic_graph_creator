@@ -2,6 +2,7 @@ const esbuild = require("esbuild");
 const sass = require("sass");
 const postcss = require("postcss");
 const autoprefixer = require("autoprefixer");
+const prefixSelector = require("postcss-prefix-selector");
 const JavaScriptObfuscator = require("javascript-obfuscator");
 const chokidar = require("chokidar");
 const fs = require("fs");
@@ -78,8 +79,39 @@ async function compileSass(scssFile, name) {
       sourceMapIncludeSources: generateSourceMap,
     });
 
-    // Add vendor prefixes with autoprefixer
-    const prefixed = await postcss([autoprefixer]).process(result.css, {
+    // Add vendor prefixes with autoprefixer and scope all selectors under .dgc-app
+    // This prevents CSS conflicts with Rapidkart's Bootstrap 3 styles
+    const prefixed = await postcss([
+      prefixSelector({
+        prefix: ".dgc-app",
+        // Don't prefix these selectors
+        exclude: [
+          ":root",           // CSS variables must stay at :root
+          ":root.theme-dark", // Theme dark mode
+          ":root.theme-light", // Theme light mode
+          /^\[data-theme/, // data-theme attributes
+          "@keyframes",      // Keyframe animations
+          "@font-face",      // Font declarations
+        ],
+        // Transform rules
+        transform: function (prefix, selector, prefixedSelector) {
+          // Don't prefix html or body - they're global
+          if (selector === "html" || selector === "body") {
+            return selector;
+          }
+          // Don't prefix * selector
+          if (selector === "*") {
+            return selector;
+          }
+          // Handle :root properly - keep as is
+          if (selector.startsWith(":root")) {
+            return selector;
+          }
+          return prefixedSelector;
+        },
+      }),
+      autoprefixer,
+    ]).process(result.css, {
       from: scssPath,
       map: generateSourceMap
         ? { prev: result.sourceMap, inline: false, annotation: false }

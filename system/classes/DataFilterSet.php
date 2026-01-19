@@ -68,7 +68,7 @@ class DataFilterSet
             $res = $db->query($sql, array('::gid' => $this->entity_id));
 
             if ($res && $db->numRows($res) > 0) {
-                $row = $db->fetchAssoc($res);
+                $row = $db->fetchAssocArray($res);
                 return isset($row['query']) ? $row['query'] : '';
             }
         }

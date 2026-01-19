@@ -12,7 +12,9 @@ Utility::addModuleJs('common');
 Utility::addModuleJs('graph');
 
 $theme = Rapidkart::getInstance()->getThemeRegistry();
-$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+
+// Bootstrap 5 JS is required for modals and tooltips
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'bootstrap5/js/bootstrap.bundle.min.js', 5);
 
 // $url is already parsed in index.php
 $action = isset($url[1]) ? $url[1] : 'list';
@@ -70,12 +72,9 @@ function showList()
     $theme->setPageTitle('Graphs - Dynamic Graph Creator');
 
     // Get content from template
-    $graphs = GraphManager::getAll();
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'graph/graph-list.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'graph/views/graph-list');
+    $tpl->graphs = GraphManager::getAll();
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -118,11 +117,11 @@ function showCreator($graphId = null)
     // Permission to create filters (replace with actual framework permission check)
     $canCreateFilter = true;
 
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'graph/graph-creator.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'graph/forms/graph-creator');
+    $tpl->graph = $graph;
+    $tpl->allFilters = $allFilters;
+    $tpl->canCreateFilter = $canCreateFilter;
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -178,11 +177,15 @@ function showView($graphId)
         $filters[] = $filter->toArray();
     }
 
-    ob_start();
-    require_once SystemConfig::templatesPath() . 'graph/graph-view.php';
-    $content = ob_get_clean();
-
-    $theme->setContent('full_main', $content);
+    $tpl = new Template(SystemConfig::templatesPath() . 'graph/views/graph-view');
+    $tpl->graph = $graph;
+    $tpl->filters = $filters;
+    $tpl->allGraphs = $allGraphs;
+    $tpl->totalGraphs = $totalGraphs;
+    $tpl->currentIndex = $currentIndex;
+    $tpl->prevGraphId = $prevGraphId;
+    $tpl->nextGraphId = $nextGraphId;
+    $theme->setContent('full_main', $tpl->parse());
 }
 
 /**
@@ -470,7 +473,7 @@ function testQuery($data)
     $rows = array();
     $columns = array();
 
-    while ($row = $db->fetchAssoc($res)) {
+    while ($row = $db->fetchAssocArray($res)) {
         if (empty($columns)) {
             $columns = array_keys($row);
         }

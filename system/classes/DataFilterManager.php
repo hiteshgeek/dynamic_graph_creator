@@ -20,7 +20,7 @@ class DataFilterManager
         $res = $db->query($sql);
 
         $filters = array();
-        while ($row = $db->fetchAssoc($res)) {
+        while ($row = $db->fetchAssocArray($res)) {
             $filter = new DataFilter();
             $filter->parse((object)$row);
             $filters[$row['filter_key']] = $filter;
@@ -40,7 +40,7 @@ class DataFilterManager
         $res = $db->query($sql);
 
         $filters = array();
-        while ($row = $db->fetchAssoc($res)) {
+        while ($row = $db->fetchAssocArray($res)) {
             $filter = new DataFilter();
             $filter->parse((object)$row);
             $filters[] = $filter->toArray();
@@ -90,7 +90,7 @@ class DataFilterManager
 
         // First, collect all filters indexed by dfid
         $filtersByDfid = array();
-        while ($row = $db->fetchAssoc($res)) {
+        while ($row = $db->fetchAssocArray($res)) {
             $filter = new DataFilter();
             $filter->parse((object)$row);
             $filtersByDfid[$row['dfid']] = $filter;
@@ -151,7 +151,7 @@ class DataFilterManager
         $res = $db->query($sql, $args);
 
         $filters = array();
-        while ($row = $db->fetchAssoc($res)) {
+        while ($row = $db->fetchAssocArray($res)) {
             $filter = new DataFilter();
             $filter->parse((object)$row);
             $filters[$row['filter_key']] = $filter;
@@ -223,7 +223,7 @@ class DataFilterManager
         $res = $db->query($sql, $args);
         $conflicts = array();
 
-        while ($row = $db->fetchAssoc($res)) {
+        while ($row = $db->fetchAssocArray($res)) {
             $existingKey = $row['filter_key'];
             if ($existingKey === $key) {
                 continue;

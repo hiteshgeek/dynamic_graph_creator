@@ -87,7 +87,7 @@ class SQLiDatabase
        *
        * @param $resultset The result set from which to fetch the row
        */
-      public function fetchAssoc($resultset = null)
+      public function fetchAssocArray($resultset = null)
       {
             if (!$resultset) {
                   return false;

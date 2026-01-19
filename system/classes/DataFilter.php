@@ -232,7 +232,7 @@ class DataFilter implements DatabaseObject
             $res = $db->query($this->data_query);
             $options = array();
             if ($res) {
-                while ($row = $db->fetchAssoc($res)) {
+                while ($row = $db->fetchAssocArray($res)) {
                     $option = array(
                         'value' => isset($row['value']) ? $row['value'] : '',
                         'label' => isset($row['label']) ? $row['label'] : (isset($row['value']) ? $row['value'] : '')

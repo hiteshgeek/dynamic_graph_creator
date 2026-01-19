@@ -41,12 +41,6 @@
                         <?php if ($dashboard->getDescription()): ?>
                         <p class="item-card-description"><?php echo htmlspecialchars($dashboard->getDescription()); ?></p>
                         <?php endif; ?>
-                        <div class="item-card-meta">
-                            <span class="meta-item">
-                                <i class="fas fa-clock"></i>
-                                <?php echo date('M d, Y', strtotime($dashboard->getUpdatedTs())); ?>
-                            </span>
-                        </div>
                         <?php if ($dashboard->getIsSystem()): ?>
                         <div class="item-card-tags">
                             <span class="badge badge-system">

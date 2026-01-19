@@ -43,16 +43,6 @@ p {
   margin: 0 0 $spacing-md 0;
 }
 
-a {
-  color: $primary;
-  text-decoration: none;
-  transition: color $transition-fast;
-
-  &:hover {
-    color: $primary-dark;
-  }
-}
-
 // Cards (uses common card mixin)
 .card {
   @include card-base;
@@ -196,91 +186,22 @@ a {
   }
 }
 
-// Button overrides (extends Bootstrap)
+// Button layout overrides only (let Bootstrap handle colors)
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: $spacing-sm;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: $font-weight-medium;
 
   i {
     font-size: 1.1em;
   }
 }
 
-// Color customizations using Bootstrap CSS variables
-.btn-primary {
-  --bs-btn-bg: #{$primary};
-  --bs-btn-border-color: #{$primary};
-  --bs-btn-hover-bg: #{$primary-dark};
-  --bs-btn-hover-border-color: #{$primary-dark};
-  --bs-btn-active-bg: #{$primary-dark};
-  --bs-btn-active-border-color: #{$primary-dark};
-}
-
-.btn-secondary {
-  --bs-btn-bg: #{$gray-200};
-  --bs-btn-border-color: #{$gray-200};
-  --bs-btn-color: #{$text-primary};
-  --bs-btn-hover-bg: #{$gray-400};
-  --bs-btn-hover-border-color: #{$gray-400};
-  --bs-btn-hover-color: #{$gray-900};
-}
-
-.btn-success {
-  --bs-btn-bg: #{$success};
-  --bs-btn-border-color: #{$success};
-  --bs-btn-hover-bg: #{$success-dark};
-  --bs-btn-hover-border-color: #{$success-dark};
-}
-
-.btn-danger {
-  --bs-btn-bg: #{$error};
-  --bs-btn-border-color: #{$error};
-  --bs-btn-hover-bg: #{$error-dark};
-  --bs-btn-hover-border-color: #{$error-dark};
-}
-
-.btn-outline-primary {
-  --bs-btn-color: #{$primary};
-  --bs-btn-border-color: #{$primary};
-  --bs-btn-hover-bg: #{$primary};
-  --bs-btn-hover-border-color: #{$primary};
-  --bs-btn-active-bg: #{$primary};
-  --bs-btn-active-border-color: #{$primary};
-}
-
-.btn-outline-warning {
-  --bs-btn-color: #{$warning-dark};
-  --bs-btn-border-color: #{$warning};
-  --bs-btn-hover-bg: #{$warning};
-  --bs-btn-hover-border-color: #{$warning};
-  --bs-btn-hover-color: #fff;
-}
-
-.btn-outline-danger {
-  --bs-btn-color: #{$error};
-  --bs-btn-border-color: #{$error};
-  --bs-btn-hover-bg: #{$error};
-  --bs-btn-hover-border-color: #{$error};
-}
-
-.btn-outline-secondary {
-  --bs-btn-color: #{$text-secondary};
-  --bs-btn-border-color: #{$gray-300};
-  --bs-btn-hover-bg: #{$gray-100};
-  --bs-btn-hover-border-color: #{$gray-400};
-  --bs-btn-hover-color: #{$text-primary};
-}
-
-// Smaller btn-sm and form-control-sm
+// Smaller btn-sm
 .btn-sm {
-  --bs-btn-padding-y: 0.2rem;
-  --bs-btn-padding-x: 0.5rem;
-  --bs-btn-font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
 }
 
 .form-control-sm {
