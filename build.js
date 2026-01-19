@@ -52,6 +52,20 @@ function cleanDist() {
   });
 }
 
+/**
+ * Clean old versions of a specific module's files
+ * @param {string} name - Module name (e.g., 'graph', 'common')
+ * @param {string} type - File type ('css' or 'js')
+ */
+function cleanOldVersions(name, type) {
+  const pattern = new RegExp(`^${name}\\.[a-f0-9]{8}\\.${type}(\\.map)?$`);
+  fs.readdirSync(distDir).forEach((file) => {
+    if (pattern.test(file)) {
+      fs.unlinkSync(path.join(distDir, file));
+    }
+  });
+}
+
 async function compileSass(scssFile, name) {
   try {
     const scssPath = path.join(srcDir, `styles/src/${scssFile}`);
@@ -207,6 +221,7 @@ async function watch() {
         fs.readFileSync(path.join(distDir, "manifest.json"))
       );
       for (const mod of modules) {
+        cleanOldVersions(mod.name, "css"); // Clean old CSS versions
         const cssFile = await compileSass(mod.scss, mod.name);
         if (cssFile) manifest[`${mod.name}_css`] = cssFile;
       }
@@ -232,6 +247,7 @@ async function watch() {
         fs.readFileSync(path.join(distDir, "manifest.json"))
       );
       for (const mod of modules) {
+        cleanOldVersions(mod.name, "js"); // Clean old JS versions
         const jsFile = await bundleJs(mod.js, mod.name);
         if (jsFile) manifest[`${mod.name}_js`] = jsFile;
       }
