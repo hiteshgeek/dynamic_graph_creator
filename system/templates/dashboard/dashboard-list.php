@@ -4,7 +4,7 @@
     if (!empty($dashboards)) {
         $rightContent .= '<a href="?urlq=dashboard/builder" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Dashboard"><i class="fas fa-plus"></i></a>';
     }
-    echo Utility::renderPageHeader([
+    echo DGCHelper::renderPageHeader([
         'title' => 'Dashboards',
         'rightContent' => $rightContent
     ]);
@@ -24,7 +24,7 @@
             -->
 
             <?php if (empty($dashboards)): ?>
-            <?php echo Utility::renderEmptyState(
+            <?php echo DGCHelper::renderEmptyState(
                 'fa-th-large',
                 'No Dashboards Yet',
                 'Create your first dashboard to visualize your data',

@@ -127,7 +127,7 @@ class DashboardBuilder
      */
     public static function generateSectionId()
     {
-        return Utility::generateShortId('s');
+        return DGCHelper::generateShortId('s');
     }
 
     /**
@@ -136,7 +136,7 @@ class DashboardBuilder
      */
     public static function generateAreaId()
     {
-        return Utility::generateShortId('a');
+        return DGCHelper::generateShortId('a');
     }
 
     /**

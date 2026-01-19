@@ -1,6 +1,6 @@
 <?php
     $saveButtonClass = $filter ? 'btn-outline-warning' : 'btn-primary';
-    echo Utility::renderPageHeader([
+    echo DGCHelper::renderPageHeader([
         'title' => $filter ? 'Edit Data Filter' : 'Create Data Filter',
         'backUrl' => '?urlq=data-filter',
         'backLabel' => 'Data Filters',

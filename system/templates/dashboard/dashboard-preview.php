@@ -10,7 +10,7 @@
         $rightContent .= '<button class="btn btn-icon btn-outline-danger delete-dashboard-btn" data-dashboard-id="' . $dashboard->getId() . '" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete Dashboard"><i class="fas fa-trash"></i></button>';
     }
 
-    echo Utility::renderPageHeader([
+    echo DGCHelper::renderPageHeader([
         'title' => $dashboard->getName(),
         'backUrl' => '?urlq=dashboard',
         'backLabel' => 'Dashboards',
@@ -63,7 +63,7 @@
                                                     <?php
                                                     $icon = isset($subRow['emptyState']['icon']) ? $subRow['emptyState']['icon'] : 'fa-plus-circle';
                                                     $message = isset($subRow['emptyState']['message']) ? $subRow['emptyState']['message'] : 'Add content here';
-                                                    echo Utility::renderDashboardCellEmpty($icon, $message);
+                                                    echo DGCHelper::renderDashboardCellEmpty($icon, $message);
                                                     ?>
                                                 <?php else: ?>
                                                     <div class="area-content">
@@ -84,7 +84,7 @@
                                             <?php
                                             $icon = isset($area['emptyState']['icon']) ? $area['emptyState']['icon'] : 'fa-plus-circle';
                                             $message = isset($area['emptyState']['message']) ? $area['emptyState']['message'] : 'Add content here';
-                                            echo Utility::renderDashboardCellEmpty($icon, $message);
+                                            echo DGCHelper::renderDashboardCellEmpty($icon, $message);
                                             ?>
                                         <?php else: ?>
                                             <div class="area-content">
@@ -98,7 +98,7 @@
                     <?php
                     endforeach;
                 else:
-                    echo Utility::renderEmptyState(
+                    echo DGCHelper::renderEmptyState(
                         'fa-th-large',
                         'This Dashboard is Empty',
                         'No sections have been added to this dashboard yet.<br>Use the "Edit Dashboard" button above to add sections.'

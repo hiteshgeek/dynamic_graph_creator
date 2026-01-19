@@ -5,11 +5,20 @@
  * Handles dashboard builder actions
  */
 
+// Load dashboard module assets (once at top of file)
+Utility::addModuleCss('common');
+Utility::addModuleCss('dashboard');
+Utility::addModuleJs('common');
+Utility::addModuleJs('dashboard');
+
+$theme = Rapidkart::getInstance()->getThemeRegistry();
+$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+
 // Permission control for template ordering operations
 // Set to true to allow category reordering, template reordering, and moving templates between categories
 $allowTemplateOrdering = true;
 
-$url = Utility::parseUrl();
+// $url is already parsed in index.php
 $action = isset($url[1]) ? $url[1] : 'list';
 
 // Handle POST actions
@@ -137,14 +146,7 @@ function showList()
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('dashboard');
-
     // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('dashboard');
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-list.js');
 
     $theme->setPageTitle('Dashboards - Dynamic Graph Creator');
@@ -167,19 +169,12 @@ function showBuilder($dashboardId = 0)
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('dashboard');
-
     // Add libraries
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
 
     // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('dashboard');
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-builder.js');
 
     $dashboard = null;
@@ -209,17 +204,10 @@ function showPreview($dashboardId)
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('dashboard');
-
     // Add libraries
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
 
     // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('dashboard');
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-preview.js');
 
     $dashboard = new DashboardInstance($dashboardId);
@@ -667,17 +655,10 @@ function showTemplateList()
     global $allowTemplateOrdering;
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('dashboard');
-
     // Add libraries
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
 
     // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('dashboard');
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-list.js');
 
     $theme->setPageTitle('Dashboard Templates - Dynamic Graph Creator');
@@ -698,17 +679,10 @@ function showTemplateCreator()
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('dashboard');
-
     // Add libraries
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
 
     // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('dashboard');
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js');
 
     $theme->setPageTitle('Create Template - Dynamic Graph Creator');
@@ -742,17 +716,10 @@ function showTemplateEditor($templateId)
         return;
     }
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('dashboard');
-
     // Add libraries
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
 
     // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('dashboard');
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js');
 
     $theme->setPageTitle('Edit Template - Dynamic Graph Creator');
@@ -785,19 +752,12 @@ function showTemplateBuilder($templateId)
         return;
     }
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('dashboard');
-
     // Add libraries
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
 
     // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('dashboard');
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-builder.js');
 
     $theme->setPageTitle('Template Builder - ' . htmlspecialchars($template->getName()));
@@ -829,17 +789,10 @@ function showTemplatePreview($templateId)
         return;
     }
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('dashboard');
-
     // Add libraries
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
 
     // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('dashboard');
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-preview.js');
 
     $theme->setPageTitle('Template Preview - ' . htmlspecialchars($template->getName()));

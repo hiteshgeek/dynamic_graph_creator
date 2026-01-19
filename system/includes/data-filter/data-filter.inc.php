@@ -5,7 +5,16 @@
  * Handles all data-filter-related actions
  */
 
-$url = Utility::parseUrl();
+// Load data-filter module assets (once at top of file)
+Utility::addModuleCss('common');
+Utility::addModuleCss('data-filter');
+Utility::addModuleJs('common');
+Utility::addModuleJs('data-filter');
+
+$theme = Rapidkart::getInstance()->getThemeRegistry();
+$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+
+// $url is already parsed in index.php
 $action = isset($url[1]) ? $url[1] : 'list';
 
 // Handle POST actions
@@ -48,14 +57,7 @@ function showDataFilterList()
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('data-filter');
-
     // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('data-filter');
     $theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter-list.js');
 
     $theme->setPageTitle('Data Filters - Dynamic Graph Creator');
@@ -76,10 +78,6 @@ function showDataFilterForm($filterId = null)
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('data-filter');
-
     // Add libraries
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/codemirror.min.css', 5);
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/material.min.css', 6);
@@ -89,11 +87,6 @@ function showDataFilterForm($filterId = null)
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment/moment.min.js', 5);
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker/css/daterangepicker.css', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);
-
-    // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('data-filter');
 
     $filter = null;
 

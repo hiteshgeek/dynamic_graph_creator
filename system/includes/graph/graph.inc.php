@@ -5,7 +5,16 @@
  * Handles all graph-related actions
  */
 
-$url = Utility::parseUrl();
+// Load graph module assets (once at top of file)
+Utility::addModuleCss('common');
+Utility::addModuleCss('graph');
+Utility::addModuleJs('common');
+Utility::addModuleJs('graph');
+
+$theme = Rapidkart::getInstance()->getThemeRegistry();
+$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
+
+// $url is already parsed in index.php
 $action = isset($url[1]) ? $url[1] : 'list';
 
 // Handle POST actions
@@ -55,14 +64,7 @@ function showList()
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add page-specific CSS using helper functions
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('graph');
-
-    // Add page-specific JS using helper functions
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('graph');
+    // Add page-specific JS
     $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-list.js');
 
     $theme->setPageTitle('Graphs - Dynamic Graph Creator');
@@ -83,10 +85,6 @@ function showCreator($graphId = null)
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('graph');
-
     // Add libraries
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/codemirror.min.css', 5);
@@ -100,9 +98,6 @@ function showCreator($graphId = null)
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);
 
     // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('graph');
     $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-creator.js');
 
     $graph = null;
@@ -137,21 +132,12 @@ function showView($graphId)
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add page-specific CSS
-    Utility::addModuleCss('common');
-    Utility::addModuleCss('graph');
-
     // Add libraries
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery/jquery.min.js', 4);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment/moment.min.js', 5);
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker/css/daterangepicker.css', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);
-
-    // Add page-specific JS
-    Utility::addModuleJs('common');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('graph');
 
     $graph = new Graph($graphId);
     if (!$graph->getId()) {

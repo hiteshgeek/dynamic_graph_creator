@@ -150,7 +150,7 @@ VALUES (
     'Simple single column dashboard',
     @cat_columns,
     10,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Add content here"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -161,7 +161,7 @@ VALUES (
     'Two equal columns side by side',
     @cat_columns,
     20,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Column 1"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-pie","message":"Column 2"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -172,7 +172,7 @@ VALUES (
     'Four equal columns for KPIs',
     @cat_columns,
     30,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr 1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-dollar-sign","message":"KPI 1"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-users","message":"KPI 2"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-shopping-cart","message":"KPI 3"}},{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"KPI 4"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr 1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -183,7 +183,7 @@ VALUES (
     'Six equal columns for detailed metrics',
     @cat_columns,
     40,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr 1fr 1fr 1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Metric 1"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Metric 2"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-pie","message":"Metric 3"}},{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-area","message":"Metric 4"}},{"aid":"a5","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-dollar-sign","message":"Metric 5"}},{"aid":"a6","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-users","message":"Metric 6"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr 1fr 1fr 1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a5","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a6","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -198,7 +198,7 @@ VALUES (
     'Two stacked rows',
     @cat_rows,
     10,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Row 1"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Row 2"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -209,7 +209,7 @@ VALUES (
     'Three stacked rows',
     @cat_rows,
     20,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-heading","message":"Row 1"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Row 2"}}]},{"sid":"s3","gridTemplate":"1fr","areas":[{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Row 3"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]},{"sid":"s3","gridTemplate":"1fr","areas":[{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -220,7 +220,7 @@ VALUES (
     'Four stacked rows',
     @cat_rows,
     30,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-heading","message":"Row 1"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Row 2"}}]},{"sid":"s3","gridTemplate":"1fr","areas":[{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Row 3"}}]},{"sid":"s4","gridTemplate":"1fr","areas":[{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Row 4"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]},{"sid":"s3","gridTemplate":"1fr","areas":[{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]},{"sid":"s4","gridTemplate":"1fr","areas":[{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -235,7 +235,7 @@ VALUES (
     'Narrow left sidebar with main content area',
     @cat_mixed,
     10,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr 3fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-bars","message":"Sidebar"}},{"aid":"a2","colSpanFr":"3fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Main Content"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr 3fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a2","colSpanFr":"3fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -246,7 +246,7 @@ VALUES (
     'Main content with narrow right sidebar',
     @cat_mixed,
     20,
-    '{"sections":[{"sid":"s1","gridTemplate":"3fr 1fr","areas":[{"aid":"a1","colSpanFr":"3fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-area","message":"Main Content"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-info-circle","message":"Info Panel"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"3fr 1fr","areas":[{"aid":"a1","colSpanFr":"3fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -257,7 +257,7 @@ VALUES (
     'Classic three-column dashboard with navigation, content, and tools',
     @cat_mixed,
     30,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr 2fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-list","message":"Left Nav"}},{"aid":"a2","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Main Content"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-cog","message":"Tools"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr 2fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a2","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -272,7 +272,7 @@ VALUES (
     'Full-width header with two columns below',
     @cat_advanced,
     10,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-heading","message":"Header / Title"}}]},{"sid":"s2","gridTemplate":"1fr 1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Chart 1"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-pie","message":"Chart 2"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]},{"sid":"s2","gridTemplate":"1fr 1fr","areas":[{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -283,7 +283,7 @@ VALUES (
     'Complete dashboard with KPIs, main chart, and secondary charts',
     @cat_advanced,
     20,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr 1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-dollar-sign","message":"Revenue"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-shopping-cart","message":"Orders"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-users","message":"Customers"}},{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-percent","message":"Growth"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a5","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Main Chart"}}]},{"sid":"s3","gridTemplate":"1fr 1fr","areas":[{"aid":"a6","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Chart"}},{"aid":"a7","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Table"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr 1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a2","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a3","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a4","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]},{"sid":"s2","gridTemplate":"1fr","areas":[{"aid":"a5","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]},{"sid":"s3","gridTemplate":"1fr 1fr","areas":[{"aid":"a6","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a7","colSpanFr":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -294,7 +294,7 @@ VALUES (
     'Left column with 3 rows, right column with single large area',
     @cat_advanced,
     30,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr 2fr","areas":[{"aid":"a1","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Add chart here"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Add table here"}},{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Add chart here"}}]},{"aid":"a2","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-area","message":"Add main chart here"}}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr 2fr","areas":[{"aid":"a1","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]},{"aid":"a2","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}',
     0, 1
 );
 
@@ -305,7 +305,7 @@ VALUES (
     'Left column with single large area, right column with 3 rows',
     @cat_advanced,
     40,
-    '{"sections":[{"sid":"s1","gridTemplate":"2fr 1fr","areas":[{"aid":"a1","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-area","message":"Add main chart here"}},{"aid":"a2","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Add chart here"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Add table here"}},{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Add chart here"}}]}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"2fr 1fr","areas":[{"aid":"a1","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a2","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}]}',
     0, 1
 );
 
@@ -316,7 +316,7 @@ VALUES (
     'Two columns, each with 2 rows',
     @cat_advanced,
     50,
-    '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"Top chart"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-table","message":"Bottom table"}}]},{"aid":"a2","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-bar","message":"Top chart"}},{"rowId":"r4","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-pie","message":"Bottom chart"}}]}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"1fr 1fr","areas":[{"aid":"a1","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]},{"aid":"a2","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"rowId":"r4","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}]}',
     0, 1
 );
 
@@ -327,7 +327,7 @@ VALUES (
     'Large left area with right column split into 3 rows',
     @cat_advanced,
     60,
-    '{"sections":[{"sid":"s1","gridTemplate":"2fr 1fr","areas":[{"aid":"a1","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-area","message":"Featured Content"}},{"aid":"a2","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-dollar-sign","message":"KPI 1"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-users","message":"KPI 2"}},{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-chart-line","message":"KPI 3"}}]}]}]}',
+    '{"sections":[{"sid":"s1","gridTemplate":"2fr 1fr","areas":[{"aid":"a1","colSpanFr":"2fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"aid":"a2","colSpanFr":"1fr","hasSubRows":true,"subRows":[{"rowId":"r1","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"rowId":"r2","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}},{"rowId":"r3","height":"1fr","content":{"type":"empty"},"emptyState":{"icon":"fa-circle-plus","message":"Add content"}}]}]}]}',
     0, 1
 );
 

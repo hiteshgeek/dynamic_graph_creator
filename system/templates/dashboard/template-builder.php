@@ -17,7 +17,7 @@
         $rightContent .= '<div class="form-check form-switch text-switch text-switch-purple"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"><div class="text-switch-track"><span class="text-switch-knob"></span><span class="text-switch-label label-text">Tweak</span></div></div>';
     }
 
-    echo Utility::renderPageHeader([
+    echo DGCHelper::renderPageHeader([
         'title' => $templateName,
         'backUrl' => '?urlq=dashboard/templates',
         'backLabel' => 'Templates',

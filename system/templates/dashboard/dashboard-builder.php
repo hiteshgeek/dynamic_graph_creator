@@ -8,7 +8,7 @@ if ($dashboard && $dashboard->getId()) {
     $rightContent .= '<div class="save-indicator" style="display: none;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
 }
 
-echo Utility::renderPageHeader([
+echo DGCHelper::renderPageHeader([
     'title' => ($dashboard && $dashboard->getId()) ? $dashboard->getName() : 'Create Dashboard',
     'backUrl' => '?urlq=dashboard',
     'backLabel' => 'Dashboards',
@@ -30,7 +30,7 @@ echo Utility::renderPageHeader([
                 <?php if ($dashboard && $dashboard->getId()): ?>
                     <div class="dashboard-sections"></div>
                 <?php else: ?>
-                    <?php echo Utility::renderEmptyState(
+                    <?php echo DGCHelper::renderEmptyState(
                         'fa-th-large',
                         'Create Your Dashboard',
                         'Choose from our pre-designed templates to get started',

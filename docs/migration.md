@@ -24,7 +24,9 @@ Copy to: `system/classes/`
 
 | File | Description |
 |------|-------------|
+| `DGCHelper.php` | DGC-specific UI components (empty state, page header, UUID generation) |
 | `Graph.php` | Graph model (CRUD operations) |
+| `GraphManager.php` | Graph retrieval and management |
 | `DataFilter.php` | Data filter model (CRUD operations) |
 | `DataFilterManager.php` | Data filter management and rendering |
 | `DataFilterSet.php` | Data filter set collection |
@@ -45,6 +47,15 @@ Copy entire folders to: `system/includes/`
 | `data-filter/data-filter.inc.php`          | Data filter module routes and handlers   |
 | `dashboard/dashboard.inc.php`              | Dashboard module routes and handlers     |
 | `dashboard/template-preview-component.php` | Dashboard preview rendering helper       |
+
+**Note:** The migration tool automatically transforms asset loading calls during copy:
+
+| Original (DGC)                          | Transformed (Rapidkart)                                      |
+| --------------------------------------- | ------------------------------------------------------------ |
+| `Utility::addModuleCss('common')`       | `$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css')` |
+| `Utility::addModuleCss('graph')`        | `$theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')` |
+| `Utility::addModuleJs('common')`        | `$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js')` |
+| `Utility::addModuleJs('graph')`         | `$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')` |
 
 ---
 
@@ -155,202 +166,23 @@ Creates tables:
 
 ## 8. Code Modifications
 
-### Utility.php
+### DGCHelper.php
 
-Add these methods to existing `system/classes/Utility.php`:
+The `DGCHelper.php` class (copied in Step 1) contains DGC-specific UI components:
 
-**Note:** The functions `ajaxResponseTrue()` and `ajaxResponseFalse()` already exist in the live project.
+| Method | Description |
+|--------|-------------|
+| `renderEmptyState()` | Empty state UI component with icon, title, description, and optional button |
+| `renderDashboardCellEmpty()` | Dashboard cell empty state for preview pages |
+| `generateUUID()` | UUID v4 generation |
+| `generateShortId()` | Short unique ID generation (8 chars from UUID) |
+| `renderPageHeader()` | Page header with back button, badges, and theme toggle |
 
-#### 1. renderEmptyState()
+**Usage:** All copied template files use `DGCHelper::` directly. No Utility.php modifications needed.
 
+**Bootstrap:** Ensure `DGCHelper.php` is loaded in your bootstrap/autoloader. Add to your include sequence:
 ```php
-/**
- * Render an empty state component
- *
- * @param string $icon FontAwesome icon class (e.g., 'fa-chart-bar', 'fa-th-large')
- * @param string $title The main heading text
- * @param string $description The description text (supports HTML)
- * @param string|null $buttonText The button label (null or empty to hide button)
- * @param string|null $buttonUrl The button URL (use '#' or empty for button element, null to hide)
- * @param string $color Color theme: 'blue' (default), 'green', 'orange', 'purple'
- * @param string $buttonClass Optional additional CSS class for the button (for JS handlers)
- * @return string HTML markup for the empty state
- */
-public static function renderEmptyState($icon, $title, $description, $buttonText = null, $buttonUrl = null, $color = 'blue', $buttonClass = '')
-{
-    $colorClass = ' empty-state-' . htmlspecialchars($color);
-    $html = '<div class="empty-state' . $colorClass . '">';
-    $html .= '<div class="empty-state-content">';
-    $html .= '<div class="empty-state-icon">';
-    $html .= '<i class="fas ' . htmlspecialchars($icon) . '"></i>';
-    $html .= '</div>';
-    $html .= '<h3>' . htmlspecialchars($title) . '</h3>';
-    $html .= '<p>' . $description . '</p>';
-
-    if (!empty($buttonText)) {
-        if (empty($buttonUrl) || $buttonUrl === '#') {
-            $btnClass = 'btn btn-primary btn-sm' . ($buttonClass ? ' ' . htmlspecialchars($buttonClass) : '');
-            $html .= '<button type="button" class="' . $btnClass . '" autofocus>';
-            $html .= '<i class="fas fa-plus"></i> ' . htmlspecialchars($buttonText);
-            $html .= '</button>';
-        } else {
-            $btnClass = 'btn btn-primary btn-sm' . ($buttonClass ? ' ' . htmlspecialchars($buttonClass) : '');
-            $html .= '<a href="' . htmlspecialchars($buttonUrl) . '" class="' . $btnClass . '" autofocus>';
-            $html .= '<i class="fas fa-plus"></i> ' . htmlspecialchars($buttonText);
-            $html .= '</a>';
-        }
-    }
-
-    $html .= '</div>';
-    $html .= '</div>';
-    return $html;
-}
-```
-
-#### 2. renderDashboardCellEmpty()
-
-```php
-/**
- * Render a dashboard cell empty state
- * Used for empty areas/cells within dashboard sections (both edit and view mode)
- *
- * @param string $icon FontAwesome icon class (e.g., 'fa-chart-line', 'fa-plus-circle')
- * @param string $message The message to display below the icon
- * @return string HTML markup for the dashboard cell empty state
- */
-public static function renderDashboardCellEmpty($icon = 'fa-plus-circle', $message = 'Add content here')
-{
-    $html = '<div class="dashboard-cell-empty" tabindex="0" role="button">';
-    $html .= '<div class="cell-empty-icon">';
-    $html .= '<i class="fas ' . htmlspecialchars($icon) . '"></i>';
-    $html .= '</div>';
-    $html .= '<div class="cell-empty-message">';
-    $html .= htmlspecialchars($message);
-    $html .= '</div>';
-    $html .= '</div>';
-    return $html;
-}
-```
-
-#### 3. generateUUID()
-
-```php
-/**
- * Generate a UUID v4
- * Format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
- *
- * @return string UUID string
- */
-public static function generateUUID()
-{
-    $data = random_bytes(16);
-    $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
-    $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
-    return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
-}
-```
-
-#### 4. generateShortId()
-
-```php
-/**
- * Generate a short unique ID (8 characters from UUID)
- *
- * @param string $prefix Optional prefix for the ID
- * @return string Short unique ID with optional prefix
- */
-public static function generateShortId($prefix = '')
-{
-    $uuid = self::generateUUID();
-    $shortId = substr(str_replace('-', '', $uuid), 0, 8);
-    return $prefix ? $prefix . '-' . $shortId : $shortId;
-}
-```
-
-#### 5. renderPageHeader()
-
-```php
-/**
- * Render the page header component
- *
- * @param array $options Configuration options:
- *   - 'title' (string) Required. The page title
- *   - 'backUrl' (string|null) Optional. URL for back button
- *   - 'backLabel' (string) Optional. Back button label (default: 'Back')
- *   - 'badges' (array) Optional. Array of badge configs
- *   - 'leftContent' (string) Optional. Additional HTML for left section
- *   - 'rightContent' (string) Optional. HTML for right section
- *   - 'titleEditable' (bool) Optional. If true, title can be edited
- *   - 'titleId' (string) Optional. ID for the title element
- *   - 'titleDescription' (string) Optional. Description for info tooltip
- * @return string HTML markup for the page header
- */
-public static function renderPageHeader($options)
-{
-    $title = isset($options['title']) ? $options['title'] : '';
-    $backUrl = isset($options['backUrl']) ? $options['backUrl'] : null;
-    $backLabel = isset($options['backLabel']) ? $options['backLabel'] : 'Back';
-    $badges = isset($options['badges']) ? $options['badges'] : [];
-    $leftContent = isset($options['leftContent']) ? $options['leftContent'] : '';
-    $rightContent = isset($options['rightContent']) ? $options['rightContent'] : '';
-    $titleEditable = isset($options['titleEditable']) ? $options['titleEditable'] : false;
-    $titleId = isset($options['titleId']) ? $options['titleId'] : '';
-    $titleDescription = isset($options['titleDescription']) ? $options['titleDescription'] : '';
-
-    $html = '<div class="page-header">';
-    $html .= '<div class="page-header-left">';
-
-    if ($backUrl) {
-        $html .= '<a href="' . htmlspecialchars($backUrl) . '" class="btn btn-secondary btn-sm" data-back-to-list>';
-        $html .= '<i class="fas fa-arrow-left"></i> ' . htmlspecialchars($backLabel);
-        $html .= '</a>';
-    }
-
-    if ($titleEditable) {
-        $html .= '<div class="dashboard-name-editor">';
-        $idAttr = $titleId ? ' id="' . htmlspecialchars($titleId) . '"' : '';
-        $html .= '<h1' . $idAttr . '>' . htmlspecialchars($title) . '</h1>';
-        if ($titleDescription) {
-            $descriptionHtml = nl2br(htmlspecialchars($titleDescription));
-            $html .= '<span class="description-tooltip" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-html="true" title="' . $descriptionHtml . '"><i class="fas fa-info-circle"></i></span>';
-        }
-        $html .= '<button id="edit-dashboard-details-btn" class="btn btn-icon btn-outline-warning" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Edit Details"><i class="fas fa-pencil"></i></button>';
-        $html .= '</div>';
-    } else {
-        $html .= '<h1>' . htmlspecialchars($title) . '</h1>';
-    }
-
-    foreach ($badges as $badge) {
-        $badgeClass = isset($badge['class']) ? $badge['class'] : 'badge-secondary';
-        $html .= '<span class="badge ' . htmlspecialchars($badgeClass) . '">';
-        if (isset($badge['icon'])) {
-            $html .= '<i class="fas ' . htmlspecialchars($badge['icon']) . '"></i> ';
-        }
-        $html .= htmlspecialchars($badge['label']);
-        $html .= '</span>';
-    }
-
-    if ($leftContent) {
-        $html .= $leftContent;
-    }
-
-    $html .= '</div>';
-    $html .= '<div class="page-header-right">';
-    if ($rightContent) {
-        $html .= $rightContent;
-    }
-
-    $html .= '<div class="header-separator"></div>';
-    $html .= '<button type="button" class="btn btn-icon theme-toggle-btn">';
-    $html .= '<i class="fas"></i>';
-    $html .= '</button>';
-    $html .= '<script>(function(){var m=localStorage.getItem("dgc-theme-mode")||"light",i=document.querySelector(".theme-toggle-btn i");if(i){i.classList.add(m==="dark"?"fa-moon":m==="system"?"fa-desktop":"fa-sun");}})();</script>';
-
-    $html .= '</div>';
-    $html .= '</div>';
-
-    return $html;
-}
+require_once 'system/classes/DGCHelper.php';
 ```
 
 ---
@@ -415,101 +247,32 @@ case "dashboard":
 
 ---
 
-## 11. Update Asset Loading in Include Files
+## 11. Asset Loading (Automatic Transformation)
 
-The copied include files use helper methods `Utility::addModuleCss()` and `Utility::addModuleJs()` in each function. In Rapidkart, assets are loaded **once at the top of the file** and removed from individual functions.
+**Good news!** The migration tool **automatically transforms** asset loading calls when copying include files.
 
-### Rapidkart Pattern
+### Automatic Transformation
 
-In Rapidkart, assets are loaded at the top of the include file (after the `<?php` tag):
+When you run Step 2 ("Copy Include Files"), the migration tool transforms:
 
-```php
-<?php
-// Load assets once at the top
-$theme->addCss(SystemConfig::stylesUrl() . 'module/module.css');
-$theme->addScript(SystemConfig::scriptsUrl() . 'module/module.js');
+| Original (DGC) | Transformed (Rapidkart) |
+|----------------|-------------------------|
+| `Utility::addModuleCss('common')` | `$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css')` |
+| `Utility::addModuleCss('graph')` | `$theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')` |
+| `Utility::addModuleJs('common')` | `$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js')` |
+| `Utility::addModuleJs('graph')` | `$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')` |
 
-function showList() {
-    // No asset loading here - already loaded at top
-}
+### What Stays the Same
 
-function showForm() {
-    // No asset loading here - already loaded at top
-}
-```
-
----
-
-### File: `system/includes/graph/graph.inc.php`
-
-**Add at top of file:**
+Page-specific scripts and external library includes already use the correct Rapidkart pattern:
 
 ```php
-// Load graph module assets
-$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
-$theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css');
-$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js');
+// These are NOT transformed (already correct):
+$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-list.js');
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
 ```
 
-**Remove from functions:**
-- `showList()` - Remove 4 `Utility::addModule*` calls
-- `showCreator()` - Remove 4 `Utility::addModule*` calls
-- `showView()` - Remove 4 `Utility::addModule*` calls
-
----
-
-### File: `system/includes/data-filter/data-filter.inc.php`
-
-**Add at top of file:**
-
-```php
-// Load data-filter module assets
-$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
-$theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css');
-$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js');
-```
-
-**Remove from functions:**
-- `showList()` - Remove 4 `Utility::addModule*` calls
-- `showForm()` - Remove 4 `Utility::addModule*` calls
-
----
-
-### File: `system/includes/dashboard/dashboard.inc.php`
-
-**Add at top of file:**
-
-```php
-// Load dashboard module assets
-$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
-$theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css');
-$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js');
-```
-
-**Remove from functions:**
-- `showList()` - Remove 4 `Utility::addModule*` calls
-- `showBuilder()` - Remove 4 `Utility::addModule*` calls
-- `showPreview()` - Remove 4 `Utility::addModule*` calls
-- `showTemplateList()` - Remove 4 `Utility::addModule*` calls
-- `showTemplateEditor()` - Remove 4 `Utility::addModule*` calls
-- `showTemplateCreate()` - Remove 4 `Utility::addModule*` calls
-- `showTemplateBuilder()` - Remove 4 `Utility::addModule*` calls
-- `showTemplatePreview()` - Remove 4 `Utility::addModule*` calls
-
----
-
-### Summary
-
-| File | Add at Top | Remove from Functions |
-|------|------------|----------------------|
-| `graph.inc.php` | 4 lines | 3 functions (12 lines) |
-| `data-filter.inc.php` | 4 lines | 2 functions (8 lines) |
-| `dashboard.inc.php` | 4 lines | 8 functions (32 lines) |
-
-**Note:** The `Theme.js` file and page-specific scripts (e.g., `graph-list.js`) already use the Rapidkart pattern with `$theme->addScript()` and don't need to be changed.
+**No manual changes needed for asset loading!**
 
 ---
 
@@ -519,7 +282,7 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js');
 - [ ] Run `sql/install.sql` on your database
 
 ### Phase 2: Copy Files
-- [ ] Copy `system/classes/*.php` (8 files)
+- [ ] Copy `system/classes/*.php` (10 files including DGCHelper.php)
 - [ ] Copy `system/includes/graph/` folder
 - [ ] Copy `system/includes/data-filter/` folder
 - [ ] Copy `system/includes/dashboard/` folder
@@ -533,11 +296,7 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js');
 - [ ] Copy new libraries to `themes/libraries/`
 
 ### Phase 3: Code Changes
-- [ ] Add `renderEmptyState()` method to `Utility.php`
-- [ ] Add `renderDashboardCellEmpty()` method to `Utility.php`
-- [ ] Add `generateUUID()` method to `Utility.php`
-- [ ] Add `generateShortId()` method to `Utility.php`
-- [ ] Add `renderPageHeader()` method to `Utility.php`
+- [ ] Add `require_once 'system/classes/DGCHelper.php'` to bootstrap
 - [ ] Add route cases to `system.inc.php` (graph, data-filter, dashboard)
 - [ ] Update include files to replace `addModuleCss/addModuleJs` with rapidkart style
 - [ ] Add menu items to navigation

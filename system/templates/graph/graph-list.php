@@ -5,7 +5,7 @@ $rightContent .= '<a href="?urlq=data-filter" class="btn btn-icon btn-outline-se
 if (!empty($graphs)) {
     $rightContent .= '<a href="?urlq=graph/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Graph"><i class="fas fa-plus"></i></a>';
 }
-echo Utility::renderPageHeader([
+echo DGCHelper::renderPageHeader([
     'title' => 'Graphs',
     'rightContent' => $rightContent
 ]);
@@ -14,7 +14,7 @@ echo Utility::renderPageHeader([
 <div class="container">
     <div id="graph-list" class="graph-list-page">
         <?php if (empty($graphs)): ?>
-        <?php echo Utility::renderEmptyState(
+        <?php echo DGCHelper::renderEmptyState(
             'fa-chart-bar',
             'No Graphs Yet',
             'Create your first graph to visualize your data',

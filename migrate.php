@@ -17,12 +17,52 @@ $targetExists = is_dir($targetDir);
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 $step = isset($_GET['step']) ? intval($_GET['step']) : 0;
 
+// Handle file count AJAX request (target directory only)
+if ($action === 'count_files') {
+    header('Content-Type: application/json');
+    $path = isset($_GET['path']) ? $_GET['path'] : '';
+    $recursive = isset($_GET['recursive']) ? $_GET['recursive'] === '1' : false;
+    $countType = isset($_GET['count_type']) ? $_GET['count_type'] : 'files'; // 'files' or 'folders'
+
+    $fullPath = $targetDir . '/' . $path;
+
+    if (!is_dir($fullPath)) {
+        echo json_encode(['count' => 0, 'exists' => false, 'path' => $path, 'type' => $countType]);
+        exit;
+    }
+
+    // Count files or folders
+    $count = 0;
+    if ($countType === 'folders') {
+        // Count only immediate subdirectories
+        $items = glob($fullPath . '/*', GLOB_ONLYDIR);
+        $count = count($items);
+    } else if ($recursive) {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($fullPath, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::LEAVES_ONLY
+        );
+        foreach ($iterator as $file) {
+            if ($file->isFile()) $count++;
+        }
+    } else {
+        $files = glob($fullPath . '/*');
+        foreach ($files as $f) {
+            if (is_file($f)) $count++;
+        }
+    }
+
+    echo json_encode(['count' => $count, 'exists' => true, 'path' => $path, 'type' => $countType]);
+    exit;
+}
+
 // Define migration steps
 $steps = [
     1 => [
         'title' => 'Copy PHP Classes',
-        'description' => 'Copies 9 PHP class files to handle graphs, data filters, and dashboards.',
+        'description' => 'Copies 10 PHP class files to handle graphs, data filters, dashboards, and UI components.',
         'files' => [
+            'system/classes/DGCHelper.php',
             'system/classes/Graph.php',
             'system/classes/GraphManager.php',
             'system/classes/DataFilter.php',
@@ -36,14 +76,14 @@ $steps = [
         'type' => 'copy'
     ],
     2 => [
-        'title' => 'Copy Include Files',
-        'description' => 'Copies 3 include folders that define routes and page handlers.',
+        'title' => 'Copy Include Files (with Asset Transformation)',
+        'description' => 'Copies 3 include folders and transforms Utility::addModule*() calls to Rapidkart-style $theme->addCss()/addScript() calls.',
         'folders' => [
             'system/includes/graph',
             'system/includes/data-filter',
             'system/includes/dashboard',
         ],
-        'type' => 'copy_folders'
+        'type' => 'copy_includes_transformed'
     ],
     3 => [
         'title' => 'Copy Graph Templates',
@@ -126,10 +166,13 @@ $steps = [
     ],
     10 => [
         'title' => 'Code Modifications Required',
-        'description' => 'Manual changes needed in existing files (Utility.php and system.inc.php).',
+        'description' => 'Manual changes needed: add routes to system.inc.php and update asset loading in include files.',
         'type' => 'code_modifications'
     ],
 ];
+
+// Check if this is an AJAX request
+$isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 
 // Process action
 $result = null;
@@ -173,12 +216,48 @@ if ($action === 'execute' && $step > 0 && isset($steps[$step])) {
                 }
             }
             $result = $results;
+        } elseif ($stepData['type'] === 'copy_includes_transformed') {
+            // Copy include folders with asset loading transformation
+            $results = [];
+            foreach ($stepData['folders'] as $folder) {
+                $srcFolder = $sourceDir . '/' . $folder;
+                $dstFolder = $targetDir . '/' . $folder;
+                if (is_dir($srcFolder)) {
+                    $results[$folder] = copyIncludesTransformed($srcFolder, $dstFolder);
+                }
+            }
+            $result = $results;
         } elseif ($stepData['type'] === 'copy_dist_renamed') {
             // Copy to module-specific folders (system/styles/module/ and system/scripts/module/)
             $result = copyDistRenamed($sourceDir . '/' . $stepData['folder'], $targetDir);
         }
+
+        // If AJAX request, return JSON response
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'step' => $step,
+                'title' => $stepData['title'],
+                'result' => $result,
+                'timestamp' => time()
+            ]);
+            exit;
+        }
     } catch (Exception $e) {
         $error = $e->getMessage();
+
+        // If AJAX request, return JSON error
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'step' => $step,
+                'error' => $error,
+                'timestamp' => time()
+            ]);
+            exit;
+        }
     }
 }
 
@@ -230,6 +309,70 @@ function copyFolder($src, $dst) {
             $results['dirs'] += $subResult['dirs'];
         } else {
             copy($srcPath, $dstPath);
+            $results['files']++;
+        }
+    }
+    closedir($dir);
+
+    return $results;
+}
+
+/**
+ * Copy include files with asset loading transformation
+ * Replaces Utility::addModule*() calls with Rapidkart-style $theme->addCss()/addScript() calls
+ */
+function copyIncludesTransformed($src, $dst) {
+    $results = ['files' => 0, 'dirs' => 0, 'transformed' => 0];
+
+    if (!is_dir($src)) {
+        return ['error' => 'Source folder not found: ' . $src];
+    }
+
+    if (!is_dir($dst)) {
+        mkdir($dst, 0755, true);
+        $results['dirs']++;
+    }
+
+    $dir = opendir($src);
+    while (($file = readdir($dir)) !== false) {
+        if ($file === '.' || $file === '..') continue;
+
+        $srcPath = $src . '/' . $file;
+        $dstPath = $dst . '/' . $file;
+
+        if (is_dir($srcPath)) {
+            $subResult = copyIncludesTransformed($srcPath, $dstPath);
+            $results['files'] += $subResult['files'];
+            $results['dirs'] += $subResult['dirs'];
+            $results['transformed'] += $subResult['transformed'];
+        } else {
+            // Only transform .inc.php files
+            if (strpos($file, '.inc.php') !== false) {
+                $content = file_get_contents($srcPath);
+                $originalContent = $content;
+
+                // Transform Utility::addModuleCss() calls
+                $content = preg_replace(
+                    "/Utility::addModuleCss\('([^']+)'\);/",
+                    "\$theme->addCss(SystemConfig::stylesUrl() . '$1/$1.css');",
+                    $content
+                );
+
+                // Transform Utility::addModuleJs() calls
+                $content = preg_replace(
+                    "/Utility::addModuleJs\('([^']+)'\);/",
+                    "\$theme->addScript(SystemConfig::scriptsUrl() . '$1/$1.js');",
+                    $content
+                );
+
+                file_put_contents($dstPath, $content);
+
+                if ($content !== $originalContent) {
+                    $results['transformed']++;
+                }
+            } else {
+                copy($srcPath, $dstPath);
+            }
             $results['files']++;
         }
     }
@@ -369,15 +512,17 @@ function copyDistRenamed($src, $targetDir) {
             border-left: 4px solid #ffc107;
         }
         .step-number {
-            width: 40px;
+            min-width: 40px;
             height: 40px;
-            border-radius: 50%;
+            padding: 0 12px;
+            border-radius: 20px;
             background: #667eea;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            flex-shrink: 0;
         }
         .file-list {
             background: #f8f9fa;
@@ -463,6 +608,84 @@ function copyDistRenamed($src, $targetDir) {
             border-radius: 8px;
             border: none;
         }
+        /* Last execution time badges */
+        .last-exec-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .last-exec-badge i {
+            font-size: 0.65rem;
+        }
+        .exec-recent {
+            background: #d4edda;
+            color: #155724;
+        }
+        .exec-today {
+            background: #cce5ff;
+            color: #004085;
+        }
+        .exec-old {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+        /* Toast notifications (exact match from compiled common.css) */
+        .dgc-toast-container {
+            position: fixed;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .dgc-toast {
+            display: flex !important;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 24px;
+            padding-left: 16px;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            min-width: 300px;
+            animation: dgcSlideIn 0.3s ease;
+            color: #212529;
+        }
+        .dgc-toast .dgc-toast-indicator {
+            width: 4px;
+            align-self: stretch;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .dgc-toast.success .dgc-toast-indicator { background-color: #4caf50; }
+        .dgc-toast.success i { color: #4caf50; }
+        .dgc-toast.error .dgc-toast-indicator { background-color: #f44336; }
+        .dgc-toast.error i { color: #f44336; }
+        .dgc-toast.warning .dgc-toast-indicator { background-color: #ff9800; }
+        .dgc-toast.warning i { color: #ff9800; }
+        .dgc-toast.info .dgc-toast-indicator { background-color: #2196f3; }
+        .dgc-toast.info i { color: #2196f3; }
+        .dgc-toast i { font-size: 20px; }
+        .dgc-toast .dgc-toast-message { flex: 1; color: #212529; }
+        .dgc-toast .dgc-toast-close {
+            background: transparent;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .dgc-toast .dgc-toast-close:hover { color: #212529; }
+        @keyframes dgcSlideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -530,12 +753,15 @@ function copyDistRenamed($src, $targetDir) {
         <h4 class="mb-3">Migration Steps</h4>
 
         <?php foreach ($steps as $num => $stepData): ?>
-        <div class="card step-card">
+        <div class="card step-card" data-step-card="<?php echo $num; ?>">
             <div class="card-body">
                 <div class="d-flex align-items-start gap-3">
                     <div class="step-number"><?php echo $num; ?></div>
                     <div class="flex-grow-1">
-                        <h5 class="mb-1"><?php echo htmlspecialchars($stepData['title']); ?></h5>
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <h5 class="mb-0"><?php echo htmlspecialchars($stepData['title']); ?></h5>
+                            <span class="last-exec-badge" data-step-exec="<?php echo $num; ?>" style="display:none;"></span>
+                        </div>
                         <p class="text-muted mb-3"><?php echo htmlspecialchars($stepData['description']); ?></p>
 
                         <?php if ($stepData['type'] === 'copy' && isset($stepData['files'])): ?>
@@ -559,13 +785,48 @@ function copyDistRenamed($src, $targetDir) {
                             </div>
                             <?php endforeach; ?>
                         </div>
-                        <?php $confirmMsg = 'Copy ' . count($stepData['files']) . ' files to target directory?';
-                              if ($existingCount > 0) $confirmMsg .= '\n\nWARNING: ' . $existingCount . ' file(s) already exist and will be OVERWRITTEN!'; ?>
-                        <a href="?action=execute&step=<?php echo $num; ?>"
-                           class="btn btn-primary btn-sm"
-                           onclick="return confirm('<?php echo $confirmMsg; ?>')">
+                        <?php
+                              $confirmTitle = 'Copy ' . count($stepData['files']) . ' Files';
+                              $confirmMsg = 'Copy ' . count($stepData['files']) . ' files to target directory?';
+                              $hasWarning = $existingCount > 0;
+                              $warningMsg = $existingCount . ' file(s) already exist and will be OVERWRITTEN!';
+                              // Get unique directory for counting
+                              $countDir = dirname($stepData['files'][0]); ?>
+                        <button type="button" class="btn btn-primary btn-sm confirm-action-btn"
+                                data-action-url="?action=execute&step=<?php echo $num; ?>"
+                                data-step="<?php echo $num; ?>"
+                                data-title="<?php echo htmlspecialchars($confirmTitle); ?>"
+                                data-message="<?php echo htmlspecialchars($confirmMsg); ?>"
+                                data-has-warning="<?php echo $hasWarning ? '1' : '0'; ?>"
+                                data-warning="<?php echo htmlspecialchars($warningMsg); ?>">
                             <i class="fas fa-copy me-1"></i> Copy Files
-                        </a>
+                        </button>
+                        <?php
+                        // Get unique directories from file list
+                        $uniqueDirs = array();
+                        foreach ($stepData['files'] as $file) {
+                            $dir = dirname($file);
+                            if (!in_array($dir, $uniqueDirs)) {
+                                $uniqueDirs[] = $dir;
+                            }
+                        }
+                        // If multiple directories, show a button for each
+                        if (count($uniqueDirs) > 1): ?>
+                        <?php foreach ($uniqueDirs as $dir): ?>
+                        <button class="btn btn-outline-info btn-sm count-target-btn ms-1"
+                                data-path="<?php echo htmlspecialchars($dir); ?>"
+                                data-recursive="0"
+                                title="Count files in <?php echo htmlspecialchars($dir); ?>">
+                            <i class="fas fa-calculator me-1"></i> <?php echo htmlspecialchars(basename($dir)); ?>
+                        </button>
+                        <?php endforeach; ?>
+                        <?php else: ?>
+                        <button class="btn btn-outline-info btn-sm count-target-btn"
+                                data-path="<?php echo htmlspecialchars($countDir); ?>"
+                                data-recursive="0">
+                            <i class="fas fa-calculator me-1"></i> Count Target
+                        </button>
+                        <?php endif; ?>
                         <?php endif; ?>
 
                         <?php if ($stepData['type'] === 'copy_folder'): ?>
@@ -590,13 +851,20 @@ function copyDistRenamed($src, $targetDir) {
                             }
                             ?>
                         </div>
-                        <?php $confirmMsg = 'Copy entire ' . $stepData['folder'] . '/ folder to target directory?';
-                              if ($status === 'exists') $confirmMsg .= '\n\nWARNING: Folder already exists - files will be OVERWRITTEN!'; ?>
-                        <a href="?action=execute&step=<?php echo $num; ?>"
-                           class="btn btn-primary btn-sm"
-                           onclick="return confirm('<?php echo $confirmMsg; ?>')">
+                        <?php
+                              $confirmTitle = 'Copy Folder';
+                              $confirmMsg = 'Copy entire ' . $stepData['folder'] . '/ folder to target directory?';
+                              $hasWarning = $status === 'exists';
+                              $warningMsg = 'Folder already exists - files will be OVERWRITTEN!'; ?>
+                        <button type="button" class="btn btn-primary btn-sm confirm-action-btn"
+                                data-action-url="?action=execute&step=<?php echo $num; ?>"
+                                data-step="<?php echo $num; ?>"
+                                data-title="<?php echo htmlspecialchars($confirmTitle); ?>"
+                                data-message="<?php echo htmlspecialchars($confirmMsg); ?>"
+                                data-has-warning="<?php echo $hasWarning ? '1' : '0'; ?>"
+                                data-warning="<?php echo htmlspecialchars($warningMsg); ?>">
                             <i class="fas fa-folder me-1"></i> Copy Folder
-                        </a>
+                        </button>
                         <?php endif; ?>
 
                         <?php if ($stepData['type'] === 'copy_dist_renamed'): ?>
@@ -657,13 +925,32 @@ function copyDistRenamed($src, $targetDir) {
                             <i class="fas fa-info-circle me-1"></i>
                             Files are copied to module-specific folders matching Rapidkart's asset structure.
                         </p>
-                        <?php $confirmMsg = 'Copy and rename dist files?';
-                              if ($status === 'exists') $confirmMsg .= '\n\nWARNING: Folder already exists - files will be OVERWRITTEN!'; ?>
-                        <a href="?action=execute&step=<?php echo $num; ?>"
-                           class="btn btn-primary btn-sm"
-                           onclick="return confirm('<?php echo $confirmMsg; ?>')">
+                        <?php
+                              $confirmTitle = 'Copy & Rename Assets';
+                              $confirmMsg = 'Copy and rename dist files to module-specific folders?';
+                              $hasWarning = $status === 'exists';
+                              $warningMsg = 'Some folders may already exist - files will be OVERWRITTEN!'; ?>
+                        <button type="button" class="btn btn-primary btn-sm confirm-action-btn"
+                                data-action-url="?action=execute&step=<?php echo $num; ?>"
+                                data-step="<?php echo $num; ?>"
+                                data-title="<?php echo htmlspecialchars($confirmTitle); ?>"
+                                data-message="<?php echo htmlspecialchars($confirmMsg); ?>"
+                                data-has-warning="<?php echo $hasWarning ? '1' : '0'; ?>"
+                                data-warning="<?php echo htmlspecialchars($warningMsg); ?>">
                             <i class="fas fa-folder me-1"></i> Copy &amp; Rename
-                        </a>
+                        </button>
+                        <button class="btn btn-outline-info btn-sm count-target-btn ms-1"
+                                data-path="system/styles"
+                                data-recursive="1"
+                                title="Count CSS files in system/styles">
+                            <i class="fas fa-calculator me-1"></i> Styles
+                        </button>
+                        <button class="btn btn-outline-info btn-sm count-target-btn ms-1"
+                                data-path="system/scripts"
+                                data-recursive="1"
+                                title="Count JS files in system/scripts">
+                            <i class="fas fa-calculator me-1"></i> Scripts
+                        </button>
                         <?php endif; ?>
 
                         <?php if ($stepData['type'] === 'copy_folders'): ?>
@@ -681,13 +968,28 @@ function copyDistRenamed($src, $targetDir) {
                             </div>
                             <?php endforeach; ?>
                         </div>
-                        <?php $confirmMsg = 'Copy folders to target directory?';
-                              if ($folderExistCount > 0) $confirmMsg .= '\n\nWARNING: ' . $folderExistCount . ' folder(s) already exist and will be OVERWRITTEN!'; ?>
-                        <a href="?action=execute&step=<?php echo $num; ?>"
-                           class="btn btn-primary btn-sm"
-                           onclick="return confirm('<?php echo $confirmMsg; ?>')">
+                        <?php
+                              $confirmTitle = 'Copy Folders';
+                              $confirmMsg = 'Copy folders to target directory?';
+                              $hasWarning = $folderExistCount > 0;
+                              $warningMsg = $folderExistCount . ' folder(s) already exist and will be OVERWRITTEN!'; ?>
+                        <button type="button" class="btn btn-primary btn-sm confirm-action-btn"
+                                data-action-url="?action=execute&step=<?php echo $num; ?>"
+                                data-step="<?php echo $num; ?>"
+                                data-title="<?php echo htmlspecialchars($confirmTitle); ?>"
+                                data-message="<?php echo htmlspecialchars($confirmMsg); ?>"
+                                data-has-warning="<?php echo $hasWarning ? '1' : '0'; ?>"
+                                data-warning="<?php echo htmlspecialchars($warningMsg); ?>">
                             <i class="fas fa-folder me-1"></i> Copy Folders
-                        </a>
+                        </button>
+                        <?php foreach ($stepData['folders'] as $folder): ?>
+                        <button class="btn btn-outline-info btn-sm count-target-btn ms-1"
+                                data-path="<?php echo htmlspecialchars($folder); ?>"
+                                data-recursive="1"
+                                title="Count files in <?php echo htmlspecialchars(basename($folder)); ?>">
+                            <i class="fas fa-calculator me-1"></i> <?php echo htmlspecialchars(basename($folder)); ?>
+                        </button>
+                        <?php endforeach; ?>
                         <?php endif; ?>
 
                         <?php if ($stepData['type'] === 'copy_libraries'): ?>
@@ -705,13 +1007,20 @@ function copyDistRenamed($src, $targetDir) {
                             </div>
                             <?php endforeach; ?>
                         </div>
-                        <?php $confirmMsg = 'Copy library folders to target directory?';
-                              if ($libExistCount > 0) $confirmMsg .= '\n\nWARNING: ' . $libExistCount . ' folder(s) already exist and will be OVERWRITTEN!'; ?>
-                        <a href="?action=execute&step=<?php echo $num; ?>"
-                           class="btn btn-primary btn-sm"
-                           onclick="return confirm('<?php echo $confirmMsg; ?>')">
+                        <?php
+                              $confirmTitle = 'Copy Libraries';
+                              $confirmMsg = 'Copy library folders to target directory?';
+                              $hasWarning = $libExistCount > 0;
+                              $warningMsg = $libExistCount . ' folder(s) already exist and will be OVERWRITTEN!'; ?>
+                        <button type="button" class="btn btn-primary btn-sm confirm-action-btn"
+                                data-action-url="?action=execute&step=<?php echo $num; ?>"
+                                data-step="<?php echo $num; ?>"
+                                data-title="<?php echo htmlspecialchars($confirmTitle); ?>"
+                                data-message="<?php echo htmlspecialchars($confirmMsg); ?>"
+                                data-has-warning="<?php echo $hasWarning ? '1' : '0'; ?>"
+                                data-warning="<?php echo htmlspecialchars($warningMsg); ?>">
                             <i class="fas fa-folder me-1"></i> Copy Libraries
-                        </a>
+                        </button>
                         <?php endif; ?>
 
                         <?php if ($stepData['type'] === 'copy_libraries_versioned'): ?>
@@ -725,7 +1034,7 @@ function copyDistRenamed($src, $targetDir) {
                                 <span class="status-badge status-<?php echo $status; ?>">
                                     <?php echo $status; ?>
                                 </span>
-                                <?php echo htmlspecialchars(basename($lib['source'])); ?>/ &rarr; <strong><?php echo htmlspecialchars(basename($lib['target'])); ?>/</strong>
+                                <?php echo htmlspecialchars(basename($lib['source'])); ?>/ &rarr; <strong><?php echo htmlspecialchars($lib['target']); ?>/</strong>
                             </div>
                             <?php endforeach; ?>
                         </div>
@@ -733,13 +1042,26 @@ function copyDistRenamed($src, $targetDir) {
                             <i class="fas fa-info-circle me-1"></i>
                             Libraries will be copied to versioned folders (e.g., bootstrap5/, jquery3/) to avoid conflicts with existing libraries.
                         </p>
-                        <?php $confirmMsg = 'Copy library folders to versioned directories?';
-                              if ($libExistCount > 0) $confirmMsg .= '\n\nWARNING: ' . $libExistCount . ' folder(s) already exist and will be OVERWRITTEN!'; ?>
-                        <a href="?action=execute&step=<?php echo $num; ?>"
-                           class="btn btn-primary btn-sm"
-                           onclick="return confirm('<?php echo $confirmMsg; ?>')">
+                        <?php
+                              $confirmTitle = 'Copy Versioned Libraries';
+                              $confirmMsg = 'Copy library folders to versioned directories?';
+                              $hasWarning = $libExistCount > 0;
+                              $warningMsg = $libExistCount . ' folder(s) already exist and will be OVERWRITTEN!'; ?>
+                        <button type="button" class="btn btn-primary btn-sm confirm-action-btn"
+                                data-action-url="?action=execute&step=<?php echo $num; ?>"
+                                data-step="<?php echo $num; ?>"
+                                data-title="<?php echo htmlspecialchars($confirmTitle); ?>"
+                                data-message="<?php echo htmlspecialchars($confirmMsg); ?>"
+                                data-has-warning="<?php echo $hasWarning ? '1' : '0'; ?>"
+                                data-warning="<?php echo htmlspecialchars($warningMsg); ?>">
                             <i class="fas fa-folder me-1"></i> Copy Libraries
-                        </a>
+                        </button>
+                        <button class="btn btn-outline-info btn-sm count-target-btn ms-1"
+                                data-path="themes/libraries"
+                                data-count-type="folders"
+                                title="Count folders in themes/libraries">
+                            <i class="fas fa-calculator me-1"></i> Count Libraries
+                        </button>
                         <?php endif; ?>
 
                         <?php if ($stepData['type'] === 'sql_preview'): ?>
@@ -766,81 +1088,7 @@ function copyDistRenamed($src, $targetDir) {
 
                         <?php if ($stepData['type'] === 'code_modifications'): ?>
                         <div class="mb-3">
-                            <h6 class="text-primary"><i class="fas fa-file-code me-1"></i> 1. Add to Utility.php</h6>
-                            <p class="small text-muted mb-2">
-                                Add these 5 methods to <code>system/classes/Utility.php</code>:
-                            </p>
-                            <?php
-                            // Read Utility.php and extract the 5 methods
-                            $utilityFile = $sourceDir . '/system/classes/Utility.php';
-                            $utilityMethods = [];
-                            if (file_exists($utilityFile)) {
-                                $utilityContent = file_get_contents($utilityFile);
-                                $methodsToExtract = [
-                                    'renderEmptyState' => 'Empty state UI component',
-                                    'renderDashboardCellEmpty' => 'Dashboard cell empty state',
-                                    'generateUUID' => 'UUID v4 generation',
-                                    'generateShortId' => 'Short unique ID generation',
-                                    'renderPageHeader' => 'Page header with theme toggle'
-                                ];
-                                foreach ($methodsToExtract as $methodName => $description) {
-                                    // Find the method signature position
-                                    $methodSignature = 'public static function ' . $methodName . '(';
-                                    $methodPos = strpos($utilityContent, $methodSignature);
-                                    if ($methodPos !== false) {
-                                        // Find the docblock before the method (search backwards)
-                                        $docBlockEnd = strrpos(substr($utilityContent, 0, $methodPos), '*/');
-                                        if ($docBlockEnd !== false) {
-                                            $docBlockStart = strrpos(substr($utilityContent, 0, $docBlockEnd), '/**');
-                                            if ($docBlockStart !== false) {
-                                                $startPos = $docBlockStart;
-                                            } else {
-                                                $startPos = $methodPos;
-                                            }
-                                        } else {
-                                            $startPos = $methodPos;
-                                        }
-
-                                        // Find the matching closing brace for the method
-                                        $braceCount = 0;
-                                        $inMethod = false;
-                                        $endPos = $methodPos;
-                                        for ($i = $methodPos; $i < strlen($utilityContent); $i++) {
-                                            if ($utilityContent[$i] === '{') {
-                                                $braceCount++;
-                                                $inMethod = true;
-                                            } elseif ($utilityContent[$i] === '}') {
-                                                $braceCount--;
-                                                if ($inMethod && $braceCount === 0) {
-                                                    $endPos = $i + 1;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        $methodCode = trim(substr($utilityContent, $startPos, $endPos - $startPos));
-                                        $utilityMethods[$methodName] = [
-                                            'code' => $methodCode,
-                                            'description' => $description
-                                        ];
-                                    }
-                                }
-                            }
-                            $methodNum = 1;
-                            foreach ($utilityMethods as $methodName => $methodData):
-                            ?>
-                            <div class="utility-method mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <strong class="small"><span class="file-number"><?php echo $methodNum++; ?>.</span> <?php echo $methodName; ?>()</strong>
-                                    <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="method-<?php echo $methodName; ?>">
-                                        <i class="fas fa-copy me-1"></i> Copy
-                                    </button>
-                                </div>
-                                <div class="code-block" id="method-<?php echo $methodName; ?>"><?php echo htmlspecialchars($methodData['code']); ?></div>
-                                <small class="text-muted"><?php echo htmlspecialchars($methodData['description']); ?></small>
-                            </div>
-                            <?php endforeach; ?>
-
-                            <h6 class="text-primary"><i class="fas fa-route me-1"></i> 2. Add Routes to system.inc.php</h6>
+                            <h6 class="text-primary"><i class="fas fa-route me-1"></i> 1. Add Routes to system.inc.php</h6>
                             <p class="small text-muted mb-2">
                                 Add these cases in the <code>switch ($url[0])</code> section of <code>system/includes/system.inc.php</code>:
                             </p>
@@ -861,64 +1109,269 @@ case "dashboard":
     include_once 'dashboard/dashboard.inc.php';
     break;</div>
 
-                            <h6 class="text-primary mt-3"><i class="fas fa-link me-1"></i> 3. Update Asset Loading in Include Files</h6>
+                            <h6 class="text-primary mt-3"><i class="fas fa-check-circle me-1"></i> 2. Asset Loading (Automatic)</h6>
+                            <div class="alert alert-success mb-3">
+                                <i class="fas fa-magic me-1"></i>
+                                <strong>Step 2 handles this automatically!</strong> The include files are copied with <code>Utility::addModule*()</code> calls transformed to Rapidkart-style <code>$theme->addCss()</code> / <code>$theme->addScript()</code> calls.
+                            </div>
                             <p class="small text-muted mb-2">
-                                In Rapidkart, assets are loaded <strong>once at the top of the file</strong>. Add the code below at the top of each include file and remove all <code>Utility::addModule*</code> calls from functions.
+                                <strong>Transformation applied:</strong>
                             </p>
-
-                            <!-- graph.inc.php -->
-                            <div class="asset-loading-file mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <strong class="small"><i class="fas fa-file-code me-1"></i> graph.inc.php</strong>
-                                    <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="graph-assets">
-                                        <i class="fas fa-copy me-1"></i> Copy
-                                    </button>
-                                </div>
-                                <div class="code-block" id="graph-assets">// Load graph module assets
-$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
-$theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css');
-$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js');</div>
-                                <small class="text-muted">Remove from: <code>showList()</code>, <code>showCreator()</code>, <code>showView()</code></small>
-                            </div>
-
-                            <!-- data-filter.inc.php -->
-                            <div class="asset-loading-file mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <strong class="small"><i class="fas fa-file-code me-1"></i> data-filter.inc.php</strong>
-                                    <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="data-filter-assets">
-                                        <i class="fas fa-copy me-1"></i> Copy
-                                    </button>
-                                </div>
-                                <div class="code-block" id="data-filter-assets">// Load data-filter module assets
-$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
-$theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css');
-$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js');</div>
-                                <small class="text-muted">Remove from: <code>showList()</code>, <code>showForm()</code></small>
-                            </div>
-
-                            <!-- dashboard.inc.php -->
-                            <div class="asset-loading-file mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1">
-                                    <strong class="small"><i class="fas fa-file-code me-1"></i> dashboard.inc.php</strong>
-                                    <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="dashboard-assets">
-                                        <i class="fas fa-copy me-1"></i> Copy
-                                    </button>
-                                </div>
-                                <div class="code-block" id="dashboard-assets">// Load dashboard module assets
-$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
-$theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css');
-$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
-$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js');</div>
-                                <small class="text-muted">Remove from: <code>showList()</code>, <code>showBuilder()</code>, <code>showPreview()</code>, <code>showTemplateList()</code>, <code>showTemplateEditor()</code>, <code>showTemplateCreate()</code>, <code>showTemplateBuilder()</code>, <code>showTemplatePreview()</code></small>
-                            </div>
+                            <div class="code-block mb-3">Utility::addModuleCss('common')  →  $theme->addCss(SystemConfig::stylesUrl() . 'common/common.css')
+Utility::addModuleCss('graph')   →  $theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')
+Utility::addModuleJs('common')   →  $theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js')
+Utility::addModuleJs('graph')    →  $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')</div>
+                            <p class="small text-muted mb-3">
+                                Page-specific scripts and external libraries remain unchanged - they already use the correct Rapidkart pattern.
+                            </p>
 
                             <a href="docs/migration.md" target="_blank" class="btn btn-outline-secondary btn-sm">
                                 <i class="fas fa-book me-1"></i> View Full Documentation
                             </a>
                         </div>
                         <?php endif; ?>
+<!-- END OF CODE_MODIFICATIONS CONTENT - OLD ASSET LOADING BLOCKS REMOVED -->
+<?php if (false): // Old detailed asset loading blocks - no longer needed since transformation is automatic ?>
+                            <!-- graph.inc.php -->
+                            <div class="asset-loading-file mb-4">
+                                <h6 class="text-info mb-2"><i class="fas fa-file-code me-1"></i> graph.inc.php</h6>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">Top of File</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="graph-top">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="graph-top">// Load graph module assets (once at top of file)
+$theme = Rapidkart::getInstance()->getThemeRegistry();
+$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
+$theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css');
+$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showList()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="graph-showList">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="graph-showList">// Add page-specific JS
+$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-list.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showCreator()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="graph-showCreator">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="graph-showCreator">// Add libraries
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/codemirror.min.css', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/material.min.css', 6);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/codemirror.min.js', 6);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/sql.min.js', 7);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery/jquery.min.js', 4);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment/moment.min.js', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker/css/daterangepicker.css', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);
+
+// Add page-specific JS
+$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-creator.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showView()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="graph-showView">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="graph-showView">// Add libraries
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery/jquery.min.js', 4);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment/moment.min.js', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker/css/daterangepicker.css', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);</div>
+                                </div>
+                            </div>
+
+                            <!-- data-filter.inc.php -->
+                            <div class="asset-loading-file mb-4">
+                                <h6 class="text-info mb-2"><i class="fas fa-file-code me-1"></i> data-filter.inc.php</h6>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">Top of File</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="datafilter-top">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="datafilter-top">// Load data-filter module assets (once at top of file)
+$theme = Rapidkart::getInstance()->getThemeRegistry();
+$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
+$theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css');
+$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showDataFilterList()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="datafilter-showList">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="datafilter-showList">// Add page-specific JS
+$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter-list.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showDataFilterForm()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="datafilter-showForm">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="datafilter-showForm">// Add libraries
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/codemirror.min.css', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/material.min.css', 6);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/codemirror.min.js', 6);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror/js/sql.min.js', 7);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery/jquery.min.js', 4);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment/moment.min.js', 5);
+$theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker/css/daterangepicker.css', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker/js/daterangepicker.min.js', 8);</div>
+                                </div>
+                            </div>
+
+                            <!-- dashboard.inc.php -->
+                            <div class="asset-loading-file mb-4">
+                                <h6 class="text-info mb-2"><i class="fas fa-file-code me-1"></i> dashboard.inc.php</h6>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">Top of File</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="dashboard-top">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="dashboard-top">// Load dashboard module assets (once at top of file)
+$theme = Rapidkart::getInstance()->getThemeRegistry();
+$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css');
+$theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css');
+$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js');
+$theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showList()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="dashboard-showList">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="dashboard-showList">// Add page-specific JS
+$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-list.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showBuilder()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="dashboard-showBuilder">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="dashboard-showBuilder">// Add libraries
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+
+// Add page-specific JS
+$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-builder.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showPreview()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="dashboard-showPreview">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="dashboard-showPreview">// Add libraries
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+
+// Add page-specific JS
+$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-preview.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showTemplateList()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="dashboard-showTemplateList">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="dashboard-showTemplateList">// Add libraries
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
+
+// Add page-specific JS
+$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-list.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showTemplateCreator() / showTemplateEditor()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="dashboard-showTemplateEditor">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="dashboard-showTemplateEditor">// Add libraries
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+
+// Add page-specific JS
+$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showTemplateBuilder()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="dashboard-showTemplateBuilder">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="dashboard-showTemplateBuilder">// Add libraries
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs/Sortable.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize/autosize.min.js', 5);
+
+// Add page-specific JS
+$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-builder.js');</div>
+                                </div>
+
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small">showTemplatePreview()</strong>
+                                        <button class="btn btn-outline-secondary btn-sm copy-btn" data-target="dashboard-showTemplatePreview">
+                                            <i class="fas fa-copy me-1"></i> Copy
+                                        </button>
+                                    </div>
+                                    <div class="code-block" id="dashboard-showTemplatePreview">// Add libraries
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts/echarts.min.js', 5);
+
+// Add page-specific JS
+$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-preview.js');</div>
+                                </div>
+                            </div>
+<?php endif; // End of old asset loading blocks ?>
                     </div>
                 </div>
             </div>
@@ -939,8 +1392,208 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js');</div>
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="confirm-message mb-0">Are you sure?</p>
+                    <div class="alert alert-warning mt-3 mb-0 confirm-warning" style="display:none;">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        <span class="warning-text"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary confirm-execute">
+                        <i class="fas fa-play me-1"></i> Execute
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+    // Toast utility (matches common.js pattern)
+    const Toast = {
+        container: null,
+        init() {
+            this.container = document.createElement('div');
+            this.container.className = 'dgc-toast-container';
+            document.body.appendChild(this.container);
+        },
+        show(message, type = 'success', duration = 3000) {
+            if (!this.container) this.init();
+            const toast = document.createElement('div');
+            toast.className = `dgc-toast ${type}`;
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+            toast.innerHTML = `<span class="dgc-toast-indicator"></span><i class="fas ${icons[type] || icons.success}"></i><span class="dgc-toast-message">${message}</span><button class="dgc-toast-close"><i class="fas fa-times"></i></button>`;
+            toast.querySelector('.dgc-toast-close').addEventListener('click', () => toast.remove());
+            this.container.appendChild(toast);
+            if (duration > 0) setTimeout(() => toast.remove(), duration);
+        },
+        success(message) { this.show(message, 'success'); },
+        error(message) { this.show(message, 'error', 5000); },
+        warning(message) { this.show(message, 'warning', 4000); },
+        info(message) { this.show(message, 'info'); }
+    };
+
+    // LocalStorage key for execution times
+    const STORAGE_KEY = 'migrate_execution_times';
+
+    // Get execution times from localStorage
+    function getExecutionTimes() {
+        const data = localStorage.getItem(STORAGE_KEY);
+        return data ? JSON.parse(data) : {};
+    }
+
+    // Save execution time for a step
+    function saveExecutionTime(step, timestamp) {
+        const times = getExecutionTimes();
+        times[step] = timestamp;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(times));
+    }
+
+    // Format relative time
+    function formatRelativeTime(timestamp) {
+        const now = Math.floor(Date.now() / 1000);
+        const diff = now - timestamp;
+
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+        if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+
+        const date = new Date(timestamp * 1000);
+        return date.toLocaleDateString();
+    }
+
+    // Get badge class based on execution time
+    function getExecBadgeClass(timestamp) {
+        const now = Math.floor(Date.now() / 1000);
+        const diff = now - timestamp;
+
+        // Within last 10 minutes = green (recent)
+        if (diff < 600) return 'exec-recent';
+
+        // Same day = blue (today)
+        const execDate = new Date(timestamp * 1000).toDateString();
+        const todayDate = new Date().toDateString();
+        if (execDate === todayDate) return 'exec-today';
+
+        // Otherwise = gray (old)
+        return 'exec-old';
+    }
+
+    // Update all execution badges on page load
+    function updateAllExecBadges() {
+        const times = getExecutionTimes();
+        document.querySelectorAll('[data-step-exec]').forEach(badge => {
+            const step = badge.getAttribute('data-step-exec');
+            if (times[step]) {
+                const badgeClass = getExecBadgeClass(times[step]);
+                const relativeTime = formatRelativeTime(times[step]);
+                badge.className = 'last-exec-badge ' + badgeClass;
+                badge.innerHTML = '<i class="fas fa-check-circle"></i> ' + relativeTime;
+                badge.style.display = 'inline-flex';
+            }
+        });
+    }
+
+    // Update single execution badge
+    function updateExecBadge(step, timestamp) {
+        const badge = document.querySelector('[data-step-exec="' + step + '"]');
+        if (badge) {
+            const badgeClass = getExecBadgeClass(timestamp);
+            const relativeTime = formatRelativeTime(timestamp);
+            badge.className = 'last-exec-badge ' + badgeClass;
+            badge.innerHTML = '<i class="fas fa-check-circle"></i> ' + relativeTime;
+            badge.style.display = 'inline-flex';
+        }
+    }
+
+    // Confirmation Modal functionality
+    const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    let pendingActionUrl = null;
+    let pendingStep = null;
+
+    document.querySelectorAll('.confirm-action-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const title = this.getAttribute('data-title');
+            const message = this.getAttribute('data-message');
+            const hasWarning = this.getAttribute('data-has-warning') === '1';
+            const warning = this.getAttribute('data-warning');
+
+            pendingActionUrl = this.getAttribute('data-action-url');
+            pendingStep = this.getAttribute('data-step');
+
+            // Update modal content
+            document.querySelector('#confirmModal .modal-title').textContent = title;
+            document.querySelector('#confirmModal .confirm-message').textContent = message;
+
+            const warningEl = document.querySelector('#confirmModal .confirm-warning');
+            if (hasWarning) {
+                document.querySelector('#confirmModal .warning-text').textContent = warning;
+                warningEl.style.display = 'block';
+            } else {
+                warningEl.style.display = 'none';
+            }
+
+            confirmModal.show();
+        });
+    });
+
+    // Execute action via AJAX
+    document.querySelector('#confirmModal .confirm-execute').addEventListener('click', function() {
+        if (!pendingActionUrl) return;
+
+        const btn = this;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Executing...';
+        btn.disabled = true;
+
+        fetch(pendingActionUrl, {
+            method: 'GET',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            confirmModal.hide();
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+
+            if (data.success) {
+                // Save execution time
+                saveExecutionTime(data.step, data.timestamp);
+                updateExecBadge(data.step, data.timestamp);
+
+                // Show success toast
+                let resultMsg = 'Step ' + data.step + ' completed: ' + data.title;
+                if (data.result) {
+                    if (data.result.files !== undefined) {
+                        resultMsg += ' (' + data.result.files + ' files)';
+                    } else if (data.result.copied) {
+                        resultMsg += ' (' + Object.keys(data.result.copied).length + ' files)';
+                    }
+                }
+                Toast.success(resultMsg);
+            } else {
+                Toast.error('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            confirmModal.hide();
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+            Toast.error('Request failed: ' + error.message);
+        });
+    });
+
     // Copy button functionality
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -962,6 +1615,59 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js');</div>
             }
         });
     });
+
+    // Count target files button functionality
+    document.querySelectorAll('.count-target-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const path = this.getAttribute('data-path');
+            const recursive = this.getAttribute('data-recursive') || '0';
+            const countType = this.getAttribute('data-count-type') || 'files';
+            const originalHtml = this.innerHTML;
+
+            // Show loading state
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Counting...';
+            this.disabled = true;
+
+            fetch('?action=count_files&path=' + encodeURIComponent(path) + '&recursive=' + recursive + '&count_type=' + countType)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        const icon = data.type === 'folders' ? 'fa-folder' : 'fa-file';
+                        const label = data.type === 'folders' ? 'folders' : 'files';
+                        this.innerHTML = '<i class="fas ' + icon + ' me-1"></i> ' + data.count + ' ' + label;
+                        this.classList.remove('btn-outline-info');
+                        this.classList.add('btn-info');
+                    } else {
+                        this.innerHTML = '<i class="fas fa-folder-open me-1"></i> Not found';
+                        this.classList.remove('btn-outline-info');
+                        this.classList.add('btn-warning');
+                    }
+                    this.disabled = false;
+
+                    // Reset after 5 seconds
+                    setTimeout(() => {
+                        this.innerHTML = originalHtml;
+                        this.classList.remove('btn-info', 'btn-warning');
+                        this.classList.add('btn-outline-info');
+                    }, 5000);
+                })
+                .catch(error => {
+                    this.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i> Error';
+                    this.classList.remove('btn-outline-info');
+                    this.classList.add('btn-danger');
+                    this.disabled = false;
+
+                    setTimeout(() => {
+                        this.innerHTML = originalHtml;
+                        this.classList.remove('btn-danger');
+                        this.classList.add('btn-outline-info');
+                    }, 3000);
+                });
+        });
+    });
+
+    // Initialize execution badges on page load
+    updateAllExecBadges();
     </script>
 </body>
 </html>

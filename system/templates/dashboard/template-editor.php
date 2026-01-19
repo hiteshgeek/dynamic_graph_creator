@@ -1,7 +1,7 @@
 <?php
     $rightContent = '<button type="submit" form="template-editor-form" class="btn btn-sm btn-outline-primary" id="submit-btn" data-save-btn>';
     $rightContent .= '<i class="fas fa-save"></i> ' . ($template ? 'Save' : 'Create Template') . '</button>';
-    echo Utility::renderPageHeader([
+    echo DGCHelper::renderPageHeader([
         'title' => $pageTitle,
         'backUrl' => '?urlq=dashboard/templates',
         'backLabel' => 'Templates',

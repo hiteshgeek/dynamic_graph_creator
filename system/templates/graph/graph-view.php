@@ -1,5 +1,5 @@
 <?php
-    echo Utility::renderPageHeader([
+    echo DGCHelper::renderPageHeader([
         'title' => $graph->getName(),
         'backUrl' => '?urlq=graph',
         'backLabel' => 'Graphs',

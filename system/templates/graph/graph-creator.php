@@ -5,7 +5,7 @@ $rightContent .= '<button type="button" class="btn ' . $saveButtonClass . ' btn-
 if ($graph) {
     $rightContent .= '<a href="?urlq=graph/view/' . $graph->getId() . '" class="btn btn-icon btn-outline-primary btn-view-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Mode"><i class="fas fa-eye"></i></a>';
 }
-echo Utility::renderPageHeader([
+echo DGCHelper::renderPageHeader([
     'title' => $graph ? 'Edit Graph' : 'Create Graph',
     'backUrl' => '?urlq=graph',
     'backLabel' => 'Graphs',

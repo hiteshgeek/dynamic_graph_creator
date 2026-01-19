@@ -17,7 +17,7 @@ window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'f
         $rightContent .= '<a href="?urlq=dashboard/template/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Template"><i class="fas fa-plus"></i></a>';
     }
 
-    echo Utility::renderPageHeader([
+    echo DGCHelper::renderPageHeader([
         'title' => 'Dashboard Templates',
         'leftContent' => $leftContent,
         'rightContent' => $rightContent
@@ -27,7 +27,7 @@ window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'f
     <div class="container-fluid">
         <div class="template-list-page">
             <?php if (empty($templates)): ?>
-            <?php echo Utility::renderEmptyState(
+            <?php echo DGCHelper::renderEmptyState(
                 'fa-clone',
                 'No Templates Yet',
                 'Create your first template to get started',

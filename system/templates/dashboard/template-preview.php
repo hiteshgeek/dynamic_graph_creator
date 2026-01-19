@@ -13,7 +13,7 @@
         $rightContent .= '<button class="btn btn-icon btn-outline-danger delete-template-btn" data-template-id="' . $template->getId() . '" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete Template"><i class="fas fa-trash"></i></button>';
     }
 
-    echo Utility::renderPageHeader([
+    echo DGCHelper::renderPageHeader([
         'title' => $templateName,
         'backUrl' => '?urlq=dashboard/templates',
         'backLabel' => 'Templates',
@@ -63,7 +63,7 @@
                                             <?php
                                             $icon = isset($subRow['emptyState']['icon']) ? $subRow['emptyState']['icon'] : 'fa-plus-circle';
                                             $message = isset($subRow['emptyState']['message']) ? $subRow['emptyState']['message'] : 'Empty cell';
-                                            echo Utility::renderDashboardCellEmpty($icon, $message);
+                                            echo DGCHelper::renderDashboardCellEmpty($icon, $message);
                                             ?>
                                         </div>
                                     <?php endforeach; ?>
@@ -78,7 +78,7 @@
                                     <?php
                                     $icon = isset($area['emptyState']['icon']) ? $area['emptyState']['icon'] : 'fa-plus-circle';
                                     $message = isset($area['emptyState']['message']) ? $area['emptyState']['message'] : 'Empty cell';
-                                    echo Utility::renderDashboardCellEmpty($icon, $message);
+                                    echo DGCHelper::renderDashboardCellEmpty($icon, $message);
                                     ?>
                                 </div>
                             <?php endif; ?>
@@ -87,7 +87,7 @@
                 <?php
                 endforeach;
             else:
-                echo Utility::renderEmptyState(
+                echo DGCHelper::renderEmptyState(
                     'fa-th-large',
                     'This Template is Empty',
                     'No sections have been added to this template yet.<br>Use the "Design Mode" button above to add sections.'

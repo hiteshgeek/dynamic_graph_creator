@@ -4,7 +4,7 @@
     if (!empty($filters)) {
         $rightContent .= '<a href="?urlq=data-filter/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Data Filter"><i class="fas fa-plus"></i></a>';
     }
-    echo Utility::renderPageHeader([
+    echo DGCHelper::renderPageHeader([
         'title' => 'Data Filters',
         'rightContent' => $rightContent
     ]);
@@ -13,7 +13,7 @@
     <div class="container">
         <div id="filter-list" class="filter-list-page">
             <?php if (empty($filters)): ?>
-            <?php echo Utility::renderEmptyState(
+            <?php echo DGCHelper::renderEmptyState(
                 'fa-filter',
                 'No Data Filters Yet',
                 'Create reusable filters for your graphs and dashboards',
