@@ -249,47 +249,61 @@ async function watch() {
   }, 100);
 
   // Watch SCSS files with chokidar
-  const scssWatcher = chokidar.watch(path.join(srcDir, "styles/src/**/*.scss"), {
+  const scssPath = path.join(srcDir, "styles/src");
+  const scssWatcher = chokidar.watch(scssPath, {
     ignoreInitial: true,
-    awaitWriteFinish: {
-      stabilityThreshold: 100,
-      pollInterval: 50,
-    },
+    usePolling: true,
+    interval: 300,
+    ignored: /(^|[\/\\])\../,
   });
 
   scssWatcher
     .on("change", (filePath) => {
-      console.log(`\nSCSS changed: ${path.basename(filePath)}`);
-      rebuildCss();
+      if (filePath.endsWith(".scss")) {
+        console.log(`\nSCSS changed: ${path.basename(filePath)}`);
+        rebuildCss();
+      }
     })
     .on("add", (filePath) => {
-      console.log(`\nSCSS added: ${path.basename(filePath)}`);
-      rebuildCss();
+      if (filePath.endsWith(".scss")) {
+        console.log(`\nSCSS added: ${path.basename(filePath)}`);
+        rebuildCss();
+      }
     })
     .on("error", (error) => {
       console.error("SCSS watcher error:", error.message);
+    })
+    .on("ready", () => {
+      console.log("SCSS watcher ready");
     });
 
   // Watch JS files with chokidar
-  const jsWatcher = chokidar.watch(path.join(srcDir, "scripts/src/**/*.js"), {
+  const jsPath = path.join(srcDir, "scripts/src");
+  const jsWatcher = chokidar.watch(jsPath, {
     ignoreInitial: true,
-    awaitWriteFinish: {
-      stabilityThreshold: 100,
-      pollInterval: 50,
-    },
+    usePolling: true,
+    interval: 300,
+    ignored: /(^|[\/\\])\../,
   });
 
   jsWatcher
     .on("change", (filePath) => {
-      console.log(`\nJS changed: ${path.basename(filePath)}`);
-      rebuildJs();
+      if (filePath.endsWith(".js")) {
+        console.log(`\nJS changed: ${path.basename(filePath)}`);
+        rebuildJs();
+      }
     })
     .on("add", (filePath) => {
-      console.log(`\nJS added: ${path.basename(filePath)}`);
-      rebuildJs();
+      if (filePath.endsWith(".js")) {
+        console.log(`\nJS added: ${path.basename(filePath)}`);
+        rebuildJs();
+      }
     })
     .on("error", (error) => {
       console.error("JS watcher error:", error.message);
+    })
+    .on("ready", () => {
+      console.log("JS watcher ready");
     });
 
   console.log("Watching for changes... (Press Ctrl+C to stop)\n");
