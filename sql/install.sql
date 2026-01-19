@@ -125,9 +125,9 @@ CREATE TABLE dashboard_instance (
 
 INSERT INTO dashboard_template_category (slug, name, description, icon, color, display_order, is_system, dtcsid) VALUES
 ('columns', 'Columns', 'Simple column-based dashboards with equal or varied widths', 'fa-columns', '#007bff', 10, 1, 1),
-('mixed', 'Mixed', 'Mixed dashboards with sidebars and unequal column ratios', 'fa-table-columns', '#6610f2', 20, 1, 1),
-('advanced', 'Advanced', 'Complex multi-section dashboards with nested areas', 'fa-th', '#6f42c1', 30, 1, 1),
-('rows', 'Rows', 'Row-based dashboards with stacked sections', 'fa-bars', '#d63384', 40, 1, 1);
+('rows', 'Rows', 'Row-based dashboards with stacked sections', 'fa-bars', '#d63384', 20, 1, 1),
+('mixed', 'Mixed', 'Mixed dashboards with sidebars and unequal column ratios', 'fa-table-columns', '#6610f2', 30, 1, 1),
+('advanced', 'Advanced', 'Complex multi-section dashboards with nested areas', 'fa-th', '#6f42c1', 40, 1, 1);
 
 -- ============================================================================
 -- SYSTEM DATA - Dashboard Templates
@@ -341,11 +341,11 @@ VALUES (
 --   - dashboard_template (16 system templates)
 --   - dashboard_instance (user dashboards)
 --
--- Templates by category:
---   Columns: Single Column, Two Columns, Four Columns, Six Columns
---   Rows: Two Rows, Three Rows, Four Rows
---   Mixed: Left Sidebar, Right Sidebar, Holy Grail
---   Advanced: Header + Two Columns, Dashboard, Left Multi-Row + Right Single,
---             Right Multi-Row + Left Single, Two Multi-Row Columns,
---             Focal Point with Multi-Row
+-- Categories (in display order):
+--   1. Columns: Single Column, Two Columns, Four Columns, Six Columns
+--   2. Rows: Two Rows, Three Rows, Four Rows
+--   3. Mixed: Left Sidebar, Right Sidebar, Holy Grail
+--   4. Advanced: Header + Two Columns, Dashboard, Left Multi-Row + Right Single,
+--                Right Multi-Row + Left Single, Two Multi-Row Columns,
+--                Focal Point with Multi-Row
 -- ============================================================================
