@@ -361,6 +361,7 @@ class Filter implements DatabaseObject
         $res = $db->query($sql, array('::fid' => $this->fid));
 
         if (!$res || $db->numRows($res) < 1) {
+            $this->fid = null;
             return false;
         }
 

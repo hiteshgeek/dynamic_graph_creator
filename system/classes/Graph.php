@@ -120,7 +120,10 @@ class Graph implements DatabaseObject
         $sql = "SELECT * FROM " . SystemTables::DB_TBL_GRAPH . " WHERE gid = '::gid' AND gsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::gid' => $this->gid));
 
-        if (!$res || $db->numRows($res) < 1) return false;
+        if (!$res || $db->numRows($res) < 1) {
+            $this->gid = null;
+            return false;
+        }
 
         return $this->parse($db->fetchObject($res));
     }

@@ -172,7 +172,10 @@ class DashboardInstance implements DatabaseObject
         $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . " WHERE diid = '::diid' AND disid != 3 LIMIT 1";
         $res = $db->query($sql, array('::diid' => $this->diid));
 
-        if (!$res || $db->numRows($res) < 1) return false;
+        if (!$res || $db->numRows($res) < 1) {
+            $this->diid = null;
+            return false;
+        }
 
         return $this->parse($db->fetchObject($res));
     }

@@ -148,7 +148,10 @@ class DashboardTemplate implements DatabaseObject
         $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_TEMPLATE . " WHERE dtid = '::dtid' AND dtsid != 3 LIMIT 1";
         $res = $db->query($sql, array('::dtid' => $this->dtid));
 
-        if (!$res || $db->numRows($res) < 1) return false;
+        if (!$res || $db->numRows($res) < 1) {
+            $this->dtid = null;
+            return false;
+        }
 
         return $this->parse($db->fetchObject($res));
     }

@@ -170,6 +170,7 @@ class DashboardTemplateCategory implements DatabaseObject
             return true;
         }
 
+        $this->dtcid = null;
         return false;
     }
 

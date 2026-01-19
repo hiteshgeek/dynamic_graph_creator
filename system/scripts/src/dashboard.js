@@ -786,7 +786,7 @@ class DashboardBuilder {
                         </div>
                         <h3>No Sections Yet</h3>
                         <p>Start building your dashboard by adding a section or choosing a template</p>
-                        <button class="btn btn-primary btn-sm add-first-section-btn">
+                        <button class="btn btn-primary btn-sm add-first-section-btn" autofocus>
                             <i class="fas fa-plus"></i> Add Section
                         </button>
                     </div>
