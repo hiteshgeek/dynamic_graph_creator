@@ -6,39 +6,7 @@
 @use "loader";
 @use "code-editor";
 
-// Product Sans Font - Self-hosted
-// Path is relative to compiled CSS location (dist/ folder)
-@font-face {
-  font-family: 'Product Sans';
-  src: url('../themes/libraries/fonts/product-sans/Product-Sans-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Product Sans';
-  src: url('../themes/libraries/fonts/product-sans/Product-Sans-Italic.ttf') format('truetype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Product Sans';
-  src: url('../themes/libraries/fonts/product-sans/Product-Sans-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Product Sans';
-  src: url('../themes/libraries/fonts/product-sans/Product-Sans-Bold-Italic.ttf') format('truetype');
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
+// Poppins font is loaded via Google Fonts in html.tpl.php
 
 .navbar.navbar-inverse.navbar-fixed-top,
 #sidebar {

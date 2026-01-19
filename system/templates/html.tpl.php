@@ -19,8 +19,8 @@
     })();
     </script>
 
-    <!-- Google Sans Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Product+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Outfit Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Core Libraries -->
     <link href="<?php echo SiteConfig::themeLibrariessUrl(); ?>bootstrap5/css/bootstrap.min.css" rel="stylesheet">
