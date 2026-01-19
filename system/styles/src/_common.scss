@@ -263,6 +263,10 @@ body {
   animation: dgcSlideIn 0.3s ease;
   color: var(--dgc-text-primary);
 
+  &.exiting {
+    animation: dgcSlideOut 0.3s ease forwards;
+  }
+
   .dgc-toast-indicator {
     width: 4px;
     align-self: stretch;
@@ -340,6 +344,17 @@ body {
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+@keyframes dgcSlideOut {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-20px);
+    opacity: 0;
   }
 }
 

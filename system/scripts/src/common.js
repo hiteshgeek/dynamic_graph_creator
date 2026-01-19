@@ -17,15 +17,20 @@ window.Toast = {
         this.container.className = 'dgc-toast-container';
         document.body.appendChild(this.container);
     },
+    dismiss(toast) {
+        // Add exit animation class, then remove after animation completes
+        toast.classList.add('exiting');
+        setTimeout(() => toast.remove(), 300);
+    },
     show(message, type = 'success', duration = 3000) {
         if (!this.container) this.init();
         const toast = document.createElement('div');
         toast.className = `dgc-toast ${type}`;
         const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
         toast.innerHTML = `<span class="dgc-toast-indicator"></span><i class="fas ${icons[type] || icons.success}"></i><span class="dgc-toast-message">${message}</span><button class="dgc-toast-close"><i class="fas fa-times"></i></button>`;
-        toast.querySelector('.dgc-toast-close').addEventListener('click', () => toast.remove());
+        toast.querySelector('.dgc-toast-close').addEventListener('click', () => this.dismiss(toast));
         this.container.appendChild(toast);
-        if (duration > 0) setTimeout(() => toast.remove(), duration);
+        if (duration > 0) setTimeout(() => this.dismiss(toast), duration);
     },
     success(message) { this.show(message, 'success'); },
     error(message) { this.show(message, 'error', 5000); },

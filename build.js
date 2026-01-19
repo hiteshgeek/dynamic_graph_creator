@@ -115,6 +115,10 @@ async function compileSass(scssFile, name) {
           if (selector.startsWith(".loading-overlay")) {
             return selector;
           }
+          // Don't prefix spinner - used in loading-overlay outside .dgc-app
+          if (selector === ".spinner") {
+            return selector;
+          }
           // Don't prefix .dgc-app itself - it's the wrapper class
           if (selector.startsWith(".dgc-app")) {
             return selector;
