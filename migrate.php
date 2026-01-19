@@ -1129,17 +1129,7 @@ function copyDistRenamed($src, $targetDir) {
                                 <strong>Auto-transform:</strong> <code>Utility::addModuleCss/Js()</code> &rarr; <code>$theme->addCss/Script()</code>
                             </p>
                             <div class="transform-details small mb-2" style="border-left: 2px solid #6c757d; padding-left: 10px; background: #f8f9fa; padding: 8px 10px; border-radius: 4px;">
-                                <div class="text-muted mb-1"><strong>Common module (all files):</strong></div>
-                                <div class="transform-row text-muted">
-                                    <code class="text-danger">Utility::addModuleCss('common')</code>
-                                    <i class="fas fa-arrow-right mx-1"></i>
-                                    <code class="text-success">$theme->addCss(SystemConfig::stylesUrl() . 'common/common.css')</code>
-                                </div>
-                                <div class="transform-row text-muted">
-                                    <code class="text-danger">Utility::addModuleJs('common')</code>
-                                    <i class="fas fa-arrow-right mx-1"></i>
-                                    <code class="text-success">$theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js')</code>
-                                </div>
+                                <div class="text-muted mb-1"><strong>Note:</strong> Common assets are loaded in Theme.php. Only module-specific transforms shown above.</div>
                             </div>
                         </div>
 
@@ -1382,12 +1372,17 @@ case "dashboard":
                                 <strong>Step 2 handles this automatically!</strong> The include files are copied with <code>Utility::addModule*()</code> calls transformed to Rapidkart-style <code>$theme->addCss()</code> / <code>$theme->addScript()</code> calls.
                             </div>
                             <p class="small text-muted mb-2">
-                                <strong>Transformation applied:</strong>
+                                <strong>Transformation applied (module-specific only):</strong>
                             </p>
-                            <div class="code-block mb-3">Utility::addModuleCss('common')  →  $theme->addCss(SystemConfig::stylesUrl() . 'common/common.css')
-Utility::addModuleCss('graph')   →  $theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')
-Utility::addModuleJs('common')   →  $theme->addScript(SystemConfig::scriptsUrl() . 'common/common.js')
-Utility::addModuleJs('graph')    →  $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')</div>
+                            <div class="code-block mb-3">Utility::addModuleCss('graph')       →  $theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')
+Utility::addModuleJs('graph')        →  $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')
+Utility::addModuleCss('data-filter') →  $theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css')
+Utility::addModuleJs('data-filter')  →  $theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js')
+Utility::addModuleCss('dashboard')   →  $theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css')
+Utility::addModuleJs('dashboard')    →  $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js')</div>
+                            <p class="small text-muted mb-2">
+                                <strong>Note:</strong> Common module assets are loaded in Theme.php for DGC pages.
+                            </p>
                             <p class="small text-muted mb-3">
                                 Page-specific scripts and external libraries remain unchanged - they already use the correct Rapidkart pattern.
                             </p>

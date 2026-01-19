@@ -1,4 +1,4 @@
-<div class="dgc-app">
+
 <?php
     echo DGCHelper::renderPageHeader([
         'title' => $graph->getName(),
@@ -184,4 +184,3 @@
             </div>
         </main>
     </div>
-</div>

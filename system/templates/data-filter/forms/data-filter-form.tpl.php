@@ -1,4 +1,4 @@
-<div class="dgc-app">
+
 <?php
     $saveButtonClass = $filter ? 'btn-outline-warning' : 'btn-primary';
     echo DGCHelper::renderPageHeader([
@@ -235,4 +235,3 @@
         </main>
     </div>
 
-</div>

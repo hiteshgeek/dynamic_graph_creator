@@ -1,4 +1,4 @@
-<div class="dgc-app">
+
 <?php
     $badges = [];
     if ($dashboard->getIsSystem()) {
@@ -110,4 +110,3 @@
         </div>
     </div>
 
-</div>

@@ -35,6 +35,12 @@ require_once __DIR__ . '/system/classes/DashboardBuilder.php';
 $url = Utility::parseUrl();
 $page = isset($url[0]) ? $url[0] : 'graph';
 
+// Load common assets for all DGC pages
+$theme = Rapidkart::getInstance()->getThemeRegistry();
+Utility::addModuleCss('common');
+Utility::addModuleJs('common');
+$theme->addScript(SiteConfig::themeLibrariessUrl() . 'bootstrap5/js/bootstrap.bundle.min.js', 5);
+
 // Route to controller
 switch ($page) {
     case 'data-filter':

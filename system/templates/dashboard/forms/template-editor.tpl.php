@@ -1,4 +1,4 @@
-<div class="dgc-app">
+
 <?php
     $rightContent = '<button type="submit" form="template-editor-form" class="btn btn-sm btn-outline-primary" id="submit-btn" data-save-btn>';
     $rightContent .= '<i class="fas fa-save"></i> ' . ($template ? 'Save' : 'Create Template') . '</button>';
@@ -81,4 +81,3 @@
         </div>
     </div>
 
-</div>

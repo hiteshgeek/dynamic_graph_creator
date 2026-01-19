@@ -31,7 +31,7 @@
     <link href="<?php echo $css; ?>" rel="stylesheet">
     <?php endforeach; ?>
 </head>
-<body>
+<body class="dgc-app">
     <?php echo $this->getContent(); ?>
 
     <!-- Core Libraries JS -->

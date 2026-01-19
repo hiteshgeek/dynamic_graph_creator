@@ -5,16 +5,9 @@
  * Handles dashboard builder actions
  */
 
-// Load dashboard module assets
-Utility::addModuleCss('common');
+// Load dashboard module assets (common assets loaded in index.php)
 Utility::addModuleCss('dashboard');
-Utility::addModuleJs('common');
 Utility::addModuleJs('dashboard');
-
-$theme = Rapidkart::getInstance()->getThemeRegistry();
-
-// Bootstrap 5 JS is required for modals and tooltips
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'bootstrap5/js/bootstrap.bundle.min.js', 5);
 
 // Permission control for template ordering operations
 // Set to true to allow category reordering, template reordering, and moving templates between categories

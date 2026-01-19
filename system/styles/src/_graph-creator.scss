@@ -5,7 +5,7 @@
 // Top spacing handled by body > .container-full rule in _common.scss
 .container-full {
   max-width: 100%;
-  padding: 0 $spacing-lg $spacing-lg;
+  padding: $spacing-lg;
 }
 
 .graph-creator {
@@ -1954,7 +1954,9 @@
   right: $spacing-lg;
   background: var(--dgc-bg-card);
   border-radius: $border-radius-lg;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.15);
   z-index: 100;
   display: none; // Instant hide
   opacity: 0;
@@ -2116,7 +2118,7 @@
   // Resizing state - show loading overlay
   &.resizing .mini-chart-content {
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: 0;
@@ -2130,7 +2132,7 @@
     }
 
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 50%;
       left: 50%;
@@ -2173,7 +2175,9 @@
   background: var(--dgc-bg-card);
   border: 1px solid var(--dgc-border-color);
   border-radius: $border-radius-lg;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 100;
   cursor: pointer;
   display: none; // Instant hide
@@ -2184,7 +2188,9 @@
   &:hover {
     background: var(--dgc-bg-elevated);
     color: var(--dgc-primary);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.2),
+      0 4px 16px rgba(0, 0, 0, 0.15);
   }
 
   &.visible {

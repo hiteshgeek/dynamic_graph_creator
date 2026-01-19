@@ -1,4 +1,4 @@
-<div class="dgc-app">
+
 <?php
 require_once __DIR__ . '/../../../includes/dashboard/template-preview-component.php';
 ?>
@@ -158,4 +158,3 @@ window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'f
         </div>
     </div>
 
-</div>

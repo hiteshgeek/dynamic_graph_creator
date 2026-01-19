@@ -1,4 +1,4 @@
-<div class="dgc-app">
+
 <?php
 $rightContent = '';
 if ($dashboard && $dashboard->getId()) {

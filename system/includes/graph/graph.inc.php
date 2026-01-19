@@ -5,16 +5,9 @@
  * Handles all graph-related actions
  */
 
-// Load graph module assets
-Utility::addModuleCss('common');
+// Load graph module assets (common assets loaded in index.php)
 Utility::addModuleCss('graph');
-Utility::addModuleJs('common');
 Utility::addModuleJs('graph');
-
-$theme = Rapidkart::getInstance()->getThemeRegistry();
-
-// Bootstrap 5 JS is required for modals and tooltips
-$theme->addScript(SiteConfig::themeLibrariessUrl() . 'bootstrap5/js/bootstrap.bundle.min.js', 5);
 
 // $url is already parsed in index.php
 $action = isset($url[1]) ? $url[1] : 'list';
