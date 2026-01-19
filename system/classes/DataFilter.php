@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Filter model - Independent/Reusable filter definition
+ * DataFilter model - Independent/Reusable filter definition
  * Filters define how to get data (static options or SQL query)
  * and can be linked to multiple graphs
  *
  * @author Dynamic Graph Creator
  */
-class Filter implements DatabaseObject
+class DataFilter implements DatabaseObject
 {
-    private $fid;
+    private $dfid;
     private $filter_key;
     private $filter_label;
     private $filter_type;
@@ -19,19 +19,19 @@ class Filter implements DatabaseObject
     private $filter_config;
     private $default_value;
     private $is_required;
-    private $fsid;
+    private $dfsid;
     private $created_ts;
     private $updated_ts;
 
     /**
      * Constructor
      *
-     * @param int $id Filter ID to load
+     * @param int $id DataFilter ID to load
      */
     public function __construct($id = null)
     {
         if ($id !== null) {
-            $this->fid = intval($id);
+            $this->dfid = intval($id);
             $this->load();
         }
     }
@@ -45,8 +45,8 @@ class Filter implements DatabaseObject
     public static function isExistent($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT fid FROM " . SystemTables::DB_TBL_FILTER . " WHERE fid = '::fid' AND fsid != 3 LIMIT 1";
-        $res = $db->query($sql, array('::fid' => intval($id)));
+        $sql = "SELECT dfid FROM " . SystemTables::DB_TBL_DATA_FILTER . " WHERE dfid = '::dfid' AND dfsid != 3 LIMIT 1";
+        $res = $db->query($sql, array('::dfid' => intval($id)));
         return $db->numRows($res) > 0;
     }
 
@@ -58,7 +58,7 @@ class Filter implements DatabaseObject
     public static function getAll()
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_FILTER . " WHERE fsid != 3 ORDER BY filter_label";
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DATA_FILTER . " WHERE dfsid != 3 ORDER BY filter_label";
         $res = $db->query($sql);
 
         $filters = array();
@@ -74,7 +74,7 @@ class Filter implements DatabaseObject
      */
     public function getId()
     {
-        return $this->fid;
+        return $this->dfid;
     }
 
     /**
@@ -98,7 +98,7 @@ class Filter implements DatabaseObject
 
         $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "INSERT INTO " . SystemTables::DB_TBL_FILTER . " (
+        $sql = "INSERT INTO " . SystemTables::DB_TBL_DATA_FILTER . " (
             filter_key,
             filter_label,
             filter_type,
@@ -134,7 +134,7 @@ class Filter implements DatabaseObject
 
         $res = $db->query($sql, $args);
         if ($res) {
-            $this->fid = $db->lastInsertId();
+            $this->dfid = $db->lastInsertId();
             return true;
         }
         return false;
@@ -146,13 +146,13 @@ class Filter implements DatabaseObject
      */
     public function update()
     {
-        if (!$this->fid) {
+        if (!$this->dfid) {
             return false;
         }
 
         $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "UPDATE " . SystemTables::DB_TBL_FILTER . " SET
+        $sql = "UPDATE " . SystemTables::DB_TBL_DATA_FILTER . " SET
             filter_key = '::filter_key',
             filter_label = '::filter_label',
             filter_type = '::filter_type',
@@ -162,7 +162,7 @@ class Filter implements DatabaseObject
             filter_config = '::filter_config',
             default_value = '::default_value',
             is_required = '::is_required'
-        WHERE fid = '::fid'";
+        WHERE dfid = '::dfid'";
 
         $args = array(
             '::filter_key' => $this->filter_key,
@@ -174,7 +174,7 @@ class Filter implements DatabaseObject
             '::filter_config' => $this->filter_config ? $this->filter_config : '',
             '::default_value' => $this->default_value ? $this->default_value : '',
             '::is_required' => $this->is_required ? 1 : 0,
-            '::fid' => $this->fid
+            '::dfid' => $this->dfid
         );
 
         return $db->query($sql, $args) ? true : false;
@@ -189,8 +189,8 @@ class Filter implements DatabaseObject
     public static function delete($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "UPDATE " . SystemTables::DB_TBL_FILTER . " SET fsid = 3 WHERE fid = '::fid'";
-        return $db->query($sql, array('::fid' => intval($id))) ? true : false;
+        $sql = "UPDATE " . SystemTables::DB_TBL_DATA_FILTER . " SET dfsid = 3 WHERE dfid = '::dfid'";
+        return $db->query($sql, array('::dfid' => intval($id))) ? true : false;
     }
 
     /**
@@ -202,15 +202,15 @@ class Filter implements DatabaseObject
     public static function hardDelete($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "DELETE FROM " . SystemTables::DB_TBL_FILTER . " WHERE fid = '::fid'";
-        return $db->query($sql, array('::fid' => intval($id))) ? true : false;
+        $sql = "DELETE FROM " . SystemTables::DB_TBL_DATA_FILTER . " WHERE dfid = '::dfid'";
+        return $db->query($sql, array('::dfid' => intval($id))) ? true : false;
     }
 
     /**
      * Get filters by their keys (for matching placeholders in queries)
      *
      * @param array $keys Array of filter keys like [':year', ':date_from']
-     * @return array Array of Filter objects indexed by filter_key
+     * @return array Array of DataFilter objects indexed by filter_key
      */
     public static function getByKeys($keys)
     {
@@ -228,13 +228,13 @@ class Filter implements DatabaseObject
             $args["::key{$i}"] = $key;
         }
 
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_FILTER . "
-                WHERE filter_key IN (" . implode(',', $placeholders) . ") AND fsid != 3";
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DATA_FILTER . "
+                WHERE filter_key IN (" . implode(',', $placeholders) . ") AND dfsid != 3";
         $res = $db->query($sql, $args);
 
         $filters = array();
         while ($row = $db->fetchAssoc($res)) {
-            $filter = new Filter();
+            $filter = new DataFilter();
             $filter->parse((object)$row);
             $filters[$row['filter_key']] = $filter;
         }
@@ -252,12 +252,12 @@ class Filter implements DatabaseObject
     {
         $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "SELECT fid FROM " . SystemTables::DB_TBL_FILTER . "
-                WHERE filter_key = '::key' AND fsid != 3";
+        $sql = "SELECT dfid FROM " . SystemTables::DB_TBL_DATA_FILTER . "
+                WHERE filter_key = '::key' AND dfsid != 3";
         $args = array('::key' => $key);
 
         if ($excludeId !== null) {
-            $sql .= " AND fid != '::exclude_id'";
+            $sql .= " AND dfid != '::exclude_id'";
             $args['::exclude_id'] = intval($excludeId);
         }
 
@@ -280,12 +280,12 @@ class Filter implements DatabaseObject
     {
         $db = Rapidkart::getInstance()->getDB();
 
-        $sql = "SELECT fid, filter_key, filter_label FROM " . SystemTables::DB_TBL_FILTER . "
-                WHERE fsid != 3";
+        $sql = "SELECT dfid, filter_key, filter_label FROM " . SystemTables::DB_TBL_DATA_FILTER . "
+                WHERE dfsid != 3";
         $args = array();
 
         if ($excludeId !== null) {
-            $sql .= " AND fid != '::exclude_id'";
+            $sql .= " AND dfid != '::exclude_id'";
             $args['::exclude_id'] = intval($excludeId);
         }
 
@@ -352,16 +352,16 @@ class Filter implements DatabaseObject
      */
     public function load()
     {
-        if (!$this->fid) {
+        if (!$this->dfid) {
             return false;
         }
 
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_FILTER . " WHERE fid = '::fid' AND fsid != 3 LIMIT 1";
-        $res = $db->query($sql, array('::fid' => $this->fid));
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DATA_FILTER . " WHERE dfid = '::dfid' AND dfsid != 3 LIMIT 1";
+        $res = $db->query($sql, array('::dfid' => $this->dfid));
 
         if (!$res || $db->numRows($res) < 1) {
-            $this->fid = null;
+            $this->dfid = null;
             return false;
         }
 
@@ -443,7 +443,7 @@ class Filter implements DatabaseObject
     public function toArray()
     {
         return array(
-            'fid' => $this->fid,
+            'dfid' => $this->dfid,
             'filter_key' => $this->filter_key,
             'filter_label' => $this->filter_label,
             'filter_type' => $this->filter_type,

@@ -1,5 +1,5 @@
 /**
- * Filter List Page - Delete functionality
+ * Data Filter List Page - Delete functionality
  */
 document.addEventListener('DOMContentLoaded', function() {
     var deleteModalElement = document.getElementById('delete-modal');
@@ -22,20 +22,20 @@ document.addEventListener('DOMContentLoaded', function() {
     if (confirmBtn) {
         confirmBtn.addEventListener('click', function() {
             if (filterIdToDelete) {
-                Loading.show('Deleting filter...');
-                Ajax.post('delete_filter', { id: filterIdToDelete }).then(function(result) {
+                Loading.show('Deleting data filter...');
+                Ajax.post('delete_data_filter', { id: filterIdToDelete }).then(function(result) {
                     Loading.hide();
                     deleteModal.hide();
                     if (result.success) {
-                        Toast.success('Filter deleted');
+                        Toast.success('Data filter deleted');
                         location.reload();
                     } else {
-                        Toast.error(result.message || 'Failed to delete filter');
+                        Toast.error(result.message || 'Failed to delete data filter');
                     }
                 }).catch(function() {
                     Loading.hide();
                     deleteModal.hide();
-                    Toast.error('Failed to delete filter');
+                    Toast.error('Failed to delete data filter');
                 });
             }
         });

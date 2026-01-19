@@ -19,10 +19,10 @@ class SystemTables
       const DB_TBL_GRAPH_STATUS = "graph_status";
 
       /**
-       * Filter Management Tables
+       * DataFilter Management Tables
        */
-      const DB_TBL_FILTER = "filter";
-      const DB_TBL_FILTER_STATUS = "filter_status";
+      const DB_TBL_DATA_FILTER = "data_filter";
+      const DB_TBL_DATA_FILTER_STATUS = "data_filter_status";
 
       /**
        * Dashboard Builder Tables

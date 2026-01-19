@@ -21,12 +21,12 @@ $step = isset($_GET['step']) ? intval($_GET['step']) : 0;
 $steps = [
     1 => [
         'title' => 'Copy PHP Classes',
-        'description' => 'Copies 8 PHP class files to handle graphs, filters, and dashboards.',
+        'description' => 'Copies 8 PHP class files to handle graphs, data filters, and dashboards.',
         'files' => [
             'system/classes/Graph.php',
-            'system/classes/Filter.php',
-            'system/classes/FilterManager.php',
-            'system/classes/FilterSet.php',
+            'system/classes/DataFilter.php',
+            'system/classes/DataFilterManager.php',
+            'system/classes/DataFilterSet.php',
             'system/classes/DashboardInstance.php',
             'system/classes/DashboardTemplate.php',
             'system/classes/DashboardTemplateCategory.php',
@@ -39,7 +39,7 @@ $steps = [
         'description' => 'Copies 3 include folders that define routes and page handlers.',
         'folders' => [
             'system/includes/graph',
-            'system/includes/filter',
+            'system/includes/data-filter',
             'system/includes/dashboard',
         ],
         'type' => 'copy_folders'
@@ -55,11 +55,11 @@ $steps = [
         'type' => 'copy'
     ],
     4 => [
-        'title' => 'Copy Filter Templates',
-        'description' => 'Copies template files for the Filter module (list, form pages).',
+        'title' => 'Copy Data Filter Templates',
+        'description' => 'Copies template files for the Data Filter module (list, form pages).',
         'files' => [
-            'system/templates/filter/filter-list.php',
-            'system/templates/filter/filter-form.php',
+            'system/templates/data-filter/data-filter-list.php',
+            'system/templates/data-filter/data-filter-form.php',
         ],
         'type' => 'copy'
     ],
@@ -83,7 +83,7 @@ $steps = [
         'files' => [
             'system/scripts/graph/graph-list.js',
             'system/scripts/graph/graph-creator.js',
-            'system/scripts/filter/filter-list.js',
+            'system/scripts/data-filter/data-filter-list.js',
             'system/scripts/dashboard/dashboard-list.js',
             'system/scripts/dashboard/dashboard-builder.js',
             'system/scripts/dashboard/dashboard-preview.js',
@@ -406,7 +406,7 @@ function copyDistRenamed($src, $dst) {
         }
         .module-common { background: #6f42c1; color: white; }
         .module-graph { background: #0d6efd; color: white; }
-        .module-filter { background: #198754; color: white; }
+        .module-data-filter { background: #198754; color: white; }
         .module-dashboard { background: #dc3545; color: white; }
         .code-block {
             background: #2d2d2d;
@@ -706,7 +706,7 @@ function copyDistRenamed($src, $dst) {
                             </p>
                             <ul class="small">
                                 <li><strong>graph</strong> - Graph definitions</li>
-                                <li><strong>filter</strong> - Filter definitions</li>
+                                <li><strong>data_filter</strong> - Data filter definitions</li>
                                 <li><strong>dashboard_template_category</strong> - 4 system categories</li>
                                 <li><strong>dashboard_template</strong> - 16 system templates</li>
                                 <li><strong>dashboard_instance</strong> - User dashboards</li>
@@ -742,8 +742,8 @@ function copyDistRenamed($src, $dst) {
     include_once 'graph/graph.inc.php';
     break;
 
-case "filter":
-    include_once 'filter/filter.inc.php';
+case "data-filter":
+    include_once 'data-filter/data-filter.inc.php';
     break;
 
 case "dashboard":
@@ -782,7 +782,7 @@ $theme->addScript(SystemConfig::baseUrl() . 'dist/common.js');</div>
                 <p class="text-muted">Once all steps are complete, test the following URLs:</p>
                 <ul class="mb-0">
                     <li><code>?urlq=graph/list</code> - Graph listing</li>
-                    <li><code>?urlq=filter/list</code> - Filter listing</li>
+                    <li><code>?urlq=data-filter/list</code> - Data filter listing</li>
                     <li><code>?urlq=dashboard/list</code> - Dashboard listing</li>
                     <li><code>?urlq=dashboard/templates</code> - Template listing</li>
                 </ul>

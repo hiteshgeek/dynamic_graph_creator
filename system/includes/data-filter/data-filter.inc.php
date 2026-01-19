@@ -1,8 +1,8 @@
 <?php
 
 /**
- * Filter Controller
- * Handles all filter-related actions
+ * DataFilter Controller
+ * Handles all data-filter-related actions
  */
 
 $url = Utility::parseUrl();
@@ -11,17 +11,17 @@ $action = isset($url[1]) ? $url[1] : 'list';
 // Handle POST actions
 if (isset($_POST['submit'])) {
     switch ($_POST['submit']) {
-        case 'save_filter':
-            saveFilter($_POST);
+        case 'save_data_filter':
+            saveDataFilter($_POST);
             break;
-        case 'get_filter':
-            getFilter($_POST);
+        case 'get_data_filter':
+            getDataFilter($_POST);
             break;
-        case 'delete_filter':
-            deleteFilter($_POST);
+        case 'delete_data_filter':
+            deleteDataFilter($_POST);
             break;
-        case 'test_filter_query':
-            testFilterQuery($_POST);
+        case 'test_data_filter_query':
+            testDataFilterQuery($_POST);
             break;
     }
 }
@@ -29,56 +29,56 @@ if (isset($_POST['submit'])) {
 // Handle GET actions
 switch ($action) {
     case 'create':
-        showFilterForm();
+        showDataFilterForm();
         break;
     case 'edit':
         $filterId = isset($url[2]) ? intval($url[2]) : 0;
-        showFilterForm($filterId);
+        showDataFilterForm($filterId);
         break;
     case 'list':
     default:
-        showFilterList();
+        showDataFilterList();
         break;
 }
 
 /**
- * Show filter list page (all independent filters)
+ * Show data filter list page (all independent filters)
  */
-function showFilterList()
+function showDataFilterList()
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     // Add page-specific CSS
     Utility::addModuleCss('common');
-    Utility::addModuleCss('filter');
+    Utility::addModuleCss('data-filter');
 
     // Add page-specific JS
     Utility::addModuleJs('common');
     $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('filter');
-    $theme->addScript(SystemConfig::scriptsUrl() . 'filter/filter-list.js');
+    Utility::addModuleJs('data-filter');
+    $theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter-list.js');
 
-    $theme->setPageTitle('Filters - Dynamic Graph Creator');
+    $theme->setPageTitle('Data Filters - Dynamic Graph Creator');
 
-    $filters = Filter::getAll();
+    $filters = DataFilter::getAll();
 
     ob_start();
-    require_once SystemConfig::templatesPath() . 'filter/filter-list.php';
+    require_once SystemConfig::templatesPath() . 'data-filter/data-filter-list.php';
     $content = ob_get_clean();
 
     $theme->setContent('full_main', $content);
 }
 
 /**
- * Show filter add/edit form
+ * Show data filter add/edit form
  */
-function showFilterForm($filterId = null)
+function showDataFilterForm($filterId = null)
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     // Add page-specific CSS
     Utility::addModuleCss('common');
-    Utility::addModuleCss('filter');
+    Utility::addModuleCss('data-filter');
 
     // Add libraries
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror/css/codemirror.min.css', 5);
@@ -93,36 +93,36 @@ function showFilterForm($filterId = null)
     // Add page-specific JS
     Utility::addModuleJs('common');
     $theme->addScript(SystemConfig::scriptsUrl() . 'src/Theme.js');
-    Utility::addModuleJs('filter');
+    Utility::addModuleJs('data-filter');
 
     $filter = null;
 
     if ($filterId) {
-        $filter = new Filter($filterId);
+        $filter = new DataFilter($filterId);
         if (!$filter->getId()) {
-            Utility::redirect('filters');
+            Utility::redirect('data-filters');
             return;
         }
     }
 
     // Get all filters for sidebar navigation
-    $allFilters = Filter::getAll();
+    $allFilters = DataFilter::getAll();
     $totalFilters = count($allFilters);
 
-    $theme->setPageTitle(($filter ? 'Edit' : 'Create') . ' Filter - Dynamic Graph Creator');
+    $theme->setPageTitle(($filter ? 'Edit' : 'Create') . ' Data Filter - Dynamic Graph Creator');
 
     ob_start();
-    require_once SystemConfig::templatesPath() . 'filter/filter-form.php';
+    require_once SystemConfig::templatesPath() . 'data-filter/data-filter-form.php';
     $content = ob_get_clean();
 
     $theme->setContent('full_main', $content);
 }
 
 /**
- * Save filter (create or update)
- * Filters are independent - not tied to any graph
+ * Save data filter (create or update)
+ * DataFilters are independent - not tied to any graph
  */
-function saveFilter($data)
+function saveDataFilter($data)
 {
     $filterId = isset($data['filter_id']) ? intval($data['filter_id']) : 0;
 
@@ -145,18 +145,18 @@ function saveFilter($data)
     }
 
     // Check if filter key already exists (excluding current filter for updates)
-    if (Filter::keyExists($filterKey, $filterId ?: null)) {
+    if (DataFilter::keyExists($filterKey, $filterId ?: null)) {
         Utility::ajaxResponseFalse('A filter with this placeholder key already exists. Please use a unique key.');
     }
 
     // Check for substring conflicts with other filter keys
     // e.g., ::category and ::category_checkbox would conflict
-    $conflict = Filter::checkKeyConflict($filterKey, $filterId ?: null);
+    $conflict = DataFilter::checkKeyConflict($filterKey, $filterId ?: null);
     if ($conflict) {
         Utility::ajaxResponseFalse($conflict['message']);
     }
 
-    $filter = $filterId ? new Filter($filterId) : new Filter();
+    $filter = $filterId ? new DataFilter($filterId) : new DataFilter();
 
     $filter->setFilterKey($filterKey);
     $filter->setFilterLabel($filterLabel);
@@ -170,21 +170,21 @@ function saveFilter($data)
 
     if ($filterId) {
         if (!$filter->update()) {
-            Utility::ajaxResponseFalse('Failed to update filter');
+            Utility::ajaxResponseFalse('Failed to update data filter');
         }
     } else {
         if (!$filter->insert()) {
-            Utility::ajaxResponseFalse('Failed to create filter');
+            Utility::ajaxResponseFalse('Failed to create data filter');
         }
     }
 
-    Utility::ajaxResponseTrue('Filter saved successfully', array('id' => $filter->getId()));
+    Utility::ajaxResponseTrue('Data filter saved successfully', array('id' => $filter->getId()));
 }
 
 /**
- * Get single filter for editing
+ * Get single data filter for editing
  */
-function getFilter($data)
+function getDataFilter($data)
 {
     $filterId = isset($data['id']) ? intval($data['id']) : 0;
 
@@ -192,34 +192,34 @@ function getFilter($data)
         Utility::ajaxResponseFalse('Invalid filter ID');
     }
 
-    $filter = new Filter($filterId);
+    $filter = new DataFilter($filterId);
     if (!$filter->getId()) {
-        Utility::ajaxResponseFalse('Filter not found');
+        Utility::ajaxResponseFalse('Data filter not found');
     }
 
-    Utility::ajaxResponseTrue('Filter loaded', $filter->toArray());
+    Utility::ajaxResponseTrue('Data filter loaded', $filter->toArray());
 }
 
 /**
- * Delete filter
+ * Delete data filter
  */
-function deleteFilter($data)
+function deleteDataFilter($data)
 {
     $filterId = isset($data['id']) ? intval($data['id']) : 0;
 
-    if (!$filterId || !Filter::delete($filterId)) {
-        Utility::ajaxResponseFalse('Failed to delete filter');
+    if (!$filterId || !DataFilter::delete($filterId)) {
+        Utility::ajaxResponseFalse('Failed to delete data filter');
     }
 
-    Utility::ajaxResponseTrue('Filter deleted successfully');
+    Utility::ajaxResponseTrue('Data filter deleted successfully');
 }
 
 /**
- * Test filter query (for query-based filter options)
+ * Test data filter query (for query-based filter options)
  * Query should return 'value' and 'label' columns
  * Optional 'is_selected' column (1/0) to pre-select options
  */
-function testFilterQuery($data)
+function testDataFilterQuery($data)
 {
     $query = isset($data['query']) ? trim($data['query']) : '';
 

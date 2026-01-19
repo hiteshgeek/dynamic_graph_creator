@@ -1,4 +1,4 @@
-// Generic Filter Styles (Reusable)
+// Generic Data Filter Styles (Reusable)
 @use "variables" as *;
 
 // Filter key badge mixin - reusable placeholder style
@@ -18,8 +18,8 @@
   @include filter-key-badge;
 }
 
-// Filter List Page
-.filter-list-page {
+// Data Filter List Page
+.data-filter-list-page {
   // Padding handled by body > .container rule in _common.scss
 
   // Filter-specific styles for item cards
@@ -126,8 +126,8 @@
   }
 }
 
-// Filter Form Page
-.filter-form-page {
+// Data Filter Form Page
+.data-filter-form-page {
   max-width: 600px;
   margin: 0 auto;
 
@@ -582,8 +582,8 @@
   margin-left: auto;
 }
 
-// Filter Form Page Styles
-.filter-form-page {
+// Data Filter Form Page Styles
+.data-filter-form-page {
   .form-row {
     display: flex;
     gap: 20px;
@@ -896,15 +896,15 @@
   }
 }
 
-// Filter Form layout with sidebar
-.filter-form-layout {
+// Data Filter Form layout with sidebar
+.data-filter-form-layout {
   display: flex;
   gap: $spacing-lg;
   padding: $spacing-lg;
   min-height: calc(100vh - 80px);
 }
 
-.filter-form-sidebar {
+.data-filter-form-sidebar {
   width: 280px;
   flex-shrink: 0;
   background: var(--dgc-bg-card);
@@ -1061,16 +1061,16 @@
   }
 }
 
-.filter-form-main {
+.data-filter-form-main {
   flex: 1;
   min-width: 0;
 }
 
 // When no sidebar, center the form
-.filter-form-layout.no-sidebar {
+.data-filter-form-layout.no-sidebar {
   justify-content: center;
 
-  .filter-form-main {
+  .data-filter-form-main {
     flex: 0 1 auto;
     max-width: 700px;
     width: 100%;
@@ -1079,11 +1079,11 @@
 
 // Responsive: adjust sidebar on smaller screens
 @media (max-width: 992px) {
-  .filter-form-layout {
+  .data-filter-form-layout {
     flex-direction: column;
   }
 
-  .filter-form-sidebar {
+  .data-filter-form-sidebar {
     width: 100%;
     max-height: none;
     position: static;

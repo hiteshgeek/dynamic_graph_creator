@@ -1,9 +1,9 @@
 /**
- * FilterManager - Generic filter management component
+ * DataFilterManager - Generic filter management component
  * Can be used for graphs, reports, or any filterable entity
  */
 
-export default class FilterManager {
+export default class DataFilterManager {
     constructor(container, options = {}) {
         this.container = container;
         this.entityType = options.entityType || 'graph';
@@ -414,7 +414,7 @@ export default class FilterManager {
         let html = '<div class="filter-inputs">';
 
         filters.forEach(filter => {
-            html += FilterManager.renderFilterInput(filter);
+            html += DataFilterManager.renderFilterInput(filter);
         });
 
         html += `
@@ -452,7 +452,7 @@ export default class FilterManager {
 
             case 'select':
             case 'multi_select':
-                const options = FilterManager.parseOptions(filter.filter_options);
+                const options = DataFilterManager.parseOptions(filter.filter_options);
                 const multiple = filter.filter_type === 'multi_select' ? 'multiple' : '';
                 inputHtml = `
                     <select class="form-select" id="${inputId}" data-filter-key="${key}" ${multiple}>

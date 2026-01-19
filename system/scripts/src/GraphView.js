@@ -5,7 +5,7 @@
 
 import GraphPreview from './GraphPreview.js';
 import GraphExporter from './GraphExporter.js';
-import FilterUtils from './FilterUtils.js';
+import DataFilterUtils from './DataFilterUtils.js';
 
 // Use global helpers from main.js
 const Ajax = window.Ajax;
@@ -376,6 +376,6 @@ export default class GraphView {
      */
     getFilterValues() {
         const filtersContainer = this.container.querySelector('#graph-filters');
-        return FilterUtils.getValues(filtersContainer, { visibleOnly: false });
+        return DataFilterUtils.getValues(filtersContainer, { visibleOnly: false });
     }
 }

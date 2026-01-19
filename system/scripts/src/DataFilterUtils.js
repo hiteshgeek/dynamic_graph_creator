@@ -1,9 +1,9 @@
 /**
- * FilterUtils - Utility for extracting filter values from filter containers
+ * DataFilterUtils - Utility for extracting filter values from filter containers
  * Provides a single entry point for getting filter values across the app
  */
 
-export default class FilterUtils {
+export default class DataFilterUtils {
     /**
      * Get all filter values from a container
      * @param {HTMLElement} container - The container element with .filter-input-item children
@@ -28,7 +28,7 @@ export default class FilterUtils {
             const filterKey = item.dataset.filterKey;
             if (!filterKey) return;
 
-            const value = FilterUtils.getItemValue(item, filterKey);
+            const value = DataFilterUtils.getItemValue(item, filterKey);
             if (value !== null) {
                 Object.assign(filterValues, value);
             }

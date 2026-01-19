@@ -28,9 +28,9 @@ CREATE TABLE IF NOT EXISTS graph (
     INDEX idx_graph_type (graph_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores graph definitions';
 
--- Filter table (standalone reusable filters)
-CREATE TABLE IF NOT EXISTS filter (
-    fid INT(11) AUTO_INCREMENT PRIMARY KEY,
+-- DataFilter table (standalone reusable filters)
+CREATE TABLE IF NOT EXISTS data_filter (
+    dfid INT(11) AUTO_INCREMENT PRIMARY KEY,
     filter_key VARCHAR(50) NOT NULL COMMENT 'Placeholder key e.g. :date_from',
     filter_label VARCHAR(100) NOT NULL COMMENT 'Display label',
     filter_type ENUM('text', 'number', 'date', 'date_range', 'select', 'multi_select', 'checkbox', 'radio', 'tokeninput') NOT NULL DEFAULT 'text',
@@ -40,10 +40,10 @@ CREATE TABLE IF NOT EXISTS filter (
     filter_config TEXT COMMENT 'JSON config options like {inline: true}',
     default_value VARCHAR(255) DEFAULT NULL,
     is_required TINYINT(1) NOT NULL DEFAULT 0,
-    fsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=active, 3=deleted',
+    dfsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=active, 3=deleted',
     created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_ts TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_fsid (fsid),
+    INDEX idx_dfsid (dfsid),
     INDEX idx_filter_key (filter_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Standalone filter definitions';
 
@@ -336,7 +336,7 @@ VALUES (
 -- ============================================================================
 -- Tables created:
 --   - graph (graph definitions)
---   - filter (reusable filter definitions)
+--   - data_filter (reusable filter definitions)
 --   - dashboard_template_category (4 system categories)
 --   - dashboard_template (16 system templates)
 --   - dashboard_instance (user dashboards)

@@ -1,10 +1,10 @@
 <?php
     $saveButtonClass = $filter ? 'btn-outline-warning' : 'btn-primary';
     echo Utility::renderPageHeader([
-        'title' => $filter ? 'Edit Filter' : 'Create Filter',
-        'backUrl' => '?urlq=filters',
-        'backLabel' => 'Filters',
-        'rightContent' => '<button type="button" class="btn ' . $saveButtonClass . ' btn-sm save-filter-btn" data-save-btn><i class="fas fa-save"></i> ' . ($filter ? 'Save' : 'Create Filter') . '</button>'
+        'title' => $filter ? 'Edit Data Filter' : 'Create Data Filter',
+        'backUrl' => '?urlq=data-filters',
+        'backLabel' => 'Data Filters',
+        'rightContent' => '<button type="button" class="btn ' . $saveButtonClass . ' btn-sm save-filter-btn" data-save-btn><i class="fas fa-save"></i> ' . ($filter ? 'Save' : 'Create Data Filter') . '</button>'
     ]);
     ?>
 
@@ -13,7 +13,7 @@
         <!-- Sidebar with filter list -->
         <aside class="filter-form-sidebar">
             <div class="sidebar-header">
-                <span class="sidebar-title">All Filters</span>
+                <span class="sidebar-title">All Data Filters</span>
                 <span class="sidebar-count"><?php echo $totalFilters; ?></span>
             </div>
             <div class="filter-list-nav">
@@ -32,8 +32,8 @@
                 foreach ($allFilters as $f):
                     $typeIcon = isset($typeIcons[$f['filter_type']]) ? $typeIcons[$f['filter_type']] : 'filter';
                 ?>
-                    <a href="?urlq=filters/edit/<?php echo $f['fid']; ?>"
-                       class="filter-nav-item <?php echo ($filter && $f['fid'] == $filter->getId()) ? 'active' : ''; ?>">
+                    <a href="?urlq=data-filters/edit/<?php echo $f['dfid']; ?>"
+                       class="filter-nav-item <?php echo ($filter && $f['dfid'] == $filter->getId()) ? 'active' : ''; ?>">
                         <span class="filter-nav-icon <?php echo $f['filter_type']; ?>">
                             <i class="fas fa-<?php echo $typeIcon; ?>"></i>
                         </span>

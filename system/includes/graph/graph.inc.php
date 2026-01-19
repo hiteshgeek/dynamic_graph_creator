@@ -118,7 +118,7 @@ function showCreator($graphId = null)
     $theme->setPageTitle('Graphs - ' . ($graph ? 'Edit' : 'Create') . ' Graph - Dynamic Graph Creator');
 
     // Get all available filters for selection
-    $allFilters = Filter::getAll();
+    $allFilters = DataFilter::getAll();
 
     // Permission to create filters (replace with actual framework permission check)
     $canCreateFilter = true;
@@ -183,8 +183,8 @@ function showView($graphId)
     }
 
     // Extract placeholders from the graph query and find matching filters
-    $placeholders = Filter::extractPlaceholders($graph->getQuery());
-    $matchedFilters = Filter::getByKeys($placeholders);
+    $placeholders = DataFilter::extractPlaceholders($graph->getQuery());
+    $matchedFilters = DataFilter::getByKeys($placeholders);
 
     // Convert to array format for template
     $filters = array();
@@ -642,8 +642,8 @@ function loadGraph($data)
     }
 
     // Extract placeholders and find matching filters
-    $placeholders = Filter::extractPlaceholders($graph->getQuery());
-    $matchedFilters = Filter::getByKeys($placeholders);
+    $placeholders = DataFilter::extractPlaceholders($graph->getQuery());
+    $matchedFilters = DataFilter::getByKeys($placeholders);
 
     $response = $graph->toArray();
     $response['placeholders'] = $placeholders;

@@ -14,11 +14,11 @@ const isProd = !isWatch && !isDev; // Default build is production
 const srcDir = path.join(__dirname, "system");
 const distDir = path.join(__dirname, "dist");
 
-// Modules: common (shared) + graph + filter + dashboard (specific)
+// Modules: common (shared) + graph + data-filter + dashboard (specific)
 const modules = [
   { name: "common", scss: "shared.scss", js: "common.js" },
   { name: "graph", scss: "graph.scss", js: "graph.js" },
-  { name: "filter", scss: "filter.scss", js: "filter.js" },
+  { name: "data-filter", scss: "data-filter.scss", js: "data-filter.js" },
   { name: "dashboard", scss: "dashboard.scss", js: "dashboard.js" },
 ];
 
@@ -124,7 +124,7 @@ async function bundleJs(jsFile, name) {
       target: ["es2015"],
       format: "iife",
       globalName: `${
-        name.charAt(0).toUpperCase() + name.slice(1).replace(/_/g, "")
+        name.split(/[-_]/).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('')
       }App`,
     });
 

@@ -7,10 +7,10 @@ import GraphPreview from './GraphPreview.js';
 import GraphExporter from './GraphExporter.js';
 import QueryBuilder from './QueryBuilder.js';
 import DataMapper from './DataMapper.js';
-import FilterManager from './FilterManager.js';
+import DataFilterManager from './DataFilterManager.js';
 import ConfigPanel from './ConfigPanel.js';
 import PlaceholderSettings from './PlaceholderSettings.js';
-import FilterUtils from './FilterUtils.js';
+import DataFilterUtils from './DataFilterUtils.js';
 
 // Use autosize from CDN (global)
 const autosize = window.autosize;
@@ -168,7 +168,7 @@ export default class GraphCreator {
     initFilterManager() {
         const filterContainer = this.container.querySelector('.filter-manager');
         if (filterContainer) {
-            this.filterManager = new FilterManager(filterContainer, {
+            this.filterManager = new DataFilterManager(filterContainer, {
                 entityType: 'graph',
                 entityId: this.graphId,
                 onChange: () => {
@@ -1208,7 +1208,7 @@ export default class GraphCreator {
             filtersContainer = document.getElementById('graph-filters');
         }
 
-        return FilterUtils.getValues(filtersContainer, { visibleOnly: true });
+        return DataFilterUtils.getValues(filtersContainer, { visibleOnly: true });
     }
 
     /**

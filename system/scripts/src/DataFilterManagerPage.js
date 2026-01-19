@@ -1,5 +1,5 @@
 /**
- * FilterManagerPage - Filter management page controller
+ * DataFilterManagerPage - Data Filter management page controller
  * Handles CRUD operations for graph filters
  */
 
@@ -8,7 +8,7 @@ const Ajax = window.Ajax;
 const Loading = window.Loading;
 const Toast = window.Toast;
 
-export default class FilterManagerPage {
+export default class DataFilterManagerPage {
     constructor(container, options = {}) {
         this.container = container;
         this.graphId = options.graphId || null;
@@ -126,7 +126,7 @@ export default class FilterManagerPage {
      */
     openFilterModal(filterData = null) {
         document.getElementById('filter-modal-title').textContent = filterData ? 'Edit Filter' : 'Add Filter';
-        document.getElementById('filter-id').value = filterData ? filterData.fid : '';
+        document.getElementById('filter-id').value = filterData ? filterData.dfid : '';
         document.getElementById('filter-key').value = filterData ? filterData.filter_key : '';
         document.getElementById('filter-label').value = filterData ? filterData.filter_label : '';
         document.getElementById('filter-type').value = filterData ? filterData.filter_type : 'text';
@@ -185,7 +185,7 @@ export default class FilterManagerPage {
     loadFilterForEdit(filterId) {
         Loading.show('Loading filter...');
 
-        Ajax.post('get_filter', { id: filterId })
+        Ajax.post('get_data_filter', { id: filterId })
             .then(result => {
                 Loading.hide();
                 if (result.success) {
@@ -233,7 +233,7 @@ export default class FilterManagerPage {
 
         Loading.show('Saving filter...');
 
-        Ajax.post('save_filter', data)
+        Ajax.post('save_data_filter', data)
             .then(result => {
                 Loading.hide();
                 if (result.success) {
@@ -256,7 +256,7 @@ export default class FilterManagerPage {
     deleteFilter(filterId) {
         Loading.show('Deleting filter...');
 
-        Ajax.post('delete_filter', { id: filterId })
+        Ajax.post('delete_data_filter', { id: filterId })
             .then(result => {
                 Loading.hide();
                 if (result.success) {

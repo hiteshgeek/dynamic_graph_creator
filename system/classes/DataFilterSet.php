@@ -1,18 +1,18 @@
 <?php
 
 /**
- * FilterSet - Manages filters linked to a graph or dashboard
+ * DataFilterSet - Manages filters linked to a graph or dashboard
  *
  * Extracts filter placeholders from SQL queries and applies filter values.
  * Filters are linked to graphs via placeholders in the query (e.g., :year, :date_from)
  *
  * @author Dynamic Graph Creator
  */
-class FilterSet
+class DataFilterSet
 {
     private $entity_type; // 'graph' or 'dashboard'
     private $entity_id;
-    private $filters = array(); // Filter objects indexed by filter_key
+    private $filters = array(); // DataFilter objects indexed by filter_key
     private $query;
 
     /**
@@ -43,14 +43,14 @@ class FilterSet
         }
 
         // Extract placeholders from query
-        $placeholders = Filter::extractPlaceholders($this->query);
+        $placeholders = DataFilter::extractPlaceholders($this->query);
 
         if (empty($placeholders)) {
             return true; // No filters needed
         }
 
         // Get filters matching these placeholders
-        $this->filters = Filter::getByKeys($placeholders);
+        $this->filters = DataFilter::getByKeys($placeholders);
 
         return true;
     }

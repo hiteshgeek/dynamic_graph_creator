@@ -8,10 +8,10 @@ import GraphPreview from './GraphPreview.js';
 import GraphExporter from './GraphExporter.js';
 import QueryBuilder from './QueryBuilder.js';
 import DataMapper from './DataMapper.js';
-import FilterManager from './FilterManager.js';
+import DataFilterManager from './DataFilterManager.js';
 import ConfigPanel from './ConfigPanel.js';
 import GraphView from './GraphView.js';
-import FilterManagerPage from './FilterManagerPage.js';
+import DataFilterManagerPage from './DataFilterManagerPage.js';
 import DatePickerInit from './DatePickerInit.js';
 
 // Make classes available globally
@@ -20,10 +20,10 @@ window.GraphPreview = GraphPreview;
 window.GraphExporter = GraphExporter;
 window.QueryBuilder = QueryBuilder;
 window.DataMapper = DataMapper;
-window.FilterManager = FilterManager;
+window.DataFilterManager = DataFilterManager;
 window.ConfigPanel = ConfigPanel;
 window.GraphView = GraphView;
-window.FilterManagerPage = FilterManagerPage;
+window.DataFilterManagerPage = DataFilterManagerPage;
 window.DatePickerInit = DatePickerInit;
 
 // Toast, Loading, Ajax, Tooltips, and KeyboardShortcuts are provided by common.js
@@ -56,11 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
         window.graphView = new GraphView(viewContainer, { graphId, graphType, graphName, config, hasFilters });
     }
 
-    // Auto-init filter manager page
-    const filterManagerContainer = document.querySelector('.filter-manager-page');
+    // Auto-init data filter manager page
+    const filterManagerContainer = document.querySelector('.data-filter-manager-page');
     if (filterManagerContainer) {
         const graphId = filterManagerContainer.dataset.graphId;
-        window.filterManagerPage = new FilterManagerPage(filterManagerContainer, { graphId });
+        window.dataFilterManagerPage = new DataFilterManagerPage(filterManagerContainer, { graphId });
     }
 });
 

@@ -1,5 +1,5 @@
 /**
- * FilterListPage - Filter list page controller
+ * DataFilterListPage - Data Filter list page controller
  * Handles filter listing and deletion
  */
 
@@ -7,7 +7,7 @@ const Ajax = window.Ajax;
 const Loading = window.Loading;
 const Toast = window.Toast;
 
-export default class FilterListPage {
+export default class DataFilterListPage {
     constructor(container) {
         this.container = container;
         this.deleteModalElement = null;
@@ -74,7 +74,7 @@ export default class FilterListPage {
 
         Loading.show('Deleting filter...');
 
-        Ajax.post('delete_filter', { id: this.filterIdToDelete })
+        Ajax.post('delete_data_filter', { id: this.filterIdToDelete })
             .then(result => {
                 Loading.hide();
                 const modal = this.getModal();

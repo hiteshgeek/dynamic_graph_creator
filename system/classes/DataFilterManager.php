@@ -1,27 +1,27 @@
 <?php
 
 /**
- * FilterManager - Centralized filter retrieval and management
+ * DataFilterManager - Centralized filter retrieval and management
  * Provides methods to get filters by various criteria
  *
  * @author Dynamic Graph Creator
  */
-class FilterManager
+class DataFilterManager
 {
     /**
      * Get all active filters
      *
-     * @return array Array of Filter objects indexed by filter_key
+     * @return array Array of DataFilter objects indexed by filter_key
      */
     public static function getAll()
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_FILTER . " WHERE fsid != 3 ORDER BY filter_label";
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DATA_FILTER . " WHERE dfsid != 3 ORDER BY filter_label";
         $res = $db->query($sql);
 
         $filters = array();
         while ($row = $db->fetchAssoc($res)) {
-            $filter = new Filter();
+            $filter = new DataFilter();
             $filter->parse((object)$row);
             $filters[$row['filter_key']] = $filter;
         }
@@ -36,12 +36,12 @@ class FilterManager
     public static function getAllAsArray()
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_FILTER . " WHERE fsid != 3 ORDER BY filter_label";
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DATA_FILTER . " WHERE dfsid != 3 ORDER BY filter_label";
         $res = $db->query($sql);
 
         $filters = array();
         while ($row = $db->fetchAssoc($res)) {
-            $filter = new Filter();
+            $filter = new DataFilter();
             $filter->parse((object)$row);
             $filters[] = $filter->toArray();
         }
@@ -52,21 +52,21 @@ class FilterManager
      * Get a single filter by ID
      *
      * @param int $id Filter ID
-     * @return Filter|null Filter object or null if not found
+     * @return DataFilter|null DataFilter object or null if not found
      */
     public static function getById($id)
     {
-        if (!Filter::isExistent($id)) {
+        if (!DataFilter::isExistent($id)) {
             return null;
         }
-        return new Filter($id);
+        return new DataFilter($id);
     }
 
     /**
      * Get filters by their IDs, maintaining order and indexed by filter_key
      *
      * @param array $ids Array of filter IDs
-     * @return array Array of Filter objects indexed by filter_key, in order of IDs provided
+     * @return array Array of DataFilter objects indexed by filter_key, in order of IDs provided
      */
     public static function getByIds($ids)
     {
@@ -84,23 +84,23 @@ class FilterManager
             $args["::id{$i}"] = intval($id);
         }
 
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_FILTER . "
-                WHERE fid IN (" . implode(',', $placeholders) . ") AND fsid != 3";
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DATA_FILTER . "
+                WHERE dfid IN (" . implode(',', $placeholders) . ") AND dfsid != 3";
         $res = $db->query($sql, $args);
 
-        // First, collect all filters indexed by fid
-        $filtersByFid = array();
+        // First, collect all filters indexed by dfid
+        $filtersByDfid = array();
         while ($row = $db->fetchAssoc($res)) {
-            $filter = new Filter();
+            $filter = new DataFilter();
             $filter->parse((object)$row);
-            $filtersByFid[$row['fid']] = $filter;
+            $filtersByDfid[$row['dfid']] = $filter;
         }
 
         // Build result array in order of IDs, indexed by filter_key
         $filters = array();
         foreach ($ids as $id) {
-            if (isset($filtersByFid[$id])) {
-                $filter = $filtersByFid[$id];
+            if (isset($filtersByDfid[$id])) {
+                $filter = $filtersByDfid[$id];
                 $filters[$filter->getFilterKey()] = $filter;
             }
         }
@@ -128,7 +128,7 @@ class FilterManager
      * Get filters by their keys (for matching placeholders in queries)
      *
      * @param array $keys Array of filter keys like ['::year', '::date_from']
-     * @return array Array of Filter objects indexed by filter_key
+     * @return array Array of DataFilter objects indexed by filter_key
      */
     public static function getByKeys($keys)
     {
@@ -146,13 +146,13 @@ class FilterManager
             $args["::key{$i}"] = $key;
         }
 
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_FILTER . "
-                WHERE filter_key IN (" . implode(',', $placeholders) . ") AND fsid != 3";
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DATA_FILTER . "
+                WHERE filter_key IN (" . implode(',', $placeholders) . ") AND dfsid != 3";
         $res = $db->query($sql, $args);
 
         $filters = array();
         while ($row = $db->fetchAssoc($res)) {
-            $filter = new Filter();
+            $filter = new DataFilter();
             $filter->parse((object)$row);
             $filters[$row['filter_key']] = $filter;
         }
@@ -179,11 +179,11 @@ class FilterManager
      * Extract placeholders from a SQL query and get matching filters
      *
      * @param string $query SQL query string
-     * @return array Array of Filter objects indexed by filter_key
+     * @return array Array of DataFilter objects indexed by filter_key
      */
     public static function getFromQuery($query)
     {
-        $placeholders = Filter::extractPlaceholders($query);
+        $placeholders = DataFilter::extractPlaceholders($query);
         return self::getByKeys($placeholders);
     }
 

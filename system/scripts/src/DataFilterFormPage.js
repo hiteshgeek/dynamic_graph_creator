@@ -1,5 +1,5 @@
 /**
- * FilterFormPage - Filter add/edit form controller
+ * DataFilterFormPage - Data Filter add/edit form controller
  * Handles filter form functionality including CodeMirror, options management, and save
  */
 
@@ -9,7 +9,7 @@ const Ajax = window.Ajax;
 const Loading = window.Loading;
 const Toast = window.Toast;
 
-export default class FilterFormPage {
+export default class DataFilterFormPage {
     constructor(container) {
         this.container = container;
         this.queryEditor = null;
@@ -322,7 +322,7 @@ export default class FilterFormPage {
 
         Loading.show('Testing query...');
 
-        Ajax.post('test_filter_query', { query: query })
+        Ajax.post('test_data_filter_query', { query: query })
             .then(result => {
                 Loading.hide();
                 const resultDiv = document.getElementById('query-result');
@@ -495,12 +495,12 @@ export default class FilterFormPage {
 
         Loading.show('Saving filter...');
 
-        Ajax.post('save_filter', data)
+        Ajax.post('save_data_filter', data)
             .then(result => {
                 Loading.hide();
                 if (result.success) {
                     Toast.success('Filter saved successfully');
-                    window.location.href = '?urlq=filters';
+                    window.location.href = '?urlq=data-filters';
                 } else {
                     Toast.error(result.message || 'Failed to save filter');
                 }

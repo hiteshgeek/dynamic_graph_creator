@@ -7,7 +7,7 @@ import GraphPreview from './GraphPreview.js';
 import GraphExporter from './GraphExporter.js';
 import QueryBuilder from './QueryBuilder.js';
 import DataMapper from './DataMapper.js';
-import FilterManager from './FilterManager.js';
+import DataFilterManager from './DataFilterManager.js';
 import ConfigPanel from './ConfigPanel.js';
 import GraphView from './GraphView.js';
 
@@ -16,7 +16,7 @@ window.GraphPreview = GraphPreview;
 window.GraphExporter = GraphExporter;
 window.QueryBuilder = QueryBuilder;
 window.DataMapper = DataMapper;
-window.FilterManager = FilterManager;
+window.DataFilterManager = DataFilterManager;
 window.ConfigPanel = ConfigPanel;
 window.GraphView = GraphView;
 

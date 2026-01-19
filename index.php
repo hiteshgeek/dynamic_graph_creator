@@ -19,8 +19,8 @@ require_once __DIR__ . '/system/classes/SQLiDatabase.php';
 require_once __DIR__ . '/system/classes/ThemeRegistry.php';
 require_once __DIR__ . '/system/classes/Rapidkart.php';
 require_once __DIR__ . '/system/classes/Utility.php';
-require_once __DIR__ . '/system/classes/Filter.php';
-require_once __DIR__ . '/system/classes/FilterSet.php';
+require_once __DIR__ . '/system/classes/DataFilter.php';
+require_once __DIR__ . '/system/classes/DataFilterSet.php';
 require_once __DIR__ . '/system/classes/Graph.php';
 require_once __DIR__ . '/system/classes/DashboardTemplateCategory.php';
 require_once __DIR__ . '/system/classes/DashboardTemplate.php';
@@ -33,8 +33,8 @@ $page = isset($url[0]) ? $url[0] : 'graph';
 
 // Route to controller
 switch ($page) {
-    case 'filters':
-        require_once SystemConfig::includesPath() . 'filter/filter.inc.php';
+    case 'data-filters':
+        require_once SystemConfig::includesPath() . 'data-filter/data-filter.inc.php';
         break;
     case 'dashboard':
         require_once SystemConfig::includesPath() . 'dashboard/dashboard.inc.php';

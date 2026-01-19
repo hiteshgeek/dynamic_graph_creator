@@ -25,9 +25,9 @@ Copy to: `system/classes/`
 | File | Description |
 |------|-------------|
 | `Graph.php` | Graph model (CRUD operations) |
-| `Filter.php` | Filter model (CRUD operations) |
-| `FilterManager.php` | Filter management and rendering |
-| `FilterSet.php` | Filter set collection |
+| `DataFilter.php` | Data filter model (CRUD operations) |
+| `DataFilterManager.php` | Data filter management and rendering |
+| `DataFilterSet.php` | Data filter set collection |
 | `DashboardInstance.php` | Dashboard instance model |
 | `DashboardTemplate.php` | Dashboard template model |
 | `DashboardTemplateCategory.php` | Template category model |
@@ -39,12 +39,12 @@ Copy to: `system/classes/`
 
 Copy entire folders to: `system/includes/`
 
-| Folder                                     | Description                          |
-| ------------------------------------------ | ------------------------------------ |
-| `graph/graph.inc.php`                      | Graph module routes and handlers     |
-| `filter/filter.inc.php`                    | Filter module routes and handlers    |
-| `dashboard/dashboard.inc.php`              | Dashboard module routes and handlers |
-| `dashboard/template-preview-component.php` | Dashboard preview rendering helper   |
+| Folder                                     | Description                              |
+| ------------------------------------------ | ---------------------------------------- |
+| `graph/graph.inc.php`                      | Graph module routes and handlers         |
+| `data-filter/data-filter.inc.php`          | Data filter module routes and handlers   |
+| `dashboard/dashboard.inc.php`              | Dashboard module routes and handlers     |
+| `dashboard/template-preview-component.php` | Dashboard preview rendering helper       |
 
 ---
 
@@ -59,11 +59,12 @@ Copy entire folders to: `system/templates/`
 | `graph/graph-creator.php` | Graph create/edit form |
 | `graph/graph-view.php` | Graph preview with filters |
 
-### Filter Templates
+### Data Filter Templates
+
 | File | Description |
 |------|-------------|
-| `filter/filter-list.php` | Filter listing page |
-| `filter/filter-form.php` | Filter create/edit form |
+| `data-filter/data-filter-list.php` | Data filter listing page |
+| `data-filter/data-filter-form.php` | Data filter create/edit form |
 
 ### Dashboard Templates
 | File | Description |
@@ -86,7 +87,7 @@ Copy these folders to: `system/scripts/`
 |------|-------------|
 | `graph/graph-list.js` | Graph list delete handler |
 | `graph/graph-creator.js` | Graph creator initialization |
-| `filter/filter-list.js` | Filter list delete handler |
+| `data-filter/data-filter-list.js` | Data filter list delete handler |
 | `dashboard/dashboard-list.js` | Dashboard list delete handler |
 | `dashboard/dashboard-builder.js` | Builder page initialization |
 | `dashboard/dashboard-preview.js` | Preview page functionality |
@@ -107,8 +108,8 @@ Copy to project root `dist/` with renamed files (hashes removed):
 | `common.abc123.js` | `common.js` | Common JS (Theme.js, utilities) |
 | `graph.abc123.css` | `graph.css` | Graph module CSS |
 | `graph.abc123.js` | `graph.js` | Graph module JS (GraphConfig, FilterUtils) |
-| `filter.abc123.css` | `filter.css` | Filter module CSS |
-| `filter.abc123.js` | `filter.js` | Filter module JS (FilterManager) |
+| `data-filter.abc123.css` | `data-filter.css` | Data filter module CSS |
+| `data-filter.abc123.js` | `data-filter.js` | Data filter module JS (FilterManager) |
 | `dashboard.abc123.css` | `dashboard.css` | Dashboard module CSS |
 | `dashboard.abc123.js` | `dashboard.js` | Dashboard JS (dashboard, TemplateManager, TemplateBuilder) |
 
@@ -145,7 +146,7 @@ Run SQL file: `sql/install.sql`
 Creates tables:
 
 - `graph` - Graph definitions
-- `filter` - Filter definitions
+- `data_filter` - Data filter definitions
 - `dashboard_template_category` - Template categories (4 system categories)
 - `dashboard_template` - Templates (16 system templates)
 - `dashboard_instance` - User dashboard instances
@@ -367,8 +368,8 @@ $menuItems = [
         'icon' => 'fa-chart-bar'
     ],
     [
-        'label' => 'Filters',
-        'url' => '?urlq=filter/list',
+        'label' => 'Data Filters',
+        'url' => '?urlq=data-filter/list',
         'icon' => 'fa-filter'
     ],
     [
@@ -397,8 +398,8 @@ case "graph":
     include_once 'graph/graph.inc.php';
     break;
 
-case "filter":
-    include_once 'filter/filter.inc.php';
+case "data-filter":
+    include_once 'data-filter/data-filter.inc.php';
     break;
 
 case "dashboard":
@@ -409,7 +410,7 @@ case "dashboard":
 **Note:** These include files should be placed in subfolders:
 
 - `system/includes/graph/graph.inc.php`
-- `system/includes/filter/filter.inc.php`
+- `system/includes/data-filter/data-filter.inc.php`
 - `system/includes/dashboard/dashboard.inc.php`
 
 ---
@@ -420,7 +421,7 @@ The copied include files use helper methods `Utility::addModuleCss()` and `Utili
 
 ### Replace These Calls
 
-In `graph.inc.php`, `filter.inc.php`, and `dashboard.inc.php`, replace:
+In `graph.inc.php`, `data-filter.inc.php`, and `dashboard.inc.php`, replace:
 
 ```php
 // Old style (needs to be replaced)
@@ -442,11 +443,11 @@ $theme->addScript(SystemConfig::baseUrl() . 'dist/graph.js');
 
 ### Module-Specific Assets
 
-| Include File         | CSS Files                    | JS Files                   |
-| -------------------- | ---------------------------- | -------------------------- |
-| `graph.inc.php`      | `common.css`, `graph.css`    | `common.js`, `graph.js`    |
-| `filter.inc.php`     | `common.css`, `filter.css`   | `common.js`, `filter.js`   |
-| `dashboard.inc.php`  | `common.css`, `dashboard.css`| `common.js`, `dashboard.js`|
+| Include File             | CSS Files                    | JS Files                   |
+| ------------------------ | ---------------------------- | -------------------------- |
+| `graph.inc.php`          | `common.css`, `graph.css`    | `common.js`, `graph.js`    |
+| `data-filter.inc.php`    | `common.css`, `filter.css`   | `common.js`, `filter.js`   |
+| `dashboard.inc.php`      | `common.css`, `dashboard.css`| `common.js`, `dashboard.js`|
 
 **Note:** Each page function (showList, showCreator, showView, etc.) will need these replacements made.
 
@@ -460,13 +461,13 @@ $theme->addScript(SystemConfig::baseUrl() . 'dist/graph.js');
 ### Phase 2: Copy Files
 - [ ] Copy `system/classes/*.php` (8 files)
 - [ ] Copy `system/includes/graph/` folder
-- [ ] Copy `system/includes/filter/` folder
+- [ ] Copy `system/includes/data-filter/` folder
 - [ ] Copy `system/includes/dashboard/` folder
 - [ ] Copy `system/templates/graph/` folder
-- [ ] Copy `system/templates/filter/` folder
+- [ ] Copy `system/templates/data-filter/` folder
 - [ ] Copy `system/templates/dashboard/` folder
 - [ ] Copy `system/scripts/graph/` folder
-- [ ] Copy `system/scripts/filter/` folder
+- [ ] Copy `system/scripts/data-filter/` folder
 - [ ] Copy `system/scripts/dashboard/` folder
 - [ ] Copy `dist/` folder (compiled CSS/JS)
 - [ ] Copy new libraries to `themes/libraries/`
@@ -477,15 +478,15 @@ $theme->addScript(SystemConfig::baseUrl() . 'dist/graph.js');
 - [ ] Add `generateUUID()` method to `Utility.php`
 - [ ] Add `generateShortId()` method to `Utility.php`
 - [ ] Add `renderPageHeader()` method to `Utility.php`
-- [ ] Add route cases to `system.inc.php` (graph, filter, dashboard)
+- [ ] Add route cases to `system.inc.php` (graph, data-filter, dashboard)
 - [ ] Update include files to replace `addModuleCss/addModuleJs` with rapidkart style
 - [ ] Add menu items to navigation
 
 ### Phase 4: Testing
 - [ ] Visit `?urlq=graph/list` - Graph listing works
 - [ ] Visit `?urlq=graph/create` - Create graph form works
-- [ ] Visit `?urlq=filter/list` - Filter listing works
-- [ ] Visit `?urlq=filter/create` - Create filter form works
+- [ ] Visit `?urlq=data-filter/list` - Data filter listing works
+- [ ] Visit `?urlq=data-filter/create` - Create data filter form works
 - [ ] Visit `?urlq=dashboard/list` - Dashboard listing works
 - [ ] Visit `?urlq=dashboard/templates` - Template listing works
 - [ ] Create a dashboard from template
