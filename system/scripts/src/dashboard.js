@@ -748,9 +748,9 @@ class DashboardBuilder {
 
     gridEditor.innerHTML = `
             <div class="dashboard-sections">
-                <div class="loading-message">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading dashboard...</p>
+                <div class="loader">
+                    <div class="spinner"></div>
+                    <span class="loader-text">Loading dashboard...</span>
                 </div>
             </div>
         `;
@@ -2613,7 +2613,7 @@ class DashboardBuilder {
 
     // Show loading state
     templateList.innerHTML = `<div class="loader">
-      <i class="fas fa-spinner fa-spin loader-spinner"></i>
+      <div class="spinner"></div>
       <span class="loader-text">Loading templates...</span>
     </div>`;
 

@@ -17,8 +17,6 @@
   margin: 0;
 }
 
-
-
 // Global textarea - disable resize handle (autosize handles it)
 textarea {
   resize: none;
@@ -41,14 +39,18 @@ body {
   // Ensure all child elements inherit the font-family
   // Exclude Font Awesome icons which need their own font-family for ::before pseudo-elements
   *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.fat),
-  *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.fat)::before,
-  *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.fat)::after {
+  *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(
+      .fat
+    )::before,
+  *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(
+      .fat
+    )::after {
     font-family: inherit !important;
   }
 
-  > .container,
-  > .container-fluid,
-  > .container-full {
+  .container,
+  .container-fluid,
+  .container-full {
     --bs-gutter-x: 0;
     padding: $spacing-lg;
   }
@@ -204,7 +206,9 @@ body {
     font-weight: $font-weight-medium;
     background: none;
     border-radius: 0;
-    transition: color $transition-fast, border-color $transition-fast;
+    transition:
+      color $transition-fast,
+      border-color $transition-fast;
 
     i {
       margin-right: $spacing-xs;
@@ -396,7 +400,9 @@ body {
   background-color: var(--dgc-bg-card);
   border: 1px solid var(--dgc-border-color);
   color: var(--dgc-text-primary);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 
   &::placeholder {
     color: var(--dgc-text-hint);
@@ -425,7 +431,9 @@ body {
   background-color: var(--dgc-bg-card);
   border: 1px solid var(--dgc-border-color);
   color: var(--dgc-text-primary);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 
   &:hover:not(:focus) {
     border-color: var(--dgc-primary-light);
@@ -652,7 +660,9 @@ option[value="__new__"] {
 
   // Toast dark mode - stronger shadow for visibility
   .dgc-toast {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -924,7 +934,9 @@ option[value="__new__"] {
     border: none;
     border-radius: 28px;
     background-image: none;
-    transition: background-color 0.25s ease, box-shadow 0.2s ease;
+    transition:
+      background-color 0.25s ease,
+      box-shadow 0.2s ease;
     box-shadow: none;
 
     &:focus {
@@ -982,7 +994,9 @@ option[value="__new__"] {
     letter-spacing: 0.5px;
     white-space: nowrap;
     z-index: 1;
-    transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
+    transition:
+      left 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+      color 0.25s ease;
 
     &.label-text {
       left: 30px; // Position to the right of knob when OFF
@@ -1052,7 +1066,10 @@ option[value="__new__"] {
 // Normal Bootstrap form-switch focus styles
 .form-switch:not(.text-switch) {
   .form-check-input {
-    transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition:
+      background-color 0.15s ease-in-out,
+      border-color 0.15s ease-in-out,
+      box-shadow 0.15s ease-in-out;
 
     &:focus {
       outline: none;

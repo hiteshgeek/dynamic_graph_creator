@@ -70,7 +70,7 @@ echo DGCHelper::renderPageHeader([
                 <hr class="mb-4">
                 <div id="template-list">
                     <div class="loader">
-                        <i class="fas fa-spinner fa-spin loader-spinner"></i>
+                        <div class="spinner"></div>
                         <span class="loader-text">Loading templates...</span>
                     </div>
                 </div>
@@ -104,7 +104,7 @@ echo DGCHelper::renderPageHeader([
                 <!-- Template List -->
                 <div id="add-section-template-list">
                     <div class="loader">
-                        <i class="fas fa-spinner fa-spin loader-spinner"></i>
+                        <div class="spinner"></div>
                         <span class="loader-text">Loading templates...</span>
                     </div>
                 </div>

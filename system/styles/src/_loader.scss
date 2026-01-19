@@ -10,6 +10,7 @@
     color: #6c757d;
     min-height: 200px;
 
+    // Font Awesome icon spinner (legacy)
     .loader-spinner {
         font-size: 2rem;
         color: $primary;
@@ -17,20 +18,28 @@
         animation: spin 1s linear infinite;
     }
 
+    // CSS border spinner (matches loading-overlay style)
+    .spinner {
+        width: 40px;
+        height: 40px;
+        border-width: 3px;
+        margin-bottom: 0.75rem;
+    }
+
     .loader-text {
         font-size: 0.875rem;
         font-weight: 500;
-        color: #6c757d;
+        color: var(--dgc-text-secondary, #6c757d);
     }
 
-    // Overlay variant for modals
+    // Overlay variant for modals - matches loading-overlay style
     &.loader-overlay {
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(255, 255, 255, 0.95);
+        background: var(--dgc-loading-overlay-bg, rgba(255, 255, 255, 0.9));
         z-index: 10;
     }
 
@@ -41,6 +50,13 @@
 
         .loader-spinner {
             font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border-width: 2px;
             margin-bottom: 0.5rem;
         }
 
@@ -56,6 +72,13 @@
 
         .loader-spinner {
             font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border-width: 4px;
             margin-bottom: 1rem;
         }
 

@@ -69,7 +69,7 @@
                     <!-- Template List -->
                     <div id="add-section-template-list">
                         <div class="loader">
-                            <i class="fas fa-spinner fa-spin loader-spinner"></i>
+                            <div class="spinner"></div>
                             <span class="loader-text">Loading templates...</span>
                         </div>
                     </div>
