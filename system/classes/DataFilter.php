@@ -221,6 +221,7 @@ class DataFilter implements DatabaseObject
     /**
      * Get filter options (executes query if data_source is 'query')
      * Query can return optional 'is_selected' column (1/0) to pre-select options
+     * System placeholders (like ::logged_in_uid) are resolved before query execution
      *
      * @return array
      */
@@ -229,7 +230,11 @@ class DataFilter implements DatabaseObject
         if ($this->data_source === 'query' && !empty($this->data_query)) {
             // Execute query to get options
             $db = Rapidkart::getInstance()->getDB();
-            $res = $db->query($this->data_query);
+
+            // Resolve system placeholders in the query before execution
+            $query = SystemPlaceholderManager::resolveInQuery($this->data_query);
+
+            $res = $db->query($query);
             $options = array();
             if ($res) {
                 while ($row = $db->fetchAssocArray($res)) {

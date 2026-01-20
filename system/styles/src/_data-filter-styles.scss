@@ -1165,3 +1165,90 @@
     }
   }
 }
+
+// System Placeholders Panel (in query editor section)
+.system-placeholders-panel {
+  margin-top: $spacing-md;
+  background: var(--dgc-bg-elevated);
+  border: 1px solid var(--dgc-border-color);
+  border-radius: $border-radius;
+  overflow: hidden;
+
+  .system-placeholders-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: var(--dgc-bg-card);
+    border-bottom: 1px solid var(--dgc-border-color);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--dgc-text-primary);
+
+    i {
+      color: $primary;
+    }
+
+    small {
+      margin-left: auto;
+      font-weight: 400;
+    }
+  }
+
+  .system-placeholders-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    padding: $spacing-md;
+  }
+
+  .system-placeholder-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-xs $spacing-sm;
+    background: var(--dgc-bg-card);
+    border: 1px solid var(--dgc-border-color);
+    border-radius: $border-radius;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover {
+      border-color: $primary;
+      background: rgba($primary, 0.05);
+
+      .placeholder-key {
+        background: $primary;
+        color: white;
+      }
+    }
+
+    .placeholder-key {
+      font-size: 0.75rem;
+      font-family: $font-family-mono;
+      background: var(--dgc-gray-200);
+      color: var(--dgc-text-primary);
+      padding: 2px 6px;
+      border-radius: 3px;
+      transition: all $transition-fast;
+    }
+
+    .placeholder-label {
+      font-size: 0.8rem;
+      color: var(--dgc-text-secondary);
+    }
+  }
+}
+
+// Dark mode adjustments for system placeholders
+:root.theme-dark {
+  .system-placeholder-item {
+    .placeholder-key {
+      background: var(--dgc-gray-700);
+    }
+
+    &:hover {
+      background: rgba($primary, 0.1);
+    }
+  }
+}

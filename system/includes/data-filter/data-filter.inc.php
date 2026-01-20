@@ -30,6 +30,9 @@ if (isset($_POST['submit'])) {
         case 'test_data_filter_query':
             testDataFilterQuery($_POST);
             break;
+        case 'get_system_placeholders':
+            getSystemPlaceholders();
+            break;
     }
 }
 
@@ -102,6 +105,7 @@ function showDataFilterForm($filterId = null)
     $tpl->filter = $filter;
     $tpl->allFilters = $allFilters;
     $tpl->totalFilters = $totalFilters;
+    $tpl->systemPlaceholders = SystemPlaceholderManager::getAllAsArray();
     $theme->setContent('full_main', $tpl->parse());
 }
 
@@ -205,6 +209,7 @@ function deleteDataFilter($data)
  * Test data filter query (for query-based filter options)
  * Query should return 'value' and 'label' columns
  * Optional 'is_selected' column (1/0) to pre-select options
+ * System placeholders (like ::logged_in_uid) are resolved before testing
  */
 function testDataFilterQuery($data)
 {
@@ -213,6 +218,9 @@ function testDataFilterQuery($data)
     if (empty($query)) {
         Utility::ajaxResponseFalse('Please enter a SQL query');
     }
+
+    // Resolve system placeholders before testing
+    $query = SystemPlaceholderManager::resolveInQuery($query);
 
     // Add LIMIT for safety
     $testQuery = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $query);
@@ -268,4 +276,13 @@ function testDataFilterQuery($data)
         'warnings' => $warnings,
         'hasIsSelected' => $hasIsSelected
     ));
+}
+
+/**
+ * Get all system placeholders (AJAX endpoint)
+ */
+function getSystemPlaceholders()
+{
+    $placeholders = SystemPlaceholderManager::getAllAsArray();
+    Utility::ajaxResponseTrue('System placeholders loaded', array('placeholders' => $placeholders));
 }

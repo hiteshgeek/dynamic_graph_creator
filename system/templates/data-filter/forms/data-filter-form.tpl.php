@@ -232,6 +232,25 @@
                                         <div id="query-result" class="query-test-result" style="display: none;"></div>
                                     </div>
                                 </div>
+
+                                <!-- System Placeholders Reference -->
+                                <?php if (!empty($systemPlaceholders)): ?>
+                                <div class="system-placeholders-panel">
+                                    <div class="system-placeholders-header">
+                                        <i class="fas fa-code"></i>
+                                        <span>System Placeholders</span>
+                                        <small class="text-muted">Click to insert into query</small>
+                                    </div>
+                                    <div class="system-placeholders-list">
+                                        <?php foreach ($systemPlaceholders as $sp): ?>
+                                        <div class="system-placeholder-item" data-placeholder="::<?php echo htmlspecialchars($sp['placeholder_key']); ?>" title="<?php echo htmlspecialchars($sp['description']); ?>">
+                                            <code class="placeholder-key">::<?php echo htmlspecialchars($sp['placeholder_key']); ?></code>
+                                            <span class="placeholder-label"><?php echo htmlspecialchars($sp['placeholder_label']); ?></span>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
                             </div>
 
                         </div>

@@ -276,15 +276,32 @@ class DataFilterManager
 
     /**
      * Extract placeholders from a SQL query
+     * Excludes system placeholders (like ::logged_in_uid) - only returns filter placeholders
      *
      * @param string $query SQL query string
+     * @param bool $excludeSystemPlaceholders Whether to exclude system placeholders (default: true)
      * @return array Array of placeholder keys found
      */
-    public static function extractPlaceholders($query)
+    public static function extractPlaceholders($query, $excludeSystemPlaceholders = true)
     {
         $placeholders = array();
+
+        // Get system placeholder keys to exclude
+        $systemPlaceholderKeys = array();
+        if ($excludeSystemPlaceholders) {
+            $systemPlaceholderKeys = SystemPlaceholderManager::getAllKeys();
+        }
+
         if (preg_match_all('/::([a-zA-Z_][a-zA-Z0-9_]*)/', $query, $matches)) {
-            foreach ($matches[0] as $match) {
+            foreach ($matches[0] as $index => $match) {
+                // Get the key without :: prefix
+                $key = $matches[1][$index];
+
+                // Skip if it's a system placeholder
+                if ($excludeSystemPlaceholders && in_array($key, $systemPlaceholderKeys)) {
+                    continue;
+                }
+
                 if (!in_array($match, $placeholders)) {
                     $placeholders[] = $match;
                 }
@@ -418,6 +435,9 @@ class DataFilterManager
     public static function replaceQueryPlaceholders($query, $filterValues, $placeholderSettings = array())
     {
         $db = Rapidkart::getInstance()->getDB();
+
+        // First, resolve system placeholders (like ::logged_in_uid)
+        $query = SystemPlaceholderManager::resolveInQuery($query);
 
         // Expand date range filters into _from and _to placeholders
         $filterValues = self::expandDateRangeValues($filterValues);

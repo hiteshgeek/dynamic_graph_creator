@@ -19,6 +19,7 @@ out/
 .env.local
 .env.*.local
 *.local
+export_tables/.developer_db.env
 
 # IDE and editor files
 .idea/
@@ -62,13 +63,6 @@ tmp/
 temp/
 *.tmp
 *.temp
-
-# SQL export files (contain credentials)
-sql/export_login_tables.sh
-sql/login_tables_*.sql
-
-# Keep install.sql
-!sql/install.sql
 
 # Package manager lock files (optional - uncomment if needed)
 # package-lock.json

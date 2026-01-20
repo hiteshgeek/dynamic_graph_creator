@@ -183,6 +183,22 @@ export default class DataFilterFormPage {
                 this.saveFilter();
             });
         }
+
+        // System placeholder click to insert
+        document.querySelectorAll('.system-placeholder-item').forEach(item => {
+            item.addEventListener('click', () => this.insertSystemPlaceholder(item.dataset.placeholder));
+        });
+    }
+
+    /**
+     * Insert system placeholder into query editor at cursor position
+     */
+    insertSystemPlaceholder(placeholder) {
+        if (!this.queryEditor || !placeholder) return;
+
+        const cursor = this.queryEditor.getCursor();
+        this.queryEditor.replaceRange(placeholder, cursor);
+        this.queryEditor.focus();
     }
 
     /**
