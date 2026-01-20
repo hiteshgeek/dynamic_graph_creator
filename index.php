@@ -44,10 +44,6 @@ require_once __DIR__ . '/system/classes/LicenceCompanies.php';
 require_once __DIR__ . '/system/classes/LicenceManager.php';
 require_once __DIR__ . '/system/classes/LicenceDomain.php';
 
-// Load Rapidkart stub classes (only defines classes if they don't exist)
-// These provide test data for company/outlet filters in DGC dev environment
-require_once __DIR__ . '/system/classes/RapidkartStubs.php';
-
 // Initialize session
 Session::init();
 
