@@ -1,0 +1,1177 @@
+<?php
+
+    /*
+     * To change this license header, choose License Headers in Project Properties.
+     * To change this template file, choose Tools | Templates
+     * and open the template in the editor.
+     */
+
+    /**
+     * Description of SystemTablesStatus
+     *
+     * @author asharani
+     */
+    class SystemTablesStatus
+    {
+        /*  Roles */
+
+        const DELIVERY_USER_ROLE = "11";
+        const RETURN_ITEM_MANAGE_ROLE = "16";
+
+        /* ItemReturn */
+        const RETURN_ITEM_PENDING_STATUS = "1";
+        const RETURN_ITEM_INITIATED_STATUS = "2";
+        const RETURN_ITEM_APPROVED_STATUS = "3";
+        const RETURN_ITEM_RECEIVED_STATUS = "4";
+        const RETURN_ITEM_CANCELLED_STATUS = "5";
+        const DB_TBL_FAUJIES_MODULE_SERVICES = "6";
+
+        /* Inventory set Item Status */
+        CONST INVENTORY_SET_ITEM_RETURNED_STATUS = '6';
+        CONST INVENTORY_SET_ITEM_DISCARDED_STATUS = '7';
+        const DB_TBL_INVENTORY_SET_STATUS_ACTIVE = "1";
+        const DB_TBL_INVENTORY_SET_ITEM_STATUS_ACTIVE = "1";
+        const DB_TBL_INVENTORY_SET_ITEM_STATUS_INACTIVE = "2";
+        const DB_TBL_INVENTORY_SET_ITEM_STATUS_DELETE = "3";
+        const DB_TBL_INVENTORY_SET_VARIATIONS_ACTIVE = "1";
+
+        /**
+         * Inventory set container(Consignment) statuses
+         */
+        const DB_TBL_INVENTORY_SET_CONTAINER_STATUS_ACTIVE = 1;
+        const DB_TBL_INVENTORY_SET_CONTAINER_STATUS_INACTIVE = 2;
+        const DB_TBL_INVENTORY_SET_CONTAINER_STATUS_DELETED = 3;
+        const DB_TBL_INVENTORY_SET_CONTAINER_STATUS_FREEZED = 4;
+        const DB_TBL_INVENTORY_SET_CONTAINER_STATUS_PAYMENT_APPROVED = 5;
+
+        /**
+         * Inventory Set Variation Photos
+         */
+        const DB_TBL_INVENTORY_SET_VARIATIONS_PHOTOS_FILETYPE_IMAGE = 1;
+        const DB_TBL_INVENTORY_SET_VARIATIONS_PHOTOS_FILETYPE_VIDEO = 2;
+
+        /**
+         * Discount Types
+         */
+        const DISCOUNT_TYPE_PERCENT = 1;
+        const DISCOUNT_TYPE_INR = 2;
+
+        /* Admin User */
+        const SUPER_ADMIN_UID = '1';
+        const ADMIN_USER_ACTIVE_STATE = '1';
+        const ADMIN_USER_INACTIVE_STATE = '2';
+        const ADMIN_USER_DELETED_STATE = '3';
+        const ADMIN_USER_STATIC_STATE = '4';
+
+        /* Admin User OTP settings */
+        const ADMIN_USER_OTP_SETTINGS_ACTIVE_STATE = 1;
+        const ADMIN_USER_OTP_SETTINGS_INACTIVE_STATE = 2;
+        const ADMIN_USER_OTP_SETTINGS_DELETE_STATE = 3;
+        const ADMIN_USER_OTP_CODE_ACTIVE_STATE = 1;
+        const ADMIN_USER_OTP_CODE_INACTIVE_STATE = 2;
+        const ADMIN_USER_OTP_CODE_DELETE_STATE = 3;
+
+        /* Admin user email and mobile verification statuses */
+        const ADMIN_USER_EMAIL_UNVERIFIED_STATE = 1;
+        const ADMIN_USER_EMAIL_VERIFIED_STATE = 2;
+        const ADMIN_USER_MOBILE_UNVERIFIED_STATE = 1;
+        const ADMIN_USER_MOBILE_VERIFIED_STATE = 2;
+
+        /* Admin user session statuses */
+        const ADMIN_USER_SESSION_ACTIVE = 1;
+        const ADMIN_USER_SESSION_inACTIVE = 2;
+
+        /**
+         * Admin user role statuses
+         */
+        const ADMIN_USER_ROLE_STATUS_ACTIVE = 1;
+        const ADMIN_USER_ROLE_STATUS_INACTIVE = 2;
+        const ADMIN_USER_ROLE_STATUS_DELETED = 3;
+        const ADMIN_USER_ROLE_STATUS_STATIC = 4;
+
+        /* Generic Item Status */
+        const GI_ACTIVE_STATUS = '1';
+
+        /* Cart */
+        const CART_ITEM_ACTIVE = "1";
+        const CART_ITEM_DELETED = "3";
+
+        /* Team */
+        const TEAM_ACTIVE_STATE = "1";
+        const TEAM_INACTIVE_STATE = "2";
+        const TEAM_DELETE_STATE = "3";
+
+        /* Team */
+        const TEAM_VIDEO_ACTIVE_STATE = "1";
+        const TEAM_VIDEO_INACTIVE_STATE = "2";
+        const TEAM_VIDEO_DELETE_STATE = "3";
+
+        /* Team Attribute Status */
+        const TEAM_ATTRIBUTE_ACTIVE_STATE = "1";
+        const TEAM_ATTRIBUTE_INACTIVE_STATE = "2";
+        const TEAM_ATTRIBUTE_DELETE_STATE = "3";
+
+        /* Team Attribtes */
+        const TEAM_ATTRIBUTE_DOB = "Date of birth";
+        const TEAM_ATTRIBUTE_HOBBIES = "Hobbies";
+        const TEAM_ATTRIBUTE_DETAILS = "Details";
+
+        /* Team Member Status */
+        const TEAM_MEMBER_ACTIVE_STATE = "1";
+        const TEAM_MEMBER_INACTIVE_STATE = "2";
+        const TEAM_MEMBER_DELETE_STATE = "3";
+
+        /* Order */
+        const ORDER_RUNNING_STATUS = "1";
+        const ORDER_EXECUTED_STATUS = "2";
+        const ORDER_PENDING_STATUS = "3";
+        const ORDER_FAILED_STATUS = "4";
+        const ORDER_CANCELLED_STATUS = "5";
+        const ORDER_CANCEL_REQUEST_STATUS = "6";
+        const ORDER_INITIATED_STATE = "7";
+
+        /* Order Item */
+        const ORDER_ITEM_ACTIVE_STATUS = "1";
+        const ORDER_ITEM_PARTIAL_EXECUTED_STATUS = "2";
+        const ORDER_ITEM_EXECUTED_STATUS = "3";
+        const ORDER_ITEM_PARTIAL_DELIVERED_STATUS = "4";
+        const ORDER_ITEM_DELIVERED_STATUS = "5";
+        const ORDER_ITEM_CANCELLED_STATUS = "6";
+        const ORDER_ITEM_RETURNED_FAILED = "7";
+        const ORDER_ITEM_DELIVERY_FAILED_STATUS = "8";
+
+        /**
+         * Order request
+         */
+        const DB_TBL_ORDER_REQUEST_STATUS_PENDING = 1;
+        const DB_TBL_ORDER_REQUEST_STATUS_APPROVED = 2;
+        const DB_TBL_ORDER_REQUEST_STATUS_REJECTED = 3;
+
+        /* indiafaujies */
+        const DB_TBL_CUSTOMER_RELATION_TYPE_SELF = "1";
+        const DB_TBL_CUSTOMER_RELATION_TYPE_SPOUSE = "2";
+        const DB_TBL_CUSTOMER_RELATION_TYPE_SON = "3";
+        const DB_TBL_CUSTOMER_RELATION_TYPE_DAUGHTER = "4";
+        const DB_TBL_CUSTOMER_RELATION_TYPE_MOTHER = "5";
+        const DB_TBL_CUSTOMER_RELATION_TYPE_FATHER = "6";
+
+        /* customer status */
+        const DB_TBL_CUSTOMER_STATUS_ACTIVE = "1";
+        const DB_TBL_CUSTOMER_STATUS_INACTIVE = "2";
+        const DB_TBL_CUSTOMER_STATUS_EMAIL_UNVARIFIED = "3";
+        const DB_TBL_CUSTOMER_STATUS_DELETED = "4";
+        const DB_TBL_INFLUENCER_STATUS_ACTIVE = "1";
+        const DB_TBL_INFLUENCER_STATUS_INACTIVE = "2";
+        const DB_TBL_INFLUENCER_STATUS_EMAIL_UNVARIFIED = "3";
+        const DB_TBL_INFLUENCER_STATUS_DELETED = "4";
+
+        /* Customer shipping address status */
+        const DB_TBL_CUSTOMER_SHIPPING_ADDRESS_STATUS_ACTIVE = 1;
+        const DB_TBL_CUSTOMER_SHIPPING_ADDRESS_STATUS_INACTIVE = 2;
+        const DB_TBL_CUSTOMER_SHIPPING_ADDRESS_STATUS_DELETED = 3;
+
+        /*
+         * property posession type
+         */
+        const DB_TBL_PROPERTY_POSESSION_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_PROPERTY_POSESSION_TYPE_STATUS_INACTIVE = 2;
+
+        /*
+         * property area type
+         */
+        const DB_TBL_PROPERTY_AREA_TYPE_COVERED = 1;
+        const DB_TBL_PROPERTY_AREA_TYPE_PLOT = 2;
+        const DB_TBL_PROPERTY_AREA_TYPE_CARPET = 3;
+        /*
+         * property scale type status
+         */
+        const DB_TBL_PROPERTY_SCALE_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_PROPERTY_SCALE_TYPE_STATUS_INACTIVE = 2;
+
+        /*
+         * Property status
+         */
+        const DB_TBL_PROPERTY_STATUS_ACTIVE = 1;
+        const DB_TBL_PROPERTY_STATUS_INACTIVE = 2;
+        const DB_TBL_PROPERTY_STATUS_DELETED = 3;
+
+        /*
+         * Property sale types
+         */
+        const DB_TBL_PROPERTY_SALE_TYPE_SALE = 3;
+        const DB_TBL_PROPERTY_SALE_TYPE_RENT = 4;
+
+        /*
+         * property transaction type status
+         */
+        const DB_TBL_PROPERTY_TRANSACTION_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_PROPERTY_TRANSACTION_TYPE_STATUS_INACTIVE = 2;
+
+        /* indianfaujies modules */
+        const DB_TBL_FAUJIES_MODULE_SOCIAL_CONNECT = "1";
+        const DB_TBL_FAUJIES_MODULE_MATRIMONIAL = "2";
+        const DB_TBL_FAUJIES_MODULE_BUY_N_SELL = "3";
+        const DB_TBL_FAUJIES_MODULE_PROPERTY = "4";
+        const DB_TBL_FAUJIES_MODULE_DEALS = "5";
+
+        /*
+         * indianfaujies Seller
+         */
+        const DB_TBL_SELLER_STATUS_ACTIVE = "1";
+        const DB_TBL_SELLER_STATUS_INACTIVE = "2";
+        const DB_TBL_SELLER_STATUS_DELETED = "3";
+
+        /**
+         * indianfaujies Matrimonial status.
+         */
+        const DB_TBL_MATRIMONIAL_SCALE_TYPE_FEET = 1;
+        const DB_TBL_MATRIMONIAL_SCALE_TYPE_CMS = 2;
+        const DB_TBL_MATRIMONIAL_SCALE_TYPE_KILOS = 3;
+        const DB_TBL_MATRIMONIAL_STATUS_ACTIVE = 1;
+        const DB_TBL_MATRIMONIAL_STATUS_INACTIVE = 2;
+        const DB_TBL_MATRIMONIAL_STATUS_DELETED = 3;
+        const DB_TBL_MATRIMONIAL_RELATION_MYSELF = 1;
+        const DB_TBL_MATRIMONIAL_RELATION_OTHER = 2;
+
+        /*
+         * indianfaujies Buy n Sell Ad type
+         */
+        const DB_TBL_ADVERTISEMENT_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_ADVERTISEMENT_TYPE_STATUS_INACTIVE = 2;
+        const DB_TBL_ADVERTISEMENT_STATUS_ACTIVE = 1;
+        const DB_TBL_ADVERTISEMENT_STATUS_INACTIVE = 2;
+        const DB_TBL_ADVERTISEMENT_STATUS_DELETED = 3;
+
+        /**
+         * Gender status
+         */
+        const DB_TBL_GENDER_MALE = 1;
+        const DB_TBL_GENDER_FEMALE = 2;
+
+        /*
+         * indianfaujies category status
+         */
+        const DB_TBL_CATEGORY_STATUS_ACTIVE = "1";
+        const DB_TBL_CATEGORY_STATUS_INACTIVE = "2";
+        const DB_TBL_CATEGORY_STATUS_DELETED = "3";
+
+        /* indianfaujies deals */
+        const DB_TBL_DEAL_STATUS_ACTIVE = 1;
+        const DB_TBL_DEAL_STATUS_INACTIVE = 2;
+        const DB_TBL_DEAL_STATUS_DELETED = 3;
+        const DB_TBL_DEAL_STATUS_NEED_APPROVAL = 4;
+        const DB_TBL_DEAL_COMPANY_STATUS_ACTIVE = 1;
+        const DB_TBL_DEAL_COMPANY_STATUS_INACTIVE = 2;
+        const DB_TBL_DEAL_COMPANY_STATUS_DELETED = 3;
+
+        /* indianfaujies Socio Connect */
+        const DB_TBL_SOCIO_GROUP_PHOTO_STATUS_ACTIVE = 1;
+        const DB_TBL_SOCIO_GROUP_PHOTO_STATUS_INACTIVE = 2;
+        const DB_TBL_SOCIO_GROUP_ACTIVE = 1;
+        const DB_TBL_SOCIO_GROUP_INACTIVE = 2;
+        const DB_TBL_SOCIO_GROUP_DELETED = 3;
+        const DB_TBL_SOCIO_EVENT_PHOTO_ACTIVE = 1;
+        const DB_TBL_SOCIO_EVENT_PHOTO_INACTIVE = 2;
+        const DB_TBL_SOCIO_EVENT_ACTIVE = 1;
+        const DB_TBL_SOCIO_EVENT_INACTIVE = 2;
+        const DB_TBL_SOCIO_EVENT_UNVERIFIED = 3;
+        /*
+         * accesssories
+         */
+        const DB_TBL_ITEM_ACCESSORIES_STATUS_ACTIVE = 1;
+        const DB_TBL_ITEM_ACCESSORIES_STATUS_INACTIVE = 2;
+        const DB_TBL_ITEM_ACCESSORIES_STATUS_DELETE = 3;
+
+        /* Package Shipping Type */
+        const PACKAGE_SHIPPING_INTERNAL_TYPE = "1";
+        /*
+         * item features statuses
+         */
+        const DB_TBL_ITEM_ITEM_FEATURE_STATUS_ACTIVE = 1;
+        const DB_TBL_ITEM_ITEM_FEATURE_STATUS_INACTIVE = 2;
+        const DB_TBL_ITEM_ITEM_FEATURE_STATUS_DELETED = 3;
+
+        /* Offer Status */
+        const DB_TBL_OFFER_DELETE_STATUS = 3;
+
+        /* Customer Payment Option */
+        const IN_CASH_PAYMENT_OPTION = 7;
+
+        /*
+         * Payment option...
+         */
+        const DB_TBL_CUSTOMER_PAYMENT_OPTION_TYPE_STATUS_INSTANT = 1;
+        const DB_TBL_CUSTOMER_PAYMENT_OPTION_TYPE_STATUS_ON_DELIVERY = 2;
+        const DB_TBL_CUSTOMER_PAYMENT_OPTION_TYPE_DEBIT_CARD = 1;
+        const DB_TBL_CUSTOMER_PAYMENT_OPTION_TYPE_CREDIT_CARD = 2;
+        const DB_TBL_CUSTOMER_PAYMENT_OPTION_TYPE_NET_BANKING = 3;
+        const DB_TBL_CUSTOMER_PAYMENT_OPTION_TYPE_COD = 5;
+        const DB_TBL_CUSTOMER_PAYMENT_OPTION_TYPE_REFERRAL = 6;
+        const DB_TBL_CUSTOMER_PAYMENT_OPTION_TYPE_EMI = 2;
+        const DB_TBL_CUSTOMER_PAYMENT_OPTION_STATUS_ACTIVE = 1;
+        const DB_TBL_CUSTOMER_PAYMENT_OPTION_STATUS_INACTIVE = 2;
+        const DB_TBL_CUSTOMER_PAYMENT_OPTION_TYPE_STATUS_REFERRAL = 4;
+
+        /**
+         * Distributor statuses
+         */
+        const DB_TBL_DISTRIBUTOR_STATUS_ACTIVE = 1;
+        const DB_TBL_DISTRIBUTOR_STATUS_INACTIVE = 2;
+        const DB_TBL_DISTRIBUTOR_STATUS_DELETED = 3;
+
+        /* Customer Payment Option Type */
+        const INSTANT_PAYMENT_OPTION_TYPE = 1;
+
+        /* Customer Payment user */
+        // for COD it is admin user
+
+        const PAYMENT_USER_ADMIN = "1";
+
+        /* Transaction Type */
+        const TRANSACTION_TYPE_CREDIT = "1";
+        const TRANSACTION_TYPE_DEBIT = "2";
+
+        /* Transaction Status */
+        const TRANSACTION_APPROVED_STATUS = "2";
+        const TRANSACTION_PENDING_STATUS = 3;
+
+        /* Temporary Order Status */
+        const TEMPORARY_ORDER_EXECUTED_STATUS = "3";
+
+        /* Temporary order item status */
+        const TEMPORARY_ORDER_ITEM_ACTIVE_STATUS = "1";
+        const TEMPORARY_ORDER_ITEM_PENDING_STATUS = "3";
+
+        /* Email template */
+        const DB_TBL_EMAIL_TEMPLATE_STATUS_ACTIVE = 1;
+        const DB_TBL_EMAIL_TEMPLATE_STATUS_INACTIVE = 2;
+        const DB_TBL_EMAIL_TEMPLATE_STATUS_DELETED = 3;
+
+        /* Sms template */
+        const DB_TBL_SMS_TEMPLATE_STATUS_ACTIVE = 1;
+        const DB_TBL_SMS_TEMPLATE_STATUS_INACTIVE = 2;
+        const DB_TBL_SMS_TEMPLATE_STATUS_DELETED = 3;
+
+        /**
+
+         * Customer query statuses
+         */
+        const DB_TBL_CUSTOMER_QUERY_STATUS_UNINITIALIZED = 1;
+        const DB_TBL_CUSTOMER_QUERY_STATUS_INITIALIZED = 2;
+        const DB_TBL_CUSTOMER_QUERY_STATUS_SOLVED = 3;
+
+        /**
+         * Customer query issue statuses
+         */
+        const DB_TBL_CUSTOMER_QUERY_ISSUE_STATUS_ACTIVE = 1;
+        const DB_TBL_CUSTOMER_QUERY_ISSUE_STATUS_INACTIVE = 2;
+        const DB_TBL_CUSTOMER_QUERY_ISSUE_STATUS_DELETED = 3;
+        const DB_TBL_CUSTOMER_QUERY_ISSUE_STATUS_STATIC = 4;
+
+        /**
+         * Customer query issue attribute statuses
+         */
+        const DB_TBL_CUSTOMER_QUERY_ISSUE_ATTRIBUTE_STATUS_ACTIVE = 1;
+        const DB_TBL_CUSTOMER_QUERY_ISSUE_ATTRIBUTE_STATUS_INACTIVE = 2;
+        const DB_TBL_CUSTOMER_QUERY_ISSUE_ATTRIBUTE_STATUS_DELETED = 3;
+
+        /**
+         * Customer query issue attribute statuses
+         */
+        const DB_TBL_CUSTOMER_QUERY_PRIORITY_STATUS_ACTIVE = 1;
+        const DB_TBL_CUSTOMER_QUERY_PRIORITY_STATUS_INACTIVE = 2;
+        const DB_TBL_CUSTOMER_QUERY_PRIORITY_STATUS_DELETED = 3;
+
+        /*
+         * Service type status
+         */
+        const DB_TBL_SERVICE_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_SERVICE_TYPE_STATUS_INACTIVE = 2;
+
+        /*
+         * Service status
+         */
+        const DB_TBL_SERVICE_STATUS_ACTIVE = 1;
+        const DB_TBL_SERVICE_STATUS_INACTIVE = 2;
+        const DB_TBL_SERVICE_STATUS_DELETED = 3;
+        const DB_TBL_SERVICE_STATUS_NEED_APPROVAL = 4;
+
+        /**
+         * Checkpoint status
+         */
+        const DB_TBL_CHECKPOINT_ITEM_ORDER_STATUS_ACTIVE = 1;
+        const DB_TBL_CHECKPOINT_ITEM_ORDER_STATUS_EXECUTED = 2;
+
+        /**
+         * Checkpoint order statues
+         */
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_PENDING = 1;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_PARTIALLY_ASSIGNED = 2;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_ASSIGNED = 3;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_PARTIALLY_DELIVERED = 4;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_DELIVERED = 5;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_REJECTED = 6;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_REVOKED = 7;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_PARTIALLY_EXECUTED = 8;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_EXECUTED = 9;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_CANCELED = 10;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_DELETED = 11;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_TO_BE_APPROVED = 12;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_NOT_APPLICABLE = 13;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_CLOSED = 14;
+        const DB_TBL_CHECKPOINT_ORDER_STATUS_MERGED = 15;
+
+        /* Package shipping status */
+        const PACKAGE_DELIVERY_FAILED = "8";
+
+        /* Package Shipping status */
+        const DB_TBL_PACKAGE_SHIPPING_STATUS_PACKED = 1;
+        const DB_TBL_PACKAGE_SHIPPING_STATUS_SHIPPED = 2;
+        const DB_TBL_PACKAGE_SHIPPING_STATUS_OUT_FOR_DELIVERY = 3;
+        const DB_TBL_PACKAGE_SHIPPING_STATUS_DELIVERED = 4;
+        const DB_TBL_PACKAGE_SHIPPING_STATUS_ATTEMPT_FAILED = 5;
+        const DB_TBL_PACKAGE_SHIPPING_STATUS_RE_ATTEMPT = 6;
+        const DB_TBL_PACKAGE_SHIPPING_STATUS_RETURNED = 7;
+        const DB_TBL_PACKAGE_SHIPPING_STATUS_DELIVERY_FAILED = 8;
+
+        /* ItemReturn action */
+        const RETURN_ITEM_ACTION_STATUS_REFUND = 1;
+
+        /* Static page status */
+        const DB_TBL_STATIC_PAGE_STATUS_ACTIVE = 1;
+        const DB_TBL_STATIC_PAGE_STATUS_INACTIVE = 2;
+        const DB_TBL_STATIC_PAGE_STATUS_DELETE = 3;
+
+        /* Language status */
+        const DB_TBL_LANGUAGE_STATUS_ACTIVE = 1;
+        const DB_TBL_LANGUAGE_STATUS_INACTIVE = 2;
+        const DB_TBL_LANGUAGE_STATUS_DELETE = 3;
+
+        /* Inventory Set Type Status */
+        const INVENTORY_TYPE_AVTIVE_STATUS = 1;
+        const INVENTORY_TYPE_INAVTIVE_STATUS = 2;
+
+        /* Inventory set types */
+        const INVENTORY_ONLINE_TYPE = "1";
+        const INVENTORY_POS_TYPE = "2";
+
+        /**
+         * leave table status
+         */
+        const DB_TBL_HR_LEAVE_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_HR_LEAVE_TYPE_STATUS_INACTIVE = 2;
+        const DB_TBL_HR_LEAVE_TYPE_STATUS_DELETE = 3;
+        const DB_TBL_HR_LEAVE_PERIOD_STATUS_ACTIVE = 1;
+        const DB_TBL_HR_LEAVE_PERIOD_STATUS_INACTIVE = 2;
+        const DB_TBL_HR_LEAVE_PERIOD_STATUS_DELETE = 3;
+        const DB_TBL_HR_LEAVE_PERIOD_TIME_STATUS_ACTIVE = 1;
+        const DB_TBL_HR_LEAVE_PERIOD_TIME_STATUS_INACTIVE = 2;
+        const DB_TBL_HR_LEAVE_PERIOD_TIME_STATUS_DELETE = 3;
+        const DB_TBL_HR_LEAVE_ENTITLEMENT_STATUS_ACTIVE = 1;
+        const DB_TBL_HR_LEAVE_ENTITLEMENT_STATUS_INACTIVE = 2;
+        const DB_TBL_HR_LEAVE_ENTITLEMENT_STATUS_DELETE = 3;
+        const DB_TBL_HR_LEAVE_REQUEST_STATUS_PENDING = 1;
+        const DB_TBL_HR_LEAVE_REQUEST_STATUS_SCHEDULED = 2;
+        const DB_TBL_HR_LEAVE_REQUEST_STATUS_TAKEN = 3;
+        const DB_TBL_HR_LEAVE_REQUEST_STATUS_REJECTED = 4;
+        const DB_TBL_HR_LEAVE_REQUEST_STATUS_CANCELED = 5;
+        const DB_TBL_HR_LEAVE_REQUEST_STATUS_DELETED = 6;
+        const DB_TBL_HR_LEAVE_REQUEST_STATUS_TYPE_DISPLAY = 0;
+        const DB_TBL_HR_LEAVE_REQUEST_STATUS_TYPE_HIDE = 1;
+
+        /**
+         * EMPLOYEE table status
+         */
+        const DB_TBL_HR_EMPLOYEE_STATUS_ACTIVE = 1;
+        const DB_TBL_HR_EMPLOYEE_STATUS_INACTIVE = 2;
+        const DB_TBL_HR_EMPLOYEE_STATUS_DELETE = 3;
+        const DB_TBL_HR_EMPLOYEE_STATUS_TERMINATED = 4;
+        const DB_TBL_HR_EMPLOYEE_STATUS_TERMINATION_INITIATED = 5;
+        const DB_TBL_HR_EMPLOYEE_DEPARTMENT_STATUS_ACTIVE = 1;
+        const DB_TBL_HR_EMPLOYEE_DEPARTMENT_STATUS_INACTIVE = 2;
+        const DB_TBL_HR_EMPLOYEE_DEPARTMENT_STATUS_DELETE = 3;
+        const DB_TBL_HR_EMPLOYEE_GROUP_STATUS_ACTIVE = 1;
+        const DB_TBL_HR_EMPLOYEE_GROUP_STATUS_INACTIVE = 2;
+        const DB_TBL_HR_EMPLOYEE_GROUP_STATUS_DELETED = 3;
+        const DB_TBL_HR_HOLIDAY_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_HR_HOLIDAY_TYPE_STATUS_INACTIVE = 2;
+        const DB_TBL_HR_HOLIDAY_TYPE_STATUS_DELETED = 3;
+        const DB_TBL_HR_EMPLOYEE_DESIGNATION_STATUS_ACTIVE = 1;
+        const DB_TBL_HR_EMPLOYEE_DESIGNATION_STATUS_INACTIVE = 2;
+        const DB_TBL_HR_EMPLOYEE_DESIGNATION_STATUS_DELETE = 3;
+        const DB_TBL_HR_EMPLOYEE_TERMINATION_STATUS_ACCEPTED = 1;
+        const DB_TBL_HR_EMPLOYEE_TERMINATION_STATUS_REJECTED = 2;
+        const DB_TBL_HR_EMPLOYEE_TERMINATION_STATUS_INITIATED = 3;
+        const DB_TBL_HR_EMPLOYEE_TERMINATION_STATUS_REVERTED = 4;
+        const DB_TBL_HR_EMPLOYEE_WORK_EXPERIENCE_STATUS_VERIFIED = 1;
+        const DB_TBL_HR_EMPLOYEE_WORK_EXPERIENCE_STATUS_UNVERIFIED = 2;
+        const DB_TBL_HR_EMPLOYEE_WORK_EXPERIENCE_STATUS_REJECTED = 3;
+        const DB_TBL_HR_EMPLOYEE_WORK_EXPERIENCE_STATUS_DELETED = 4;
+        const DB_TBL_HR_EMPLOYEE_EDUCATION_STATUS_VERIFIED = 1;
+        const DB_TBL_HR_EMPLOYEE_EDUCATION_STATUS_UNVERIFIED = 2;
+        const DB_TBL_HR_EMPLOYEE_EDUCATION_STATUS_REJECTED = 3;
+        const DB_TBL_HR_EMPLOYEE_EDUCATION_STATUS_DELETED = 4;
+
+        /**
+         * leave period times 
+         */
+        const DB_TBL_HR_LEAVE_PERIOD_TIME_FULL_DAY = 1;
+        const DB_TBL_HR_LEAVE_PERIOD_TIME_HALF_DAY = 2;
+        const DB_TBL_HR_LEAVE_PERIOD_TIME_ALL_DAY = 3;
+        const DB_TBL_HR_LEAVE_PERIOD_TIME_START_DAY_HALF = 4;
+        const DB_TBL_HR_LEAVE_PERIOD_TIME_END_DAY_HALF = 5;
+
+        /**
+         * Lead statuses
+         */
+        const DB_TBL_LEAD_STATUS_NEW = 1;
+        const DB_TBL_LEAD_STATUS_PROGRESS = 2;
+        const DB_TBL_LEAD_STATUS_CONVERTED = 3;
+        const DB_TBL_LEAD_STATUS_CANCELED = 4;
+
+        /**
+         * Followup statuses
+         */
+        const DB_TBL_FOLLOWUP_STATUS_PENDING = 1;
+        const DB_TBL_FOLLOWUP_STATUS_TAKEN = 2;
+        const DB_TBL_FOLLOWUP_STATUS_DISCARDED = 3;
+
+        /**
+         * Followup types
+         */
+        const DB_TBL_FOLLOWUP_TYPE_SCHEDULED = 1;
+        const DB_TBL_FOLLOWUP_TYPE_UNSCHEDULED = 2;
+
+        /**
+         * Followup outcome types
+         */
+        const DB_TBL_FOLLOWUP_OUTCOME_TYPE_NEGATIVE = 0;
+        const DB_TBL_FOLLOWUP_OUTCOME_TYPE_POSITIVE = 1;
+
+        /**
+         * Followup alert modes
+         */
+        const DB_TBL_FOLLOWUP_ALERT_MODE_NONE = 0;
+        const DB_TBL_FOLLOWUP_ALERT_MODE_SMS = 1;
+        const DB_TBL_FOLLOWUP_ALERT_MODE_EMAIL = 2;
+        const DB_TBL_FOLLOWUP_ALERT_MODE_BOTH = 3;
+
+        /**
+         * DMR statuses
+         */
+        const DB_TBL_DMR_STATUS_ACTIVE = 1;
+        const DB_TBL_DMR_STATUS_INACTIVE = 2;
+        const DB_TBL_DMR_STATUS_DELETED = 3;
+
+        /**
+         * Enquiry statuses
+         */
+        const DB_TBL_QUOTATION_STATUS_CONVERTED = 1;
+        const DB_TBL_QUOTATION_STATUS_PENDING = 2;
+        const DB_TBL_QUOTATION_STATUS_CANCELED = 3;
+        const DB_TBL_QUOTATION_STATUS_PARTIAL_QUOTATION = 6;
+
+        /**
+         * Jobcard statuses
+         */
+        const DB_TBL_JOB_CARD_STATUS_TO_BE_APPROVED = 1;
+        const DB_TBL_JOB_CARD_STATUS_PENDING = 2;
+        const DB_TBL_JOB_CARD_STATUS_ASSIGNED = 3;
+        const DB_TBL_JOB_CARD_STATUS_UNDER_PROGRESS = 4;
+        const DB_TBL_JOB_CARD_STATUS_SITE_COMPLETED = 5;
+        const DB_TBL_JOB_CARD_STATUS_CANCELED = 7;
+        const DB_TBL_JOB_CARD_STATUS_DELETED = 6;
+
+        /**
+         * Permission statuses
+         */
+        const DB_TBL_PERMISSION_STATUS_ACTIVE = 1;
+        const DB_TBL_PERMISSION_STATUS_INACTIVE = 2;
+        const DB_TBL_PERMISSION_STATUS_DELETED = 3;
+
+        /**
+         * Enquiry statuses
+         */
+        const DB_TBL_ENQUIRY_STATUS_CONVERTED = 1;
+        const DB_TBL_ENQUIRY_STATUS_PENDING = 2;
+        const DB_TBL_ENQUIRY_STATUS_CANCELED = 3;
+        const DB_TBL_ENQUIRY_STATUS_DELETED = 4;
+        const DB_TBL_ENQUIRY_STATUS_ON_HOLD = 5;
+
+        /**
+         * System group statuses
+         */
+        const DB_TBL_SYSTEM_GROUP_STATUS_ACTIVE = 1;
+        const DB_TBL_SYSTEM_GROUP_STATUS_INACTIVE = 2;
+        const DB_TBL_SYSTEM_GROUP_STATUS_DELETED = 3;
+
+        /**
+         * Chat statuses
+         */
+        const DB_TBL_CHAT_CHANNEL_STATUS_ACTIVE = 1;
+        const DB_TBL_CHAT_CHANNEL_STATUS_INACTIVE = 2;
+        const DB_TBL_CHAT_CHANNEL_STATUS_DELETED = 3;
+        const DB_TBL_CHAT_LIST_STATUS_ACTIVE = 1;
+        const DB_TBL_CHAT_LIST_STATUS_INACTIVE = 2;
+        const DB_TBL_CHAT_LIST_STATUS_DELETED = 3;
+        /*
+         * system settings
+         */
+        const DB_TBL_SYSTEM_SETTINGS_STATUS_ACTIVE = 1;
+        const DB_TBL_SYSTEM_SETTINGS_STATUS_INACTIVE = 2;
+        const DB_TBL_SYSTEM_SETTINGS_STATUS_DELETED = 3;
+
+        /**
+         * system settings TYPE
+         */
+        const DB_TBL_SYSTEM_SETTINGS_TYPE_BOOLEAN = 1;
+        const DB_TBL_SYSTEM_SETTINGS_TYPE_NUMBER = 2;
+
+        /**
+         * module table
+         */
+        const DB_TBL_MODULE_STATUS_ACTIVE = 1;
+        const DB_TBL_MODULE_STATUS_INACTIVE = 2;
+        const DB_TBL_MODULE_STATUS_DELETED = 3;
+
+        /**
+         * Chat message statuses
+         */
+        const DB_TBL_CHAT_MESSAGES_STATUS_UNREAD = 0;
+        const DB_TBL_CHAT_MESSAGES_STATUS_READ = 1;
+
+        /**
+         * Chat list types
+         */
+        const DB_TBL_CHAT_LIST_TYPE_INDIVIDUAL = 1;
+        const DB_TBL_CHAT_LIST_TYPE_GROUP = 2;
+        const DB_TBL_CHAT_LIST_TYPE_CHANNEL = 3;
+
+        /**
+         * Business tax profile statuses
+         */
+        const DB_TBL_BUSINESS_TAX_PROFILE_STATUS_ACTIVE = 1;
+        const DB_TBL_BUSINESS_TAX_PROFILE_STATUS_INACTIVE = 2;
+        const DB_TBL_BUSINESS_TAX_PROFILE_STATUS_DELETED = 3;
+
+        /**
+         * Business tax profile types
+         */
+        const DB_TBL_BUSINESS_TAX_PROFILE_TYPE_PAYABLE = 1;
+        const DB_TBL_BUSINESS_TAX_PROFILE_TYPE_RECEIVABLE = 2;
+
+        /**
+         * Industry type statuses
+         */
+        const DB_TBL_INDUSTRY_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_INDUSTRY_TYPE_STATUS_INACTIVE = 2;
+        const DB_TBL_INDUSTRY_TYPE_STATUS_DELETED = 3;
+
+        /**
+         * User wallet transaction type
+         */
+        const DB_TBL_USER_WALLET_TRANSACTION_CREDIT = 1;
+        const DB_TBL_USER_WALLET_TRANSACTION_DEBIT = 2;
+
+        /**
+         * Cover and Grid images statuses
+         */
+        const DB_TBL_COVER_IMAGE_STATUS_ACTIVE = 1;
+        const DB_TBL_COVER_IMAGE_STATUS_INACTIVE = 2;
+        const DB_TBL_COVER_IMAGE_STATUS_DELETED = 3;
+        const DB_TBL_GRID_IMAGE_STATUS_ACTIVE = 1;
+        const DB_TBL_GRID_IMAGE_STATUS_INACTIVE = 2;
+        const DB_TBL_GRID_IMAGE_STATUS_DELETED = 3;
+
+        /**
+         * Region statuses
+         */
+        const DB_TBL_REGION_STATUS_ACTIVE = 1;
+        const DB_TBL_REGION_STATUS_INACTIVE = 2;
+        const DB_TBL_REGION_STATUS_DELETED = 3;
+
+        /**
+         * Custome attribute statuses
+         */
+        const DB_TBL_CUSTOM_ATTRIBUTE_STATUS_ACTIVE = 1;
+        const DB_TBL_CUSTOM_ATTRIBUTE_STATUS_INACTIVE = 2;
+        const DB_TBL_CUSTOM_ATTRIBUTE_STATUS_DELETED = 3;
+
+        /**
+         * Claim Expense status
+         */
+        const DB_TBL_AUSER_EXPENSE_CLAIM_STATUS_PENDING = 1;
+        const DB_TBL_AUSER_EXPENSE_CLAIM_STATUS_APPROVED = 2;
+        const DB_TBL_AUSER_EXPENSE_CLAIM_STATUS_BILL_RECEIVED = 3;
+        const DB_TBL_AUSER_EXPENSE_CLAIM_STATUS_PAYMENT_PENDING = 4;
+        const DB_TBL_AUSER_EXPENSE_CLAIM_STATUS_PAYMENT_MADE = 5;
+        const DB_TBL_AUSER_EXPENSE_CLAIM_STATUS_REJECTED = 6;
+        const DB_TBL_AUSER_EXPENSE_CLAIM_STATUS_DELETED = 7;
+
+        /**
+         * Vendor statuses
+         */
+        const DB_TBL_VENDOR_STATUS_ACTIVE = 1;
+        const DB_TBL_VENDOR_STATUS_INACTIVE = 2;
+        const DB_TBL_VENDOR_STATUS_DELETED = 3;
+        const DB_TBL_VENDOR_TRANSPORTATION_STATUS_ACTIVE = 1;
+        const DB_TBL_VENDOR_TRANSPORTATION_STATUS_INACTIVE = 2;
+        const DB_TBL_VENDOR_TRANSPORTATION_STATUS_DELETED = 3;
+        const DB_TBL_VENDOR_TRANSPORTATION_STATUS_APPROVED = 4;
+
+        /**
+         * system reference types
+         * 
+         */
+        const DB_TBL_SYSTEM_REFERENCES_TYPE_CUSTOMER = 1;
+        const DB_TBL_SYSTEM_REFERENCES_TYPE_LEAD = 2;
+        const DB_TBL_SYSTEM_REFERENCES_TYPE_VENDOR = 3;
+        const DB_TBL_SYSTEM_REFERENCES_TYPE_OTHER = 4;
+
+        /**
+         * Inventory receive
+         */
+        const DB_TBL_INVENTORY_RECEIVE_STATUS_ACTIVE = 1;
+        const DB_TBL_INVENTORY_RECEIVE_STATUS_INACTIVE = 2;
+        const DB_TBL_INVENTORY_RECEIVE_STATUS_DELETED = 3;
+        const DB_TBL_INVENTORY_RECEIVE_ITEM_STATUS_ACTIVE = 1;
+        const DB_TBL_INVENTORY_RECEIVE_ITEM_STATUS_INACTIVE = 2;
+        const DB_TBL_INVENTORY_RECEIVE_ITEM_STATUS_DELETED = 3;
+
+        /**
+         * Account statuses
+         */
+        const DB_TBL_ACCOUNT_LEDGER_STATUS_STATIC = 1;
+        const DB_TBL_ACCOUNT_LEDGER_STATUS_ACTIVE = 2;
+        const DB_TBL_ACCOUNT_LEDGER_STATUS_INACTIVE = 3;
+        const DB_TBL_ACCOUNT_LEDGER_STATUS_DELETED = 4;
+        const DB_TBL_ACCOUNT_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_ACCOUNT_TYPE_STATUS_INACTIVE = 2;
+        const DB_TBL_ACCOUNT_TYPE_STATUS_DELETED = 3;
+        const DB_TBL_ACCOUNT_GROUP_STATUS_STATIC = 1;
+        const DB_TBL_ACCOUNT_GROUP_STATUS_ACTIVE = 2;
+        const DB_TBL_ACCOUNT_GROUP_STATUS_INACTIVE = 3;
+        const DB_TBL_ACCOUNT_GROUP_STATUS_DELETED = 4;
+        const DB_TBL_ACCOUNT_VOUCHER_STATUS_ACTIVE = 1;
+        const DB_TBL_ACCOUNT_VOUCHER_STATUS_INACTIVE = 2;
+        const DB_TBL_ACCOUNT_VOUCHER_STATUS_DELETED = 3;
+        const DB_TBL_ACCOUNT_VOUCHER_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_ACCOUNT_VOUCHER_TYPE_STATUS_INACTIVE = 2;
+        const DB_TBL_ACCOUNT_VOUCHER_TYPE_STATUS_DELETED = 3;
+        const DB_TBL_ACCOUNT_TRANSACTION_TYPE_DEBIT = 1;
+        const DB_TBL_ACCOUNT_TRANSACTION_TYPE_CREDIT = 2;
+        const DB_TBL_ACCOUNT_TRANSACTION_STATUS_PENDING = 1;
+        const DB_TBL_ACCOUNT_TRANSACTION_STATUS_SUCCESS = 2;
+        const DB_TBL_ACCOUNT_TRANSACTION_STATUS_FAILED = 3;
+        const DB_TBL_ACCOUNT_TRANSACTION_STATUS_CANCELED = 4;
+        const DB_TBL_ACCOUNT_TRANSACTION_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_ACCOUNT_TRANSACTION_TYPE_STATUS_INACTIVE = 2;
+        const DB_TBL_ACCOUNT_TRANSACTION_TYPE_STATUS_DELETED = 3;
+
+        /**
+         * Asset statuses
+         */
+        const DB_TBL_ASSET_STATUS_STATIC = 1;
+        const DB_TBL_ASSET_STATUS_ACTIVE = 2;
+        const DB_TBL_ASSET_STATUS_INACTIVE = 3;
+        const DB_TBL_ASSET_STATUS_DELETED = 4;
+        const DB_TBL_ASSET_PURCHASE_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_PURCHASE_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_PURCHASE_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_PURCHASE_ASSET_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_PURCHASE_ASSET_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_PURCHASE_ASSET_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_SALES_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_SALES_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_SALES_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_SALES_ASSET_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_SALES_ASSET_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_SALES_ASSET_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_DEPRECIATION_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_DEPRECIATION_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_DEPRECIATION_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_DEPRECIATION_ASSET_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_DEPRECIATION_ASSET_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_DEPRECIATION_ASSET_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_DEPRECIATION_METHOD_STATUS_STATIC = 1;
+        const DB_TBL_ASSET_DEPRECIATION_METHOD_STATUS_ACTIVE = 2;
+        const DB_TBL_ASSET_DEPRECIATION_METHOD_STATUS_INACTIVE = 3;
+        const DB_TBL_ASSET_DEPRECIATION_METHOD_STATUS_DELETED = 4;
+        const DB_TBL_ASSET_DEPRECIATION_PURPOSE_STATUS_STATIC = 1;
+        const DB_TBL_ASSET_DEPRECIATION_PURPOSE_STATUS_ACTIVE = 2;
+        const DB_TBL_ASSET_DEPRECIATION_PURPOSE_STATUS_INACTIVE = 3;
+        const DB_TBL_ASSET_DEPRECIATION_PURPOSE_STATUS_DELETED = 4;
+        const DB_TBL_ASSET_DISPOSAL_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_DISPOSAL_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_DISPOSAL_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_DISPOSAL_ASSET_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_DISPOSAL_ASSET_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_DISPOSAL_ASSET_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_TRANSFER_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_TRANSFER_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_TRANSFER_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_TRANSFER_ASSET_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_TRANSFER_ASSET_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_TRANSFER_ASSET_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_INSURANCE_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_INSURANCE_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_INSURANCE_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_INSURANCE_ASSET_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_INSURANCE_ASSET_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_INSURANCE_ASSET_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_MANAGEMENT_COMPANY_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_MANAGEMENT_COMPANY_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_MANAGEMENT_COMPANY_STATUS_DELETED = 3;
+        const DB_TBL_ASSET_MANAGEMENT_COMPANY_ASSET_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_MANAGEMENT_COMPANY_ASSET_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_MANAGEMENT_COMPANY_ASSET_STATUS_DELETED = 3;
+
+        /**
+         * Transaction Type
+         */
+        const DB_TBL_TRANSACTION_TYPE_CREDIT = 1;
+        const DB_TBL_TRANSACTION_TYPE_DEBIT = 2;
+
+        /**
+         * Invoice statuses
+         */
+        const DB_TBL_INVOICE_STATUS_ACTIVE = 1;
+        const DB_TBL_INVOICE_STATUS_INACTIVE = 2;
+        const DB_TBL_INVOICE_STATUS_DELETED = 3;
+        const DB_TBL_INVOICE_STATUS_PARTIAL_PAYMENT_DONE = 4;
+        const DB_TBL_INVOICE_STATUS_PAYMENT_DONE = 5;
+        const DB_TBL_INVOICE_STATUS_CANCELLED = 6;
+        const DB_TBL_INVOICE_STATUS_TO_BE_APPROVED = 7;
+        const DB_TBL_INVOICE_STATUS_REJECTED = 8;
+        const DB_TBL_INVOICE_ITEM_STATUS_ACTIVE = 1;
+        const DB_TBL_INVOICE_ITEM_STATUS_INACTIVE = 2;
+        const DB_TBL_INVOICE_ITEM_STATUS_DELETED = 3;
+        const DB_TBL_INVOICE_BUSINESS_TAX_PROFILE_DOCUMENT_STATUS_PENDING = 1;
+        const DB_TBL_INVOICE_BUSINESS_TAX_PROFILE_DOCUMENT_STATUS_UPLOADED = 2;
+        const DB_TBL_INVOICE_BUSINESS_TAX_PROFILE_DOCUMENT_STATUS_DELETED = 3;
+        const DB_TBL_PURCHASE_INVOICE_STATUS_ACTIVE = 1;
+        const DB_TBL_PURCHASE_INVOICE_STATUS_INACTIVE = 2;
+        const DB_TBL_PURCHASE_INVOICE_STATUS_DELETED = 3;
+        const DB_TBL_PURCHASE_INVOICE_STATUS_APPROVE = 6;
+        const DB_TBL_PURCHASE_INVOICE_ITEM_STATUS_ACTIVE = 1;
+        const DB_TBL_PURCHASE_INVOICE_ITEM_STATUS_INACTIVE = 2;
+        const DB_TBL_PURCHASE_INVOICE_ITEM_STATUS_DELETED = 3;
+        const DB_TBL_PURCHASE_INVOICE_BUSINESS_TAX_PROFILE_DOCUMENT_STATUS_PENDING = 1;
+        const DB_TBL_PURCHASE_INVOICE_BUSINESS_TAX_PROFILE_DOCUMENT_STATUS_UPLOADED = 2;
+        const DB_TBL_PURCHASE_INVOICE_BUSINESS_TAX_PROFILE_DOCUMENT_STATUS_DELETED = 3;
+        const DB_TBL_INVOICE_TRANSACTION_STATUS_SUCCESS = 1;
+        const DB_TBL_INVOICE_TRANSACTION_STATUS_APPROVED = 2;
+        const DB_TBL_INVOICE_TRANSACTION_STATUS_PENDING = 3;
+        const DB_TBL_INVOICE_TRANSACTION_STATUS_FAILED = 4;
+        const DB_TBL_INVOICE_TRANSACTION_STATUS_REJECTED = 5;
+        const DB_TBL_INVOICE_TRANSACTION_STATUS_DELETED = 6;
+        const DB_TBL_INVOICE_TRANSACTION_STATUS_RECONCILIATION_WAITING = 7;
+
+        /**
+         * Purchase Order
+         */
+        const DB_TBL_PURCHASE_ORDER_STATUS_CREATED = 1;
+        const DB_TBL_PURCHASE_ORDER_STATUS_PARTIAL_RECIEVED = 2;
+        const DB_TBL_PURCHASE_ORDER_STATUS_RECIEVED = 3;
+        const DB_TBL_PURCHASE_ORDER_STATUS_CANCELLED = 4;
+        const DB_TBL_PURCHASE_ORDER_STATUS_CLOSED = 5;
+        const DB_TBL_PURCHASE_ORDER_STATUS_PENDING = 6;
+        const DB_TBL_PURCHASE_ORDER_EXPECTED_DELIVERY = 7;
+        const DB_TBL_PURCHASE_ORDER_PENDING_TRANSPORTATION = 8;
+
+        /**
+         * Asset Disposal Statuses
+         */
+        const DB_TBL_ASSET_DISPOSAL_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_DISPOSAL_TYPE_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_DISPOSAL_TYPE_STATUS_DELETED = 3;
+
+        /**
+         * Asset Transfer Statuses
+         */
+        const DB_TBL_ASSET_TRANSFER_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_ASSET_TRANSFER_TYPE_STATUS_INACTIVE = 2;
+        const DB_TBL_ASSET_TRANSFER_TYPE_STATUS_DELETED = 3;
+
+        /**
+         * Insurance type statuses
+         */
+        const DB_TBL_INSURANCE_STATUS_ACTIVE = 1;
+        const DB_TBL_INSURANCE_STATUS_INACTIVE = 2;
+        const DB_TBL_INSURANCE_STATUS_DELETED = 3;
+        const DB_TBL_INSURANCE_TYPE_STATUS_ACTIVE = 1;
+        const DB_TBL_INSURANCE_TYPE_STATUS_INACTIVE = 2;
+        const DB_TBL_INSURANCE_TYPE_STATUS_DELETED = 3;
+
+        /**
+         * Transaction statuses
+         */
+        const DB_TBL_TRANSACTION_STATUS_SUCCESS = 1;
+        const DB_TBL_TRANSACTION_STATUS_APPROVED = 2;
+        const DB_TBL_TRANSACTION_STATUS_PENDING = 3;
+        const DB_TBL_TRANSACTION_STATUS_FAILED = 4;
+        const DB_TBL_TRANSACTION_STATUS_REJECTED = 5;
+        const DB_TBL_TRANSACTION_STATUS_DELETED = 6;
+        const DB_TBL_TRANSACTION_STATUS_RECONCILIATION_WAITING = 7;
+
+        /**
+         * Measurement
+         */
+        const DB_TBL_MEASUREMENT_STATUS_ACTIVE = 1;
+        const DB_TBL_MEASUREMENT_STATUS_INACTIVE = 2;
+        const DB_TBL_MEASUREMENT_STATUS_DELETED = 3;
+        const DB_TBL_MEASUREMENT_STATUS_STATIC = 4;
+
+        /**
+         * Credit note statuses
+         */
+        const DB_TBL_CREDIT_NOTE_STATUS_CREATED = 1;
+        const DB_TBL_CREDIT_NOTE_STATUS_PAYMENT_APPROVED = 2;
+        const DB_TBL_CREDIT_NOTE_STATUS_DELETED = 3;
+        const DB_TBL_CREDIT_NOTE_STATUS_CANCELLED = 4;
+        const DB_TBL_SALES_RETURN_REQUEST_STATUS_CREATED = 1;
+        const DB_TBL_SALES_RETURN_REQUEST_STATUS_APPROVED = 2;
+        const DB_TBL_SALES_RETURN_REQUEST_STATUS_REJECTED = 3;
+        const DB_TBL_SALES_RETURN_REQUEST_STATUS_DELETED = 4;
+        const DB_TBL_SALES_RETURN_REQUEST_STATUS_PUT_AWAY = 5;
+        const DB_TBL_SALES_RETURN_REQUEST_STATUS_COMPLETED = 6;
+
+        /**
+         * Debit note statuses
+         */
+        const DB_TBL_DEBIT_NOTE_STATUS_CREATED = 1;
+        const DB_TBL_DEBIT_NOTE_STATUS_PAYMENT_APPROVED = 2;
+        const DB_TBL_DEBIT_NOTE_STATUS_DELETED = 3;
+
+        /**
+         * Stock transfer statuses
+         */
+        const DB_TBL_STOCK_TRANSFER_STATUS_ACTIVE = 1;
+        const DB_TBL_STOCK_TRANSFER_STATUS_INACTIVE = 2;
+        const DB_TBL_STOCK_TRANSFER_STATUS_DELETED = 3;
+        const DB_TBL_STOCK_TRANSFER_TO_BE_APPROVED = 5;
+
+        /**
+         * Stock transfer item statuses
+         */
+        const DB_TBL_STOCK_TRANSFER_ITEM_STATUS_ACTIVE = 1;
+        const DB_TBL_STOCK_TRANSFER_ITEM_STATUS_INACTIVE = 2;
+        const DB_TBL_STOCK_TRANSFER_ITEM_STATUS_DELETED = 3;
+        const DB_TBL_STOCK_TRANSFER_ITEM_TO_BE_APPROVED = 5;
+
+        /**
+         * Check Item Availability statuses
+         */
+        const DB_TBL_CHECK_ITEM_AVAILABILITY_PENDING = 1;
+        const DB_TBL_CHECK_ITEM_AVAILABILITY_AVAILABLE = 2;
+        const DB_TBL_CHECK_ITEM_AVAILABILITY_DISCONTINUITY = 3;
+        const DB_TBL_CHECK_ITEM_AVAILABILITY_AVAILABLE_IN_DAYS = 4;
+
+        /**
+         * Stock Types
+         */
+        const DB_TBL_INVENTORY_SET_OPENING_STOCK = 1;
+        const DB_TBL_INVENTORY_SET_CONSIGNMENT_RECEIVED = 2;
+        const DB_TBL_INVENTORY_SET_PACKAGE_CREATE = 3;
+        const DB_TBL_INVENTORY_SET_PACKAGE_CANCEL = 4;
+        const DB_TBL_INVENTORY_SET_CREDIT_NOTE = 5;
+        const DB_TBL_INVENTORY_SET_DEBIT_NOTE = 6;
+        const DB_TBL_INVENTORY_SET_ISSUE_STOCK = 7;
+        const DB_TBL_INVENTORY_SET_RECEIVE_STOCK = 8;
+        const DB_TBL_INVENTORY_SET_STOCK_TRANSFER = 9;
+        const DB_TBL_INVENTORY_SET_STOCK_CONVERSION = 10;
+        const DB_TBL_INVENTORY_SET_STOCK_REQUEST = 11;
+        const DB_TBL_INVENTORY_SET_STAGE_ORDER = 12;
+        const DB_TBL_INVENTORY_SET_PRODUCTION = 13;
+        const DB_TBL_INVENTORY_SET_PHYSICAL_STOCK = 14;
+        const DB_TBL_INVENTORY_SET_POS = 15;
+        const DB_TBL_INVENTORY_SET_DIRECT_INVOICE = 16;
+        const DB_TBL_INVENTORY_SET_DIRECT_PURCHASE_INVOICE = 17;
+        const DB_TBL_INVENTORY_SET_STOCK_DISCOVERED = 18;
+        const DB_TBL_INVENTORY_SET_STOCK_CONVERSION_DEDUCTION = 19;
+        const DB_TBL_INVENTORY_SET_COST_ANALYSIS_ISSUE = 20;
+        const DB_TBL_INVENTORY_SET_COST_ANALYSIS_RECEIVE = 21;
+        const DB_TBL_INVENTORY_SET_COST_ANALYSIS_PRODUCTION = 22;
+        const DB_TBL_INVENTORY_SET_CONSIGNMENT_REVERSAL = 23;
+        const DB_TBL_INVENTORY_SET_DAMAGE_STOCK = 24;
+        const DB_TBL_INVENTORY_SET_CONSIGNMENT_DAMAGE_STOCK = 25;
+        const DB_TBL_INVENTORY_SET_LOCATION_TRANSFER_STOCK = 26;
+        const DB_TBL_INVENTORY_SET_RAW_MATERIAL_CONSUMPTION = 27;
+        const DB_TBL_INVENTORY_SET_INHOUSE_DAMAGE = 28;
+        const DB_TBL_INVENTORY_SET_STOCK_CONVERSION_DAMAGE = 29;
+        const DB_TBL_INVENTORY_SET_PURCHASE_INVOICE_DEDUCTION = 30;
+        const DB_TBL_INVENTORY_SET_JOB_WORK_OUT = 31;
+        const DB_TBL_INVENTORY_SET_JOB_ORDER_OUT = 32;
+        const DB_TBL_INVENTORY_SET_JOB_ORDER_IN = 33;
+        const DB_TBL_INVENTORY_SET_STOCK_OUT = 34;
+        const DB_TBL_INVENTORY_SET_STOCK_IN = 35;
+        const DB_TBL_INVENTORY_SET_CONSIGNMENT_REVERSED = 36;
+        const DB_TBL_INVENTORY_SET_PURCHASE_INVOICE_REVERSED = 37;
+        const DB_TBL_INVENTORY_SET_FACTORY_PRODUCTION = 38;
+        const DB_TBL_INVENTORY_SET_DAMAGE_RECOVERY = 39;
+
+        /**
+         * Stock Request Status
+         */
+        const DB_TBL_STOCK_REQUEST_CREATED = 1;
+        const DB_TBL_STOCK_REQUEST_ASSIGNED = 2;
+        const DB_TBL_STOCK_REQUEST_PROCESSED = 3;
+        const DB_TBL_STOCK_REQUEST_PACKED = 4;
+        const DB_TBL_STOCK_REQUEST_RECEIVED = 5;
+        const DB_TBL_STOCK_REQUEST_CANCELLED = 6;
+        const DB_TBL_STOCK_REQUEST_PARTIALLY_ASSIGNED = 7;
+        const DB_TBL_STOCK_REQUEST_PARTIALLY_PROCESSED = 8;
+        const DB_TBL_STOCK_REQUEST_PARTIALLY_PACKED = 9;
+        const DB_TBL_STOCK_REQUEST_PARTIALLY_RECEIVED = 10;
+        //workorder services//
+        const DB_TBL_WORKORDER_SERVICES_STATUS_DELETED = 3;
+        const DB_TBL_WORKORDER_SERVICES_STATUS_ACTIVE = 1;
+        const DB_TBL_WORKORDER_SERVICES_STATUS_CANCELLED = 2;
+        const DB_TBL_WORKORDER_SERVICES_STATUS_TO_BE_APPROVED = 4;
+        const DB_TBL_WORKORDER_SERVICES_STATUS_UNDER_PROGRESS = 5;
+        const DB_TBL_WORKORDER_SERVICES_STATUS_COMPLETED = 6;
+
+        /**
+         * payroll profile status
+         */
+        const DB_TBL_PAYROLL_PROFILE_STATUS_ACTIVE = 1;
+        const DB_TBL_PAYROLL_PROFILE_STATUS_INACTIVE = 2;
+
+        /*
+         *  HR Configuration
+         */
+        const DB_TBL_HR_CONFIGURATION_PAYING_LEDGER = 1;
+
+        /**
+         * Stat Type
+         */
+        const DB_TBL_DECREASE_OF_TAX_LIABILITY = "1";
+        const DB_TBL_INCREASE_OF_INPUT_TAX_CREDIT = "2";
+        const DB_TBL_INCREASE_OF_TAX_LIABILITY = "3";
+        const DB_TBL_INCREASE_OF_TAX_LIABILITY_INPUT_TAX_CREDIT = "4";
+        const DB_TBL_OPENING_BALANCE = "5";
+        const DB_TBL_REFUND = "6";
+        const DB_TBL_REVERSAL_OF_INPUT_TAX_CREDIT = "7";
+        const DB_TBL_REVERSE_OF_TAX_LIABILITY = "8";
+        const DB_TBL_REVERSAL_OF_TAX_LIABILITY_INPUT_TAX_CREDIT = "9";
+
+        /**
+         * Stat Other Type
+         */
+        const DB_TBL_1_ADJUSTMENT_AGAINST_CREDIT = 14;
+        const DB_TBL_1_CANCELLATION_OF_ADVANCE_PAYMENT_UNDER_REVERSE_CHARGE = 15;
+        const DB_TBL_1_PURCHASE_AGAINST_ADVANCE_PAYMENT = 16;
+        const DB_TBL_2_IMPORTS_OF_CAPTIAL_GOODS = 18;
+        const DB_TBL_2_IMPORTS_OF_GOODS = 17;
+        const DB_TBL_2_IMPORTS_OF_SERVICES = 9;
+        const DB_TBL_2_ISD_TRANSFER = 3;
+        const DB_TBL_2_OTHER = 10;
+        const DB_TBL_2_PURCHASE_FROM_SEZ = 11;
+        const DB_TBL_2_PURCHASE_UNDER_REVERSE_CHARGE = 19;
+        const DB_TBL_2_RECLAIM_OF_REVERSAL_ITC_ON_ACCOUNT_OF_BUYER_PAYMENT = 12;
+        const DB_TBL_2_RECLAIM_OF_REVERSAL_ITC_RULE_42_2_B = 13;
+        const DB_TBL_2_TCS_ADJUSTMENT = 6;
+        const DB_TBL_2_TDS_ADJUSTMENT = 7;
+        const DB_TBL_2_TRANSITIONAL_CREDIT = 8;
+        const DB_TBL_3_IMPORTS_OF_CAPTIAL_GOODS = 2;
+        const DB_TBL_3_IMPORTS_OF_GOODS = 1;
+        const DB_TBL_3_IMPORTS_OF_SERVICES = 20;
+        const DB_TBL_3_LATE_FEES = 21;
+        const DB_TBL_3_OTHERS = 22;
+        const DB_TBL_3_PENALTY = 23;
+        const DB_TBL_3_PURCHASE_UNDER_REVERSE_CHARGE = 4;
+        const DB_TBL_3_TAX_PAID_ON_ADVANCE_UNDER_REVERSE_CHARGE = 5;
+        const DB_TBL_4_IMPORTS_OF_SERVICES = 25;
+        const DB_TBL_4_PURCHASE_UNDER_REVERSE_CHARGE = 24;
+        const DB_TBL_6_INTEREST = 27;
+        const DB_TBL_6_LATE_FEES = 28;
+        const DB_TBL_6_NOT_APPLICABLE = 26;
+        const DB_TBL_6_OTHERS = 29;
+        const DB_TBL_6_PENALTY = 30;
+        const DB_TBL_8_IMPORTS_OF_SERVICES = 31;
+        const DB_TBL_8_PURCHASE_UNDER_REVERSE_CHARGE = 32;
+        const DB_TBL_9_CAPITAL_CREDIT_DUE_TO_EXEMPTED_SUPPLIES_RULE_43_1_H = 37;
+        const DB_TBL_9_EXEMPT_AND_NONBUSINESS_SUPPLIES_RULE_42_1_M = 38;
+        const DB_TBL_9_IMPORTS_OF_SERVICES = 36;
+        const DB_TBL_9_INELIGIBLE_CREDIT = 39;
+        const DB_TBL_9_ISD_CREDIT_NOTE_RULE_39_1_J = 40;
+        const DB_TBL_9_NON_PAYMENT_TO_THE_BUYER_RULE_37_2 = 41;
+        const DB_TBL_9_NOT_APPLICABLE = 35;
+        const DB_TBL_9_ON_ACCOUNT_OF_CLAIMING_MORE_RULE_42_2_A = 42;
+        const DB_TBL_9_OTHERS = 34;
+        const DB_TBL_9_PURCHASE_UNDER_REVERSE_CHARGE = 33;
+
+        /**
+         * Checkpoint order Service statues
+         */
+        const DB_TBL_CHECKPOINT_ORDER_SERVICE_STATUS_PENDING = 1;
+        const DB_TBL_CHECKPOINT_ORDER_SERVICE_STATUS_PARTIALLY_ASSIGNED = 2;
+        const DB_TBL_CHECKPOINT_ORDER_SERVICE_STATUS_ASSIGNED = 3;
+        const DB_TBL_CHECKPOINT_ORDER_SERVICE_STATUS_PARTIALLY_EXECUTED = 4;
+        const DB_TBL_CHECKPOINT_ORDER_SERVICE_STATUS_EXECUTED = 5;
+        const DB_TBL_CHECKPOINT_ORDER_SERVICE_STATUS_CANCELED = 6;
+        const DB_TBL_CHECKPOINT_ORDER_SERVICE_STATUS_DELETED = 7;
+        const DB_TBL_CHECKPOINT_ORDER_SERVICE_STATUS_NOT_APPLICABLE = 8;
+        const DB_TBL_CHECKPOINT_ORDER_SERVICE_STATUS_TO_BE_APPROVED = 9;
+
+        /**
+         * Campaign
+         */
+        const DB_TBL_CAMPAIGN_STATUS_SCHEDULED = 1;
+        const DB_TBL_CAMPAIGN_STATUS_UNDER_PROGRESS = 2;
+        const DB_TBL_CAMPAIGN_STATUS_COMPLETED = 3;
+        const DB_TBL_CAMPAIGN_STATUS_CANCELED = 4;
+        const DB_TBL_CAMPAIGN_STATUS_DELETED = 5;
+
+        /**
+         * JobWork
+         */
+        const DB_TBL_JOBWORK_TO_BE_APPROVED = 1;
+        const DB_TBL_JOBWORK_PENDING = 2;
+        const DB_TBL_JOBWORK_UNDER_PROGRESS = 3;
+        const DB_TBL_JOBWORK_PARTIALLY_PROCESSED = 4;
+        const DB_TBL_JOBWORK_PROCESSED = 5;
+        const DB_TBL_JOBWORK_CANCELLED = 6;
+        const DB_TBL_JOBWORK_DELETED = 7;
+
+        /**
+         * JobOrder
+         */
+        const DB_TBL_JOBORDER_PENDING = 1;
+        const DB_TBL_JOBORDER_PARTIALLY_RECEIVED = 2;
+        const DB_TBL_JOBORDER_RECEIVED = 3;
+        const DB_TBL_JOBORDER_CANCELLED = 4;
+        const DB_TBL_JOBORDER_TO_BE_APPROVED = 5;
+        const DB_TBL_JOBORDER_INSPECT_ITEM = 6;
+        const DB_TBL_JOBORDER_CLOSED = 7;
+
+        /**
+         * Application Area
+         */
+        const DB_TBL_APPLICATION_AREA_STATUS_ACTIVE = 1;
+        const DB_TBL_APPLICATION_AREA_STATUS_INACTIVE = 2;
+        const DB_TBL_APPLICATION_AREA_STATUS_DELETE = 3;
+
+        /**
+         * Inventory Set Variations Target Audience
+         */
+        const DB_TBL_ISV_TARGET_AUDIENCE_BOTH = 0;
+        const DB_TBL_ISV_TARGET_AUDIENCE_CUSTOMER = 1;
+        const DB_TBL_ISV_TARGET_AUDIENCE_ARCHITECT = 2;
+
+        /**
+         * Inventory Set Variations Sample Availability
+         */
+        const DB_TBL_ISV_SAMPLE_AVAILABLE_BASED_ON_STOCK_AVAILABILITY = 0;
+        const DB_TBL_ISV_SAMPLE_AVAILABLE_IN_SHOWROOM = 1;
+        const DB_TBL_ISV_SAMPLE_AVAILABLE_IN_WAREHOUSE = 2;
+        const DB_TBL_ISV_SAMPLE_AVAILABLE_ON_REQUEST = 3;
+
+        /**
+         * Ecom Store Project
+         */
+        const DB_TBL_ECOM_STORE_PROJECT_STATUS_ACTIVE = 1;
+        const DB_TBL_ECOM_STORE_PROJECT_STATUS_INACTIVE = 2;
+        const DB_TBL_ECOM_STORE_PROJECT_STATUS_DELETE = 3;
+    }
+    
