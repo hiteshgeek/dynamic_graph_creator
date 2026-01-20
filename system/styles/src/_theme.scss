@@ -174,11 +174,11 @@
   // Borders
   --dgc-border-color: #3d3d3d;
 
-  // Shadows - darker for dark mode, all sides
-  --dgc-shadow-subtle: 0 0 4px rgba(0, 0, 0, 0.2), 0 0 8px rgba(0, 0, 0, 0.15);
-  --dgc-shadow-1: 0 0 4px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.2);
-  --dgc-shadow-2: 0 0 8px rgba(0, 0, 0, 0.35), 0 0 4px rgba(0, 0, 0, 0.25);
-  --dgc-shadow-3: 0 0 16px rgba(0, 0, 0, 0.4), 0 0 8px rgba(0, 0, 0, 0.3);
+  // Shadows - dark mode uses subtle light glow for better definition
+  --dgc-shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --dgc-shadow-1: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --dgc-shadow-2: 0 4px 8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --dgc-shadow-3: 0 8px 16px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
 
   // Loading overlay
   --dgc-loading-overlay-bg: rgba(18, 18, 18, 0.85);
