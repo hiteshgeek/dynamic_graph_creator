@@ -256,8 +256,16 @@ export default class DataFilterFormPage {
         const dateRangeInfo = document.getElementById('date-range-info');
         const previewSection = document.getElementById('filter-preview-section');
 
+        const showDataSource = this.typesWithOptions.includes(filterType);
+
         if (dataSourceSection) {
-            dataSourceSection.style.display = this.typesWithOptions.includes(filterType) ? 'block' : 'none';
+            dataSourceSection.style.display = showDataSource ? 'block' : 'none';
+        }
+
+        // Show/hide right panel for data source options
+        const dataSourcePanel = document.getElementById('data-source-panel');
+        if (dataSourcePanel) {
+            dataSourcePanel.style.display = showDataSource ? '' : 'none';
         }
 
         if (checkboxRadioConfigSection) {
@@ -329,13 +337,13 @@ export default class DataFilterFormPage {
         });
         tab.classList.add('active');
 
-        // Show/hide sections
+        // Show/hide sections in right column
         document.getElementById('static-options-section').style.display = source === 'static' ? 'block' : 'none';
         document.getElementById('query-options-section').style.display = source === 'query' ? 'block' : 'none';
 
         // Refresh CodeMirror when switching to query
         if (source === 'query' && this.codeEditor) {
-            this.codeEditor.refresh();
+            setTimeout(() => this.codeEditor.refresh(), 50);
         }
 
         // Update filter preview based on data source
@@ -436,10 +444,11 @@ export default class DataFilterFormPage {
 
     /**
      * Test the SQL query
+     * @param {number} page - Page number (default 1)
      */
-    testQuery() {
-        // Format query before testing
-        if (this.codeEditor) {
+    testQuery(page = 1) {
+        // Format query before testing (only on first page)
+        if (page === 1 && this.codeEditor) {
             this.codeEditor.format();
         }
 
@@ -450,25 +459,30 @@ export default class DataFilterFormPage {
             return;
         }
 
-        Loading.show('Testing query...');
+        Loading.show(page === 1 ? 'Testing query...' : 'Loading page...');
 
-        Ajax.post('test_data_filter_query', { query: query })
+        Ajax.post('test_data_filter_query', { query: query, page: page })
             .then(result => {
                 Loading.hide();
                 const resultDiv = document.getElementById('query-result');
 
                 if (result.success) {
                     const options = result.data.options || [];
+                    const totalCount = result.data.totalCount || options.length;
+                    const currentPage = result.data.page || 1;
+                    const totalPages = result.data.totalPages || 1;
+                    const pageSize = result.data.pageSize || 100;
+
                     let html = `
                         <div class="query-result-header">
                             <i class="fas fa-check-circle"></i>
                             Query is valid
-                            <span class="query-row-count">${options.length} row${options.length !== 1 ? 's' : ''} returned</span>
+                            <span class="query-row-count">${totalCount} total row${totalCount !== 1 ? 's' : ''}</span>
                         </div>
                     `;
 
-                    // Show Generated Query tab and populate it
-                    if (result.data.resolvedQuery) {
+                    // Show Generated Query tab and populate it (only on first page)
+                    if (page === 1 && result.data.resolvedQuery) {
                         const generatedTabItem = document.getElementById('generated-query-tab-item');
                         if (generatedTabItem) {
                             generatedTabItem.style.display = '';
@@ -476,8 +490,8 @@ export default class DataFilterFormPage {
                         this.updateGeneratedQueryEditor(result.data.resolvedQuery);
                     }
 
-                    // Show warnings if any
-                    if (result.data.warnings && result.data.warnings.length > 0) {
+                    // Show warnings if any (only on first page)
+                    if (page === 1 && result.data.warnings && result.data.warnings.length > 0) {
                         html += '<div class="query-warnings"><ul>';
                         result.data.warnings.forEach(w => {
                             html += `<li>${w}</li>`;
@@ -485,36 +499,59 @@ export default class DataFilterFormPage {
                         html += '</ul></div>';
                     }
 
-                    // Store options for later preview updates
-                    this.lastQueryOptions = options;
+                    // Store options for later preview updates (accumulate across pages for preview)
+                    if (page === 1) {
+                        this.lastQueryOptions = options;
+                    }
 
                     if (options.length > 0) {
                         const hasIsSelected = result.data.hasIsSelected || false;
-                        const colCount = hasIsSelected ? 3 : 2;
+
                         html += `
                             <div class="query-sample-data">
                                 <div class="query-result-table-wrapper">
-                                    <table class="query-result-table">
+                                    <table class="query-result-table" id="query-result-table">
                                         <thead>
                                             <tr><th>Value</th><th>Label</th>${hasIsSelected ? '<th>Selected</th>' : ''}</tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody id="query-result-tbody">
                         `;
-                        options.slice(0, 10).forEach(opt => {
+                        options.forEach(opt => {
                             const selectedIcon = opt.is_selected ? '<i class="fas fa-check text-success"></i>' : '-';
                             html += `<tr><td>${this.escapeHtml(opt.value) || '-'}</td><td>${this.escapeHtml(opt.label) || '-'}</td>${hasIsSelected ? `<td>${selectedIcon}</td>` : ''}</tr>`;
                         });
-                        if (options.length > 10) {
-                            html += `<tr><td colspan="${colCount}" class="text-muted">... and ${options.length - 10} more</td></tr>`;
-                        }
-                        html += '</tbody></table></div></div>';
+                        html += '</tbody></table></div>';
 
-                        // Show filter preview in dedicated container
-                        this.showFilterPreview(options);
+                        // Pagination info
+                        const startRecord = (currentPage - 1) * pageSize + 1;
+                        const endRecord = Math.min(currentPage * pageSize, totalCount);
+                        html += `<div class="query-result-info">`;
+                        html += `<span class="query-result-count">Showing ${startRecord}-${endRecord} of ${totalCount} records</span>`;
+
+                        // Pagination controls
+                        if (totalPages > 1) {
+                            html += `<div class="query-result-pagination" id="query-result-pagination">`;
+                            html += `<button type="button" class="btn btn-sm btn-outline-secondary query-page-btn" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+                            html += `<span class="query-page-info">Page ${currentPage} of ${totalPages}</span>`;
+                            html += `<button type="button" class="btn btn-sm btn-outline-secondary query-page-btn" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+                            html += `</div>`;
+                        }
+                        html += `</div></div>`;
+
+                        // Show filter preview in dedicated container (only on first page)
+                        if (page === 1) {
+                            this.showFilterPreview(options);
+                        }
+
+                        // Store data for pagination
+                        this.queryResultHasIsSelected = hasIsSelected;
                     }
 
                     resultDiv.className = 'query-test-result success';
                     resultDiv.innerHTML = html;
+
+                    // Bind pagination events
+                    this.bindQueryPagination();
                 } else {
                     resultDiv.className = 'query-test-result error';
                     resultDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${result.message || 'Query failed'}`;
@@ -526,6 +563,23 @@ export default class DataFilterFormPage {
                 Loading.hide();
                 Toast.error('Failed to test query');
             });
+    }
+
+    /**
+     * Bind pagination events for query result table
+     */
+    bindQueryPagination() {
+        const pagination = document.getElementById('query-result-pagination');
+        if (!pagination) return;
+
+        pagination.querySelectorAll('.query-page-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const page = parseInt(btn.dataset.page, 10);
+                if (page > 0) {
+                    this.testQuery(page);
+                }
+            });
+        });
     }
 
     /**

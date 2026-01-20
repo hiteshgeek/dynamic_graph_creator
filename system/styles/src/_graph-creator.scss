@@ -992,28 +992,13 @@
 .filter-selector-keys {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: $spacing-xs;
   margin-top: $spacing-xs;
   padding-left: 24px; // Align with label (checkbox width + gap)
 }
 
-.filter-selector-key {
-  font-size: 11px;
-  // color: var(--dgc-text-inverse);
-  // background: var(--dgc-primary);
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-weight: $font-weight-bold;
-  width: fit-content;
-
-  color: var(--dgc-success);
-  background: var(--dgc-success-bg);
-
-  // &.filter-selector-key-derived {
-  //   background: var(--dgc-success);
-  // }
-}
+// filter-selector-key now uses code.placeholder-key class in HTML
 
 .filter-use-btn {
   margin-top: $spacing-xs;
@@ -1097,23 +1082,7 @@
   margin: 0;
 }
 
-.filter-placeholder {
-  font-size: 11px;
-  padding: 3px 8px;
-  background: var(--dgc-primary);
-  color: var(--dgc-text-inverse);
-  border-radius: 4px;
-  font-family: monospace;
-  font-weight: $font-weight-medium;
-  cursor: pointer;
-  transition: all $transition-fast;
-  flex-shrink: 0;
-
-  &:hover {
-    background: var(--dgc-primary-dark);
-    color: var(--dgc-text-inverse);
-  }
-}
+// filter-placeholder now uses code.placeholder-key class in HTML
 
 // Filter placeholders row (below label)
 .filter-placeholders {
@@ -1122,14 +1091,6 @@
   align-items: flex-start;
   gap: $spacing-xs;
   margin-bottom: $spacing-sm;
-
-  .filter-placeholder-derived {
-    background: var(--dgc-success);
-
-    &:hover {
-      background: var(--dgc-success-dark, #1a7f37);
-    }
-  }
 }
 
 .filter-input {
@@ -1881,15 +1842,7 @@
   td {
     color: var(--dgc-text-secondary);
     vertical-align: middle;
-
-    code {
-      background: var(--dgc-primary);
-      color: var(--dgc-text-inverse);
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: $font-weight-medium;
-    }
+    // code style inherited from _theme.scss
   }
 
   tbody tr:hover {

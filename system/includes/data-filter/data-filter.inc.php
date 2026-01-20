@@ -210,23 +210,38 @@ function deleteDataFilter($data)
  * Query should return 'value' and 'label' columns
  * Optional 'is_selected' column (1/0) to pre-select options
  * System placeholders (like ::logged_in_uid) are resolved before testing
+ * Supports pagination with page parameter (100 records per page)
  */
 function testDataFilterQuery($data)
 {
     $query = isset($data['query']) ? trim($data['query']) : '';
+    $page = isset($data['page']) ? max(1, intval($data['page'])) : 1;
+    $pageSize = BaseConfig::QUERY_RESULT_PAGE_SIZE;
 
     if (empty($query)) {
         Utility::ajaxResponseFalse('Please enter a SQL query');
     }
 
     // Resolve system placeholders before testing
-    $query = SystemPlaceholderManager::resolveInQuery($query);
+    $resolvedQuery = SystemPlaceholderManager::resolveInQuery($query);
 
-    // Add LIMIT for safety
-    $testQuery = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $query);
-    $testQuery .= ' LIMIT 20';
+    // Remove existing LIMIT clause
+    $baseQuery = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $resolvedQuery);
 
     $db = Rapidkart::getInstance()->getDB();
+
+    // Get total count first
+    $countQuery = "SELECT COUNT(*) as total FROM (" . $baseQuery . ") as subquery";
+    $countRes = $db->query($countQuery);
+    $totalCount = 0;
+    if ($countRes && $countRow = $db->fetchAssocArray($countRes)) {
+        $totalCount = intval($countRow['total']);
+    }
+
+    // Add pagination LIMIT
+    $offset = ($page - 1) * $pageSize;
+    $testQuery = $baseQuery . " LIMIT " . $offset . ", " . $pageSize;
+
     $res = $db->query($testQuery);
 
     if (!$res) {
@@ -252,7 +267,7 @@ function testDataFilterQuery($data)
         $options[] = $option;
     }
 
-    if (empty($options)) {
+    if (empty($options) && $page === 1) {
         Utility::ajaxResponseFalse('Query returned no results');
     }
 
@@ -262,17 +277,23 @@ function testDataFilterQuery($data)
     $hasIsSelected = in_array('is_selected', $columns);
     $warnings = array();
 
-    if (!$hasValue) {
+    if (!$hasValue && $page === 1) {
         $warnings[] = "No 'value' column found. Using first column.";
     }
-    if (!$hasLabel) {
+    if (!$hasLabel && $page === 1) {
         $warnings[] = "No 'label' column found. Using 'value' for labels.";
     }
+
+    $totalPages = ceil($totalCount / $pageSize);
 
     Utility::ajaxResponseTrue('Query is valid', array(
         'columns' => $columns,
         'options' => $options,
         'count' => count($options),
+        'totalCount' => $totalCount,
+        'page' => $page,
+        'pageSize' => $pageSize,
+        'totalPages' => $totalPages,
         'warnings' => $warnings,
         'hasIsSelected' => $hasIsSelected,
         'resolvedQuery' => $testQuery

@@ -125,10 +125,10 @@ echo DGCHelper::renderPageHeader([
                                                 </div>
                                                 <div class="filter-selector-keys">
                                                     <?php if ($isDateRangeSelector): ?>
-                                                        <code class="filter-selector-key filter-selector-key-derived">::<?php echo htmlspecialchars($filterKeyClean); ?>_from</code>
-                                                        <code class="filter-selector-key filter-selector-key-derived">::<?php echo htmlspecialchars($filterKeyClean); ?>_to</code>
+                                                        <code class="placeholder-key">::<?php echo htmlspecialchars($filterKeyClean); ?>_from</code>
+                                                        <code class="placeholder-key">::<?php echo htmlspecialchars($filterKeyClean); ?>_to</code>
                                                     <?php else: ?>
-                                                        <code class="filter-selector-key"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
+                                                        <code class="placeholder-key"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
                                                     <?php endif; ?>
                                                 </div>
                                             </div>
@@ -171,10 +171,10 @@ echo DGCHelper::renderPageHeader([
                                                 </div>
                                                 <div class="filter-placeholders">
                                                     <?php if ($isDateRange): ?>
-                                                        <code class="filter-placeholder filter-placeholder-derived" title="Start date - Use in query">::<?php echo htmlspecialchars($filterKeyClean); ?>_from</code>
-                                                        <code class="filter-placeholder filter-placeholder-derived" title="End date - Use in query">::<?php echo htmlspecialchars($filterKeyClean); ?>_to</code>
+                                                        <code class="placeholder-key" title="Start date - Use in query">::<?php echo htmlspecialchars($filterKeyClean); ?>_from</code>
+                                                        <code class="placeholder-key" title="End date - Use in query">::<?php echo htmlspecialchars($filterKeyClean); ?>_to</code>
                                                     <?php else: ?>
-                                                        <code class="filter-placeholder" title="Use in query"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
+                                                        <code class="placeholder-key" title="Use in query"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
                                                     <?php endif; ?>
                                                 </div>
 

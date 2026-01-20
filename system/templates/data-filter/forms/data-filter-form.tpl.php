@@ -44,7 +44,7 @@
                         </span>
                         <span class="filter-nav-info">
                             <span class="filter-nav-name"><?php echo htmlspecialchars($f['filter_label']); ?></span>
-                            <span class="filter-nav-key"><?php echo htmlspecialchars($f['filter_key']); ?></span>
+                            <code class="placeholder-key"><?php echo htmlspecialchars($f['filter_key']); ?></code>
                         </span>
                         <span class="filter-nav-source <?php echo $f['data_source']; ?>" title="<?php echo $f['data_source'] === 'query' ? 'Query' : 'Static'; ?>">
                             <?php if ($f['data_source'] === 'query'): ?>
@@ -67,10 +67,13 @@
         <!-- Main content -->
         <main class="data-filter-form-main">
             <div class="data-filter-form-page" data-filter-id="<?php echo $filter ? $filter->getId() : ''; ?>">
-            <div class="card">
-                <div class="card-body">
-                    <form id="filter-form">
-                        <input type="hidden" id="filter-id" value="<?php echo $filter ? $filter->getId() : ''; ?>">
+            <div class="data-filter-form-content">
+                <!-- Left Column - Form Fields -->
+                <div class="data-filter-form-left">
+                    <div class="card">
+                        <div class="card-body">
+                            <form id="filter-form">
+                                <input type="hidden" id="filter-id" value="<?php echo $filter ? $filter->getId() : ''; ?>">
 
                         <div class="form-row">
                             <div class="form-group">
@@ -81,16 +84,15 @@
                                 $filterKeyValue = ltrim($filterKeyValue, ':');
                                 ?>
                                 <input type="text" id="filter-key" class="form-control" placeholder="year" value="<?php echo htmlspecialchars($filterKeyValue); ?>" required>
-                                <small class="form-hint">Only letters, numbers, and underscores.<br><code>:: prefix will be added automatically.</code></small>
                                 <div class="invalid-feedback">Only letters, numbers, and underscores allowed</div>
                             </div>
 
                             <div class="form-group">
                                 <label class="form-label" for="filter-label">Label <span class="required">*</span></label>
                                 <input type="text" id="filter-label" class="form-control" placeholder="Year" value="<?php echo $filter ? htmlspecialchars($filter->getFilterLabel()) : ''; ?>" required>
-                                <small class="form-hint">Display label shown to users</small>
                             </div>
                         </div>
+                        <small class="form-hint d-block mb-3">Filter Key: Only letters, numbers, and underscores allowed. <code>::</code> prefix will be added automatically.</small>
 
                         <div class="form-row">
                             <div class="form-group">
@@ -179,85 +181,76 @@
                                 </div>
                                 <input type="hidden" id="data-source" value="<?php echo $dataSource; ?>">
                             </div>
+                        </div>
 
-                            <!-- Static Options -->
-                            <div id="static-options-section" style="<?php echo $dataSource === 'static' ? '' : 'display: none;'; ?>">
-                                <div class="form-group">
-                                    <label class="form-label">Options</label>
-                                    <div class="filter-options-list">
-                                        <?php
-                                        $staticOptions = array();
-                                        if ($filter && $filter->getStaticOptions()) {
-                                            $staticOptions = json_decode($filter->getStaticOptions(), true);
-                                            if (!is_array($staticOptions)) $staticOptions = array();
-                                        }
-                                        if (!empty($staticOptions)):
-                                            foreach ($staticOptions as $opt):
-                                        ?>
-                                                <div class="filter-option-item">
-                                                    <input type="text" class="form-control option-value" placeholder="Value" value="<?php echo htmlspecialchars($opt['value']); ?>">
-                                                    <input type="text" class="form-control option-label" placeholder="Label" value="<?php echo htmlspecialchars($opt['label']); ?>">
-                                                    <button type="button" class="btn btn-sm btn-outline-secondary remove-option-btn">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </div>
-                                            <?php
-                                            endforeach;
-                                        else:
-                                            ?>
+                                <!-- Filter Preview Section -->
+                                <div id="filter-preview-section" style="display: none;">
+                                    <div class="section-header">
+                                        <i class="fas fa-eye"></i>
+                                        <span>Filter Preview</span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Data Source Options (visible when filter type has options) -->
+                <div class="data-filter-form-right" id="data-source-panel" style="<?php echo $showDataSource ? '' : 'display: none;'; ?>">
+                    <!-- Static Options Section -->
+                    <div id="static-options-section" style="<?php echo $dataSource === 'static' ? '' : 'display: none;'; ?>">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="section-header">
+                                    <i class="fas fa-list"></i>
+                                    <span>Static Options</span>
+                                </div>
+                                <div class="filter-options-list">
+                                    <?php
+                                    $staticOptions = array();
+                                    if ($filter && $filter->getStaticOptions()) {
+                                        $staticOptions = json_decode($filter->getStaticOptions(), true);
+                                        if (!is_array($staticOptions)) $staticOptions = array();
+                                    }
+                                    if (!empty($staticOptions)):
+                                        foreach ($staticOptions as $opt):
+                                    ?>
                                             <div class="filter-option-item">
-                                                <input type="text" class="form-control option-value" placeholder="Value">
-                                                <input type="text" class="form-control option-label" placeholder="Label">
+                                                <input type="text" class="form-control option-value" placeholder="Value" value="<?php echo htmlspecialchars($opt['value']); ?>">
+                                                <input type="text" class="form-control option-label" placeholder="Label" value="<?php echo htmlspecialchars($opt['label']); ?>">
                                                 <button type="button" class="btn btn-sm btn-outline-secondary remove-option-btn">
                                                     <i class="fas fa-times"></i>
                                                 </button>
                                             </div>
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="static-options-actions">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary add-option-btn">
-                                            <i class="fas fa-plus"></i> Add Option
-                                        </button>
-                                    </div>
+                                        <?php
+                                        endforeach;
+                                    else:
+                                        ?>
+                                        <div class="filter-option-item">
+                                            <input type="text" class="form-control option-value" placeholder="Value">
+                                            <input type="text" class="form-control option-label" placeholder="Label">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary remove-option-btn">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="static-options-actions">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary add-option-btn">
+                                        <i class="fas fa-plus"></i> Add Option
+                                    </button>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <!-- Query Options -->
-                            <div id="query-options-section" style="<?php echo $dataSource === 'query' ? '' : 'display: none;'; ?>">
-                                <div class="form-group">
-                                    <ul class="nav nav-tabs dgc-tabs" role="tablist">
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link active" id="sql-query-tab" data-bs-toggle="tab" data-bs-target="#sql-query-pane" type="button" role="tab">
-                                                <i class="fas fa-database"></i> SQL Query
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation" id="generated-query-tab-item" style="display: none;">
-                                            <button class="nav-link" id="generated-query-tab" data-bs-toggle="tab" data-bs-target="#generated-query-pane" type="button" role="tab">
-                                                <i class="fas fa-play-circle"></i> Generated Query
-                                            </button>
-                                        </li>
-                                    </ul>
-                                    <div class="tab-content dgc-tab-content">
-                                        <!-- SQL Query Tab -->
-                                        <div class="tab-pane fade show active" id="sql-query-pane" role="tabpanel">
-                                            <div class="query-builder">
-                                                <textarea id="data-query" class="query-editor" rows="4" placeholder="SELECT id as value, name as label, 1 as is_selected FROM categories WHERE status = 1 ORDER BY name"><?php echo $filter ? htmlspecialchars($filter->getDataQuery()) : ''; ?></textarea>
-                                                <!-- Copy, Format, Test buttons and hint are generated by CodeMirrorEditor -->
-                                                <div id="query-result" class="query-test-result" style="display: none;"></div>
-                                            </div>
-                                        </div>
-                                        <!-- Generated Query Tab (populated by JavaScript after test) -->
-                                        <div class="tab-pane fade" id="generated-query-pane" role="tabpanel">
-                                            <div class="generated-query-content">
-                                                <textarea id="generated-query-code" class="query-editor" readonly></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
+                    <!-- Query Options Section -->
+                    <div id="query-options-section" style="<?php echo $dataSource === 'query' ? '' : 'display: none;'; ?>">
+                        <div class="card">
+                            <div class="card-body">
                                 <!-- System Placeholders Reference -->
                                 <?php if (!empty($systemPlaceholders)): ?>
-                                <div class="system-placeholders-panel">
+                                <div class="system-placeholders-panel" style="margin-top: 0; margin-bottom: 1rem;">
                                     <div class="system-placeholders-header">
                                         <i class="fas fa-code"></i>
                                         <span>System Placeholders</span>
@@ -266,25 +259,48 @@
                                     <div class="system-placeholders-list">
                                         <?php foreach ($systemPlaceholders as $sp): ?>
                                         <div class="system-placeholder-item" data-placeholder="::<?php echo htmlspecialchars($sp['placeholder_key']); ?>" title="<?php echo htmlspecialchars($sp['description']); ?>">
-                                            <code class="placeholder-key">::<?php echo htmlspecialchars($sp['placeholder_key']); ?></code>
                                             <span class="placeholder-label"><?php echo htmlspecialchars($sp['placeholder_label']); ?></span>
+                                            <code>::<?php echo htmlspecialchars($sp['placeholder_key']); ?></code>
                                         </div>
                                         <?php endforeach; ?>
                                     </div>
                                 </div>
                                 <?php endif; ?>
-                            </div>
 
-                        </div>
+                                <!-- Query Tabs -->
+                                <ul class="nav nav-tabs dgc-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="sql-query-tab" data-bs-toggle="tab" data-bs-target="#sql-query-pane" type="button" role="tab">
+                                            <i class="fas fa-database"></i> SQL Query
+                                        </button>
+                                    </li>
+                                    <li class="nav-item" role="presentation" id="generated-query-tab-item" style="display: none;">
+                                        <button class="nav-link" id="generated-query-tab" data-bs-toggle="tab" data-bs-target="#generated-query-pane" type="button" role="tab">
+                                            <i class="fas fa-play-circle"></i> Generated Query
+                                        </button>
+                                    </li>
+                                </ul>
+                                <div class="tab-content dgc-tab-content">
+                                    <!-- SQL Query Tab -->
+                                    <div class="tab-pane fade show active" id="sql-query-pane" role="tabpanel">
+                                        <div class="query-builder">
+                                            <textarea id="data-query" class="query-editor" rows="4" placeholder="SELECT id as value, name as label, 1 as is_selected FROM categories WHERE status = 1 ORDER BY name"><?php echo $filter ? htmlspecialchars($filter->getDataQuery()) : ''; ?></textarea>
+                                            <!-- Copy, Format, Test buttons and hint are generated by CodeMirrorEditor -->
+                                        </div>
+                                    </div>
+                                    <!-- Generated Query Tab (populated by JavaScript after test) -->
+                                    <div class="tab-pane fade" id="generated-query-pane" role="tabpanel">
+                                        <div class="generated-query-content">
+                                            <textarea id="generated-query-code" class="query-editor" readonly></textarea>
+                                        </div>
+                                    </div>
+                                </div>
 
-                        <!-- Filter Preview Section -->
-                        <div id="filter-preview-section" style="display: none;">
-                            <div class="section-header">
-                                <i class="fas fa-eye"></i>
-                                <span>Filter Preview</span>
+                                <!-- Query Result -->
+                                <div id="query-result" class="query-test-result" style="display: none;"></div>
                             </div>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

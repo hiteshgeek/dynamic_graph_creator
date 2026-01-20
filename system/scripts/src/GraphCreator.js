@@ -1139,7 +1139,7 @@ export default class GraphCreator {
 
     // Copy filter placeholder to clipboard on click
     const placeholders = filtersContainer.querySelectorAll(
-      ".filter-placeholder",
+      ".placeholder-key",
     );
     placeholders.forEach((placeholder) => {
       placeholder.addEventListener("click", async (e) => {

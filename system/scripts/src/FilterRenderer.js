@@ -148,7 +148,7 @@ class FilterRenderer {
         ` : '';
 
         const placeholderHtml = showLabels ? `
-            <code class="filter-placeholder" title="Use in query">::${keyClean}</code>
+            <code class="placeholder-key" title="Use in query">::${keyClean}</code>
         ` : '';
 
         return `

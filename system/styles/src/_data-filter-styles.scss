@@ -1,35 +1,15 @@
 // Generic Data Filter Styles (Reusable)
 @use "variables" as *;
 
-// Filter key badge mixin - reusable placeholder style
-@mixin filter-key-badge {
-  display: inline-block;
-  padding: 2px 10px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-family: monospace;
-
-  color: var(--dgc-success);
-  background: var(--dgc-success-bg);
-  font-weight: $font-weight-bold;
-}
-
-// Standalone class for filter key badge
-.filter-key-badge {
-  @include filter-key-badge;
-}
+// Code style is now centralized in _theme.scss
 
 // Data Filter List Page
-.data-filter-list-page {
+.filter-list-page {
   // Padding handled by body > .container rule in _common.scss
 
   // Filter-specific styles for item cards
   .filter-key {
     margin-bottom: 0.5rem;
-
-    code {
-      @include filter-key-badge;
-    }
   }
 
   .item-card-meta .meta-item.required {
@@ -39,11 +19,11 @@
   // Data source icon styling
   .item-card-meta .meta-item.data-source-icon {
     &.query {
-      color: $primary;
+      color: $info-dark;
     }
 
     &.static {
-      color: $gray-500;
+      color: $gray-600;
     }
   }
 }
@@ -74,6 +54,11 @@
   &.date_range {
     background: rgba($success, 0.1);
     color: $success;
+  }
+
+  &.main_datepicker {
+    background: rgba($purple, 0.1);
+    color: $purple;
   }
 
   &.checkbox,
@@ -115,6 +100,11 @@
     color: $success;
   }
 
+  &.main_datepicker {
+    background: rgba($purple, 0.1);
+    color: $purple;
+  }
+
   &.checkbox,
   &.radio {
     background: rgba($warning, 0.1);
@@ -129,11 +119,8 @@
 
 // Data Filter Form Page
 .data-filter-form-page {
-  max-width: 600px;
-  margin: 0 auto;
-
   .card-body {
-    padding: 0;
+    padding: $spacing-md;
   }
 
   form {
@@ -280,17 +267,7 @@
   margin-top: $spacing-xs;
   font-size: 12px;
   color: var(--dgc-text-hint);
-
-  code {
-    // background: rgba($primary, 0.1);
-    // color: $primary;
-    color: var(--dgc-success);
-    background: var(--dgc-success-bg);
-    font-weight: $font-weight-bold;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 11px;
-  }
+  // code style inherited from _theme.scss
 }
 
 // Filter options list in modal
@@ -366,22 +343,7 @@
   margin: 0;
 }
 
-.filter-placeholder {
-  font-size: 10px;
-  padding: 2px 6px;
-  background: var(--dgc-gray-200);
-  color: var(--dgc-text-hint);
-  border-radius: 4px;
-  font-family: monospace;
-  flex-shrink: 0;
-  cursor: pointer;
-  transition: all $transition-fast;
-
-  &:hover {
-    background: var(--dgc-primary);
-    color: white;
-  }
-}
+// Legacy filter-placeholder - now using code.placeholder-key instead
 
 .filter-input {
   font-size: $font-size-sm !important;
@@ -665,7 +627,6 @@
     }
   }
 
-
   // Note: CodeMirror styling moved to _code-editor.scss (shared component)
 
   // Filter options styling
@@ -769,7 +730,8 @@
 
   .filter-multiselect-options {
     width: 100%;
-    padding: $spacing-xs 0;
+    padding: 0;
+    // padding: $spacing-xs 0;
     background: var(--dgc-bg-card);
     border: 1px solid var(--dgc-border-color);
     box-shadow: var(--dgc-shadow-2);
@@ -899,10 +861,10 @@
     display: flex;
     align-items: center;
     gap: $spacing-sm;
-    padding-top: $spacing-md;
-    margin-top: $spacing-md;
+    // padding-top: $spacing-md;
+    // margin-top: $spacing-md;
     margin-bottom: $spacing-md;
-    border-top: 1px solid var(--dgc-border-color);
+    // border-top: 1px solid var(--dgc-border-color);
     font-size: $font-size-base;
     font-weight: $font-weight-medium;
     color: var(--dgc-text-primary);
@@ -1059,6 +1021,11 @@
       color: $success;
     }
 
+    &.main_datepicker {
+      background: rgba($purple, 0.1);
+      color: $purple;
+    }
+
     &.checkbox,
     &.radio {
       background: rgba($warning, 0.1);
@@ -1085,11 +1052,7 @@
     text-overflow: ellipsis;
   }
 
-  .filter-nav-key {
-    @include filter-key-badge;
-    font-size: 10px;
-    padding: 1px 6px;
-  }
+  // filter-nav-key now uses code.placeholder-key class in HTML
 
   .filter-nav-source {
     font-size: 10px;
@@ -1098,11 +1061,11 @@
 
     // Match card data source colors
     &.query {
-      color: $primary;
+      color: $info-dark;
     }
 
     &.static {
-      color: $gray-500;
+      color: $gray-600;
     }
   }
 }
@@ -1110,6 +1073,45 @@
 .data-filter-form-main {
   flex: 1;
   min-width: 0;
+}
+
+// Two-column content layout within main area
+.data-filter-form-content {
+  display: flex;
+  gap: $spacing-lg;
+  align-items: flex-start;
+}
+
+.data-filter-form-left {
+  flex: 0 0 400px;
+  min-width: 350px;
+
+  .card-body {
+    padding: 0;
+  }
+}
+
+.data-filter-form-right {
+  flex: 1;
+  min-width: 0;
+  position: sticky;
+  top: 85px;
+
+  .card-body {
+    padding: 0;
+  }
+
+  .dgc-tabs {
+    margin-bottom: $spacing-md;
+  }
+
+  .system-placeholders-panel {
+    margin-top: $spacing-md;
+  }
+
+  .query-test-result {
+    margin-top: $spacing-md;
+  }
 }
 
 // When no sidebar, center the form
@@ -1164,7 +1166,7 @@
       }
 
       // Hide filter key in mobile, keep name only
-      .filter-nav-key {
+      code {
         display: none;
       }
 
@@ -1229,42 +1231,13 @@
     transition: all $transition-fast;
 
     &:hover {
-      border-color: $primary;
-      background: rgba($primary, 0.05);
-
-      .placeholder-key {
-        background: $primary;
-        color: white;
-      }
-    }
-
-    .placeholder-key {
-      font-size: 0.75rem;
-      font-family:
-        "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-      background: var(--dgc-gray-200);
-      color: var(--dgc-text-primary);
-      padding: 2px 6px;
-      border-radius: 3px;
-      transition: all $transition-fast;
+      border-color: var(--dgc-success);
+      background: rgba($success, 0.05);
     }
 
     .placeholder-label {
       font-size: 0.8rem;
       color: var(--dgc-text-secondary);
-    }
-  }
-}
-
-// Dark mode adjustments for system placeholders
-:root.theme-dark {
-  .system-placeholder-item {
-    .placeholder-key {
-      background: var(--dgc-gray-700);
-    }
-
-    &:hover {
-      background: rgba($primary, 0.1);
     }
   }
 }

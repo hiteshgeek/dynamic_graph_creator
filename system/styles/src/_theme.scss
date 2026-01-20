@@ -603,8 +603,11 @@ select {
 
 // Code elements
 code {
-  // background: var(--dgc-code-bg);
-  // color: var(--dgc-code-color);
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-family: $font-family-mono;
   color: var(--dgc-success);
   background: var(--dgc-success-bg);
   font-weight: $font-weight-bold;

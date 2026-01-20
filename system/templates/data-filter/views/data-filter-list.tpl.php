@@ -32,8 +32,9 @@
                             $typeIcons = array(
                                 'text' => 'font',
                                 'number' => 'hashtag',
-                                'date' => 'calendar',
+                                'date' => 'calendar-alt',
                                 'date_range' => 'calendar-week',
+                                'main_datepicker' => 'calendar-days',
                                 'select' => 'list',
                                 'multi_select' => 'list-check',
                                 'checkbox' => 'check-square',
@@ -51,7 +52,7 @@
                         </div>
                         <h3><?php echo htmlspecialchars($filter['filter_label']); ?></h3>
                         <div class="filter-key">
-                            <code><?php echo htmlspecialchars($filter['filter_key']); ?></code>
+                            <code class="placeholder-key"><?php echo htmlspecialchars($filter['filter_key']); ?></code>
                         </div>
                         <div class="item-card-meta">
                             <span class="meta-item data-source-icon <?php echo $filter['data_source']; ?>">
