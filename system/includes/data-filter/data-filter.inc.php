@@ -5,6 +5,9 @@
  * Handles all data-filter-related actions
  */
 
+// Require admin access (company 232 + admin user)
+DGCHelper::requireAdminAccess();
+
 // Load data-filter module assets (common assets loaded in index.php)
 Utility::addModuleCss('data-filter');
 Utility::addModuleJs('data-filter');

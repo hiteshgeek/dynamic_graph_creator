@@ -5,6 +5,9 @@
  * Handles all graph-related actions
  */
 
+// Require admin access (company 232 + admin user)
+DGCHelper::requireAdminAccess();
+
 // Load graph module assets (common assets loaded in index.php)
 Utility::addModuleCss('graph');
 Utility::addModuleJs('graph');

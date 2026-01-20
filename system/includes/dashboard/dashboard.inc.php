@@ -55,38 +55,49 @@ if (isset($_POST['submit'])) {
         case 'reorder_sections':
             reorderSections($_POST);
             break;
-        // Template management actions
+        // Template management actions (require admin access)
         case 'create_template':
+            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             createTemplate($_POST);
             break;
         case 'update_template':
+            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             updateTemplate($_POST);
             break;
         case 'delete_template':
+            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             deleteTemplate($_POST);
             break;
         case 'duplicate_template':
+            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             duplicateTemplate($_POST);
             break;
         case 'save_template_structure':
+            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             saveTemplateStructure($_POST);
             break;
         case 'get_template':
+            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             getTemplate($_POST);
             break;
         case 'remove_template_section':
+            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             removeTemplateSection($_POST);
             break;
         case 'delete_category':
+            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             deleteCategory($_POST);
             break;
         case 'reorder_templates':
+            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             reorderTemplates($_POST);
             break;
         case 'reorder_categories':
+            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             reorderCategories($_POST);
             break;
         case 'move_template_category':
+            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             moveTemplateCategory($_POST);
             break;
     }
@@ -103,9 +114,13 @@ switch ($action) {
         showPreview($dashboardId);
         break;
     case 'templates':
+        // Require admin access for templates page
+        DGCHelper::requireAdminAccess();
         showTemplateList();
         break;
     case 'template':
+        // Require admin access for all template actions
+        DGCHelper::requireAdminAccess();
         $subAction = isset($url[2]) ? $url[2] : '';
         switch ($subAction) {
             case 'create':

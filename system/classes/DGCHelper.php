@@ -220,4 +220,46 @@ class DGCHelper
         }
         return '';
     }
+
+    /**
+     * Company ID that has access to DGC admin pages (templates, graph, filter)
+     */
+    const DGC_ADMIN_COMPANY_ID = 232;
+
+    /**
+     * Check if current user has access to DGC admin pages
+     * Only admin users from company ID 232 can access templates, graph, and filter pages
+     *
+     * @return bool True if user has access, false otherwise
+     */
+    public static function hasAdminAccess()
+    {
+        // Check company ID
+        if (BaseConfig::$company_id != self::DGC_ADMIN_COMPANY_ID) {
+            return false;
+        }
+
+        // Check if user is admin
+        $user = SystemConfig::getUser();
+        if (!$user || !$user->getIsAdmin()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Require admin access for protected pages
+     * Redirects to dashboard list if user doesn't have access
+     *
+     * @param string $redirectUrl URL to redirect to if access denied (default: dashboard list)
+     * @return void
+     */
+    public static function requireAdminAccess($redirectUrl = '?urlq=dashboard')
+    {
+        if (!self::hasAdminAccess()) {
+            header('Location: ' . $redirectUrl);
+            exit;
+        }
+    }
 }
