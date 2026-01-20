@@ -833,6 +833,15 @@
       background: rgba($warning, 0.2);
     }
   }
+
+  &.status-success {
+    background: rgba($success, 0.1);
+    color: $success;
+
+    &:hover {
+      background: rgba($success, 0.2);
+    }
+  }
 }
 
 // Save Indicator (matches btn-sm sizing)

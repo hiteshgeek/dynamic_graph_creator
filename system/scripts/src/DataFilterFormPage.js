@@ -17,6 +17,13 @@ export default class DataFilterFormPage {
         this.typesWithOptions = ['select', 'checkbox', 'radio', 'tokeninput'];
         this.lastQueryOptions = null; // Store query results for preview updates
 
+        // State tracking
+        this.hasUnsavedChanges = false;
+        this.queryTestPassed = false;
+        this.queryError = null;
+        this.isEditMode = false;
+        this.savedState = null;
+
         if (this.container) {
             this.init();
         }
@@ -26,10 +33,13 @@ export default class DataFilterFormPage {
      * Initialize the filter form page
      */
     init() {
+        this.isEditMode = !!document.getElementById('filter-id')?.value;
         this.initCodeMirror();
         this.initFormValidation();
         this.bindEvents();
         this.initPreview();
+        this.initChangeTracking();
+        this.updateStatusIndicators();
     }
 
     /**
@@ -184,21 +194,87 @@ export default class DataFilterFormPage {
             });
         }
 
-        // System placeholder click to insert
+        // System placeholder click to copy to clipboard
         document.querySelectorAll('.system-placeholder-item').forEach(item => {
-            item.addEventListener('click', () => this.insertSystemPlaceholder(item.dataset.placeholder));
+            item.addEventListener('click', () => this.copySystemPlaceholder(item.dataset.placeholder));
+        });
+
+        // System placeholder search
+        const searchInput = document.getElementById('system-placeholder-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => this.filterSystemPlaceholders(e.target.value));
+        }
+
+        // Initialize Bootstrap tooltips for system placeholders
+        this.initSystemPlaceholderTooltips();
+    }
+
+    /**
+     * Initialize Bootstrap tooltips for system placeholder items
+     */
+    initSystemPlaceholderTooltips() {
+        const tooltipTriggerList = document.querySelectorAll('.system-placeholder-item[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(tooltipTriggerEl => {
+            new bootstrap.Tooltip(tooltipTriggerEl);
         });
     }
 
     /**
-     * Insert system placeholder into query editor at cursor position
+     * Copy system placeholder to clipboard
      */
-    insertSystemPlaceholder(placeholder) {
-        if (!this.queryEditor || !placeholder) return;
+    copySystemPlaceholder(placeholder) {
+        if (!placeholder) return;
 
-        const cursor = this.queryEditor.getCursor();
-        this.queryEditor.replaceRange(placeholder, cursor);
-        this.queryEditor.focus();
+        navigator.clipboard.writeText(placeholder).then(() => {
+            Toast.success(`Copied ${placeholder} to clipboard`);
+        }).catch(() => {
+            // Fallback for older browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = placeholder;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            Toast.success(`Copied ${placeholder} to clipboard`);
+        });
+    }
+
+    /**
+     * Filter system placeholders based on search query
+     */
+    filterSystemPlaceholders(query) {
+        const items = document.querySelectorAll('.system-placeholder-item');
+        const emptyMessage = document.getElementById('system-placeholders-empty');
+        const searchLower = query.toLowerCase().trim();
+        let visibleCount = 0;
+
+        items.forEach(item => {
+            if (!searchLower) {
+                item.classList.remove('hidden');
+                visibleCount++;
+                return;
+            }
+
+            const label = item.dataset.label || '';
+            const key = item.dataset.key || '';
+            const description = item.dataset.description || '';
+
+            const matches = label.includes(searchLower) ||
+                           key.includes(searchLower) ||
+                           description.includes(searchLower);
+
+            if (matches) {
+                item.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                item.classList.add('hidden');
+            }
+        });
+
+        // Show/hide empty message
+        if (emptyMessage) {
+            emptyMessage.classList.toggle('show', visibleCount === 0 && searchLower);
+        }
     }
 
     /**
@@ -565,9 +641,16 @@ export default class DataFilterFormPage {
 
                     // Bind pagination events
                     this.bindQueryPagination();
+
+                    // Mark query test as passed
+                    this.setQueryTestPassed();
                 } else {
                     resultDiv.className = 'query-test-result error';
                     resultDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${result.message || 'Query failed'}`;
+
+                    // Set query error and show toast
+                    this.setQueryError(result.message || 'Query failed');
+                    Toast.error(result.message || 'Query failed');
                 }
 
                 resultDiv.style.display = 'block';
@@ -575,6 +658,7 @@ export default class DataFilterFormPage {
             .catch(() => {
                 Loading.hide();
                 Toast.error('Failed to test query');
+                this.setQueryError('Failed to test query');
             });
     }
 
@@ -596,6 +680,50 @@ export default class DataFilterFormPage {
     }
 
     /**
+     * Get all system placeholder keys from the DOM
+     * @returns {string[]} Array of system placeholder keys (without :: prefix)
+     */
+    getSystemPlaceholderKeys() {
+        const keys = [];
+        document.querySelectorAll('.system-placeholder-item[data-placeholder]').forEach(item => {
+            // data-placeholder contains "::key", extract just the key part
+            const placeholder = item.dataset.placeholder || '';
+            const key = placeholder.replace(/^::/, '');
+            if (key) {
+                keys.push(key.toLowerCase());
+            }
+        });
+        return keys;
+    }
+
+    /**
+     * Check if filter key conflicts with system placeholders
+     * @param {string} filterKey - The filter key to check (without :: prefix)
+     * @returns {string|null} Error message if conflict found, null otherwise
+     */
+    checkSystemPlaceholderConflict(filterKey) {
+        const systemKeys = this.getSystemPlaceholderKeys();
+        const filterKeyLower = filterKey.toLowerCase();
+
+        for (const sysKey of systemKeys) {
+            // Check if filter key exactly matches a system placeholder
+            if (filterKeyLower === sysKey) {
+                return `Filter key "${filterKey}" conflicts with system placeholder "::${sysKey}"`;
+            }
+            // Check if filter key is a substring of a system placeholder
+            if (sysKey.includes(filterKeyLower)) {
+                return `Filter key "${filterKey}" is a substring of system placeholder "::${sysKey}"`;
+            }
+            // Check if system placeholder is a substring of filter key
+            if (filterKeyLower.includes(sysKey)) {
+                return `Filter key "${filterKey}" contains system placeholder "::${sysKey}" as substring`;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Save the filter
      */
     saveFilter() {
@@ -609,6 +737,27 @@ export default class DataFilterFormPage {
         const filterLabel = document.getElementById('filter-label').value.trim();
         const filterType = document.getElementById('filter-type').value;
         const dataSource = document.getElementById('data-source').value;
+
+        // Check for system placeholder conflicts before saving
+        const conflictError = this.checkSystemPlaceholderConflict(filterKey);
+        if (conflictError) {
+            Toast.error(conflictError);
+            document.getElementById('filter-key').focus();
+            return;
+        }
+
+        // Check if query data source is selected but query hasn't been tested successfully
+        if (this.typesWithOptions.includes(filterType) && dataSource === 'query') {
+            const query = this.queryEditor ? this.queryEditor.getValue() : document.getElementById('data-query')?.value;
+            if (!query || !query.trim()) {
+                Toast.error('Please enter a SQL query');
+                return;
+            }
+            if (!this.queryTestPassed) {
+                Toast.error('Please test the query successfully before saving');
+                return;
+            }
+        }
 
         // Automatically prepend :: to the filter key
         filterKey = '::' + filterKey;
@@ -663,6 +812,8 @@ export default class DataFilterFormPage {
             .then(result => {
                 Loading.hide();
                 if (result.success) {
+                    // Mark as saved before redirect to prevent "unsaved changes" warning
+                    this.markAsSaved();
                     Toast.success('Filter saved successfully');
                     window.location.href = '?urlq=data-filter';
                 } else {
@@ -940,6 +1091,181 @@ export default class DataFilterFormPage {
 
         previewHtml += '</div></div>';
         return previewHtml;
+    }
+
+    // =============================================
+    // Change Tracking & Status Indicators
+    // =============================================
+
+    /**
+     * Initialize change tracking
+     */
+    initChangeTracking() {
+        // Save initial state
+        this.savedState = this.getCurrentState();
+
+        // Track changes on form inputs
+        const form = document.getElementById('filter-form');
+        if (form) {
+            form.addEventListener('input', () => this.checkForChanges());
+            form.addEventListener('change', () => this.checkForChanges());
+        }
+
+        // Track CodeMirror changes
+        if (this.queryEditor) {
+            this.queryEditor.on('change', () => {
+                this.checkForChanges();
+                // Reset query test status when query changes
+                this.queryTestPassed = false;
+                this.queryError = null;
+                this.updateStatusIndicators();
+            });
+        }
+
+        // Track static option changes
+        document.querySelectorAll('.filter-options-list').forEach(list => {
+            list.addEventListener('input', () => this.checkForChanges());
+        });
+
+        // Warn before leaving page with unsaved changes
+        window.addEventListener('beforeunload', (e) => {
+            if (this.hasUnsavedChanges) {
+                e.preventDefault();
+                e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+                return e.returnValue;
+            }
+        });
+
+        // Warn when clicking navigation links
+        document.querySelectorAll('a[href]').forEach(link => {
+            if (!link.classList.contains('no-unsaved-warning') &&
+                !link.href.includes('javascript:') &&
+                !link.getAttribute('href').startsWith('#')) {
+                link.addEventListener('click', (e) => {
+                    if (this.hasUnsavedChanges) {
+                        if (!confirm('You have unsaved changes. Are you sure you want to leave?')) {
+                            e.preventDefault();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Get current form state for comparison
+     */
+    getCurrentState() {
+        return {
+            filterKey: document.getElementById('filter-key')?.value || '',
+            filterLabel: document.getElementById('filter-label')?.value || '',
+            filterType: document.getElementById('filter-type')?.value || '',
+            dataSource: document.getElementById('data-source')?.value || '',
+            defaultValue: document.getElementById('filter-default')?.value || '',
+            isRequired: document.getElementById('filter-required')?.checked || false,
+            isMultiple: document.getElementById('filter-multiple')?.checked || false,
+            isInline: document.getElementById('filter-inline')?.checked || false,
+            query: this.queryEditor ? this.queryEditor.getValue() : (document.getElementById('data-query')?.value || ''),
+            staticOptions: this.getStaticOptionsString()
+        };
+    }
+
+    /**
+     * Get static options as string for comparison
+     */
+    getStaticOptionsString() {
+        const options = [];
+        document.querySelectorAll('.filter-option-item').forEach(row => {
+            const value = row.querySelector('.option-value')?.value || '';
+            const label = row.querySelector('.option-label')?.value || '';
+            options.push(`${value}:${label}`);
+        });
+        return options.join('|');
+    }
+
+    /**
+     * Check for changes and update state
+     */
+    checkForChanges() {
+        const currentState = this.getCurrentState();
+        const hasChanges = JSON.stringify(currentState) !== JSON.stringify(this.savedState);
+        this.setUnsavedChanges(hasChanges);
+    }
+
+    /**
+     * Set unsaved changes state
+     */
+    setUnsavedChanges(hasChanges) {
+        this.hasUnsavedChanges = hasChanges;
+        this.updateStatusIndicators();
+    }
+
+    /**
+     * Update status indicators in page header
+     */
+    updateStatusIndicators() {
+        const statusContainer = document.querySelector('.page-header-right .status-indicators');
+        if (!statusContainer) return;
+
+        let html = '';
+
+        // Save indicator
+        if (this.hasUnsavedChanges) {
+            html += '<span class="save-indicator unsaved"><i class="fas fa-circle"></i> Unsaved</span>';
+        } else {
+            html += '<span class="save-indicator saved"><i class="fas fa-check"></i> Saved</span>';
+        }
+
+        // Error indicator (query error)
+        if (this.queryError) {
+            html += `<span class="status-box status-error" title="${this.escapeHtml(this.queryError)}">
+                <i class="fas fa-times-circle"></i>
+            </span>`;
+        }
+
+        // Query test status indicator (only for query data source)
+        const dataSource = document.getElementById('data-source')?.value;
+        const filterType = document.getElementById('filter-type')?.value;
+        if (dataSource === 'query' && this.typesWithOptions.includes(filterType)) {
+            if (this.queryTestPassed) {
+                html += `<span class="status-box status-success" title="Query tested successfully">
+                    <i class="fas fa-database"></i>
+                </span>`;
+            } else if (!this.queryError) {
+                html += `<span class="status-box status-warning" title="Query not tested yet">
+                    <i class="fas fa-database"></i>
+                </span>`;
+            }
+        }
+
+        statusContainer.innerHTML = html;
+    }
+
+    /**
+     * Set query error
+     */
+    setQueryError(error) {
+        this.queryError = error;
+        this.queryTestPassed = false;
+        this.updateStatusIndicators();
+    }
+
+    /**
+     * Clear query error and mark as tested
+     */
+    setQueryTestPassed() {
+        this.queryError = null;
+        this.queryTestPassed = true;
+        this.updateStatusIndicators();
+    }
+
+    /**
+     * Mark state as saved
+     */
+    markAsSaved() {
+        this.savedState = this.getCurrentState();
+        this.hasUnsavedChanges = false;
+        this.updateStatusIndicators();
     }
 
     /**

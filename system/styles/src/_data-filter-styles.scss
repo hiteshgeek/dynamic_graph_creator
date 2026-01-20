@@ -856,15 +856,15 @@
     margin-top: $spacing-lg;
   }
 
-  // Section header with icon (like Graph Settings, Options)
+  // Section header with icon and separator line (like Graph Settings, Options)
   .section-header {
     display: flex;
     align-items: center;
     gap: $spacing-sm;
-    // padding-top: $spacing-md;
-    // margin-top: $spacing-md;
+    padding-top: $spacing-md;
+    margin-top: $spacing-md;
     margin-bottom: $spacing-md;
-    // border-top: 1px solid var(--dgc-border-color);
+    border-top: 1px solid var(--dgc-border-color);
     font-size: $font-size-base;
     font-weight: $font-weight-medium;
     color: var(--dgc-text-primary);
@@ -873,11 +873,25 @@
       color: var(--dgc-text-hint);
       font-size: 14px;
     }
+
+    // First section header doesn't need top border/margin
+    &:first-child {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+    }
   }
 
-  // Remove default h4 margin since we use section-header now
+  // Data source and filter preview sections with separators
   #data-source-section,
   #filter-preview-section {
+    .section-header {
+      // Always show separator for these sections
+      margin-top: $spacing-md;
+      padding-top: $spacing-md;
+      border-top: 1px solid var(--dgc-border-color);
+    }
+
     h4 {
       margin-top: 0;
     }
@@ -1202,13 +1216,49 @@
     font-weight: 500;
     color: var(--dgc-text-primary);
 
-    i {
+    > i {
       color: $primary;
     }
 
-    small {
-      margin-left: auto;
-      font-weight: 400;
+    > span {
+      white-space: nowrap;
+    }
+  }
+
+  .system-placeholders-search {
+    margin-left: auto;
+    position: relative;
+    width: 200px;
+
+    input {
+      width: 100%;
+      padding: 6px 10px 6px 32px;
+      font-size: 0.8rem;
+      border: 1px solid var(--dgc-border-color);
+      border-radius: $border-radius;
+      background: var(--dgc-bg-input);
+      color: var(--dgc-text-primary);
+      transition: all $transition-fast;
+
+      &::placeholder {
+        color: var(--dgc-text-hint);
+      }
+
+      &:focus {
+        outline: none;
+        border-color: var(--dgc-primary);
+        box-shadow: 0 0 0 2px rgba($primary, 0.1);
+      }
+    }
+
+    i {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--dgc-text-hint);
+      font-size: 0.8rem;
+      pointer-events: none;
     }
   }
 
@@ -1235,9 +1285,110 @@
       background: rgba($success, 0.05);
     }
 
+    &.hidden {
+      display: none;
+    }
+
     .placeholder-label {
       font-size: 0.8rem;
       color: var(--dgc-text-secondary);
+    }
+  }
+
+  .system-placeholders-empty {
+    width: 100%;
+    text-align: center;
+    color: var(--dgc-text-hint);
+    font-size: 0.85rem;
+    padding: $spacing-sm;
+    display: none;
+
+    &.show {
+      display: block;
+    }
+  }
+}
+
+// Status indicators container (shared with graph page)
+.status-indicators {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+// Small status box for error/warning/success indicators
+.status-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: $border-radius;
+  cursor: help;
+  transition: all $transition-fast;
+
+  i {
+    font-size: 14px;
+  }
+
+  &.status-error {
+    background: rgba($error, 0.1);
+    color: $error;
+
+    &:hover {
+      background: rgba($error, 0.2);
+    }
+  }
+
+  &.status-warning {
+    background: rgba($warning, 0.1);
+    color: $warning;
+
+    &:hover {
+      background: rgba($warning, 0.2);
+    }
+  }
+
+  &.status-success {
+    background: rgba($success, 0.1);
+    color: $success;
+
+    &:hover {
+      background: rgba($success, 0.2);
+    }
+  }
+}
+
+// Save Indicator (matches btn-sm sizing)
+.save-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all 0.3s;
+
+  i {
+    font-size: 0.875rem;
+  }
+
+  &.saved {
+    color: var(--dgc-success);
+    background: var(--dgc-success-bg);
+
+    i {
+      color: var(--dgc-success);
+    }
+  }
+
+  &.unsaved {
+    color: var(--dgc-warning);
+    background: var(--dgc-warning-bg);
+
+    i {
+      color: var(--dgc-warning);
     }
   }
 }

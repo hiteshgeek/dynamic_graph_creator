@@ -4,11 +4,13 @@
     echo DGCHelper::renderCompanyStartDateScript();
 
     $saveButtonClass = $filter ? 'btn-outline-warning' : 'btn-primary';
+    $rightContent = '<div class="status-indicators"></div>';
+    $rightContent .= '<button type="button" class="btn ' . $saveButtonClass . ' btn-sm save-filter-btn" data-save-btn><i class="fas fa-save"></i> ' . ($filter ? 'Save' : 'Create Data Filter') . '</button>';
     echo DGCHelper::renderPageHeader([
         'title' => $filter ? 'Edit Data Filter' : 'Create Data Filter',
         'backUrl' => '?urlq=data-filter',
         'backLabel' => 'Data Filters',
-        'rightContent' => '<button type="button" class="btn ' . $saveButtonClass . ' btn-sm save-filter-btn" data-save-btn><i class="fas fa-save"></i> ' . ($filter ? 'Save' : 'Create Data Filter') . '</button>'
+        'rightContent' => $rightContent
     ]);
     ?>
 
@@ -92,7 +94,10 @@
                                 <input type="text" id="filter-label" class="form-control" placeholder="Year" value="<?php echo $filter ? htmlspecialchars($filter->getFilterLabel()) : ''; ?>" required>
                             </div>
                         </div>
-                        <small class="form-hint d-block mb-3">Filter Key: Only letters, numbers, and underscores allowed. <code>::</code> prefix will be added automatically.</small>
+                        <small class="form-hint d-block mb-3">
+                            Filter Key: Only letters, numbers, and underscores allowed.<br>
+                            <span class="badge bg-light text-dark"><code>::</code> prefix will be added automatically.</span>
+                        </small>
 
                         <div class="form-row">
                             <div class="form-group">
@@ -254,15 +259,27 @@
                                     <div class="system-placeholders-header">
                                         <i class="fas fa-code"></i>
                                         <span>System Placeholders</span>
-                                        <small class="text-muted">Click to insert into query</small>
+                                        <div class="system-placeholders-search">
+                                            <input type="text" class="form-control form-control-sm" id="system-placeholder-search" placeholder="Search placeholders...">
+                                            <i class="fas fa-search"></i>
+                                        </div>
                                     </div>
-                                    <div class="system-placeholders-list">
+                                    <div class="system-placeholders-list" id="system-placeholders-list">
                                         <?php foreach ($systemPlaceholders as $sp): ?>
-                                        <div class="system-placeholder-item" data-placeholder="::<?php echo htmlspecialchars($sp['placeholder_key']); ?>" title="<?php echo htmlspecialchars($sp['description']); ?>">
+                                        <div class="system-placeholder-item"
+                                             data-placeholder="::<?php echo htmlspecialchars($sp['placeholder_key']); ?>"
+                                             data-label="<?php echo htmlspecialchars(strtolower($sp['placeholder_label'])); ?>"
+                                             data-key="<?php echo htmlspecialchars(strtolower($sp['placeholder_key'])); ?>"
+                                             data-description="<?php echo htmlspecialchars(strtolower($sp['description'])); ?>"
+                                             data-bs-toggle="tooltip"
+                                             data-bs-placement="top"
+                                             data-bs-html="true"
+                                             title="<strong><?php echo htmlspecialchars($sp['placeholder_label']); ?></strong><br><?php echo htmlspecialchars($sp['description']); ?><br><em>Click to copy</em>">
                                             <span class="placeholder-label"><?php echo htmlspecialchars($sp['placeholder_label']); ?></span>
                                             <code>::<?php echo htmlspecialchars($sp['placeholder_key']); ?></code>
                                         </div>
                                         <?php endforeach; ?>
+                                        <div class="system-placeholders-empty" id="system-placeholders-empty">No placeholders match your search</div>
                                     </div>
                                 </div>
                                 <?php endif; ?>

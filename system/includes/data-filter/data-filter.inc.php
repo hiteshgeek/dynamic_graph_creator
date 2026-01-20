@@ -222,6 +222,26 @@ function testDataFilterQuery($data)
         Utility::ajaxResponseFalse('Please enter a SQL query');
     }
 
+    // Find all placeholders in the query (::placeholder_name pattern)
+    preg_match_all('/::([a-zA-Z_][a-zA-Z0-9_]*)/', $query, $matches);
+    $usedPlaceholders = isset($matches[1]) ? array_unique($matches[1]) : array();
+
+    // Get all valid system placeholder keys
+    $systemPlaceholderKeys = SystemPlaceholderManager::getAllKeys();
+
+    // Check for unknown placeholders
+    $unknownPlaceholders = array();
+    foreach ($usedPlaceholders as $placeholder) {
+        if (!in_array($placeholder, $systemPlaceholderKeys)) {
+            $unknownPlaceholders[] = '::' . $placeholder;
+        }
+    }
+
+    if (!empty($unknownPlaceholders)) {
+        $placeholderList = implode(', ', $unknownPlaceholders);
+        Utility::ajaxResponseFalse('Unknown placeholder(s) found: ' . $placeholderList . '. Please use only valid system placeholders.');
+    }
+
     // Resolve system placeholders before testing
     $resolvedQuery = SystemPlaceholderManager::resolveInQuery($query);
 
@@ -230,22 +250,30 @@ function testDataFilterQuery($data)
 
     $db = Rapidkart::getInstance()->getDB();
 
-    // Get total count first
-    $countQuery = "SELECT COUNT(*) as total FROM (" . $baseQuery . ") as subquery";
-    $countRes = $db->query($countQuery);
-    $totalCount = 0;
-    if ($countRes && $countRow = $db->fetchAssocArray($countRes)) {
-        $totalCount = intval($countRow['total']);
-    }
+    // Try to execute the query with error handling
+    try {
+        // Get total count first
+        $countQuery = "SELECT COUNT(*) as total FROM (" . $baseQuery . ") as subquery";
+        $countRes = $db->query($countQuery);
+        $totalCount = 0;
+        if ($countRes && $countRow = $db->fetchAssocArray($countRes)) {
+            $totalCount = intval($countRow['total']);
+        }
 
-    // Add pagination LIMIT
-    $offset = ($page - 1) * $pageSize;
-    $testQuery = $baseQuery . " LIMIT " . $offset . ", " . $pageSize;
+        // Add pagination LIMIT
+        $offset = ($page - 1) * $pageSize;
+        $testQuery = $baseQuery . " LIMIT " . $offset . ", " . $pageSize;
 
-    $res = $db->query($testQuery);
+        $res = $db->query($testQuery);
 
-    if (!$res) {
-        Utility::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
+        if (!$res) {
+            $error = $db->getMysqlError();
+            Utility::ajaxResponseFalse('Query error: ' . $error);
+        }
+    } catch (mysqli_sql_exception $e) {
+        Utility::ajaxResponseFalse('Query error: ' . $e->getMessage());
+    } catch (Exception $e) {
+        Utility::ajaxResponseFalse('Query error: ' . $e->getMessage());
     }
 
     $options = array();
