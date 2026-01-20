@@ -175,9 +175,12 @@
   --dgc-border-color: #3d3d3d;
 
   // Shadows - dark mode uses subtle light glow spread in all directions
-  --dgc-shadow-subtle: 0 0 4px rgba(255, 255, 255, 0.05), 0 0 8px rgba(0, 0, 0, 0.3);
+  --dgc-shadow-0: 0 0 4px rgba(255, 255, 255, 0.2), 0 0 8px rgba(0, 0, 0, 0.4);
+  --dgc-shadow-subtle:
+    0 0 4px rgba(255, 255, 255, 0.05), 0 0 8px rgba(0, 0, 0, 0.3);
   --dgc-shadow-1: 0 0 4px rgba(255, 255, 255, 0.06), 0 0 8px rgba(0, 0, 0, 0.4);
-  --dgc-shadow-2: 0 0 6px rgba(255, 255, 255, 0.08), 0 0 12px rgba(0, 0, 0, 0.5);
+  --dgc-shadow-2:
+    0 0 6px rgba(255, 255, 255, 0.08), 0 0 12px rgba(0, 0, 0, 0.5);
   --dgc-shadow-3: 0 0 8px rgba(255, 255, 255, 0.1), 0 0 16px rgba(0, 0, 0, 0.6);
 
   // Loading overlay
@@ -285,18 +288,30 @@ body {
 
   // Mode-specific colors
   &[data-mode="system"] {
-    &::before { opacity: 1; }
-    &::after { opacity: 0; }
-    i { color: #0284c7; }
+    &::before {
+      opacity: 1;
+    }
+    &::after {
+      opacity: 0;
+    }
+    i {
+      color: #0284c7;
+    }
     &:hover::before {
       background: linear-gradient(135deg, #bae6fd 0%, #bfdbfe 100%);
     }
   }
 
   &[data-mode="light"] {
-    &::before { opacity: 0; }
-    &::after { opacity: 1; }
-    i { color: #d97706; }
+    &::before {
+      opacity: 0;
+    }
+    &::after {
+      opacity: 1;
+    }
+    i {
+      color: #d97706;
+    }
     &:hover::after {
       background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
     }
@@ -304,8 +319,13 @@ body {
 
   &[data-mode="dark"] {
     background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
-    &::before, &::after { opacity: 0; }
-    i { color: #4f46e5; }
+    &::before,
+    &::after {
+      opacity: 0;
+    }
+    i {
+      color: #4f46e5;
+    }
     &:hover {
       background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 100%);
     }
@@ -328,14 +348,18 @@ body {
     }
 
     &[data-mode="system"] {
-      i { color: #7dd3fc; }
+      i {
+        color: #7dd3fc;
+      }
       &:hover::before {
         background: linear-gradient(135deg, #0e5a82 0%, #254670 100%);
       }
     }
 
     &[data-mode="light"] {
-      i { color: #fbbf24; }
+      i {
+        color: #fbbf24;
+      }
       &:hover::after {
         background: linear-gradient(135deg, #92400e 0%, #a16207 100%);
       }
@@ -343,7 +367,9 @@ body {
 
     &[data-mode="dark"] {
       background: linear-gradient(135deg, #312e81 0%, #3730a3 100%);
-      i { color: #a5b4fc; }
+      i {
+        color: #a5b4fc;
+      }
       &:hover {
         background: linear-gradient(135deg, #3730a3 0%, #4338ca 100%);
       }
@@ -865,12 +891,14 @@ code {
   .template-builder-page .dashboard-builder {
     // Section border buttons (Add Section Above/Below)
     .add-section-border-btn {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
         0 0 0 1px hsla(0, 0%, 100%, 0.3),
         0 0 12px rgba(0, 123, 255, 0.15);
 
       &:hover:not([disabled]) {
-        box-shadow: 0 4px 16px rgba(0, 123, 255, 0.5),
+        box-shadow:
+          0 4px 16px rgba(0, 123, 255, 0.5),
           0 0 0 1px rgba(0, 123, 255, 0.3),
           0 0 20px rgba(0, 123, 255, 0.25);
       }
@@ -878,28 +906,33 @@ code {
 
     // Section top border controls (drag handle, delete)
     .section-top-border-controls .section-control-btn {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
         0 0 0 1px hsla(0, 0%, 100%, 0.3);
 
       &.drag-handle:hover {
-        box-shadow: 0 4px 16px rgba(0, 123, 255, 0.5),
+        box-shadow:
+          0 4px 16px rgba(0, 123, 255, 0.5),
           0 0 0 1px rgba(0, 123, 255, 0.3);
       }
 
       &.remove-btn:hover {
-        box-shadow: 0 4px 16px rgba(244, 67, 54, 0.5),
+        box-shadow:
+          0 4px 16px rgba(244, 67, 54, 0.5),
           0 0 0 1px rgba(244, 67, 54, 0.3);
       }
     }
 
     // Column drag handle (orange/warning)
     .column-drag-handle {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
         0 0 0 1px hsla(0, 0%, 100%, 0.3),
         0 0 12px rgba(255, 193, 7, 0.2);
 
       &:hover:not([disabled]) {
-        box-shadow: 0 4px 16px rgba(255, 193, 7, 0.5),
+        box-shadow:
+          0 4px 16px rgba(255, 193, 7, 0.5),
           0 0 0 1px rgba(255, 193, 7, 0.3),
           0 0 20px rgba(255, 193, 7, 0.25);
       }
@@ -907,12 +940,14 @@ code {
 
     // Row drag handle (green/success)
     .row-drag-handle {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
         0 0 0 1px hsla(0, 0%, 100%, 0.3),
         0 0 12px rgba(40, 167, 69, 0.2);
 
       &:hover:not([disabled]) {
-        box-shadow: 0 4px 16px rgba(40, 167, 69, 0.5),
+        box-shadow:
+          0 4px 16px rgba(40, 167, 69, 0.5),
           0 0 0 1px rgba(40, 167, 69, 0.3),
           0 0 20px rgba(40, 167, 69, 0.25);
       }
@@ -920,18 +955,21 @@ code {
 
     // Edge buttons (Add Row / Add Column)
     .edge-btn {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
         0 0 0 1px hsla(0, 0%, 100%, 0.3);
 
       // Row buttons (top/bottom - green)
       &.edge-top,
       &.edge-bottom {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+        box-shadow:
+          0 2px 8px rgba(0, 0, 0, 0.4),
           0 0 0 1px hsla(0, 0%, 100%, 0.3),
           0 0 12px rgba(40, 167, 69, 0.15);
 
         &:hover:not([disabled]) {
-          box-shadow: 0 4px 16px rgba(40, 167, 69, 0.5),
+          box-shadow:
+            0 4px 16px rgba(40, 167, 69, 0.5),
             0 0 0 1px rgba(40, 167, 69, 0.3),
             0 0 20px rgba(40, 167, 69, 0.25);
         }
@@ -940,12 +978,14 @@ code {
       // Column buttons (left/right - orange)
       &.edge-left,
       &.edge-right {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+        box-shadow:
+          0 2px 8px rgba(0, 0, 0, 0.4),
           0 0 0 1px hsla(0, 0%, 100%, 0.3),
           0 0 12px rgba(255, 193, 7, 0.15);
 
         &:hover:not([disabled]) {
-          box-shadow: 0 4px 16px rgba(255, 193, 7, 0.5),
+          box-shadow:
+            0 4px 16px rgba(255, 193, 7, 0.5),
             0 0 0 1px rgba(255, 193, 7, 0.3),
             0 0 20px rgba(255, 193, 7, 0.25);
         }
@@ -954,29 +994,34 @@ code {
 
     // Center controls (resize arrows + delete)
     .center-btn {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
         0 0 0 1px hsla(0, 0%, 100%, 0.3);
 
       // Row resize (green)
       &.row-resize:hover:not([disabled]) {
-        box-shadow: 0 4px 16px rgba(40, 167, 69, 0.5),
+        box-shadow:
+          0 4px 16px rgba(40, 167, 69, 0.5),
           0 0 0 1px rgba(40, 167, 69, 0.3);
       }
 
       // Column resize (orange)
       &.col-resize:hover:not([disabled]) {
-        box-shadow: 0 4px 16px rgba(255, 193, 7, 0.5),
+        box-shadow:
+          0 4px 16px rgba(255, 193, 7, 0.5),
           0 0 0 1px rgba(255, 193, 7, 0.3);
       }
 
       // Delete button (red)
       &.delete-btn {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+        box-shadow:
+          0 2px 8px rgba(0, 0, 0, 0.4),
           0 0 0 1px hsla(0, 0%, 100%, 0.3),
           0 0 12px rgba(244, 67, 54, 0.2);
 
         &:hover:not([disabled]) {
-          box-shadow: 0 4px 16px rgba(244, 67, 54, 0.5),
+          box-shadow:
+            0 4px 16px rgba(244, 67, 54, 0.5),
             0 0 0 1px rgba(244, 67, 54, 0.3),
             0 0 20px rgba(244, 67, 54, 0.25);
         }
@@ -985,34 +1030,40 @@ code {
 
     // Grid size indicator
     .grid-size-indicator {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
         0 0 0 1px hsla(0, 0%, 100%, 0.3);
     }
 
     // Area control buttons (split, remove column)
     .area-control-btn {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
         0 0 0 1px hsla(0, 0%, 100%, 0.3);
 
       &.split-column-btn:hover {
-        box-shadow: 0 4px 16px rgba(0, 123, 255, 0.5),
+        box-shadow:
+          0 4px 16px rgba(0, 123, 255, 0.5),
           0 0 0 1px rgba(0, 123, 255, 0.3);
       }
 
       &.remove-column-btn:hover {
-        box-shadow: 0 4px 16px rgba(244, 67, 54, 0.5),
+        box-shadow:
+          0 4px 16px rgba(244, 67, 54, 0.5),
           0 0 0 1px rgba(244, 67, 54, 0.3);
       }
     }
 
     // Row control button (delete row)
     .row-control-btn {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4),
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.4),
         0 0 0 1px hsla(0, 0%, 100%, 0.3),
         0 0 12px rgba(244, 67, 54, 0.2);
 
       &:hover:not([disabled]) {
-        box-shadow: 0 4px 16px rgba(244, 67, 54, 0.5),
+        box-shadow:
+          0 4px 16px rgba(244, 67, 54, 0.5),
           0 0 0 1px rgba(244, 67, 54, 0.3);
       }
     }
@@ -1253,7 +1304,9 @@ code {
     background: var(--dgc-bg-card);
     border: 1px solid var(--dgc-border-color);
     border-radius: 4px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 0 0 var(--dgc-gray-200);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.05),
+      0 2px 0 0 var(--dgc-gray-200);
   }
 
   .key-separator {
@@ -1287,6 +1340,8 @@ code {
 // Dark mode adjustments for keyboard shortcuts
 :root.theme-dark {
   .shortcut-keys kbd {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), 0 2px 0 0 var(--dgc-gray-300);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.2),
+      0 2px 0 0 var(--dgc-gray-300);
   }
 }
