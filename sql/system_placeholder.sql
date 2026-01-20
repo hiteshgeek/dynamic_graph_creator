@@ -22,4 +22,5 @@ CREATE TABLE IF NOT EXISTS system_placeholder (
 INSERT INTO system_placeholder (placeholder_key, placeholder_label, description, resolver_method) VALUES
 ('logged_in_uid', 'Logged In User ID', 'Returns the currently logged in user ID', 'getLoggedInUid'),
 ('logged_in_company_id', 'Logged In Company ID', 'Returns the company ID of the logged in user', 'getLoggedInCompanyId'),
-('logged_in_licence_id', 'Logged In Licence ID', 'Returns the licence ID of the logged in user', 'getLoggedInLicenceId');
+('logged_in_licence_id', 'Logged In Licence ID', 'Returns the licence ID of the logged in user', 'getLoggedInLicenceId'),
+('logged_in_is_admin', 'Logged In Is Admin', 'Returns 1 if the logged in user is an admin, 0 otherwise', 'getLoggedInIsAdmin');

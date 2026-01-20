@@ -654,6 +654,18 @@
     font-family: monospace;
   }
 
+  // Query tabs styling
+  #query-options-section {
+    .dgc-tabs {
+      margin-bottom: $spacing-md;
+    }
+
+    .dgc-tab-content {
+      min-height: 150px;
+    }
+  }
+
+
   // Note: CodeMirror styling moved to _code-editor.scss (shared component)
 
   // Filter options styling

@@ -202,4 +202,16 @@ class SystemPlaceholderManager
     {
         return BaseConfig::$licence_id;
     }
+
+    /**
+     * Check if the logged in user is an admin
+     * resolver_method = 'getLoggedInIsAdmin'
+     *
+     * @return int 1 if admin, 0 otherwise
+     */
+    public static function getLoggedInIsAdmin()
+    {
+        $user = SystemConfig::getUser();
+        return ($user && $user->getIsAdmin() == 1) ? 1 : 0;
+    }
 }

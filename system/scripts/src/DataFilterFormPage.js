@@ -202,6 +202,50 @@ export default class DataFilterFormPage {
     }
 
     /**
+     * Initialize or update the generated query CodeMirror editor
+     */
+    updateGeneratedQueryEditor(query) {
+        const textarea = document.getElementById('generated-query-code');
+        const generatedTab = document.getElementById('generated-query-tab');
+        if (!textarea) return;
+
+        // Store query for later use
+        this.pendingGeneratedQuery = query;
+
+        // Initialize CodeMirrorEditor if not already done
+        if (!this.generatedQueryCodeEditor) {
+            this.generatedQueryCodeEditor = new CodeMirrorEditor(textarea, {
+                copyBtn: true,
+                formatBtn: false,
+                testBtn: false,
+                minHeight: 100,
+                readOnly: true
+            });
+            this.generatedQueryEditor = this.generatedQueryCodeEditor.editor;
+
+            // Refresh CodeMirror when tab becomes visible - this is the key fix
+            if (generatedTab) {
+                generatedTab.addEventListener('shown.bs.tab', () => {
+                    // Set value and format when tab is visible
+                    if (this.pendingGeneratedQuery) {
+                        this.generatedQueryEditor.setValue(this.pendingGeneratedQuery);
+                        this.generatedQueryCodeEditor.format();
+                    }
+                    this.generatedQueryEditor.refresh();
+                });
+            }
+        } else {
+            // If already initialized and tab is visible, update immediately
+            const tabPane = document.getElementById('generated-query-pane');
+            if (tabPane && tabPane.classList.contains('show')) {
+                this.generatedQueryEditor.setValue(query);
+                this.generatedQueryCodeEditor.format();
+                this.generatedQueryEditor.refresh();
+            }
+        }
+    }
+
+    /**
      * Handle filter type change
      */
     onFilterTypeChange() {
@@ -422,6 +466,15 @@ export default class DataFilterFormPage {
                             <span class="query-row-count">${options.length} row${options.length !== 1 ? 's' : ''} returned</span>
                         </div>
                     `;
+
+                    // Show Generated Query tab and populate it
+                    if (result.data.resolvedQuery) {
+                        const generatedTabItem = document.getElementById('generated-query-tab-item');
+                        if (generatedTabItem) {
+                            generatedTabItem.style.display = '';
+                        }
+                        this.updateGeneratedQueryEditor(result.data.resolvedQuery);
+                    }
 
                     // Show warnings if any
                     if (result.data.warnings && result.data.warnings.length > 0) {

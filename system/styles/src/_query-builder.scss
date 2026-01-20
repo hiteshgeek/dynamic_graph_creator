@@ -11,7 +11,7 @@
   width: 100%;
   min-height: 150px;
   padding: $spacing-md;
-  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-family: $font-family-mono;
   font-size: 13px;
   line-height: 1.6;
   border: none;
@@ -44,7 +44,7 @@
     padding: $spacing-sm;
     background: var(--dgc-bg-card);
     border-radius: $border-radius;
-    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+    font-family: $font-family-mono;
     font-size: 11px;
     line-height: 1.5;
     overflow-x: auto;
@@ -156,7 +156,7 @@
   padding: $spacing-md;
   background: var(--dgc-gray-100);
   border-radius: $border-radius;
-  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-family: $font-family-mono;
   font-size: 12px;
   overflow-x: auto;
   white-space: pre-wrap;

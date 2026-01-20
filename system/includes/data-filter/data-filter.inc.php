@@ -274,7 +274,8 @@ function testDataFilterQuery($data)
         'options' => $options,
         'count' => count($options),
         'warnings' => $warnings,
-        'hasIsSelected' => $hasIsSelected
+        'hasIsSelected' => $hasIsSelected,
+        'resolvedQuery' => $testQuery
     ));
 }
 
