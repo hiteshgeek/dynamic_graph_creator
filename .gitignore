@@ -19,7 +19,7 @@ out/
 .env.local
 .env.*.local
 *.local
-export_tables/.developer_db.env
+export_tables/
 
 # IDE and editor files
 .idea/

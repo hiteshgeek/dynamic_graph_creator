@@ -3,3 +3,5 @@ and after each task, if its completed, do not provide summary unless asked, Just
 
 FYI :
 live project path: /var/www/html/rapidkartprocessadminv2
+
+for db crdential use .env
