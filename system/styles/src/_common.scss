@@ -8,6 +8,11 @@
 
 // Poppins font is loaded via Google Fonts in html.tpl.php
 
+// Add padding for fixed header
+body {
+  padding-top: 60px;
+}
+
 .dgc-app {
   .navbar.navbar-inverse.navbar-fixed-top,
   #sidebar {
@@ -21,11 +26,6 @@
   // Global textarea - disable resize handle (autosize handles it)
   textarea {
     resize: none;
-  }
-
-  // Add padding for fixed header
-  body {
-    padding-top: 60px;
   }
 }
 

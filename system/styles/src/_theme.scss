@@ -603,8 +603,11 @@ select {
 
 // Code elements
 code {
-  background: var(--dgc-code-bg);
-  color: var(--dgc-code-color);
+  // background: var(--dgc-code-bg);
+  // color: var(--dgc-code-color);
+  color: var(--dgc-success);
+  background: var(--dgc-success-bg);
+  font-weight: $font-weight-bold;
 }
 
 // Text utility classes
