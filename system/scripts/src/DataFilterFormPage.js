@@ -40,6 +40,7 @@ export default class DataFilterFormPage {
         this.initPreview();
         this.initChangeTracking();
         this.updateStatusIndicators();
+        this.initSidebarCollapse();
     }
 
     /**
@@ -1311,6 +1312,58 @@ export default class DataFilterFormPage {
         this.savedState = this.getCurrentState();
         this.hasUnsavedChanges = false;
         this.updateStatusIndicators();
+    }
+
+    /**
+     * Initialize sidebar collapse functionality
+     */
+    initSidebarCollapse() {
+        const sidebar = document.querySelector('.data-filter-form-sidebar');
+        const sidebarCard = sidebar?.querySelector('.sidebar-card');
+        const header = sidebar?.querySelector('.sidebar-card-header');
+        const collapseBtn = sidebar?.querySelector('.collapse-btn');
+
+        if (!sidebar || !sidebarCard) return;
+
+        // Restore collapsed state from localStorage
+        const isCollapsed = localStorage.getItem('dataFilterSidebarCollapsed') === 'true';
+        if (isCollapsed) {
+            sidebar.classList.add('collapsed');
+            sidebarCard.classList.add('collapsed');
+        }
+
+        // Toggle on header click
+        if (header) {
+            header.addEventListener('click', (e) => {
+                // Don't toggle if clicking a link inside the header
+                if (e.target.closest('a')) return;
+                this.toggleSidebar();
+            });
+        }
+
+        // Toggle on collapse button click
+        if (collapseBtn) {
+            collapseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleSidebar();
+            });
+        }
+    }
+
+    /**
+     * Toggle sidebar collapsed state
+     */
+    toggleSidebar() {
+        const sidebar = document.querySelector('.data-filter-form-sidebar');
+        const sidebarCard = sidebar?.querySelector('.sidebar-card');
+
+        if (!sidebar || !sidebarCard) return;
+
+        sidebar.classList.toggle('collapsed');
+        sidebarCard.classList.toggle('collapsed');
+
+        // Save state to localStorage
+        localStorage.setItem('dataFilterSidebarCollapsed', sidebar.classList.contains('collapsed') ? 'true' : 'false');
     }
 
     /**

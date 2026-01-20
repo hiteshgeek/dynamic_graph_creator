@@ -138,18 +138,80 @@
   max-height: calc(100vh - 110px);
   position: sticky;
   top: 85px;
+  transition: width $transition-normal;
+
+  &.collapsed {
+    width: 48px;
+
+    .graph-list-nav {
+      display: none;
+    }
+
+    .sidebar-header {
+      flex-direction: column;
+      padding: $spacing-md $spacing-sm;
+      border-bottom: none;
+      gap: $spacing-lg;
+
+      .sidebar-title {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        transform: rotate(180deg);
+        flex-direction: row;
+        gap: $spacing-sm;
+
+        i {
+          transform: rotate(90deg);
+        }
+      }
+
+      .sidebar-count {
+        order: 2;
+      }
+
+      .collapse-btn {
+        order: -1;
+
+        i {
+          transform: rotate(-90deg);
+        }
+      }
+    }
+  }
 
   .sidebar-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: $spacing-md $spacing-lg;
+    padding: $spacing-sm $spacing-md;
     border-bottom: 1px solid var(--dgc-border-color);
     background: var(--dgc-bg-elevated);
+    cursor: pointer;
+    user-select: none;
+    transition: all $transition-normal;
+
+    &:hover {
+      background: var(--dgc-bg-hover);
+    }
+
+    &:hover .collapse-btn {
+      background: var(--dgc-primary);
+      border-color: var(--dgc-primary);
+      color: var(--dgc-text-inverse);
+    }
 
     .sidebar-title {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
       font-weight: 600;
       color: var(--dgc-text-primary);
+      white-space: nowrap;
+
+      i {
+        font-size: 14px;
+        color: var(--dgc-primary);
+      }
     }
 
     .sidebar-count {
@@ -161,6 +223,32 @@
       border-radius: 12px;
       min-width: 24px;
       text-align: center;
+    }
+
+    .collapse-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--dgc-bg-card);
+      border: 1px solid var(--dgc-gray-300);
+      border-radius: 50%;
+      color: var(--dgc-text-secondary);
+      cursor: pointer;
+      transition: all $transition-fast;
+      flex-shrink: 0;
+
+      &:hover {
+        background: var(--dgc-primary);
+        border-color: var(--dgc-primary);
+        color: var(--dgc-text-inverse);
+      }
+
+      i {
+        font-size: 12px;
+        transition: transform $transition-fast;
+      }
     }
   }
 

@@ -40,12 +40,6 @@ echo DGCHelper::renderPageHeader([
                     <?php if ($g->getDescription()): ?>
                     <p class="item-card-description"><?php echo htmlspecialchars($g->getDescription()); ?></p>
                     <?php endif; ?>
-                    <div class="item-card-meta">
-                        <span class="meta-item">
-                            <i class="fas fa-clock"></i>
-                            <?php echo date('M d, Y', strtotime($g->getUpdatedTs())); ?>
-                        </span>
-                    </div>
                 </div>
                 <div class="item-card-actions">
                     <a href="?urlq=graph/view/<?php echo $g->getId(); ?>" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" title="View Mode">

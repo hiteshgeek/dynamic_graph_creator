@@ -944,38 +944,143 @@
 .data-filter-form-sidebar {
   width: 280px;
   flex-shrink: 0;
-  background: var(--dgc-bg-card);
-  border-radius: $border-radius-lg;
-  box-shadow: var(--dgc-shadow-subtle);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100vh - 110px);
-  position: sticky;
-  top: 85px;
+  transition: width $transition-normal;
+  overflow: visible;
 
-  .sidebar-header {
+  &.collapsed {
+    width: 48px;
+  }
+
+  .sidebar-card {
+    background: var(--dgc-bg-card);
+    border-radius: $border-radius-lg;
+    box-shadow: var(--dgc-shadow-subtle);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 110px);
+    position: sticky;
+    top: 85px;
+    height: fit-content;
+    padding-bottom: $spacing-md;
+
+    // Collapsed state
+    &.collapsed {
+      padding-bottom: 0;
+
+      .filter-list-nav {
+        display: none;
+      }
+
+      .sidebar-card-header {
+        flex-direction: column;
+        padding: $spacing-md $spacing-sm;
+        border-bottom: none;
+        gap: $spacing-lg;
+
+        .sidebar-card-title {
+          writing-mode: vertical-rl;
+          text-orientation: mixed;
+          transform: rotate(180deg);
+          flex-direction: row;
+          gap: $spacing-sm;
+
+          i {
+            transform: rotate(90deg);
+          }
+        }
+
+        .sidebar-count {
+          order: 2;
+        }
+
+        .collapse-btn {
+          order: -1;
+
+          i {
+            transform: rotate(-90deg);
+          }
+        }
+      }
+    }
+  }
+
+  .sidebar-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: $spacing-md $spacing-lg;
+    padding: $spacing-sm $spacing-md;
     border-bottom: 1px solid var(--dgc-border-color);
-    background: var(--dgc-bg-elevated);
+    border-radius: $border-radius-lg $border-radius-lg 0 0;
+    cursor: pointer;
+    user-select: none;
+    transition: all $transition-normal;
 
-    .sidebar-title {
-      font-weight: 600;
-      color: var(--dgc-text-primary);
+    &:hover {
+      background: var(--dgc-bg-hover);
     }
 
-    .sidebar-count {
-      font-size: 11px;
-      font-weight: 600;
-      color: white;
-      background: $primary;
-      padding: 2px 10px;
-      border-radius: 12px;
-      min-width: 24px;
-      text-align: center;
+    &:hover .collapse-btn {
+      background: var(--dgc-primary);
+      border-color: var(--dgc-primary);
+      color: var(--dgc-text-inverse);
+    }
+
+    .sidebar-card.collapsed & {
+      border-radius: $border-radius-lg;
+    }
+  }
+
+  .sidebar-card-title {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    margin: 0;
+    color: var(--dgc-text-secondary);
+    white-space: nowrap;
+
+    i {
+      font-size: 14px;
+      color: var(--dgc-primary);
+    }
+  }
+
+  .sidebar-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: white;
+    background: $primary;
+    padding: 2px 10px;
+    border-radius: 12px;
+    min-width: 24px;
+    text-align: center;
+  }
+
+  .collapse-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dgc-bg-card);
+    border: 1px solid var(--dgc-gray-300);
+    border-radius: 50%;
+    color: var(--dgc-text-secondary);
+    cursor: pointer;
+    transition: all $transition-fast;
+    flex-shrink: 0;
+
+    &:hover {
+      background: var(--dgc-primary);
+      border-color: var(--dgc-primary);
+      color: var(--dgc-text-inverse);
+    }
+
+    i {
+      font-size: 12px;
+      transition: transform $transition-fast;
     }
   }
 
@@ -1135,9 +1240,15 @@
 .data-filter-form-left {
   flex: 0 0 400px;
   min-width: 350px;
+  transition: flex-basis $transition-normal;
 
   .card-body {
     padding: 0;
+  }
+
+  // Expand when sidebar is collapsed
+  .data-filter-form-sidebar.collapsed ~ .data-filter-form-main & {
+    flex: 0 0 480px;
   }
 }
 

@@ -795,25 +795,38 @@ window.KeyboardShortcuts = {
 
         // Graph Creator: Alt+O to toggle sidebar
         this.register('alt+o', () => {
-            const sidebar = document.querySelector('.graph-creator .graph-sidebar-left');
-            const card = sidebar?.querySelector('.sidebar-card');
-            if (card) {
-                card.classList.toggle('collapsed');
-            }
-            if (sidebar) {
-                sidebar.classList.toggle('collapsed');
-                localStorage.setItem('graphCreatorSidebarCollapsed', sidebar.classList.contains('collapsed') ? 'true' : 'false');
+            // Check for graph creator sidebar first
+            const graphSidebar = document.querySelector('.graph-creator .graph-sidebar-left');
+            if (graphSidebar) {
+                const card = graphSidebar.querySelector('.sidebar-card');
+                if (card) {
+                    card.classList.toggle('collapsed');
+                }
+                graphSidebar.classList.toggle('collapsed');
+                localStorage.setItem('graphCreatorSidebarCollapsed', graphSidebar.classList.contains('collapsed') ? 'true' : 'false');
                 // Trigger chart resize after animation
                 setTimeout(() => {
                     if (window.graphCreator?.preview) {
                         window.graphCreator.preview.resize();
                     }
                 }, 350);
+                return;
+            }
+
+            // Check for data filter form sidebar
+            const filterSidebar = document.querySelector('.data-filter-form-sidebar');
+            if (filterSidebar) {
+                const card = filterSidebar.querySelector('.sidebar-card');
+                if (card) {
+                    card.classList.toggle('collapsed');
+                }
+                filterSidebar.classList.toggle('collapsed');
+                localStorage.setItem('dataFilterSidebarCollapsed', filterSidebar.classList.contains('collapsed') ? 'true' : 'false');
             }
         }, {
-            description: 'Toggle options panel',
-            scope: 'graph-creator',
-            available: () => !!document.querySelector('.graph-creator .graph-sidebar-left')
+            description: 'Toggle sidebar panel',
+            scope: 'global',
+            available: () => !!document.querySelector('.graph-creator .graph-sidebar-left, .data-filter-form-sidebar')
         });
 
         return this;

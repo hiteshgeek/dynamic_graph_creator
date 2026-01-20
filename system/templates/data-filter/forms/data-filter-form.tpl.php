@@ -16,53 +16,68 @@
 
     <div class="data-filter-form-layout">
         <!-- Sidebar with filter list -->
-        <aside class="data-filter-form-sidebar">
-            <div class="sidebar-header">
-                <span class="sidebar-title">All Data Filters</span>
-                <span class="sidebar-count"><?php echo $totalFilters; ?></span>
-            </div>
-            <div class="filter-list-nav">
-                <?php if ($totalFilters > 0): ?>
-                <?php
-                $typeIcons = array(
-                    'text' => 'font',
-                    'number' => 'hashtag',
-                    'date' => 'calendar',
-                    'date_range' => 'calendar-week',
-                    'main_datepicker' => 'calendar-alt',
-                    'select' => 'list',
-                    'multi_select' => 'list-check',
-                    'checkbox' => 'check-square',
-                    'radio' => 'circle-dot',
-                    'tokeninput' => 'tags'
-                );
-                foreach ($allFilters as $f):
-                    $typeIcon = isset($typeIcons[$f['filter_type']]) ? $typeIcons[$f['filter_type']] : 'filter';
-                ?>
-                    <a href="?urlq=data-filter/edit/<?php echo $f['dfid']; ?>"
-                       class="filter-nav-item <?php echo ($filter && $f['dfid'] == $filter->getId()) ? 'active' : ''; ?>">
-                        <span class="filter-nav-icon <?php echo $f['filter_type']; ?>">
-                            <i class="fas fa-<?php echo $typeIcon; ?>"></i>
-                        </span>
-                        <span class="filter-nav-info">
-                            <span class="filter-nav-name"><?php echo htmlspecialchars($f['filter_label']); ?></span>
-                            <code class="placeholder-key"><?php echo htmlspecialchars($f['filter_key']); ?></code>
-                        </span>
-                        <span class="filter-nav-source <?php echo $f['data_source']; ?>" title="<?php echo $f['data_source'] === 'query' ? 'Query' : 'Static'; ?>">
-                            <?php if ($f['data_source'] === 'query'): ?>
-                            <i class="fas fa-database"></i>
-                            <?php else: ?>
-                            <i class="fas fa-list-ul"></i>
-                            <?php endif; ?>
-                        </span>
-                    </a>
-                <?php endforeach; ?>
-                <?php else: ?>
-                <div class="sidebar-empty">
-                    <i class="fas fa-filter"></i>
-                    <span>No filters yet</span>
+        <aside class="data-filter-form-sidebar" id="data-filter-sidebar">
+            <div class="sidebar-card" id="data-filter-sidebar-card">
+            <script>
+                // Apply collapsed state immediately to prevent flash
+                if (localStorage.getItem('dataFilterSidebarCollapsed') === 'true') {
+                    document.getElementById('data-filter-sidebar').classList.add('collapsed');
+                    document.getElementById('data-filter-sidebar-card').classList.add('collapsed');
+                }
+            </script>
+                <div class="sidebar-card-header" title="Toggle sidebar (Alt+O)">
+                    <span class="sidebar-card-title">
+                        <i class="fas fa-filter"></i>
+                        <span>All Data Filters</span>
+                    </span>
+                    <span class="sidebar-count"><?php echo $totalFilters; ?></span>
+                    <button type="button" class="collapse-btn" title="Collapse sidebar">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
                 </div>
-                <?php endif; ?>
+                <div class="filter-list-nav">
+                    <?php if ($totalFilters > 0): ?>
+                    <?php
+                    $typeIcons = array(
+                        'text' => 'font',
+                        'number' => 'hashtag',
+                        'date' => 'calendar',
+                        'date_range' => 'calendar-week',
+                        'main_datepicker' => 'calendar-alt',
+                        'select' => 'list',
+                        'multi_select' => 'list-check',
+                        'checkbox' => 'check-square',
+                        'radio' => 'circle-dot',
+                        'tokeninput' => 'tags'
+                    );
+                    foreach ($allFilters as $f):
+                        $typeIcon = isset($typeIcons[$f['filter_type']]) ? $typeIcons[$f['filter_type']] : 'filter';
+                    ?>
+                        <a href="?urlq=data-filter/edit/<?php echo $f['dfid']; ?>"
+                           class="filter-nav-item <?php echo ($filter && $f['dfid'] == $filter->getId()) ? 'active' : ''; ?>">
+                            <span class="filter-nav-icon <?php echo $f['filter_type']; ?>">
+                                <i class="fas fa-<?php echo $typeIcon; ?>"></i>
+                            </span>
+                            <span class="filter-nav-info">
+                                <span class="filter-nav-name"><?php echo htmlspecialchars($f['filter_label']); ?></span>
+                                <code class="placeholder-key"><?php echo htmlspecialchars($f['filter_key']); ?></code>
+                            </span>
+                            <span class="filter-nav-source <?php echo $f['data_source']; ?>" title="<?php echo $f['data_source'] === 'query' ? 'Query' : 'Static'; ?>">
+                                <?php if ($f['data_source'] === 'query'): ?>
+                                <i class="fas fa-database"></i>
+                                <?php else: ?>
+                                <i class="fas fa-list-ul"></i>
+                                <?php endif; ?>
+                            </span>
+                        </a>
+                    <?php endforeach; ?>
+                    <?php else: ?>
+                    <div class="sidebar-empty">
+                        <i class="fas fa-filter"></i>
+                        <span>No filters yet</span>
+                    </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </aside>
 

@@ -13,9 +13,18 @@
 
     <div class="graph-view-layout">
         <!-- Sidebar with chart list -->
-        <aside class="graph-view-sidebar">
-            <div class="sidebar-header">
-                <span class="sidebar-title">All Charts</span>
+        <aside class="graph-view-sidebar" id="graph-view-sidebar">
+            <script>
+                // Apply collapsed state immediately to prevent flash
+                if (localStorage.getItem('graphViewSidebarCollapsed') === 'true') {
+                    document.getElementById('graph-view-sidebar').classList.add('collapsed');
+                }
+            </script>
+            <div class="sidebar-header" title="Toggle sidebar (Alt+O)">
+                <span class="sidebar-title">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>All Charts</span>
+                </span>
                 <span class="sidebar-count"><?php
                     $currentIndex = 0;
                     foreach ($allGraphs as $index => $g) {
@@ -24,8 +33,11 @@
                             break;
                         }
                     }
-                    echo $currentIndex . ' of ' . $totalGraphs;
+                    echo $currentIndex . '/' . $totalGraphs;
                 ?></span>
+                <button type="button" class="collapse-btn" title="Collapse sidebar">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
             </div>
             <div class="graph-list-nav">
                 <?php foreach ($allGraphs as $index => $g): ?>
