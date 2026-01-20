@@ -14,26 +14,26 @@ These files are direct copies from the live Rapidkart project. Any changes shoul
 
 #### Classes (`system/classes/`)
 
-| File                   | Purpose                            |
-| ---------------------- | ---------------------------------- |
-| `AdminUser.php`        | User entity class                  |
-| `AdminUserManager.php` | User management functions          |
-| `Session.php`          | Session handling (login/logout)    |
-| `SessionsManager.php`  | Session DB operations              |
-| `SessionDetails.php`   | Session details entity             |
-| `Licence.php`          | Licence entity class               |
-| `LicenceCompanies.php` | Company entity class               |
-| `LicenceManager.php`   | Licence management functions       |
-| `LicenceDomain.php`    | Domain entity class                |
-| `Outlet.php`           | Outlet entity class                |
-| `OutletManager.php`    | Outlet management functions        |
-| `Warehouse.php`        | Warehouse entity class             |
-| `WarehouseManager.php` | Warehouse management functions     |
-| `Rapidkart.php`        | Singleton pattern for DB access    |
-| `SQLiDatabase.php`     | Database wrapper                   |
-| `Template.php`         | Template engine                    |
-| `ThemeRegistry.php`    | Theme/asset management             |
-| `Utility.php`          | Utility functions                  |
+| File                   | Purpose                         |
+| ---------------------- | ------------------------------- |
+| `AdminUser.php`        | User entity class               |
+| `AdminUserManager.php` | User management functions       |
+| `Session.php`          | Session handling (login/logout) |
+| `SessionsManager.php`  | Session DB operations           |
+| `SessionDetails.php`   | Session details entity          |
+| `Licence.php`          | Licence entity class            |
+| `LicenceCompanies.php` | Company entity class            |
+| `LicenceManager.php`   | Licence management functions    |
+| `LicenceDomain.php`    | Domain entity class             |
+| `Outlet.php`           | Outlet entity class             |
+| `OutletManager.php`    | Outlet management functions     |
+| `Warehouse.php`        | Warehouse entity class          |
+| `WarehouseManager.php` | Warehouse management functions  |
+| `Rapidkart.php`        | Singleton pattern for DB access |
+| `SQLiDatabase.php`     | Database wrapper                |
+| `Template.php`         | Template engine                 |
+| `ThemeRegistry.php`    | Theme/asset management          |
+| `Utility.php`          | Utility functions               |
 
 #### Configuration (`system/config/`)
 
@@ -43,19 +43,26 @@ These files are direct copies from the live Rapidkart project. Any changes shoul
 
 #### Interfaces (`system/interfaces/`)
 
-| File                   | Purpose                                  |
-| ---------------------- | ---------------------------------------- |
-| `DatabaseObject.php`   | Database object interface                |
-| `User.php`             | User interface (extends DatabaseObject)  |
+| File                   | Purpose                                      |
+| ---------------------- | -------------------------------------------- |
+| `DatabaseObject.php`   | Database object interface                    |
+| `User.php`             | User interface (extends DatabaseObject)      |
 | `UniqueIdentifier.php` | Unique ID interface (extends DatabaseObject) |
 
 #### Utilities (`system/utilities/`)
 
-| File               | Purpose                                     |
-| ------------------ | ------------------------------------------- |
-| `SystemTables.php` | Database table constants (subset from live) |
-| `SystemConfig.php` | System configuration                        |
-| `SiteConfig.php`   | Site-specific configuration                 |
+| File                     | Purpose                                     |
+| ------------------------ | ------------------------------------------- |
+| `SystemTables.php`       | Database table constants (subset from live) |
+| `SystemTablesStatus.php` | Database table constants (subset from live) |
+| `SystemConfig.php`       | System configuration                        |
+| `SiteConfig.php`         | Site-specific configuration                 |
+
+#### Includes (`system/includes/`)
+
+| Directory           | Purpose          |
+| ------------------- | ---------------- |
+| `functions.inc.php` | Common Functions |
 
 ---
 
@@ -150,6 +157,7 @@ In `index.php`, uncomment one of these lines:
 ```
 
 **How it works:**
+
 - `SimulateLogin::loginById($uid)` sets up `BaseConfig::$licence_id` and `BaseConfig::$company_id` from user data, then calls `Session::loginUser()`
 - This mimics the live project's flow where `system.inc.php` sets licence_id from domain lookup and `login.inc.php` sets company_id from authenticated user
 
