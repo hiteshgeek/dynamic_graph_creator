@@ -63,6 +63,8 @@
   // Collapsed state
   &.collapsed {
     padding-bottom: 0;
+    position: sticky;
+    top: 85px;
 
     .sidebar-section {
       display: none;
