@@ -142,6 +142,9 @@
                                     <?php elseif ($filterType === 'date_range'): ?>
                                         <input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="<?php echo htmlspecialchars($filterKeyClean); ?>" data-picker-type="range" placeholder="Select date range" autocomplete="off">
 
+                                    <?php elseif ($filterType === 'main_datepicker'): ?>
+                                        <input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="<?php echo htmlspecialchars($filterKeyClean); ?>" data-picker-type="main" placeholder="Select date range" autocomplete="off">
+
                                     <?php elseif ($filterType === 'number'): ?>
                                         <input type="number" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($defaultValue); ?>" placeholder="Enter number">
 

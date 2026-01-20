@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS filter (
     fid INT(11) AUTO_INCREMENT PRIMARY KEY,
     filter_key VARCHAR(50) NOT NULL COMMENT 'Placeholder key e.g. :date_from',
     filter_label VARCHAR(100) NOT NULL COMMENT 'Display label',
-    filter_type ENUM('text', 'number', 'date', 'date_range', 'select', 'multi_select', 'checkbox', 'radio', 'tokeninput') NOT NULL DEFAULT 'text',
+    filter_type ENUM('text', 'number', 'date', 'date_range', 'main_datepicker', 'select', 'multi_select', 'checkbox', 'radio', 'tokeninput') NOT NULL DEFAULT 'text',
     data_source ENUM('static', 'query') NOT NULL DEFAULT 'static' COMMENT 'How to get filter options',
     data_query TEXT COMMENT 'SQL query to fetch options (if data_source=query)',
     static_options TEXT COMMENT 'JSON array of static options [{value, label}]',

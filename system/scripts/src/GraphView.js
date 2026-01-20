@@ -80,109 +80,25 @@ export default class GraphView {
     }
 
     /**
-     * Initialize filter components (multi-select dropdowns, datepickers, etc.)
+     * Initialize filter components (date pickers, multi-select dropdowns, etc.)
+     * Uses FilterRenderer for centralized initialization
      */
     initFilters() {
         const filtersContainer = this.container.querySelector('#graph-filters');
         if (!filtersContainer) return;
 
-        // Initialize date pickers
-        if (typeof DatePickerInit !== 'undefined') {
+        // Use FilterRenderer for initialization (handles datepickers, multi-selects, etc.)
+        if (typeof FilterRenderer !== 'undefined') {
+            FilterRenderer.initPickers(filtersContainer);
+
+            // Listen for filter changes from FilterRenderer-initialized components
+            filtersContainer.addEventListener('change', () => {
+                this.onFilterChange();
+            });
+        } else if (typeof DatePickerInit !== 'undefined') {
+            // Fallback to just datepickers
             DatePickerInit.init(filtersContainer);
         }
-
-        // Initialize multi-select dropdowns
-        const multiSelectDropdowns = filtersContainer.querySelectorAll('.filter-multiselect-dropdown');
-        multiSelectDropdowns.forEach(dropdown => {
-            const trigger = dropdown.querySelector('.filter-multiselect-trigger');
-            const optionsPanel = dropdown.querySelector('.filter-multiselect-options');
-            const placeholder = dropdown.querySelector('.filter-multiselect-placeholder');
-            const optionItems = dropdown.querySelectorAll('.filter-multiselect-option');
-            const checkboxes = dropdown.querySelectorAll('.filter-multiselect-option input[type="checkbox"]');
-            const selectAllBtn = dropdown.querySelector('.multiselect-select-all');
-            const selectNoneBtn = dropdown.querySelector('.multiselect-select-none');
-            const searchInput = dropdown.querySelector('.multiselect-search');
-
-            if (!trigger || !optionsPanel) return;
-
-            // Helper function to update placeholder
-            const updatePlaceholder = () => {
-                const selected = Array.from(checkboxes)
-                    .filter(cb => cb.checked)
-                    .map(cb => cb.nextElementSibling?.textContent || cb.value);
-
-                if (selected.length === 0) {
-                    placeholder.textContent = '-- Select multiple --';
-                    placeholder.classList.remove('has-selection');
-                } else if (selected.length <= 2) {
-                    placeholder.textContent = selected.join(', ');
-                    placeholder.classList.add('has-selection');
-                } else {
-                    placeholder.textContent = `${selected.length} selected`;
-                    placeholder.classList.add('has-selection');
-                }
-            };
-
-            // Select All button
-            if (selectAllBtn) {
-                selectAllBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    optionItems.forEach(item => {
-                        if (item.style.display !== 'none') {
-                            const cb = item.querySelector('input[type="checkbox"]');
-                            if (cb) cb.checked = true;
-                        }
-                    });
-                    updatePlaceholder();
-                    this.onFilterChange();
-                });
-            }
-
-            // Select None button
-            if (selectNoneBtn) {
-                selectNoneBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    optionItems.forEach(item => {
-                        if (item.style.display !== 'none') {
-                            const cb = item.querySelector('input[type="checkbox"]');
-                            if (cb) cb.checked = false;
-                        }
-                    });
-                    updatePlaceholder();
-                    this.onFilterChange();
-                });
-            }
-
-            // Search functionality
-            if (searchInput) {
-                searchInput.addEventListener('input', (e) => {
-                    const searchTerm = e.target.value.toLowerCase().trim();
-                    optionItems.forEach(item => {
-                        const label = item.querySelector('.form-check-label')?.textContent.toLowerCase() || '';
-                        if (searchTerm === '' || label.includes(searchTerm)) {
-                            item.style.display = '';
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
-                });
-
-                // Prevent dropdown from closing when clicking search input
-                searchInput.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                });
-            }
-
-            // Update placeholder text when checkboxes change
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', updatePlaceholder);
-            });
-
-            // Update placeholder on init to reflect any pre-selected options (from is_selected)
-            updatePlaceholder();
-        });
     }
 
     /**

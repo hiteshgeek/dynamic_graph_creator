@@ -110,14 +110,23 @@ echo DGCHelper::renderPageHeader([
                                             $filterKey = $filter['filter_key'];
                                             $filterKeyClean = ltrim($filterKey, ':');
                                             $filterKeyDisplay = '::' . $filterKeyClean;
+                                            $filterType = $filter['filter_type'];
+                                            $isDateRangeSelector = in_array($filterType, array('date_range', 'main_datepicker'));
                                             ?>
                                             <div class="filter-selector-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>">
                                                 <div class="form-check">
                                                     <input class="form-check-input filter-selector-checkbox" type="checkbox" value="<?php echo htmlspecialchars($filterKeyClean); ?>" id="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
                                                     <label class="form-check-label" for="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
                                                         <span class="filter-selector-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
-                                                        <code class="filter-selector-key"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
                                                     </label>
+                                                </div>
+                                                <div class="filter-selector-keys">
+                                                    <?php if ($isDateRangeSelector): ?>
+                                                        <code class="filter-selector-key filter-selector-key-derived">::<?php echo htmlspecialchars($filterKeyClean); ?>_from</code>
+                                                        <code class="filter-selector-key filter-selector-key-derived">::<?php echo htmlspecialchars($filterKeyClean); ?>_to</code>
+                                                    <?php else: ?>
+                                                        <code class="filter-selector-key"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                         <?php endforeach; ?>
@@ -138,23 +147,32 @@ echo DGCHelper::renderPageHeader([
                                     <div class="filters-list" id="graph-filters">
                                         <?php foreach ($allFilters as $filter): ?>
                                             <?php
-                                            // Get filter options
-                                            $filterObj = new Filter($filter['fid']);
-                                            $options = $filterObj->getOptions();
+                                            // Get filter options from the already-loaded data (options is included in toArray())
+                                            $options = isset($filter['options']) ? $filter['options'] : array();
                                             $filterType = $filter['filter_type'];
                                             $filterKey = $filter['filter_key'];
                                             $filterKeyClean = ltrim($filterKey, ':');
                                             $filterKeyDisplay = '::' . $filterKeyClean;
-                                            $defaultValue = $filter['default_value'];
+                                            $defaultValue = isset($filter['default_value']) ? $filter['default_value'] : '';
                                             // Get filter config for inline display
-                                            $filterConfig = $filterObj->getFilterConfig();
+                                            $filterConfig = isset($filter['filter_config']) ? $filter['filter_config'] : '';
                                             $filterConfigArr = $filterConfig ? json_decode($filterConfig, true) : array();
                                             $isInline = isset($filterConfigArr['inline']) && $filterConfigArr['inline'];
                                             ?>
-                                            <div class="filter-input-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" style="display: none;">
+                                            <?php
+                                            $isDateRange = in_array($filterType, array('date_range', 'main_datepicker'));
+                                            ?>
+                                            <div class="filter-input-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" data-filter-type="<?php echo htmlspecialchars($filterType); ?>" style="display: none;">
                                                 <div class="filter-input-header">
                                                     <label class="filter-input-label"><?php echo htmlspecialchars($filter['filter_label']); ?></label>
-                                                    <code class="filter-placeholder" title="Use in query"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
+                                                </div>
+                                                <div class="filter-placeholders">
+                                                    <?php if ($isDateRange): ?>
+                                                        <code class="filter-placeholder filter-placeholder-derived" title="Start date - Use in query">::<?php echo htmlspecialchars($filterKeyClean); ?>_from</code>
+                                                        <code class="filter-placeholder filter-placeholder-derived" title="End date - Use in query">::<?php echo htmlspecialchars($filterKeyClean); ?>_to</code>
+                                                    <?php else: ?>
+                                                        <code class="filter-placeholder" title="Use in query"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
+                                                    <?php endif; ?>
                                                 </div>
 
                                                 <?php if ($filterType === 'select'): ?>
@@ -235,6 +253,9 @@ echo DGCHelper::renderPageHeader([
 
                                                 <?php elseif ($filterType === 'date_range'): ?>
                                                     <input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="<?php echo htmlspecialchars($filterKeyClean); ?>" data-picker-type="range" placeholder="Select date range" autocomplete="off">
+
+                                                <?php elseif ($filterType === 'main_datepicker'): ?>
+                                                    <input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="<?php echo htmlspecialchars($filterKeyClean); ?>" data-picker-type="main" placeholder="Select date range" autocomplete="off">
 
                                                 <?php elseif ($filterType === 'number'): ?>
                                                     <input type="number" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($defaultValue); ?>" placeholder="Enter number">

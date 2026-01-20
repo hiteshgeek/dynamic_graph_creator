@@ -163,7 +163,7 @@ class Graph implements DatabaseObject
     {
         $db = Rapidkart::getInstance()->getDB();
 
-        $filterSet = new FilterSet('graph', $this->gid);
+        $filterSet = new DataFilterSet('graph', $this->gid);
         $filterSet->loadFilters();
 
         $query = $filterSet->applyToQuery($this->query, $filter_values);

@@ -77,17 +77,17 @@ function showCreator($graphId = null)
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add libraries
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
+    // Add libraries - jQuery and daterangepicker must load BEFORE dist JS (which has weight 10+)
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery3/jquery.min.js', 1);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment-dgc/moment.min.js', 2);
+    $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/css/daterangepicker.css', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 3);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 4);
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/css/codemirror.min.css', 5);
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/css/material.min.css', 6);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/js/codemirror.min.js', 6);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/js/sql.min.js', 7);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery3/jquery.min.js', 4);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment-dgc/moment.min.js', 5);
-    $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/css/daterangepicker.css', 5);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 8);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/js/codemirror.min.js', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'codemirror-dgc/js/sql.min.js', 6);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 7);
 
     // Add page-specific JS
     $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-creator.js');
@@ -124,12 +124,12 @@ function showView($graphId)
 {
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
-    // Add libraries
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery3/jquery.min.js', 4);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment-dgc/moment.min.js', 5);
+    // Add libraries - jQuery and daterangepicker must load BEFORE dist JS (which has weight 10+)
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery3/jquery.min.js', 1);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment-dgc/moment.min.js', 2);
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/css/daterangepicker.css', 5);
-    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 8);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 3);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 4);
 
     $graph = new Graph($graphId);
     if (!$graph->getId()) {
@@ -242,7 +242,7 @@ function deleteGraph($data)
 
 /**
  * Validate that required placeholders have values
- * Returns array of missing required placeholders, or empty array if all valid
+ * Wrapper for DataFilterManager::validateRequiredPlaceholders
  *
  * @param string $query The SQL query with placeholders
  * @param array $filters Filter values keyed by placeholder
@@ -251,160 +251,27 @@ function deleteGraph($data)
  */
 function validateRequiredPlaceholders($query, $filters, $placeholderSettings)
 {
-    $missing = array();
+    $missing = DataFilterManager::validateRequiredPlaceholders($query, $filters, $placeholderSettings);
 
-    // Find all placeholders in the query
-    preg_match_all('/::([a-zA-Z_][a-zA-Z0-9_]*)/', $query, $matches);
-    $placeholders = array_unique($matches[0]);
-
-    foreach ($placeholders as $placeholder) {
-        $settings = isset($placeholderSettings[$placeholder]) ? $placeholderSettings[$placeholder] : array();
-        $allowEmpty = isset($settings['allowEmpty']) ? $settings['allowEmpty'] : true;
-
-        // If allowEmpty is false, check if filter has a value
-        if (!$allowEmpty) {
-            $filterValue = isset($filters[$placeholder]) ? $filters[$placeholder] : null;
-            if (isFilterValueEmpty($filterValue)) {
-                // Remove :: prefix for display
-                $missing[] = ltrim($placeholder, ':');
-            }
-        }
-    }
-
-    return $missing;
+    // Remove :: prefix for display
+    return array_map(function($placeholder) {
+        return ltrim($placeholder, ':');
+    }, $missing);
 }
 
 /**
  * Replace placeholders in query with filter values
- * Handles empty values based on placeholder settings:
- * - If allowEmpty is true (default): replace condition with 1=1
- * - If allowEmpty is false (required): should be validated before calling this
+ * Wrapper for DataFilterManager::replaceQueryPlaceholders
  *
  * @param string $query The SQL query with placeholders
  * @param array $filters Filter values keyed by placeholder (e.g., ['::category' => 'value'])
  * @param array $placeholderSettings Settings per placeholder (e.g., ['::category' => ['allowEmpty' => false]])
- * @param object $db Database instance for escaping
+ * @param object $db Database instance for escaping (deprecated - not used, kept for backward compatibility)
  * @return string The query with placeholders replaced
  */
 function replaceQueryPlaceholders($query, $filters, $placeholderSettings, $db)
 {
-    // Sort filter keys by length descending to replace longer placeholders first
-    // This prevents ::category from matching within ::category_checkbox
-    uksort($filters, function ($a, $b) {
-        return strlen($b) - strlen($a);
-    });
-
-    // First, handle filters that have values
-    foreach ($filters as $placeholder => $value) {
-        $isEmpty = isFilterValueEmpty($value);
-
-        if (!$isEmpty) {
-            // Filter has a value, replace normally
-            if (is_array($value)) {
-                $escaped = array();
-                foreach ($value as $v) {
-                    $escaped[] = "'" . $db->escapeString($v) . "'";
-                }
-                $query = str_replace($placeholder, implode(',', $escaped), $query);
-            } else {
-                $query = str_replace($placeholder, "'" . $db->escapeString($value) . "'", $query);
-            }
-        } else {
-            // Filter is empty, check if allowEmpty
-            $settings = isset($placeholderSettings[$placeholder]) ? $placeholderSettings[$placeholder] : array();
-            $allowEmpty = isset($settings['allowEmpty']) ? $settings['allowEmpty'] : true;
-
-            if ($allowEmpty) {
-                // Replace the entire condition containing this placeholder with 1=1
-                $query = replaceConditionWithTrueValue($query, $placeholder);
-            }
-            // If not allowEmpty and empty, validation should have caught this
-        }
-    }
-
-    // Handle any remaining placeholders not in filters
-    $query = preg_replace_callback('/::([a-zA-Z_][a-zA-Z0-9_]*)/', function ($matches) use ($placeholderSettings) {
-        $placeholder = '::' . $matches[1];
-        $settings = isset($placeholderSettings[$placeholder]) ? $placeholderSettings[$placeholder] : array();
-        $allowEmpty = isset($settings['allowEmpty']) ? $settings['allowEmpty'] : true;
-
-        if ($allowEmpty) {
-            // Will be handled by condition replacement below
-            return $placeholder;
-        }
-        // Required but not in filters - validation should have caught this
-        return $placeholder;
-    }, $query);
-
-    // Final pass: replace any remaining placeholders with allowEmpty=true using 1=1
-    preg_match_all('/::([a-zA-Z_][a-zA-Z0-9_]*)/', $query, $matches);
-    foreach ($matches[0] as $placeholder) {
-        $settings = isset($placeholderSettings[$placeholder]) ? $placeholderSettings[$placeholder] : array();
-        $allowEmpty = isset($settings['allowEmpty']) ? $settings['allowEmpty'] : true;
-
-        if ($allowEmpty) {
-            $query = replaceConditionWithTrueValue($query, $placeholder);
-        }
-    }
-
-    return $query;
-}
-
-/**
- * Check if a filter value is empty
- */
-function isFilterValueEmpty($value)
-{
-    if ($value === null || $value === '') {
-        return true;
-    }
-    if (is_array($value) && count($value) === 0) {
-        return true;
-    }
-    return false;
-}
-
-/**
- * Replace SQL condition containing placeholder with 1=1
- * Handles patterns like:
- * - field = ::placeholder
- * - field != ::placeholder
- * - field IN (::placeholder)
- * - field NOT IN (::placeholder)
- * - field LIKE ::placeholder
- * - field > ::placeholder, field < ::placeholder, etc.
- * - field BETWEEN ::placeholder_from AND ::placeholder_to
- *
- * @param string $query The SQL query
- * @param string $placeholder The placeholder to find and replace
- * @return string The query with condition replaced by 1=1
- */
-function replaceConditionWithTrueValue($query, $placeholder)
-{
-    $escapedPlaceholder = preg_quote($placeholder, '/');
-
-    // Pattern for IN/NOT IN clauses: field IN (::placeholder) or field NOT IN (::placeholder)
-    $inPattern = '/\w+\s+(?:NOT\s+)?IN\s*\(\s*' . $escapedPlaceholder . '\s*\)/i';
-    $query = preg_replace($inPattern, '1=1', $query);
-
-    // Pattern for BETWEEN: field BETWEEN ::placeholder AND value or value AND ::placeholder
-    $betweenPattern = '/\w+\s+BETWEEN\s+(?:' . $escapedPlaceholder . '\s+AND\s+[^\s]+|[^\s]+\s+AND\s+' . $escapedPlaceholder . ')/i';
-    $query = preg_replace($betweenPattern, '1=1', $query);
-
-    // Pattern for comparison operators: field = ::placeholder, field >= ::placeholder, etc.
-    $comparisonPattern = '/\w+\s*(?:=|!=|<>|>=|<=|>|<)\s*' . $escapedPlaceholder . '/i';
-    $query = preg_replace($comparisonPattern, '1=1', $query);
-
-    // Pattern for LIKE: field LIKE ::placeholder
-    $likePattern = '/\w+\s+(?:NOT\s+)?LIKE\s+' . $escapedPlaceholder . '/i';
-    $query = preg_replace($likePattern, '1=1', $query);
-
-    // If placeholder still exists (not part of a recognized condition), just replace with 'test'
-    if (strpos($query, $placeholder) !== false) {
-        $query = str_replace($placeholder, "'test'", $query);
-    }
-
-    return $query;
+    return DataFilterManager::replaceQueryPlaceholders($query, $filters, $placeholderSettings);
 }
 
 /**

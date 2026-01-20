@@ -4,7 +4,50 @@
  */
 class DatePickerInit {
     /**
+     * Get the current financial year (April to March for India)
+     * @returns {Array} [startDate, endDate] as moment objects
+     */
+    static getFinancialYear() {
+        const now = moment();
+        const currentYear = now.year();
+        const currentMonth = now.month(); // 0-indexed (0 = January)
+
+        // Financial year starts in April (month index 3)
+        if (currentMonth >= 3) {
+            // April or later - FY starts this year
+            return [moment([currentYear, 3, 1]), moment([currentYear + 1, 2, 31])];
+        } else {
+            // Before April - FY started last year
+            return [moment([currentYear - 1, 3, 1]), moment([currentYear, 2, 31])];
+        }
+    }
+
+    /**
+     * Get last financial year
+     * @returns {Array} [startDate, endDate] as moment objects
+     */
+    static getLastFinancialYear() {
+        const [start, end] = DatePickerInit.getFinancialYear();
+        return [moment(start).subtract(1, 'year'), moment(end).subtract(1, 'year')];
+    }
+
+    /**
+     * Get company start date (default: 1 year ago if not set)
+     * Can be overridden via window.companyStartDate (matches Rapidkart)
+     * @returns {moment} Company start date
+     */
+    static getCompanyStartDate() {
+        // Check if company start date is set globally (Rapidkart sets this)
+        if (window.companyStartDate) {
+            return moment(window.companyStartDate);
+        }
+        // Default: 1 year ago from today
+        return moment().subtract(1, 'year').startOf('day');
+    }
+
+    /**
      * Default preset ranges for date range picker
+     * Matches dashboard_old options
      */
     static getDefaultRanges() {
         return {
@@ -14,7 +57,10 @@ class DatePickerInit {
             'Last 30 Days': [moment().subtract(29, 'days'), moment()],
             'This Month': [moment().startOf('month'), moment().endOf('month')],
             'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-            'Year to Date': [moment().startOf('year'), moment()]
+            'Year to Date': [moment().startOf('year'), moment()],
+            'Company StartDate to Date': [DatePickerInit.getCompanyStartDate(), moment()],
+            'This Financial Year': DatePickerInit.getFinancialYear(),
+            'Last Financial Year': DatePickerInit.getLastFinancialYear()
         };
     }
 
@@ -30,9 +76,20 @@ class DatePickerInit {
         }
 
         const pickers = container.querySelectorAll('.dgc-datepicker');
+
         pickers.forEach(input => {
             // Skip if already initialized
             if (input.dataset.daterangepickerInit === 'true') {
+                return;
+            }
+            // Skip hidden elements - daterangepicker doesn't work well on hidden inputs
+            // Check if input or any parent is hidden
+            if (input.offsetParent === null || window.getComputedStyle(input).display === 'none') {
+                return;
+            }
+            // Also check parent filter-input-item
+            const filterItem = input.closest('.filter-input-item');
+            if (filterItem && (filterItem.style.display === 'none' || window.getComputedStyle(filterItem).display === 'none')) {
                 return;
             }
             DatePickerInit.initPicker(input);
@@ -49,7 +106,11 @@ class DatePickerInit {
 
         if (pickerType === 'single') {
             DatePickerInit.initSinglePicker($input);
+        } else if (pickerType === 'main') {
+            // Main datepicker with all preset ranges
+            DatePickerInit.initMainPicker($input);
         } else {
+            // Basic range picker without presets
             DatePickerInit.initRangePicker($input);
         }
 
@@ -98,12 +159,67 @@ class DatePickerInit {
     }
 
     /**
-     * Initialize a date range picker with presets
+     * Initialize a basic date range picker (no presets)
      * @param {jQuery} $input - jQuery wrapped input
      */
     static initRangePicker($input) {
         $input.daterangepicker({
-            autoUpdateInput: true,
+            autoUpdateInput: false,
+            startDate: moment().subtract(6, 'days'),
+            endDate: moment(),
+            locale: {
+                format: 'YYYY-MM-DD',
+                separator: ' - ',
+                cancelLabel: 'Clear'
+            },
+            alwaysShowCalendars: true,
+            opens: 'left'
+        });
+
+        // Helper to update display and data attributes
+        const updateValue = function($el, picker) {
+            const startDate = picker.startDate.format('YYYY-MM-DD');
+            const endDate = picker.endDate.format('YYYY-MM-DD');
+
+            // Set display value
+            $el.val(startDate + ' - ' + endDate);
+
+            // Store individual values as data attributes for FilterUtils
+            $el.data('from', startDate);
+            $el.data('to', endDate);
+
+            // Also store in dataset for vanilla JS access
+            $el[0].dataset.from = startDate;
+            $el[0].dataset.to = endDate;
+        };
+
+        // Update preview as user selects dates (live preview)
+        $input.on('apply.daterangepicker', function(ev, picker) {
+            updateValue($(this), picker);
+            // Trigger change event for other listeners
+            this.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        // Handle cancel/clear event
+        $input.on('cancel.daterangepicker', function() {
+            $(this).val('');
+            $(this).removeData('from');
+            $(this).removeData('to');
+            delete this.dataset.from;
+            delete this.dataset.to;
+            this.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+    }
+
+    /**
+     * Initialize main date picker with all preset ranges
+     * (Today, Yesterday, Last 7 Days, Last 30 Days, This Month, Last Month,
+     * Year to Date, Company StartDate to Date, This Financial Year, Last Financial Year)
+     * @param {jQuery} $input - jQuery wrapped input
+     */
+    static initMainPicker($input) {
+        $input.daterangepicker({
+            autoUpdateInput: false,
             ranges: DatePickerInit.getDefaultRanges(),
             startDate: moment().subtract(6, 'days'),
             endDate: moment(),
@@ -116,29 +232,26 @@ class DatePickerInit {
             opens: 'left'
         });
 
-        // Clear initial value (user should explicitly select)
-        $input.val('');
-
         // Helper to update display and data attributes
-        const updateValue = function(picker) {
+        const updateValue = function($el, picker) {
             const startDate = picker.startDate.format('YYYY-MM-DD');
             const endDate = picker.endDate.format('YYYY-MM-DD');
 
             // Set display value
-            $input.val(startDate + ' - ' + endDate);
+            $el.val(startDate + ' - ' + endDate);
 
             // Store individual values as data attributes for FilterUtils
-            $input.data('from', startDate);
-            $input.data('to', endDate);
+            $el.data('from', startDate);
+            $el.data('to', endDate);
 
             // Also store in dataset for vanilla JS access
-            $input[0].dataset.from = startDate;
-            $input[0].dataset.to = endDate;
+            $el[0].dataset.from = startDate;
+            $el[0].dataset.to = endDate;
         };
 
         // Update preview as user selects dates (live preview)
         $input.on('apply.daterangepicker', function(ev, picker) {
-            updateValue(picker);
+            updateValue($(this), picker);
             // Trigger change event for other listeners
             this.dispatchEvent(new Event('change', { bubbles: true }));
         });

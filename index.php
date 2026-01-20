@@ -31,6 +31,10 @@ require_once __DIR__ . '/system/classes/DashboardTemplate.php';
 require_once __DIR__ . '/system/classes/DashboardInstance.php';
 require_once __DIR__ . '/system/classes/DashboardBuilder.php';
 
+// Load Rapidkart stub classes (only defines classes if they don't exist)
+// These provide test data for company/outlet filters in DGC dev environment
+require_once __DIR__ . '/system/classes/RapidkartStubs.php';
+
 // Parse URL
 $url = Utility::parseUrl();
 $page = isset($url[0]) ? $url[0] : 'graph';

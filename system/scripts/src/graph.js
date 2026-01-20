@@ -10,6 +10,8 @@ import DataMapper from './DataMapper.js';
 import DataFilterManager from './DataFilterManager.js';
 import ConfigPanel from './ConfigPanel.js';
 import GraphView from './GraphView.js';
+import DatePickerInit from './DatePickerInit.js';
+import FilterRenderer from './FilterRenderer.js';
 
 window.GraphCreator = GraphCreator;
 window.GraphPreview = GraphPreview;
@@ -19,6 +21,8 @@ window.DataMapper = DataMapper;
 window.DataFilterManager = DataFilterManager;
 window.ConfigPanel = ConfigPanel;
 window.GraphView = GraphView;
+window.DatePickerInit = DatePickerInit;
+window.FilterRenderer = FilterRenderer;
 
 document.addEventListener('DOMContentLoaded', () => {
     const creatorContainer = document.getElementById('graph-creator');

@@ -976,8 +976,6 @@
       display: flex;
       flex: 1;
       align-items: center;
-      justify-content: space-between;
-      gap: $spacing-sm;
       cursor: pointer;
     }
   }
@@ -989,6 +987,14 @@
   color: var(--dgc-text-primary);
 }
 
+.filter-selector-keys {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  margin-top: $spacing-xs;
+  padding-left: 24px; // Align with label (checkbox width + gap)
+}
+
 .filter-selector-key {
   font-size: 11px;
   color: var(--dgc-text-inverse);
@@ -998,6 +1004,10 @@
   font-family: monospace;
   font-weight: $font-weight-medium;
   width: fit-content;
+
+  &.filter-selector-key-derived {
+    background: var(--dgc-success);
+  }
 }
 
 .filter-use-btn {
@@ -1071,6 +1081,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: $spacing-xs;
   gap: $spacing-sm;
 }
 
@@ -1096,6 +1107,23 @@
   &:hover {
     background: var(--dgc-primary-dark);
     color: var(--dgc-text-inverse);
+  }
+}
+
+// Filter placeholders row (below label)
+.filter-placeholders {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-sm;
+
+  .filter-placeholder-derived {
+    background: var(--dgc-success);
+
+    &:hover {
+      background: var(--dgc-success-dark, #1a7f37);
+    }
   }
 }
 

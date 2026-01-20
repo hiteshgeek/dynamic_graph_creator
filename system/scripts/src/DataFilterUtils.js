@@ -70,8 +70,8 @@ export default class DataFilterUtils {
             return { ['::' + filterKey]: radioChecked.value };
         }
 
-        // Date range picker (single input with data attributes)
-        const dateRangePicker = item.querySelector('.dgc-datepicker[data-picker-type="range"]');
+        // Date range picker (single input with data attributes) - handles both 'range' and 'main' types
+        const dateRangePicker = item.querySelector('.dgc-datepicker[data-picker-type="range"], .dgc-datepicker[data-picker-type="main"]');
         if (dateRangePicker) {
             const from = dateRangePicker.dataset.from;
             const to = dateRangePicker.dataset.to;

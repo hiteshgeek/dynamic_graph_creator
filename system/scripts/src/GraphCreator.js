@@ -215,23 +215,82 @@ export default class GraphCreator {
     /**
      * Get matched filters for placeholders in query
      * Returns object mapping placeholder keys to filter info
-     * Only includes filters that are currently selected/active for this graph
+     * Checks both selected filters AND all available filters (for derived placeholders)
+     * For date range filters, also creates _from and _to entries
      */
     getMatchedFilters() {
         const matchedFilters = {};
         const filtersContainer = this.container.querySelector('#graph-filters');
         if (!filtersContainer) return matchedFilters;
 
+        // Date range filter types that create _from and _to placeholders
+        const dateRangeTypes = ['date_range', 'main_datepicker'];
+
+        // First, add all selected filters
         const filterItems = filtersContainer.querySelectorAll('.filter-input-item');
         filterItems.forEach(item => {
             const filterKey = item.dataset.filterKey;
+            const filterType = item.dataset.filterType;
             const filterLabel = item.querySelector('.filter-input-label')?.textContent || filterKey;
+
             // Only include filter if it's in the selectedFilters list (active for this graph)
             if (filterKey && this.selectedFilters && this.selectedFilters.includes(filterKey)) {
+                // Add the main placeholder
                 matchedFilters['::' + filterKey] = {
                     filter_key: filterKey,
-                    filter_label: filterLabel
+                    filter_label: filterLabel,
+                    filter_type: filterType
                 };
+
+                // For date range filters, also add _from and _to entries
+                if (dateRangeTypes.includes(filterType)) {
+                    matchedFilters['::' + filterKey + '_from'] = {
+                        filter_key: filterKey,
+                        filter_label: filterLabel + ' (From)',
+                        filter_type: filterType,
+                        is_derived: true,
+                        parent_key: filterKey
+                    };
+                    matchedFilters['::' + filterKey + '_to'] = {
+                        filter_key: filterKey,
+                        filter_label: filterLabel + ' (To)',
+                        filter_type: filterType,
+                        is_derived: true,
+                        parent_key: filterKey
+                    };
+                }
+            }
+        });
+
+        // Second pass: also check ALL available filters for derived placeholders (_from/_to)
+        // This helps when user types a date range placeholder but hasn't selected the filter yet
+        filterItems.forEach(item => {
+            const filterKey = item.dataset.filterKey;
+            const filterType = item.dataset.filterType;
+            const filterLabel = item.querySelector('.filter-input-label')?.textContent || filterKey;
+
+            if (filterKey && dateRangeTypes.includes(filterType)) {
+                // Add _from and _to entries if not already added (from selected filters)
+                if (!matchedFilters['::' + filterKey + '_from']) {
+                    matchedFilters['::' + filterKey + '_from'] = {
+                        filter_key: filterKey,
+                        filter_label: filterLabel + ' (From)',
+                        filter_type: filterType,
+                        is_derived: true,
+                        parent_key: filterKey,
+                        not_selected: true  // Mark as available but not selected
+                    };
+                }
+                if (!matchedFilters['::' + filterKey + '_to']) {
+                    matchedFilters['::' + filterKey + '_to'] = {
+                        filter_key: filterKey,
+                        filter_label: filterLabel + ' (To)',
+                        filter_type: filterType,
+                        is_derived: true,
+                        parent_key: filterKey,
+                        not_selected: true  // Mark as available but not selected
+                    };
+                }
             }
         });
 
@@ -923,19 +982,42 @@ export default class GraphCreator {
             }
         }
 
+        // Helper function to update selection state
+        const updateSelectionState = () => {
+            const selected = Array.from(checkboxes).filter(cb => cb.checked);
+            this.selectedFilters = selected.map(cb => cb.value);
+
+            // Update count display
+            if (countDisplay) {
+                countDisplay.textContent = `${this.selectedFilters.length} selected`;
+            }
+
+            // Enable/disable use button
+            useBtn.disabled = this.selectedFilters.length === 0;
+        };
+
+        // Make entire filter-selector-item clickable to toggle checkbox
+        const selectorItems = this.container.querySelectorAll('.filter-selector-item');
+        selectorItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                // Don't toggle if clicking on checkbox or label (they handle themselves via for attribute)
+                if (e.target.classList.contains('filter-selector-checkbox') ||
+                    e.target.closest('.form-check-label') ||
+                    e.target.tagName === 'LABEL') {
+                    return;
+                }
+                const checkbox = item.querySelector('.filter-selector-checkbox');
+                if (checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                    updateSelectionState();
+                }
+            });
+        });
+
         // Update count and button state when checkboxes change
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', () => {
-                const selected = Array.from(checkboxes).filter(cb => cb.checked);
-                this.selectedFilters = selected.map(cb => cb.value);
-
-                // Update count display
-                if (countDisplay) {
-                    countDisplay.textContent = `${this.selectedFilters.length} selected`;
-                }
-
-                // Enable/disable use button
-                useBtn.disabled = this.selectedFilters.length === 0;
+                updateSelectionState();
             });
         });
 
@@ -984,150 +1066,28 @@ export default class GraphCreator {
             }
         });
 
+        // Initialize pickers for newly visible filters (datepickers need to be visible to init properly)
+        const filtersContainer = this.container.querySelector('#graph-filters');
+        if (filtersContainer && typeof FilterRenderer !== 'undefined') {
+            FilterRenderer.initPickers(filtersContainer);
+        }
+
         // Update placeholder settings to reflect new filter selection
         this.updatePlaceholderSettings();
     }
 
     /**
-     * Initialize sidebar filters (multi-select dropdowns, datepickers, etc.)
+     * Initialize sidebar filters (date pickers, multi-select dropdowns, etc.)
+     * Uses FilterRenderer for centralized initialization
+     * NOTE: Pickers are initialized when filters become visible (in applySelectedFilters),
+     * not here, because daterangepicker doesn't work well on hidden elements.
      */
     initSidebarFilters() {
         const filtersContainer = this.container.querySelector('#graph-filters');
         if (!filtersContainer) return;
 
-        // Initialize date pickers
-        if (typeof DatePickerInit !== 'undefined') {
-            DatePickerInit.init(filtersContainer);
-        }
-
-        // Initialize multi-select dropdowns
-        const multiSelectDropdowns = filtersContainer.querySelectorAll('.filter-multiselect-dropdown');
-        multiSelectDropdowns.forEach(dropdown => {
-            const trigger = dropdown.querySelector('.filter-multiselect-trigger');
-            const optionsPanel = dropdown.querySelector('.filter-multiselect-options');
-            const placeholder = dropdown.querySelector('.filter-multiselect-placeholder');
-            const optionItems = dropdown.querySelectorAll('.filter-multiselect-option');
-            const checkboxes = dropdown.querySelectorAll('.filter-multiselect-option input[type="checkbox"]');
-            const selectAllBtn = dropdown.querySelector('.multiselect-select-all');
-            const selectNoneBtn = dropdown.querySelector('.multiselect-select-none');
-            const searchInput = dropdown.querySelector('.multiselect-search');
-
-            if (!trigger || !optionsPanel) return;
-
-            // Helper function to update placeholder
-            const updatePlaceholder = () => {
-                const selected = Array.from(checkboxes)
-                    .filter(cb => cb.checked)
-                    .map(cb => cb.nextElementSibling?.textContent || cb.value);
-
-                if (selected.length === 0) {
-                    placeholder.textContent = '-- Select multiple --';
-                    placeholder.classList.remove('has-selection');
-                } else if (selected.length <= 2) {
-                    placeholder.textContent = selected.join(', ');
-                    placeholder.classList.add('has-selection');
-                } else {
-                    placeholder.textContent = `${selected.length} SELECTED`;
-                    placeholder.classList.add('has-selection');
-                }
-            };
-
-            // Toggle dropdown on trigger click
-            trigger.addEventListener('click', (e) => {
-                e.stopPropagation();
-
-                // Close other open dropdowns
-                multiSelectDropdowns.forEach(other => {
-                    if (other !== dropdown) {
-                        other.querySelector('.filter-multiselect-options')?.classList.remove('open');
-                        const icon = other.querySelector('.filter-multiselect-trigger i');
-                        if (icon) {
-                            icon.classList.remove('fa-chevron-up');
-                            icon.classList.add('fa-chevron-down');
-                        }
-                    }
-                });
-
-                optionsPanel.classList.toggle('open');
-                const icon = trigger.querySelector('i');
-                if (icon) {
-                    icon.classList.toggle('fa-chevron-down');
-                    icon.classList.toggle('fa-chevron-up');
-                }
-            });
-
-            // Select All button (only selects visible/filtered items)
-            if (selectAllBtn) {
-                selectAllBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    optionItems.forEach(item => {
-                        if (item.style.display !== 'none') {
-                            const cb = item.querySelector('input[type="checkbox"]');
-                            if (cb) cb.checked = true;
-                        }
-                    });
-                    updatePlaceholder();
-                });
-            }
-
-            // Select None button (only deselects visible/filtered items)
-            if (selectNoneBtn) {
-                selectNoneBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    optionItems.forEach(item => {
-                        if (item.style.display !== 'none') {
-                            const cb = item.querySelector('input[type="checkbox"]');
-                            if (cb) cb.checked = false;
-                        }
-                    });
-                    updatePlaceholder();
-                });
-            }
-
-            // Search functionality
-            if (searchInput) {
-                searchInput.addEventListener('input', (e) => {
-                    const searchTerm = e.target.value.toLowerCase().trim();
-                    optionItems.forEach(item => {
-                        const label = item.querySelector('.form-check-label')?.textContent.toLowerCase() || '';
-                        if (searchTerm === '' || label.includes(searchTerm)) {
-                            item.style.display = '';
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
-                });
-
-                // Prevent dropdown from closing when clicking search input
-                searchInput.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                });
-            }
-
-            // Update placeholder text when checkboxes change
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', updatePlaceholder);
-            });
-
-            // Update placeholder on init to reflect any pre-selected options (from is_selected)
-            updatePlaceholder();
-        });
-
-        // Close dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.filter-multiselect-dropdown')) {
-                multiSelectDropdowns.forEach(dropdown => {
-                    dropdown.querySelector('.filter-multiselect-options')?.classList.remove('open');
-                    const icon = dropdown.querySelector('.filter-multiselect-trigger i');
-                    if (icon) {
-                        icon.classList.remove('fa-chevron-up');
-                        icon.classList.add('fa-chevron-down');
-                    }
-                });
-            }
-        });
+        // Don't initialize pickers here - filters are hidden at this point.
+        // Pickers will be initialized in applySelectedFilters() when filters become visible.
 
         // Copy filter placeholder to clipboard on click
         const placeholders = filtersContainer.querySelectorAll('.filter-placeholder');
@@ -1391,22 +1351,29 @@ export default class GraphCreator {
      * Save graph
      */
     async save() {
+        // Collect all validation errors
+        const errors = [];
+
         // Validate using FormValidator
         if (this.formValidator && !this.formValidator.validate()) {
             this.expandSidebar();
-            Toast.error('Please correct the errors in the form');
-            return;
+            errors.push('Graph name is required');
         }
 
         // Additional validations for query and mapping
         const query = this.queryBuilder ? this.queryBuilder.getQuery() : '';
         if (!query.trim()) {
-            Toast.error('Please correct the errors in the form');
-            return;
+            errors.push('SQL query is required');
         }
 
         const mapping = this.dataMapper ? this.dataMapper.getMapping() : {};
         if (!this.validateMapping(mapping)) {
+            errors.push('Data mapping is incomplete (run query first to see columns)');
+        }
+
+        // Show all errors if any
+        if (errors.length > 0) {
+            console.log('Validation errors:', errors);
             Toast.error('Please correct the errors in the form');
             return;
         }

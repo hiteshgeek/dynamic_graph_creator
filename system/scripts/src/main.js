@@ -13,6 +13,7 @@ import ConfigPanel from './ConfigPanel.js';
 import GraphView from './GraphView.js';
 import DataFilterManagerPage from './DataFilterManagerPage.js';
 import DatePickerInit from './DatePickerInit.js';
+import FilterRenderer from './FilterRenderer.js';
 
 // Make classes available globally
 window.GraphCreator = GraphCreator;
@@ -25,6 +26,7 @@ window.ConfigPanel = ConfigPanel;
 window.GraphView = GraphView;
 window.DataFilterManagerPage = DataFilterManagerPage;
 window.DatePickerInit = DatePickerInit;
+window.FilterRenderer = FilterRenderer;
 
 // Toast, Loading, Ajax, Tooltips, and KeyboardShortcuts are provided by common.js
 

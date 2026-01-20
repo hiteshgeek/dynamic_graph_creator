@@ -71,19 +71,30 @@ export default class PlaceholderSettings {
             const isAllowEmpty = this.settings[placeholder]?.allowEmpty !== false;
             const checkboxId = `allow-empty-${placeholder.replace(/::/g, '')}`;
 
-            // Show warning if filter not found
+            // Show filter label or warning if filter not found
             let filterCell;
+            let rowWarningClass = '';
             if (filter) {
-                filterCell = this.escapeHtml(filter.filter_label);
+                if (filter.not_selected) {
+                    // Filter exists but not selected - show info message
+                    filterCell = `<span class="placeholder-filter-info">
+                        ${this.escapeHtml(filter.filter_label)}
+                        <small class="text-muted d-block">(select filter to use)</small>
+                    </span>`;
+                    rowWarningClass = ' class="placeholder-row-info"';
+                } else {
+                    filterCell = this.escapeHtml(filter.filter_label);
+                }
             } else {
                 filterCell = `<span class="placeholder-filter-warning">
                     <i class="fas fa-exclamation-triangle"></i>
                     Filter not found
                 </span>`;
+                rowWarningClass = ' class="placeholder-row-warning"';
             }
 
             html += `
-                <tr data-placeholder="${this.escapeHtml(placeholder)}"${!filter ? ' class="placeholder-row-warning"' : ''}>
+                <tr data-placeholder="${this.escapeHtml(placeholder)}"${rowWarningClass}>
                     <td><code>${this.escapeHtml(placeholder)}</code></td>
                     <td>${filterCell}</td>
                     <td>

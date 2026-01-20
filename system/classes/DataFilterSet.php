@@ -49,10 +49,37 @@ class DataFilterSet
             return true; // No filters needed
         }
 
-        // Get filters matching these placeholders
-        $this->filters = DataFilterManager::getByKeys($placeholders);
+        // Expand derived placeholders (_from, _to) to include base filter keys
+        $expandedKeys = $this->expandDerivedPlaceholders($placeholders);
+
+        // Get filters matching these placeholders (both direct and base keys)
+        $this->filters = DataFilterManager::getByKeys($expandedKeys);
 
         return true;
+    }
+
+    /**
+     * Expand derived placeholders to include base filter keys
+     * e.g., ::main_datepicker_from -> also include ::main_datepicker
+     *
+     * @param array $placeholders Array of placeholder keys
+     * @return array Array with both original and base keys
+     */
+    private function expandDerivedPlaceholders($placeholders)
+    {
+        $result = $placeholders;
+
+        foreach ($placeholders as $placeholder) {
+            // Check for _from or _to suffix
+            if (preg_match('/^(::[\w]+)_(from|to)$/', $placeholder, $matches)) {
+                $baseKey = $matches[1];
+                if (!in_array($baseKey, $result)) {
+                    $result[] = $baseKey;
+                }
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -85,126 +112,56 @@ class DataFilterSet
      */
     public function applyToQuery($query, $filter_values = array())
     {
-        if (empty($this->filters)) {
-            // No filters, return query as-is but remove any remaining placeholders
-            return $this->cleanUnusedPlaceholders($query);
-        }
-
-        $db = Rapidkart::getInstance()->getDB();
+        // Merge filter values with default values from filter definitions
+        $mergedValues = array();
 
         foreach ($this->filters as $key => $filter) {
-            // Get the value - from user input, or default value
-            $value = '';
-            if (isset($filter_values[$key])) {
-                $value = $filter_values[$key];
-            } elseif ($filter->getDefaultValue() !== null && $filter->getDefaultValue() !== '') {
-                $value = $filter->getDefaultValue();
-            }
+            $filterType = $filter->getFilterType();
 
-            // Check if value is empty
-            $isEmpty = $this->isValueEmpty($value);
+            // For date range filters, check for _from/_to suffixed values
+            if ($filterType === 'date_range' || $filterType === 'main_datepicker') {
+                $fromKey = $key . '_from';
+                $toKey = $key . '_to';
 
-            if (!$isEmpty) {
-                // Escape the value for SQL safety
-                if (is_array($value)) {
-                    // Handle multi-value filters (multi-select, checkbox)
-                    $escaped_parts = array();
-                    foreach ($value as $v) {
-                        $escaped_parts[] = "'" . $db->escapeString($v) . "'";
-                    }
-                    $escaped_value = implode(',', $escaped_parts);
-                } else {
-                    $escaped_value = "'" . $db->escapeString($value) . "'";
+                // Check if values are sent as separate _from/_to keys
+                if (isset($filter_values[$fromKey]) || isset($filter_values[$toKey])) {
+                    // Convert to {from, to} format for expandDateRangeValues
+                    $mergedValues[$key] = array(
+                        'from' => isset($filter_values[$fromKey]) ? $filter_values[$fromKey] : '',
+                        'to' => isset($filter_values[$toKey]) ? $filter_values[$toKey] : ''
+                    );
+                } elseif (isset($filter_values[$key])) {
+                    // Already in correct format or single value
+                    $mergedValues[$key] = $filter_values[$key];
+                } elseif ($filter->getDefaultValue() !== null && $filter->getDefaultValue() !== '') {
+                    $mergedValues[$key] = $filter->getDefaultValue();
                 }
-
-                // Replace the placeholder in the query
-                $query = str_replace($key, $escaped_value, $query);
             } else {
-                // Value is empty - if filter is not required, replace condition with 1=1
-                if (!$filter->getIsRequired()) {
-                    $query = $this->replaceConditionWithTrue($query, $key);
+                // Non-date-range filters: use provided value or default
+                if (isset($filter_values[$key])) {
+                    $mergedValues[$key] = $filter_values[$key];
+                } elseif ($filter->getDefaultValue() !== null && $filter->getDefaultValue() !== '') {
+                    $mergedValues[$key] = $filter->getDefaultValue();
                 }
-                // If required but empty, validation should have caught this
             }
         }
 
-        // Clean up any remaining placeholders that weren't matched
-        return $this->cleanUnusedPlaceholders($query);
-    }
-
-    /**
-     * Check if a filter value is empty
-     *
-     * @param mixed $value
-     * @return bool
-     */
-    private function isValueEmpty($value)
-    {
-        if ($value === null || $value === '') {
-            return true;
-        }
-        if (is_array($value)) {
-            $filtered = array_filter($value, function ($v) {
-                return $v !== null && $v !== '';
-            });
-            return empty($filtered);
-        }
-        return false;
-    }
-
-    /**
-     * Replace a condition containing a placeholder with 1=1
-     *
-     * @param string $query
-     * @param string $placeholder
-     * @return string
-     */
-    private function replaceConditionWithTrue($query, $placeholder)
-    {
-        // Pattern to match common SQL conditions containing the placeholder
-        // Matches: column = ::placeholder, column IN (::placeholder), column LIKE ::placeholder, etc.
-        $patterns = array(
-            // column IN (::placeholder)
-            '/\b\w+\s+IN\s*\(\s*' . preg_quote($placeholder, '/') . '\s*\)/i',
-            // column NOT IN (::placeholder)
-            '/\b\w+\s+NOT\s+IN\s*\(\s*' . preg_quote($placeholder, '/') . '\s*\)/i',
-            // column = ::placeholder
-            '/\b\w+\s*=\s*' . preg_quote($placeholder, '/') . '/i',
-            // column != ::placeholder or column <> ::placeholder
-            '/\b\w+\s*(<>|!=)\s*' . preg_quote($placeholder, '/') . '/i',
-            // column LIKE ::placeholder
-            '/\b\w+\s+LIKE\s+' . preg_quote($placeholder, '/') . '/i',
-            // column >= ::placeholder
-            '/\b\w+\s*>=\s*' . preg_quote($placeholder, '/') . '/i',
-            // column <= ::placeholder
-            '/\b\w+\s*<=\s*' . preg_quote($placeholder, '/') . '/i',
-            // column > ::placeholder
-            '/\b\w+\s*>\s*' . preg_quote($placeholder, '/') . '/i',
-            // column < ::placeholder
-            '/\b\w+\s*<\s*' . preg_quote($placeholder, '/') . '/i',
-        );
-
-        foreach ($patterns as $pattern) {
-            $query = preg_replace($pattern, '1=1', $query);
+        // Build placeholder settings based on filter required flag
+        $placeholderSettings = array();
+        foreach ($this->filters as $key => $filter) {
+            $placeholderSettings[$key] = array(
+                'allowEmpty' => !$filter->getIsRequired()
+            );
+            // For date range filters, also set settings for _from and _to variants
+            $filterType = $filter->getFilterType();
+            if ($filterType === 'date_range' || $filterType === 'main_datepicker') {
+                $placeholderSettings[$key . '_from'] = array('allowEmpty' => !$filter->getIsRequired());
+                $placeholderSettings[$key . '_to'] = array('allowEmpty' => !$filter->getIsRequired());
+            }
         }
 
-        return $query;
-    }
-
-    /**
-     * Remove any remaining placeholders that weren't matched
-     *
-     * @param string $query
-     * @return string
-     */
-    private function cleanUnusedPlaceholders($query)
-    {
-        // For any remaining placeholders, replace the entire condition with 1=1
-        preg_match_all('/::[a-zA-Z_][a-zA-Z0-9_]*/', $query, $matches);
-        foreach ($matches[0] as $placeholder) {
-            $query = $this->replaceConditionWithTrue($query, $placeholder);
-        }
-        return $query;
+        // Use centralized method for query placeholder replacement
+        return DataFilterManager::replaceQueryPlaceholders($query, $mergedValues, $placeholderSettings);
     }
 
     /**

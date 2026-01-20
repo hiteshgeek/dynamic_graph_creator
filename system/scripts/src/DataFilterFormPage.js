@@ -71,7 +71,7 @@ export default class DataFilterFormPage {
         const dataSource = document.getElementById('data-source')?.value;
 
         // Show preview for date types immediately (they don't need options)
-        if (filterType === 'date' || filterType === 'date_range') {
+        if (filterType === 'date' || filterType === 'date_range' || filterType === 'main_datepicker') {
             this.showFilterPreview([]);
             return;
         }
@@ -117,6 +117,14 @@ export default class DataFilterFormPage {
         const filterType = document.getElementById('filter-type');
         if (filterType) {
             filterType.addEventListener('change', () => this.onFilterTypeChange());
+            // Initialize date range info on page load
+            this.onFilterTypeChange();
+        }
+
+        // Filter key change - update date range placeholder examples
+        const filterKey = document.getElementById('filter-key');
+        if (filterKey) {
+            filterKey.addEventListener('input', () => this.updateDateRangePlaceholders());
         }
 
         // Data source tab switching
@@ -185,6 +193,7 @@ export default class DataFilterFormPage {
         const dataSourceSection = document.getElementById('data-source-section');
         const selectConfigSection = document.getElementById('select-config-section');
         const checkboxRadioConfigSection = document.getElementById('checkbox-radio-config-section');
+        const dateRangeInfo = document.getElementById('date-range-info');
         const previewSection = document.getElementById('filter-preview-section');
 
         if (dataSourceSection) {
@@ -199,8 +208,17 @@ export default class DataFilterFormPage {
             selectConfigSection.style.display = filterType === 'select' ? 'block' : 'none';
         }
 
+        // Show/hide date range info for date range types
+        const isDateRange = filterType === 'date_range' || filterType === 'main_datepicker';
+        if (dateRangeInfo) {
+            dateRangeInfo.style.display = isDateRange ? 'block' : 'none';
+            if (isDateRange) {
+                this.updateDateRangePlaceholders();
+            }
+        }
+
         // Show preview for date types immediately (they don't need options)
-        if (filterType === 'date' || filterType === 'date_range') {
+        if (filterType === 'date' || filterType === 'date_range' || filterType === 'main_datepicker') {
             this.showFilterPreview([]);
         } else if (!this.typesWithOptions.includes(filterType)) {
             // Hide preview for non-option types like text/number
@@ -210,6 +228,31 @@ export default class DataFilterFormPage {
         } else {
             // Update preview when filter type changes for option-based types
             this.updatePreview();
+        }
+    }
+
+    /**
+     * Update date range placeholder examples based on filter key
+     */
+    updateDateRangePlaceholders() {
+        const filterKey = document.getElementById('filter-key')?.value || 'filter_key';
+        const fromPlaceholder = document.getElementById('date-range-from-placeholder');
+        const toPlaceholder = document.getElementById('date-range-to-placeholder');
+
+        if (fromPlaceholder) {
+            fromPlaceholder.textContent = `::${filterKey}_from`;
+        }
+        if (toPlaceholder) {
+            toPlaceholder.textContent = `::${filterKey}_to`;
+        }
+
+        // Update the example query too
+        const dateRangeInfo = document.getElementById('date-range-info');
+        if (dateRangeInfo) {
+            const small = dateRangeInfo.querySelector('small');
+            if (small) {
+                small.innerHTML = `Example: <code>WHERE created_ts BETWEEN ::${filterKey}_from AND ::${filterKey}_to</code>`;
+            }
         }
     }
 
@@ -675,9 +718,14 @@ export default class DataFilterFormPage {
                 <input type="text" class="form-control dgc-datepicker" data-picker-type="single" placeholder="Select date" autocomplete="off" id="filter-preview-date">
             `;
         } else if (filterType === 'date_range') {
-            // Date range picker
+            // Date range picker (basic - no presets)
             previewHtml += `
                 <input type="text" class="form-control dgc-datepicker" data-picker-type="range" placeholder="Select date range" autocomplete="off" id="filter-preview-date-range">
+            `;
+        } else if (filterType === 'main_datepicker') {
+            // Main datepicker with preset ranges (Today, Yesterday, Last 7 Days, etc.)
+            previewHtml += `
+                <input type="text" class="form-control dgc-datepicker" data-picker-type="main" placeholder="Select date range" autocomplete="off" id="filter-preview-main-datepicker">
             `;
         } else if (filterType === 'select') {
             if (isMultiple) {

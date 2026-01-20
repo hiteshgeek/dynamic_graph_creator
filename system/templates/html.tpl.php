@@ -34,10 +34,7 @@
 <body class="dgc-app">
     <?php echo $this->getContent(); ?>
 
-    <!-- Core Libraries JS -->
-    <script src="<?php echo SiteConfig::themeLibrariessUrl(); ?>bootstrap5/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Page-specific JS -->
+    <!-- Page-specific JS (includes bootstrap and other libraries via ThemeRegistry) -->
     <?php foreach ($this->getScripts() as $js): ?>
     <script src="<?php echo $js; ?>"></script>
     <?php endforeach; ?>

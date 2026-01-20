@@ -403,88 +403,48 @@ export default class DataFilterManager {
     }
 
     /**
-     * Render filter inputs for viewing/applying (used in view page)
+     * Render filter inputs for viewing/applying
+     * Delegates to FilterRenderer for full filter type support
      */
-    static renderFilterInputs(container, filters) {
-        if (!filters || filters.length === 0) {
-            container.innerHTML = '';
-            return;
+    static renderFilterInputs(container, filters, options = {}) {
+        if (typeof FilterRenderer !== 'undefined') {
+            FilterRenderer.render(container, filters, options);
+        } else {
+            console.warn('FilterRenderer not loaded');
         }
-
-        let html = '<div class="filter-inputs">';
-
-        filters.forEach(filter => {
-            html += DataFilterManager.renderFilterInput(filter);
-        });
-
-        html += `
-            <button type="button" class="btn btn-primary filter-apply-btn">
-                <i class="fas fa-check"></i> Apply Filters
-            </button>
-        </div>`;
-
-        container.innerHTML = html;
     }
 
     /**
      * Render a single filter input
+     * Delegates to FilterRenderer for full filter type support
      */
-    static renderFilterInput(filter) {
-        const key = filter.filter_key;
-        const label = filter.filter_label || key;
-        const defaultVal = filter.default_value || '';
-        const inputId = `filter-input-${key}`;
-
-        let inputHtml = '';
-
-        switch (filter.filter_type) {
-            case 'date':
-                inputHtml = `<input type="text" class="form-control dgc-datepicker" id="${inputId}" data-filter-key="${key}" data-picker-type="single" value="${defaultVal}" placeholder="Select date" autocomplete="off">`;
-                break;
-
-            case 'date_range':
-                inputHtml = `<input type="text" class="form-control dgc-datepicker" id="${inputId}" data-filter-key="${key}" data-picker-type="range" placeholder="Select date range" autocomplete="off">`;
-                break;
-
-            case 'number':
-                inputHtml = `<input type="text" inputmode="decimal" class="form-control" id="${inputId}" data-filter-key="${key}" value="${defaultVal}" placeholder="Enter number" oninput="this.value=this.value.replace(/[^0-9.]/g,'')">`;
-                break;
-
-            case 'select':
-            case 'multi_select':
-                const options = DataFilterManager.parseOptions(filter.filter_options);
-                const multiple = filter.filter_type === 'multi_select' ? 'multiple' : '';
-                inputHtml = `
-                    <select class="form-select" id="${inputId}" data-filter-key="${key}" ${multiple}>
-                        <option value="">-- Select --</option>
-                        ${options.map(o => `
-                            <option value="${o.value}">${o.label}</option>
-                        `).join('')}
-                    </select>
-                `;
-                break;
-
-            default:
-                inputHtml = `<input type="text" class="form-control" id="${inputId}" data-filter-key="${key}" value="${defaultVal}">`;
+    static renderFilterInput(filter, options = {}) {
+        if (typeof FilterRenderer !== 'undefined') {
+            return FilterRenderer.renderFilterInput(filter, options);
         }
-
-        return `
-            <div class="filter-input-group">
-                <label for="${inputId}">${label}</label>
-                ${inputHtml}
-            </div>
-        `;
+        return '';
     }
 
     /**
-     * Parse filter options JSON
+     * Get filter values from container
+     * Delegates to FilterRenderer
      */
-    static parseOptions(optionsJson) {
-        try {
-            const parsed = optionsJson ? JSON.parse(optionsJson) : [];
-            return Array.isArray(parsed) ? parsed : (parsed.options || []);
-        } catch (e) {
-            return [];
+    static getFilterValues(container) {
+        if (typeof FilterRenderer !== 'undefined') {
+            return FilterRenderer.getValues(container);
+        }
+        return {};
+    }
+
+    /**
+     * Initialize filter pickers (date pickers, multi-selects, etc.)
+     * Delegates to FilterRenderer
+     */
+    static initPickers(container) {
+        if (typeof FilterRenderer !== 'undefined') {
+            FilterRenderer.initPickers(container);
+        } else if (typeof DatePickerInit !== 'undefined') {
+            DatePickerInit.init(container);
         }
     }
 }

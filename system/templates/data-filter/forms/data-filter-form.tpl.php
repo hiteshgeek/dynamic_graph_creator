@@ -24,6 +24,7 @@
                     'number' => 'hashtag',
                     'date' => 'calendar',
                     'date_range' => 'calendar-week',
+                    'main_datepicker' => 'calendar-alt',
                     'select' => 'list',
                     'multi_select' => 'list-check',
                     'checkbox' => 'check-square',
@@ -96,6 +97,7 @@
                                     <option value="number" <?php echo ($filter && $filter->getFilterType() === 'number') ? 'selected' : ''; ?>>Number Input</option>
                                     <option value="date" <?php echo ($filter && $filter->getFilterType() === 'date') ? 'selected' : ''; ?>>Date Picker</option>
                                     <option value="date_range" <?php echo ($filter && $filter->getFilterType() === 'date_range') ? 'selected' : ''; ?>>Date Range</option>
+                                    <option value="main_datepicker" <?php echo ($filter && $filter->getFilterType() === 'main_datepicker') ? 'selected' : ''; ?>>Main Datepicker (with presets)</option>
                                     <option value="select" <?php echo ($filter && in_array($filter->getFilterType(), array('select', 'multi_select'))) ? 'selected' : ''; ?>>Select</option>
                                     <option value="checkbox" <?php echo ($filter && $filter->getFilterType() === 'checkbox') ? 'selected' : ''; ?>>Checkbox</option>
                                     <option value="radio" <?php echo ($filter && $filter->getFilterType() === 'radio') ? 'selected' : ''; ?>>Radio Buttons</option>
@@ -107,6 +109,16 @@
                                 <label class="form-label" for="filter-default">Default Value</label>
                                 <input type="text" id="filter-default" class="form-control" placeholder="Optional" value="<?php echo $filter ? htmlspecialchars($filter->getDefaultValue()) : ''; ?>">
                             </div>
+                        </div>
+
+                        <div id="date-range-info" class="alert alert-info" style="display: none;">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Date Range Placeholders:</strong> This filter creates two placeholders for use in SQL queries:
+                            <ul class="mb-0 mt-1">
+                                <li><code id="date-range-from-placeholder">::filter_key_from</code> - Start date</li>
+                                <li><code id="date-range-to-placeholder">::filter_key_to</code> - End date</li>
+                            </ul>
+                            <small class="text-muted">Example: <code>WHERE created_ts BETWEEN ::filter_key_from AND ::filter_key_to</code></small>
                         </div>
 
                         <?php
