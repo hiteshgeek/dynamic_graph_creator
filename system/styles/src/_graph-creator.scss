@@ -849,20 +849,20 @@
   }
 
   &.saved {
-    color: $success;
-    background: rgba($success, 0.1);
+    color: var(--dgc-success);
+    background: var(--dgc-success-bg);
 
     i {
-      color: $success;
+      color: var(--dgc-success);
     }
   }
 
   &.unsaved {
-    color: $warning;
-    background: rgba($warning, 0.1);
+    color: var(--dgc-warning);
+    background: var(--dgc-warning-bg);
 
     i {
-      color: $warning;
+      color: var(--dgc-warning);
     }
   }
 }

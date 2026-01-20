@@ -371,38 +371,38 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15),
   }
 
   &.saved {
-    color: $success;
-    background: $success-bg;
+    color: var(--dgc-success);
+    background: var(--dgc-success-bg);
 
     i {
-      color: $success;
+      color: var(--dgc-success);
     }
   }
 
   &.saving {
-    color: $info;
-    background: $info-bg;
+    color: var(--dgc-info);
+    background: var(--dgc-info-bg);
 
     i {
-      color: $info;
+      color: var(--dgc-info);
     }
   }
 
   &.unsaved {
-    color: $warning;
-    background: $warning-bg;
+    color: var(--dgc-warning);
+    background: var(--dgc-warning-bg);
 
     i {
-      color: $warning;
+      color: var(--dgc-warning);
     }
   }
 
   &.error {
-    color: $error;
-    background: $error-bg;
+    color: var(--dgc-error);
+    background: var(--dgc-error-bg);
 
     i {
-      color: $error;
+      color: var(--dgc-error);
     }
   }
 }
