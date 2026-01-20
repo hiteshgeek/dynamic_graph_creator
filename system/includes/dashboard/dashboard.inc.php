@@ -232,8 +232,7 @@ function createFromTemplate($data)
     $name = isset($data['name']) ? $data['name'] : 'New Dashboard';
     $description = isset($data['description']) ? $data['description'] : '';
     $userId = Session::loggedInUid();
-    $user = new AdminUser($userId);
-    $companyId = $user->getCompanyId();
+    $companyId = BaseConfig::$company_id;
 
     if (!$templateId) {
         Utility::ajaxResponseFalse('Template ID required');
@@ -265,8 +264,7 @@ function saveDashboard($data)
     $structure = isset($data['structure']) ? $data['structure'] : '';
     $config = isset($data['config']) ? $data['config'] : '{}';
     $userId = Session::loggedInUid();
-    $user = new AdminUser($userId);
-    $companyId = $user->getCompanyId();
+    $companyId = BaseConfig::$company_id;
 
     if (empty($name)) {
         Utility::ajaxResponseFalse('Dashboard name is required');
