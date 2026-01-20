@@ -38,15 +38,15 @@ body {
 
   // Ensure all child elements inherit the font-family
   // Exclude Font Awesome icons which need their own font-family for ::before pseudo-elements
-  *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.fat),
-  *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(
-      .fat
-    )::before,
-  *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(
-      .fat
-    )::after {
-    font-family: inherit !important;
-  }
+  // *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(.fat),
+  // *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(
+  //     .fat
+  //   )::before,
+  // *:not(.fa):not(.fas):not(.far):not(.fab):not(.fal):not(.fad):not(
+  //     .fat
+  //   )::after {
+  //   font-family: inherit !important;
+  // }
 
   .container,
   .container-fluid,
