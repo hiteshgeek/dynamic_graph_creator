@@ -161,19 +161,20 @@
   line-height: 1.8;
 
   code {
-    background: var(--dgc-success);
+    color: var(--dgc-success);
+    background: var(--dgc-success-bg);
+    // background: var(--dgc-success);
+    // color: var(--dgc-text-inverse);
     padding: 2px 8px;
     margin: 0 2px;
     border-radius: 4px;
     font-size: 12px;
     font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
-    background: var(--dgc-success);
     padding: 2px 8px;
     margin: 0 2px;
     border-radius: 4px;
     font-size: 12px;
     font-family: "Monaco", "Menlo", "Ubuntu Mono", "Consolas", monospace;
-    color: var(--dgc-text-inverse);
     font-weight: $font-weight-medium;
   }
 }

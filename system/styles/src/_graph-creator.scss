@@ -999,17 +999,20 @@
 
 .filter-selector-key {
   font-size: 11px;
-  color: var(--dgc-text-inverse);
-  background: var(--dgc-primary);
+  // color: var(--dgc-text-inverse);
+  // background: var(--dgc-primary);
   padding: 3px 8px;
   border-radius: 4px;
   font-family: monospace;
   font-weight: $font-weight-medium;
   width: fit-content;
 
-  &.filter-selector-key-derived {
-    background: var(--dgc-success);
-  }
+  color: var(--dgc-success);
+  background: var(--dgc-success-bg);
+
+  // &.filter-selector-key-derived {
+  //   background: var(--dgc-success);
+  // }
 }
 
 .filter-use-btn {
