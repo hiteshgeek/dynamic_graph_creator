@@ -38,6 +38,8 @@ require_once __DIR__ . '/system/classes/DataFilterSet.php';
 require_once __DIR__ . '/system/classes/Graph.php';
 require_once __DIR__ . '/system/classes/GraphManager.php';
 require_once __DIR__ . '/system/classes/DataFilterManager.php';
+require_once __DIR__ . '/system/classes/SystemPlaceholder.php';
+require_once __DIR__ . '/system/classes/SystemPlaceholderManager.php';
 require_once __DIR__ . '/system/classes/DashboardTemplateCategory.php';
 require_once __DIR__ . '/system/classes/DashboardTemplate.php';
 require_once __DIR__ . '/system/classes/DashboardInstance.php';
@@ -62,6 +64,12 @@ require_once __DIR__ . '/system/classes/SimulateLogin.php';
 // Initialize session
 Session::init();
 
+// Auto-login for development (only if not logged in)
+if (!Session::isLoggedIn()) {
+    SimulateLogin::loginByEmail('admin@agt.com');
+    header('Location: .?urlq=graph');
+    exit;
+}
 // Restore BaseConfig values from session (like Rapidkart's system.inc.php)
 // Must set licence_id first since many classes depend on it
 if (Session::isLoggedIn()) {
@@ -76,13 +84,6 @@ if (Session::isLoggedIn()) {
 // Parse URL
 $url = Utility::parseUrl();
 $page = isset($url[0]) ? $url[0] : 'graph';
-
-// Auto-login for development (only if not logged in)
-if (!Session::isLoggedIn()) {
-    SimulateLogin::loginByEmail('admin@agt.com');
-    header('Location: .?urlq=graph');
-    exit;
-}
 
 // Manual logout for testing (uncomment when needed):
 // SimulateLogin::logout();

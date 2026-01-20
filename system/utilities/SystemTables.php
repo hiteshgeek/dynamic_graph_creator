@@ -185,4 +185,7 @@ class SystemTables
 
       // Dashboard instance table (status in disid column)
       const DB_TBL_DASHBOARD_INSTANCE = "dashboard_instance";
+
+      // System placeholder table (status in spsid column: 1=active, 3=deleted)
+      const DB_TBL_SYSTEM_PLACEHOLDER = "system_placeholder";
 }

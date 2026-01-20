@@ -60,7 +60,7 @@ if ($action === 'count_files') {
 $steps = [
     1 => [
         'title' => 'Copy PHP Classes',
-        'description' => 'Copies 10 PHP class files to handle graphs, data filters, dashboards, templates, and UI components.',
+        'description' => 'Copies 12 PHP class files to handle graphs, data filters, dashboards, templates, system placeholders, and UI components.',
         'files' => [
             'system/classes/DGCHelper.php',
             'system/classes/Graph.php',
@@ -72,6 +72,8 @@ $steps = [
             'system/classes/DashboardTemplate.php',
             'system/classes/DashboardTemplateCategory.php',
             'system/classes/DashboardBuilder.php',
+            'system/classes/SystemPlaceholder.php',
+            'system/classes/SystemPlaceholderManager.php',
         ],
         'type' => 'copy'
     ],
@@ -144,7 +146,6 @@ $steps = [
             ['source' => 'themes/libraries/bootstrap5', 'target' => 'themes/libraries/bootstrap5'],
             ['source' => 'themes/libraries/jquery3', 'target' => 'themes/libraries/jquery3'],
             ['source' => 'themes/libraries/fontawesome6', 'target' => 'themes/libraries/fontawesome6'],
-            ['source' => 'themes/libraries/fonts', 'target' => 'themes/libraries/fonts'],
             ['source' => 'themes/libraries/moment-dgc', 'target' => 'themes/libraries/moment-dgc'],
             ['source' => 'themes/libraries/echarts-dgc', 'target' => 'themes/libraries/echarts-dgc'],
             ['source' => 'themes/libraries/codemirror-dgc', 'target' => 'themes/libraries/codemirror-dgc'],
