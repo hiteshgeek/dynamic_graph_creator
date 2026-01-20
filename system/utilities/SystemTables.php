@@ -23,6 +23,9 @@ class SystemTables
       const DB_TBL_OUTLET_USER_MAPPING = "outlet_user_mapping";
       const DB_TBL_USER_SESSION = "auser_session";
 
+      const DB_TBL_WAREHOUSE = "warehouse";
+      const DB_TBL_WAREHOUSE_USER_MAPPING = "warehouse_user_mapping";
+
       // Graph table (status in gsid column: 1=active, 3=deleted)
       const DB_TBL_GRAPH = "graph";
 

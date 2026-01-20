@@ -43,6 +43,10 @@ require_once __DIR__ . '/system/classes/Licence.php';
 require_once __DIR__ . '/system/classes/LicenceCompanies.php';
 require_once __DIR__ . '/system/classes/LicenceManager.php';
 require_once __DIR__ . '/system/classes/LicenceDomain.php';
+require_once __DIR__ . '/system/classes/Outlet.php';
+require_once __DIR__ . '/system/classes/OutletManager.php';
+require_once __DIR__ . '/system/classes/Warehouse.php';
+require_once __DIR__ . '/system/classes/WarehouseManager.php';
 require_once __DIR__ . '/system/classes/SimulateLogin.php';
 
 // Initialize session

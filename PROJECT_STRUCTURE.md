@@ -14,24 +14,26 @@ These files are direct copies from the live Rapidkart project. Any changes shoul
 
 #### Classes (`system/classes/`)
 
-| File                   | Purpose                         |
-| ---------------------- | ------------------------------- |
-| `AdminUser.php`        | User entity class               |
-| `AdminUserManager.php` | User management functions       |
-| `Session.php`          | Session handling (login/logout) |
-| `SessionsManager.php`  | Session DB operations           |
-| `SessionDetails.php`   | Session details entity          |
-| `Licence.php`          | Licence entity class            |
-| `LicenceCompanies.php` | Company entity class            |
-| `LicenceManager.php`   | Licence management functions    |
-| `LicenceDomain.php`    | Domain entity class             |
-| `Outlet.php`           | Outlet entity class             |
-| `OutletManager.php`    | Outlet management functions     |
-| `Rapidkart.php`        | Singleton pattern for DB access |
-| `SQLiDatabase.php`     | Database wrapper                |
-| `Template.php`         | Template engine                 |
-| `ThemeRegistry.php`    | Theme/asset management          |
-| `Utility.php`          | Utility functions               |
+| File                   | Purpose                            |
+| ---------------------- | ---------------------------------- |
+| `AdminUser.php`        | User entity class                  |
+| `AdminUserManager.php` | User management functions          |
+| `Session.php`          | Session handling (login/logout)    |
+| `SessionsManager.php`  | Session DB operations              |
+| `SessionDetails.php`   | Session details entity             |
+| `Licence.php`          | Licence entity class               |
+| `LicenceCompanies.php` | Company entity class               |
+| `LicenceManager.php`   | Licence management functions       |
+| `LicenceDomain.php`    | Domain entity class                |
+| `Outlet.php`           | Outlet entity class                |
+| `OutletManager.php`    | Outlet management functions        |
+| `Warehouse.php`        | Warehouse entity class             |
+| `WarehouseManager.php` | Warehouse management functions     |
+| `Rapidkart.php`        | Singleton pattern for DB access    |
+| `SQLiDatabase.php`     | Database wrapper                   |
+| `Template.php`         | Template engine                    |
+| `ThemeRegistry.php`    | Theme/asset management             |
+| `Utility.php`          | Utility functions                  |
 
 #### Configuration (`system/config/`)
 
@@ -72,18 +74,19 @@ These files are specific to Dynamic Graph Creator and can be modified as needed.
 
 #### Classes (`system/classes/`)
 
-| File                            | Purpose                       |
-| ------------------------------- | ----------------------------- |
-| `Graph.php`                     | Graph entity class            |
-| `GraphManager.php`              | Graph CRUD operations         |
-| `DataFilter.php`                | Data filter entity class      |
-| `DataFilterSet.php`             | Filter set entity class       |
-| `DataFilterManager.php`         | Filter CRUD operations        |
-| `DashboardTemplate.php`         | Dashboard template entity     |
-| `DashboardTemplateCategory.php` | Template category entity      |
-| `DashboardInstance.php`         | Dashboard instance entity     |
-| `DashboardBuilder.php`          | Dashboard builder logic       |
-| `DGCHelper.php`                 | DGC-specific helper functions |
+| File                            | Purpose                              |
+| ------------------------------- | ------------------------------------ |
+| `Graph.php`                     | Graph entity class                   |
+| `GraphManager.php`              | Graph CRUD operations                |
+| `DataFilter.php`                | Data filter entity class             |
+| `DataFilterSet.php`             | Filter set entity class              |
+| `DataFilterManager.php`         | Filter CRUD operations               |
+| `DashboardTemplate.php`         | Dashboard template entity            |
+| `DashboardTemplateCategory.php` | Template category entity             |
+| `DashboardInstance.php`         | Dashboard instance entity            |
+| `DashboardBuilder.php`          | Dashboard builder logic              |
+| `DGCHelper.php`                 | DGC-specific helper functions        |
+| `SimulateLogin.php`             | Login bootstrap helper (sets config) |
 
 #### Includes (`system/includes/`)
 
@@ -118,6 +121,7 @@ All theme files (CSS, JS, images) are DGC-specific.
 | `licence_domains`       | Domain configuration    |
 | `outlet`                | Outlet/branch data      |
 | `outlet_user_mapping`   | User-outlet mapping     |
+| `warehouse`             | Warehouse data          |
 
 ### DGC Specific Tables
 
@@ -140,9 +144,14 @@ All theme files (CSS, JS, images) are DGC-specific.
 In `index.php`, uncomment one of these lines:
 
 ```php
-// Session::loginUser(new AdminUser(1)); header('Location: .?urlq=graph'); exit; // Login as user ID 1
-// Session::logoutUser(); header('Location: .?urlq=login'); exit; // Logout
+// SimulateLogin::loginById(1); header('Location: .?urlq=graph'); exit; // Login by user ID
+// SimulateLogin::loginByEmail('your@email.com'); header('Location: .?urlq=graph'); exit; // Login by email
+// SimulateLogin::logout(); header('Location: .?urlq=login'); exit; // Logout
 ```
+
+**How it works:**
+- `SimulateLogin::loginById($uid)` sets up `BaseConfig::$licence_id` and `BaseConfig::$company_id` from user data, then calls `Session::loginUser()`
+- This mimics the live project's flow where `system.inc.php` sets licence_id from domain lookup and `login.inc.php` sets company_id from authenticated user
 
 ### Session Check Flow
 
