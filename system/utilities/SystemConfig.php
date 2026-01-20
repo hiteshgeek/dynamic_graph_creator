@@ -2,13 +2,16 @@
 
 /**
  * Specifies the configuration of the System
- * Reads database credentials from .env file
  *
- * @author Dynamic Graph Creator
+ * @author Sohil Gupta
+ * @since 20140621
+ * @updated 20140623
  */
 class SystemConfig
 {
     private static $config = null;
+    private static $user = null;
+    public static $lock_date = "";
 
     /**
      * Load configuration from .env file
@@ -50,6 +53,73 @@ class SystemConfig
     }
 
     /**
+     * Get logged in user
+     * @return AdminUser
+     */
+    public static function getUser()
+    {
+        if (!self::$user) {
+
+            $domain_name = $_SERVER['HTTP_HOST'];
+            $licence = LicenceManager::checkDomainExists($domain_name);
+            if (!$licence) {
+                header('Location: http://www.sixorbit.com/');
+                exit;
+            }
+            // baseconfig settings
+            BaseConfig::$licence_id = $licence->getId();
+            LicenceManager::setCustomizedData($licence);
+            self::$user = new AdminUser(Session::loggedInUid());
+            $session_company_id = Session::getSessionVariable()['company_id'];
+            if ($session_company_id <= 0) {
+                $session_company_id = self::$user->getCompanyId();
+                $_SESSION['company_id'] = $session_company_id;
+            }
+            BaseConfig::$company_id = $session_company_id;
+            $company = new LicenceCompanies(BaseConfig::$company_id);
+            SystemConfig::$lock_date = $company->getLockDate();
+            BaseConfig::$company_start_date = $company->getStartDate();
+            BaseConfig::$company_gstr_date = $company->getGstrDate();
+
+            $variable_mappings = SiteVariableManager::getVariableConfig(BaseConfig::$company_id);
+            if ($variable_mappings) {
+                global $variable_config;
+                $variable_config = $variable_mappings;
+            }
+
+
+
+            BaseConfig::$if_customized = $licence->getIfCustomized() ? TRUE : FALSE;
+            if (BaseConfig::$if_customized) {
+                BaseConfig::$customization_box = $licence->getCustomizationBox();
+            }
+
+            self::$user->getRoles();
+            self::$user->getPermission();
+            self::$user->getSubOrdinates();
+        }
+
+        return self::$user;
+    }
+
+    /**
+     * @return String The protocol used by the current URL. Whether http or https
+     */
+    public static function protocol()
+    {
+        return $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+    }
+
+    /**
+     * @return String The HTTP_HOST
+     */
+    public static function host()
+    {
+        return $_SERVER['SERVER_NAME'];
+    }
+
+
+    /**
      * Get database host
      * @return string
      */
@@ -86,28 +156,11 @@ class SystemConfig
     }
 
     /**
-     * @return String The protocol used by the current URL. Whether http or https
-     */
-    public static function protocol()
-    {
-        return (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443)) ? "https://" : "http://";
-    }
-
-    /**
-     * @return String The HTTP_HOST
-     */
-    public static function host()
-    {
-        return isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost');
-    }
-
-    /**
      * @return String The Base URL of the website
      */
     public static function baseUrl()
     {
-        $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
-        return rtrim(self::protocol() . self::host() . $scriptPath, '/') . '/';
+        return rtrim(SystemConfig::protocol() . SystemConfig::host() . '/' . BaseConfig::SITE_FOLDER, '/') . '/';
     }
 
     /**
@@ -115,7 +168,12 @@ class SystemConfig
      */
     public static function basePath()
     {
-        return dirname(dirname(__DIR__)) . '/';
+        if (isset($_SERVER['DOCUMENT_ROOT']) && $_SERVER['DOCUMENT_ROOT'] !== '') {
+            $base_path = $_SERVER['DOCUMENT_ROOT'];
+        } else {
+            $base_path = BaseConfig::SITE_PATH;
+        }
+        return rtrim($base_path . '/' . BaseConfig::SITE_FOLDER, '/') . '/';
     }
 
     /**
@@ -123,7 +181,7 @@ class SystemConfig
      */
     public static function systemsDirPath()
     {
-        return self::basePath() . "system/";
+        return SystemConfig::basePath() . "system/";
     }
 
     /**
@@ -131,110 +189,118 @@ class SystemConfig
      */
     public static function systemsDirUrl()
     {
-        return self::baseUrl() . "system/";
+        return SystemConfig::baseUrl() . "system/";
     }
 
     /**
-     * @return String The Path of the directory containing include files
+     * @return String The Path of the directory containing include files of the core system
      */
     public static function includesPath()
     {
-        return self::systemsDirPath() . 'includes/';
+        return SystemConfig::systemsDirPath() . 'includes/';
     }
 
     /**
-     * @return String The URL of the directory containing include files
+     * @return String The Path of the directory containing include files of the core system
      */
     public static function includesUrl()
     {
-        return self::systemsDirUrl() . 'includes/';
+        return SystemConfig::systemsDirUrl() . 'includes/';
     }
 
     /**
-     * @return String The Path of the directory containing utility files
+     * @return String The Path of the directory containing include files of the core system
      */
     public static function utilitiesPath()
     {
-        return self::systemsDirPath() . 'utilities/';
+        return SystemConfig::systemsDirPath() . 'utilities/';
     }
 
     /**
-     * @return String The Path of the directory containing class files
+     * @return String The Path of the directory containing class files of the core system
      */
     public static function classesPath()
     {
-        return self::systemsDirPath() . "classes/";
+        return SystemConfig::systemsDirPath() . "classes/";
     }
 
     /**
-     * @return String The Path of the directory containing interface files
+     * @return String The Path of the directory containing interface files of the core system
      */
     public static function interfacesPath()
     {
-        return self::systemsDirPath() . "interfaces/";
+        return SystemConfig::systemsDirPath() . "interfaces/";
     }
 
     /**
-     * @return String The path of the directory containing templates
+     * @return String The Path of the directory containing exception class files of the core system
      */
-    public static function templatesPath()
+    public static function exceptionsPath()
     {
-        return self::systemsDirPath() . "templates/";
+        return SystemConfig::systemsDirPath() . "exceptions/";
     }
 
     /**
-     * @return String The URL of the directory containing scripts
+     * @return String The Path of the directory containing system modules
      */
-    public static function scriptsUrl()
+    public static function modulesPath()
     {
-        return self::systemsDirUrl() . "scripts/";
+        return SystemConfig::systemsDirPath() . "modules/";
     }
 
     /**
-     * @return String The URL of the directory containing styles
+     * @return String The URL of the directory containing system modules
      */
-    public static function stylesUrl()
+    public static function modulesUrl()
     {
-        return self::systemsDirUrl() . "styles/";
+        return SystemConfig::systemsDirUrl() . "modules/";
     }
 
     /**
-     * @return String The path of the dist directory
-     */
-    public static function distPath()
-    {
-        return self::basePath() . 'dist/';
-    }
-
-    /**
-     * @return String The URL of the dist directory
-     */
-    public static function distUrl()
-    {
-        return self::baseUrl() . 'dist/';
-    }
-
-    /**
-     * @return String The Path of the directory containing config files
-     */
-    public static function configPath()
-    {
-        return self::systemsDirPath() . "config/";
-    }
-
-    /**
-     * @return String The URL of the themes directory
-     */
-    public static function themesUrl()
-    {
-        return self::baseUrl() . "themes/";
-    }
-
-    /**
-     * @return String The path of the themes directory
+     * @return String The Path of the directory containing all themes
      */
     public static function themesPath()
     {
-        return self::basePath() . "themes/";
+        return SystemConfig::basePath() . "themes/";
+    }
+
+    /**
+     * @return String The URL of the directory containing all themes
+     */
+    public static function themesUrl()
+    {
+        return SystemConfig::baseUrl() . "themes/";
+    }
+
+    /**
+     * @return String The URL of the directory containing scripts for the currently in-use theme
+     */
+    public static function scriptsUrl()
+    {
+        return SystemConfig::systemsDirUrl() . "scripts/";
+    }
+
+    /**
+     * @return String The path of the directory containing templates for the currently in-use theme
+     */
+    public static function templatesPath()
+    {
+        return SystemConfig::systemsDirPath() . "templates/";
+    }
+
+    /**
+     * @return String The URL of the directory containing templates for the currently in-use theme
+     */
+    public static function stylesUrl()
+    {
+        return SystemConfig::systemsDirUrl() . "styles/";
+    }
+
+    /**
+     * @return String The URL of the directory containing templates for the currently in-use theme
+     */
+    public static function servicesPath()
+    {
+        return SystemConfig::baseUrl() . "services/";
     }
 }
