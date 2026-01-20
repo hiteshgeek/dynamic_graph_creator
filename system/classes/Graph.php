@@ -177,6 +177,15 @@ class Graph implements DatabaseObject
             $placeholderSettings = array();
         }
 
+        // Validate required placeholders before executing query
+        $missingRequired = DataFilterManager::validateRequiredPlaceholders($this->query, $filter_values, $placeholderSettings);
+        if (!empty($missingRequired)) {
+            // Format placeholder names for display (remove :: prefix)
+            $filterNames = array_map(function($p) { return ltrim($p, ':'); }, $missingRequired);
+            // Return empty data with error message
+            return $this->getEmptyChartData('Required filter(s) missing value: ' . implode(', ', $filterNames));
+        }
+
         $query = $filterSet->applyToQuery($this->query, $filter_values, $placeholderSettings);
         $res = $db->query($query);
 
@@ -224,6 +233,30 @@ class Graph implements DatabaseObject
 
             return array('categories' => $categories, 'values' => $values);
         }
+    }
+
+    /**
+     * Get empty chart data structure with optional error message
+     *
+     * @param string|null $error Error message to include
+     * @return array Empty chart data with error
+     */
+    private function getEmptyChartData($error = null)
+    {
+        $result = array();
+
+        if ($this->graph_type === 'pie') {
+            $result['items'] = array();
+        } else {
+            $result['categories'] = array();
+            $result['values'] = array();
+        }
+
+        if ($error) {
+            $result['error'] = $error;
+        }
+
+        return $result;
     }
 
     // Getters and Setters
