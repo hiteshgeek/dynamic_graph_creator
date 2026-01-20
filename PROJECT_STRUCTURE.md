@@ -30,6 +30,8 @@ These files are direct copies from the live Rapidkart project. Any changes shoul
 | `Warehouse.php`                | Warehouse entity class          |
 | `WarehouseManager.php`         | Warehouse management functions  |
 | `Rapidkart.php`                | Singleton pattern for DB access |
+| `SiteVariable.php`             |                                 |
+| `SiteVariableManager.php`      |                                 |
 | `SystemPreferences.php`        |                                 |
 | `SystemPreferencesGroup.php`   |                                 |
 | `SystemPreferencesManager.php` |                                 |

@@ -16,6 +16,15 @@ class SystemTables
       // =========================================================================
 
       /**
+       * 
+       */
+      const DB_TBL_VARIABLE = "variable";
+      const DB_TBL_VARIABLE_CATEGORY = "variable_category";
+      const DB_TBL_VARIABLE_UPDATE_LOG = "variable_update_log";
+      const DB_TBL_VARIABLE_COMPANY_MAPPING = "variable_company_mapping";
+
+
+      /**
        * User management tables
        */
       const DB_TBL_USER = "auser";
