@@ -142,6 +142,9 @@
 
   &.collapsed {
     width: 48px;
+    max-height: none;
+    height: fit-content;
+    background: var(--dgc-bg-card);
 
     .graph-list-nav {
       display: none;
@@ -152,6 +155,7 @@
       padding: $spacing-md $spacing-sm;
       border-bottom: none;
       gap: $spacing-lg;
+      background: var(--dgc-bg-card);
 
       .sidebar-title {
         writing-mode: vertical-rl;
@@ -173,7 +177,7 @@
         order: -1;
 
         i {
-          transform: rotate(-90deg);
+          transform: rotate(-180deg);
         }
       }
     }

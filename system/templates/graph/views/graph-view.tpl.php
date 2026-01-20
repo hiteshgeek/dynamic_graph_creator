@@ -20,7 +20,7 @@
                     document.getElementById('graph-view-sidebar').classList.add('collapsed');
                 }
             </script>
-            <div class="sidebar-header" title="Toggle sidebar (Alt+O)">
+            <div class="sidebar-header">
                 <span class="sidebar-title">
                     <i class="fas fa-chart-bar"></i>
                     <span>All Charts</span>
@@ -35,7 +35,7 @@
                     }
                     echo $currentIndex . '/' . $totalGraphs;
                 ?></span>
-                <button type="button" class="collapse-btn" title="Collapse sidebar">
+                <button type="button" class="collapse-btn">
                     <i class="fas fa-chevron-left"></i>
                 </button>
             </div>

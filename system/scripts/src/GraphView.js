@@ -42,6 +42,7 @@ export default class GraphView {
 
         this.initFilters();
         this.bindEvents();
+        this.initSidebarCollapse();
 
         // Restore auto-apply setting from localStorage
         this.restoreAutoApplySetting();
@@ -285,6 +286,55 @@ export default class GraphView {
             this.preview.setType(this.graphType);
             this.preview.setConfig(this.config);
         }
+    }
+
+    /**
+     * Initialize sidebar collapse functionality
+     */
+    initSidebarCollapse() {
+        const sidebar = document.querySelector('.graph-view-sidebar');
+        const header = sidebar?.querySelector('.sidebar-header');
+        const collapseBtn = sidebar?.querySelector('.collapse-btn');
+
+        if (!sidebar) return;
+
+        // Toggle on header click
+        if (header) {
+            header.addEventListener('click', (e) => {
+                // Don't toggle if clicking a link inside the header
+                if (e.target.closest('a')) return;
+                this.toggleSidebar();
+            });
+        }
+
+        // Toggle on collapse button click
+        if (collapseBtn) {
+            collapseBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleSidebar();
+            });
+        }
+    }
+
+    /**
+     * Toggle sidebar collapsed state
+     */
+    toggleSidebar() {
+        const sidebar = document.querySelector('.graph-view-sidebar');
+
+        if (!sidebar) return;
+
+        sidebar.classList.toggle('collapsed');
+
+        // Save state to localStorage
+        localStorage.setItem('graphViewSidebarCollapsed', sidebar.classList.contains('collapsed') ? 'true' : 'false');
+
+        // Resize chart after sidebar animation
+        setTimeout(() => {
+            if (this.preview) {
+                this.preview.resize();
+            }
+        }, 350);
     }
 
     /**

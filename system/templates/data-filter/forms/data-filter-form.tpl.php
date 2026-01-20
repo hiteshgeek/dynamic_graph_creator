@@ -25,13 +25,13 @@
                     document.getElementById('data-filter-sidebar-card').classList.add('collapsed');
                 }
             </script>
-                <div class="sidebar-card-header" title="Toggle sidebar (Alt+O)">
+                <div class="sidebar-card-header">
                     <span class="sidebar-card-title">
                         <i class="fas fa-filter"></i>
                         <span>All Data Filters</span>
                     </span>
                     <span class="sidebar-count"><?php echo $totalFilters; ?></span>
-                    <button type="button" class="collapse-btn" title="Collapse sidebar">
+                    <button type="button" class="collapse-btn">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                 </div>
@@ -62,7 +62,7 @@
                                 <span class="filter-nav-name"><?php echo htmlspecialchars($f['filter_label']); ?></span>
                                 <code class="placeholder-key"><?php echo htmlspecialchars($f['filter_key']); ?></code>
                             </span>
-                            <span class="filter-nav-source <?php echo $f['data_source']; ?>" title="<?php echo $f['data_source'] === 'query' ? 'Query' : 'Static'; ?>">
+                            <span class="filter-nav-source <?php echo $f['data_source']; ?>">
                                 <?php if ($f['data_source'] === 'query'): ?>
                                 <i class="fas fa-database"></i>
                                 <?php else: ?>

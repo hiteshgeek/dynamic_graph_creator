@@ -822,11 +822,25 @@ window.KeyboardShortcuts = {
                 }
                 filterSidebar.classList.toggle('collapsed');
                 localStorage.setItem('dataFilterSidebarCollapsed', filterSidebar.classList.contains('collapsed') ? 'true' : 'false');
+                return;
+            }
+
+            // Check for graph view sidebar
+            const graphViewSidebar = document.querySelector('.graph-view-sidebar');
+            if (graphViewSidebar) {
+                graphViewSidebar.classList.toggle('collapsed');
+                localStorage.setItem('graphViewSidebarCollapsed', graphViewSidebar.classList.contains('collapsed') ? 'true' : 'false');
+                // Trigger chart resize after animation
+                setTimeout(() => {
+                    if (window.graphView?.preview) {
+                        window.graphView.preview.resize();
+                    }
+                }, 350);
             }
         }, {
             description: 'Toggle sidebar panel',
             scope: 'global',
-            available: () => !!document.querySelector('.graph-creator .graph-sidebar-left, .data-filter-form-sidebar')
+            available: () => !!document.querySelector('.graph-creator .graph-sidebar-left, .data-filter-form-sidebar, .graph-view-sidebar')
         });
 
         return this;
