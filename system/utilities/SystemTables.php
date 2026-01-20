@@ -38,6 +38,7 @@ class SystemTables
        */
       const DB_TBL_ROLE = "arole";
       const DB_TBL_ROLE_PERMISSION = "arole_permission";
+      const DB_TBL_PERMISSION = "rapidkart_factory_static.apermission";
       const DB_TBL_PERMISSION_SECURITY = "permission_security";
       const DB_TBL_AUSER_PERMISSION_SECURITY = "auser_permission_security";
 
@@ -59,6 +60,14 @@ class SystemTables
       const DB_TBL_LICENCE_MEASUREMENT_MAPPING = "licence_measurement_mapping";
       const DB_TBL_MASK_CONFIG = "mask_config";
       const DB_TBL_SYSTEM_PREFERENCES = "system_preferences";
+      const DB_TBL_SYSTEM_PREFERENCES_GROUP = "system_preferences_group";
+      const DB_TBL_SYSTEM_PREFERENCES_CATEGORY = "system_preferences_category";
+      const DB_TBL_SYSTEM_PREFERENCES_MODULE_MAPPING = "system_preferences_module_mapping";
+
+      /**
+       * Module tables
+       */
+      const DB_TBL_MODULE = "rapidkart_factory_static.module";
 
       /**
        * Outlet tables
