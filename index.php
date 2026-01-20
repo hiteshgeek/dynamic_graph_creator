@@ -53,9 +53,9 @@ $url = Utility::parseUrl();
 $page = isset($url[0]) ? $url[0] : 'graph';
 
 // Quick login/logout for testing (uncomment one line at a time, then comment back):
-// Session::loginUser(new AdminUser(1)); header('Location: .?urlq=graph'); exit; // Login by user ID
-// Session::loginUser(new AdminUser(SimulateLogin::getUserIdByEmail('your@email.com'))); header('Location: .?urlq=graph'); exit; // Login by email
-// Session::logoutUser(); header('Location: .?urlq=login'); exit; // Logout
+// SimulateLogin::loginById(1); header('Location: .?urlq=graph'); exit; // Login by user ID
+// SimulateLogin::loginByEmail('your@email.com'); header('Location: .?urlq=graph'); exit; // Login by email
+// SimulateLogin::logout(); header('Location: .?urlq=login'); exit; // Logout
 
 // Check if user is logged in (same as live project)
 // Allow 'login' page without authentication
