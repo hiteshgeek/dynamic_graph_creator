@@ -599,6 +599,7 @@ function copyDistRenamed($src, $targetDir) {
         .status-same { background: #e2e3e5; color: #383d41; }
         .status-different { background: #fff3cd; color: #856404; }
         .status-missing { background: #f8d7da; color: #721c24; }
+        .status-failed { background: #f8d7da; color: #721c24; }
         .type-badge {
             font-size: 0.65rem;
             padding: 0.15rem 0.4rem;
@@ -815,9 +816,9 @@ function copyDistRenamed($src, $targetDir) {
                             if ($status === 'exists' || $status === 'different') $existingCount++;
                         }
                         ?>
-                        <div class="file-list mb-3">
+                        <div class="file-list mb-3" data-step="<?php echo $num; ?>">
                             <?php $fileNum = 1; foreach ($stepData['files'] as $file): ?>
-                            <div class="file-item-simple">
+                            <div class="file-item-simple" data-file="<?php echo htmlspecialchars($file); ?>">
                                 <span class="file-number"><?php echo $fileNum++; ?>.</span>
                                 <span class="status-badge status-<?php echo $fileStatuses[$file]; ?>">
                                     <?php echo $fileStatuses[$file]; ?>
@@ -1044,11 +1045,11 @@ function copyDistRenamed($src, $targetDir) {
                         <!-- Sub-section 1: Page Scripts -->
                         <div class="sub-section mb-4">
                             <h6 class="text-primary mb-2"><i class="fas fa-file-code me-1"></i> Page Scripts</h6>
-                            <div class="file-list mb-2">
+                            <div class="file-list mb-2" data-step="<?php echo $num; ?>" data-type="scripts">
                                 <?php $fileNum = 1; foreach ($stepData['files'] as $file): ?>
                                 <?php $status = $targetExists ? getFileStatus($sourceDir, $targetDir, $file) : 'unknown';
                                       if ($status === 'exists') $totalFileExists++; ?>
-                                <div class="file-item-simple">
+                                <div class="file-item-simple" data-file="<?php echo htmlspecialchars($file); ?>">
                                     <span class="file-number"><?php echo $fileNum++; ?>.</span>
                                     <span class="status-badge status-<?php echo $status; ?>">
                                         <?php echo $status; ?>
@@ -1062,7 +1063,7 @@ function copyDistRenamed($src, $targetDir) {
                         <!-- Sub-section 2: Include Files -->
                         <div class="sub-section mb-3">
                             <h6 class="text-info mb-2"><i class="fas fa-file-code me-1"></i> Include Files (with Transformation)</h6>
-                            <div class="file-list mb-2">
+                            <div class="file-list mb-2" data-step="<?php echo $num; ?>" data-type="includes">
                                 <?php
                                 // Define unique module-specific transforms for each include file
                                 // (common module transforms are shared across all files)
@@ -1099,7 +1100,7 @@ function copyDistRenamed($src, $targetDir) {
                                     if ($status === 'exists') $totalFolderExists++;
                                     $fileTransforms = isset($includeTransformations[$file]) ? $includeTransformations[$file] : null;
                                 ?>
-                                <div class="file-item-simple">
+                                <div class="file-item-simple" data-file="<?php echo htmlspecialchars($file); ?>">
                                     <span class="file-number"><?php echo $includeNum++; ?>.</span>
                                     <span class="status-badge status-<?php echo $status; ?>">
                                         <?php echo $status; ?>
@@ -1776,6 +1777,74 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-preview.js');
         }
     }
 
+    // Update file statuses after successful step execution
+    // Status values match getFileStatus(): 'new', 'same', 'different', 'missing', 'failed'
+    function updateFileStatuses(step, result) {
+        if (!result) return;
+
+        // Handle different result structures
+        let fileResults = {};
+
+        // For 'copy' type steps - result is {filename: 'success'/'failed'/'source not found'}
+        if (typeof result === 'object' && !result.scripts && !result.includes && !result.copied) {
+            fileResults = result;
+        }
+        // For 'copy_scripts_and_includes' type - result has {scripts: {...}, includes: {...}}
+        else if (result.scripts || result.includes) {
+            if (result.scripts) {
+                Object.assign(fileResults, result.scripts);
+            }
+            if (result.includes) {
+                Object.assign(fileResults, result.includes);
+            }
+        }
+        // For 'copy_dist_renamed' type - result has {copied: {...}}
+        else if (result.copied) {
+            // Map the copied results (e.g., 'common.abc123.css': 'common.css → system/styles/common/')
+            for (const file in result.copied) {
+                fileResults[file] = 'success';
+            }
+        }
+
+        // Update each file item's status badge
+        const fileLists = document.querySelectorAll('.file-list[data-step="' + step + '"]');
+        fileLists.forEach(list => {
+            const fileItems = list.querySelectorAll('.file-item-simple[data-file]');
+            fileItems.forEach(item => {
+                const fileName = item.getAttribute('data-file');
+                if (fileResults[fileName]) {
+                    const badge = item.querySelector('.status-badge');
+                    if (badge) {
+                        // Map copy result to status that matches getFileStatus()
+                        // 'success'/'copied' -> 'same' (file was just copied, so it's identical)
+                        // 'failed' -> 'failed'
+                        // 'source not found' -> 'missing'
+                        let status;
+                        const copyResult = fileResults[fileName];
+                        if (copyResult === 'success' || copyResult === 'copied') {
+                            status = 'same';
+                        } else if (copyResult === 'source not found') {
+                            status = 'missing';
+                        } else {
+                            status = 'failed';
+                        }
+
+                        // Remove old status classes
+                        badge.className = badge.className.replace(/status-\w+/g, '');
+                        badge.classList.add('status-badge', 'status-' + status);
+                        badge.textContent = status;
+
+                        // Add a brief highlight animation
+                        item.style.backgroundColor = status === 'same' ? '#d4edda' : '#f8d7da';
+                        setTimeout(() => {
+                            item.style.backgroundColor = '';
+                        }, 1500);
+                    }
+                }
+            });
+        });
+    }
+
     // Confirmation Modal functionality
     const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
     let pendingActionUrl = null;
@@ -1830,6 +1899,9 @@ $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-preview.js');
                 // Save execution time
                 saveExecutionTime(data.step, data.timestamp);
                 updateExecBadge(data.step, data.timestamp);
+
+                // Update file statuses in the UI
+                updateFileStatuses(data.step, data.result);
 
                 // Show success toast
                 let resultMsg = 'Step ' + data.step + ' completed: ' + data.title;
