@@ -58,6 +58,17 @@ require_once __DIR__ . '/system/classes/SimulateLogin.php';
 // Initialize session
 Session::init();
 
+// Restore BaseConfig values from session (like Rapidkart's system.inc.php)
+// Must set licence_id first since many classes depend on it
+if (Session::isLoggedIn()) {
+    if (isset($_SESSION['licence_id']) && $_SESSION['licence_id'] > 0) {
+        BaseConfig::$licence_id = (int) $_SESSION['licence_id'];
+    }
+    if (isset($_SESSION['company_id']) && $_SESSION['company_id'] > 0) {
+        BaseConfig::$company_id = (int) $_SESSION['company_id'];
+    }
+}
+
 // Parse URL
 $url = Utility::parseUrl();
 $page = isset($url[0]) ? $url[0] : 'graph';
