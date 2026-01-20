@@ -175,10 +175,9 @@
   --dgc-border-color: #3d3d3d;
 
   // Shadows - dark mode uses subtle light glow spread in all directions
-  --dgc-shadow-0: 0 0 4px rgba(255, 255, 255, 0.2), 0 0 8px rgba(0, 0, 0, 0.4);
   --dgc-shadow-subtle:
     0 0 4px rgba(255, 255, 255, 0.05), 0 0 8px rgba(0, 0, 0, 0.3);
-  --dgc-shadow-1: 0 0 4px rgba(255, 255, 255, 0.06), 0 0 8px rgba(0, 0, 0, 0.4);
+  --dgc-shadow-1: 0 0 4px rgba(255, 255, 255, 0.2), 0 0 8px rgba(0, 0, 0, 0.4);
   --dgc-shadow-2:
     0 0 6px rgba(255, 255, 255, 0.08), 0 0 12px rgba(0, 0, 0, 0.5);
   --dgc-shadow-3: 0 0 8px rgba(255, 255, 255, 0.1), 0 0 16px rgba(0, 0, 0, 0.6);
