@@ -39,6 +39,13 @@ These files are direct copies from the live Rapidkart project. Any changes shoul
 | ---------------- | ------------------------------------------------------ |
 | `BaseConfig.php` | Base configuration (DB credentials, static properties) |
 
+#### Interfaces (`system/interfaces/`)
+
+| File                  | Purpose                            |
+| --------------------- | ---------------------------------- |
+| `DatabaseObject.php`  | Database object interface          |
+| `User.php`            | User interface (extends DatabaseObject) |
+
 #### Utilities (`system/utilities/`)
 
 | File               | Purpose                                     |

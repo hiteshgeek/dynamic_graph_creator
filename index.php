@@ -15,6 +15,7 @@ require_once __DIR__ . '/system/utilities/SiteConfig.php';
 require_once __DIR__ . '/system/config/BaseConfig.php';
 require_once __DIR__ . '/system/utilities/SystemTables.php';
 require_once __DIR__ . '/system/interfaces/DatabaseObject.php';
+require_once __DIR__ . '/system/interfaces/User.php';
 require_once __DIR__ . '/system/classes/SQLiDatabase.php';
 require_once __DIR__ . '/system/classes/ThemeRegistry.php';
 require_once __DIR__ . '/system/classes/Rapidkart.php';
