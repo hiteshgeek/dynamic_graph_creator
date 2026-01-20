@@ -11,6 +11,18 @@
  */
 class SystemTables
 {
+      const DB_TBL_USER = "auser";
+      const DB_TBL_USER_COMPANY_MAPPING = "auser_company_mapping";
+      const DB_TBL_LICENCE = "licence";
+      const DB_TBL_LICENCE_DOMAIN = "licence_domain";
+      const DB_TBL_LICENCE_COMPANIES = "licence_companies";
+      const DB_TBL_MASK_CONFIG = "mask_config";
+      const DB_TBL_LICENCE_MASK_CONFIG_MAPPING = "licence_mask_config_mapping";
+      const DB_TBL_OUTLET = "outlet";
+      const DB_TBL_OUTLET_BANK = "outlet_bank";
+      const DB_TBL_OUTLET_USER_MAPPING = "outlet_user_mapping";
+      const DB_TBL_USER_SESSION = "auser_session";
+
       // Graph table (status in gsid column: 1=active, 3=deleted)
       const DB_TBL_GRAPH = "graph";
 

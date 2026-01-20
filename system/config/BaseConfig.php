@@ -8,6 +8,14 @@
  */
 class BaseConfig
 {
+      // Static properties required for Session management (same as live project)
+      public static $company_id = 0;
+      public static $licence_id = 0;
+      public static $company_start_date = "";
+
+      // Notification server (placeholder - not used in DGC but required by Session class)
+      const NOTIFICATION_SERVER = "";
+
       /**
        * Get database server/host
        * @return string
