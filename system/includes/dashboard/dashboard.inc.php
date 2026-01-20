@@ -146,8 +146,8 @@ function showList()
 
     $theme->setPageTitle('Dashboards - Dynamic Graph Creator');
 
-    // Get user's dashboards - TODO: Replace with actual user ID from session
-    $userId = 1;
+    // Get user's dashboards
+    $userId = Session::loggedInUid();
 
     $tpl = new Template(SystemConfig::templatesPath() . 'dashboard/views/dashboard-list');
     $tpl->dashboards = DashboardInstance::getUserDashboards($userId);
@@ -231,8 +231,9 @@ function createFromTemplate($data)
     $templateId = isset($data['template_id']) ? intval($data['template_id']) : 0;
     $name = isset($data['name']) ? $data['name'] : 'New Dashboard';
     $description = isset($data['description']) ? $data['description'] : '';
-    // TODO: Get actual user ID from session
-    $userId = 1;
+    $userId = Session::loggedInUid();
+    $user = new AdminUser($userId);
+    $companyId = $user->getCompanyId();
 
     if (!$templateId) {
         Utility::ajaxResponseFalse('Template ID required');
@@ -243,7 +244,7 @@ function createFromTemplate($data)
         Utility::ajaxResponseFalse('Template not found');
     }
 
-    $instance = $template->createInstance($userId, $name, $description);
+    $instance = $template->createInstance($userId, $name, $description, $companyId);
     if (!$instance->insert()) {
         Utility::ajaxResponseFalse('Failed to create dashboard');
     }
@@ -263,8 +264,9 @@ function saveDashboard($data)
     $name = isset($data['name']) ? $data['name'] : '';
     $structure = isset($data['structure']) ? $data['structure'] : '';
     $config = isset($data['config']) ? $data['config'] : '{}';
-    // TODO: Get actual user ID from session
-    $userId = 1;
+    $userId = Session::loggedInUid();
+    $user = new AdminUser($userId);
+    $companyId = $user->getCompanyId();
 
     if (empty($name)) {
         Utility::ajaxResponseFalse('Dashboard name is required');
@@ -292,7 +294,7 @@ function saveDashboard($data)
     }
 
     // Check if user owns this dashboard (if editing)
-    if ($dashboardId && $dashboard->getUserId() != $userId) {
+    if ($dashboardId && $dashboard->getCreatedUid() != $userId) {
         Utility::ajaxResponseFalse('Unauthorized');
     }
 
@@ -300,13 +302,13 @@ function saveDashboard($data)
     $dashboard->setDescription(isset($data['description']) ? $data['description'] : '');
     $dashboard->setStructure($structure);
     $dashboard->setConfig($config);
-    $dashboard->setUserId($userId);
 
     if ($dashboardId) {
         $dashboard->setUpdatedUid($userId);
         $success = $dashboard->update();
     } else {
         $dashboard->setCreatedUid($userId);
+        $dashboard->setCompanyId($companyId);
         $success = $dashboard->insert();
     }
 
@@ -356,7 +358,11 @@ function deleteDashboard($data)
         Utility::ajaxResponseFalse('System dashboards cannot be deleted');
     }
 
-    // TODO: Verify user owns this dashboard
+    // Verify user owns this dashboard
+    if ($dashboard->getCreatedUid() != Session::loggedInUid()) {
+        Utility::ajaxResponseFalse('Unauthorized');
+    }
+
     if (!DashboardInstance::delete($dashboardId)) {
         Utility::ajaxResponseFalse('Failed to delete dashboard');
     }
@@ -371,8 +377,7 @@ function updateDashboardName($data)
 {
     $dashboardId = isset($data['id']) ? intval($data['id']) : 0;
     $name = isset($data['name']) ? trim($data['name']) : '';
-    // TODO: Get actual user ID from session
-    $userId = 1;
+    $userId = Session::loggedInUid();
 
     if (!$dashboardId) {
         Utility::ajaxResponseFalse('Invalid dashboard ID');
@@ -388,7 +393,7 @@ function updateDashboardName($data)
     }
 
     // Check if user owns this dashboard
-    if ($dashboard->getUserId() != $userId) {
+    if ($dashboard->getCreatedUid() != $userId) {
         Utility::ajaxResponseFalse('Unauthorized');
     }
 
@@ -413,8 +418,7 @@ function updateDashboardDetails($data)
     $dashboardId = isset($data['id']) ? intval($data['id']) : 0;
     $name = isset($data['name']) ? trim($data['name']) : '';
     $description = isset($data['description']) ? trim($data['description']) : '';
-    // TODO: Get actual user ID from session
-    $userId = 1;
+    $userId = Session::loggedInUid();
 
     if (!$dashboardId) {
         Utility::ajaxResponseFalse('Invalid dashboard ID');
@@ -430,7 +434,7 @@ function updateDashboardDetails($data)
     }
 
     // Check if user owns this dashboard
-    if ($dashboard->getUserId() != $userId) {
+    if ($dashboard->getCreatedUid() != $userId) {
         Utility::ajaxResponseFalse('Unauthorized');
     }
 
@@ -788,8 +792,7 @@ function createTemplate($data)
     $dtcidValue = isset($data['dtcid']) ? $data['dtcid'] : '';
     $newCategoryName = isset($data['new_category_name']) ? trim($data['new_category_name']) : '';
     $newCategoryDescription = isset($data['new_category_description']) ? trim($data['new_category_description']) : '';
-    // TODO: Get actual user ID from session
-    $userId = 1;
+    $userId = Session::loggedInUid();
 
     if (empty($name)) {
         Utility::ajaxResponseFalse('Template name is required');
@@ -880,8 +883,7 @@ function updateTemplate($data)
     $dtcidValue = isset($data['dtcid']) ? $data['dtcid'] : '';
     $newCategoryName = isset($data['new_category_name']) ? trim($data['new_category_name']) : '';
     $newCategoryDescription = isset($data['new_category_description']) ? trim($data['new_category_description']) : '';
-    // TODO: Get actual user ID from session
-    $userId = 1;
+    $userId = Session::loggedInUid();
 
     if (!$templateId) {
         Utility::ajaxResponseFalse('Invalid template ID');
@@ -1007,8 +1009,7 @@ function deleteTemplate($data)
 function duplicateTemplate($data)
 {
     $templateId = isset($data['id']) ? intval($data['id']) : 0;
-    // TODO: Get actual user ID from session
-    $userId = 1;
+    $userId = Session::loggedInUid();
 
     if (!$templateId) {
         Utility::ajaxResponseFalse('Invalid template ID');
@@ -1046,8 +1047,7 @@ function saveTemplateStructure($data)
 {
     $templateId = isset($data['id']) ? intval($data['id']) : 0;
     $structure = isset($data['structure']) ? $data['structure'] : '';
-    // TODO: Get actual user ID from session
-    $userId = 1;
+    $userId = Session::loggedInUid();
 
     if (!$templateId) {
         Utility::ajaxResponseFalse('Invalid template ID');
@@ -1096,8 +1096,7 @@ function removeTemplateSection($data)
 {
     $templateId = isset($data['template_id']) ? intval($data['template_id']) : 0;
     $sectionId = isset($data['section_id']) ? $data['section_id'] : '';
-    // TODO: Get actual user ID from session
-    $userId = 1;
+    $userId = Session::loggedInUid();
 
     if (!$templateId) {
         Utility::ajaxResponseFalse('Invalid template ID');

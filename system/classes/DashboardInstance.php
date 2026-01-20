@@ -14,7 +14,6 @@ class DashboardInstance implements DatabaseObject
     private $structure; // JSON (template + content)
     private $config; // JSON (responsive config)
     private $company_id;
-    private $user_id;
     private $is_system; // System dashboards cannot be deleted
     private $disid;
     private $created_ts;
@@ -74,12 +73,6 @@ class DashboardInstance implements DatabaseObject
             $args['::company_id'] = $this->company_id;
         }
 
-        if ($this->user_id) {
-            $fields[] = 'user_id';
-            $values[] = '::user_id';
-            $args['::user_id'] = $this->user_id;
-        }
-
         if ($this->created_uid) {
             $fields[] = 'created_uid';
             $values[] = '::created_uid';
@@ -134,13 +127,6 @@ class DashboardInstance implements DatabaseObject
             $args['::company_id'] = $this->company_id;
         } else {
             $updates[] = "company_id = NULL";
-        }
-
-        if ($this->user_id) {
-            $updates[] = "user_id = '::user_id'";
-            $args['::user_id'] = $this->user_id;
-        } else {
-            $updates[] = "user_id = NULL";
         }
 
         if ($this->updated_uid) {
@@ -203,8 +189,8 @@ class DashboardInstance implements DatabaseObject
             'structure' => $this->structure,
             'config' => $this->config,
             'company_id' => $this->company_id,
-            'user_id' => $this->user_id,
             'is_system' => $this->is_system,
+            'created_uid' => $this->created_uid,
             'created_ts' => $this->created_ts,
             'updated_ts' => $this->updated_ts
         );
@@ -229,15 +215,15 @@ class DashboardInstance implements DatabaseObject
     }
 
     /**
-     * Get all instances for a user
+     * Get all instances for a user (by created_uid)
      */
     public static function getUserDashboards($userId)
     {
         $db = Rapidkart::getInstance()->getDB();
         $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . "
-                WHERE user_id = '::user_id' AND disid != 3
+                WHERE created_uid = '::created_uid' AND disid != 3
                 ORDER BY updated_ts DESC";
-        $res = $db->query($sql, array('::user_id' => intval($userId)));
+        $res = $db->query($sql, array('::created_uid' => intval($userId)));
 
         $dashboards = array();
         while ($row = $db->fetchObject($res)) {
@@ -372,15 +358,15 @@ class DashboardInstance implements DatabaseObject
     public function getCompanyId() { return $this->company_id; }
     public function setCompanyId($value) { $this->company_id = $value ? intval($value) : NULL; }
 
-    public function getUserId() { return $this->user_id; }
-    public function setUserId($value) { $this->user_id = $value ? intval($value) : NULL; }
-
     public function getIsSystem() { return $this->is_system; }
     public function setIsSystem($value) { $this->is_system = $value ? 1 : 0; }
 
     public function getCreatedTs() { return $this->created_ts; }
     public function getUpdatedTs() { return $this->updated_ts; }
 
+    public function getCreatedUid() { return $this->created_uid; }
     public function setCreatedUid($value) { $this->created_uid = intval($value); }
+
+    public function getUpdatedUid() { return $this->updated_uid; }
     public function setUpdatedUid($value) { $this->updated_uid = intval($value); }
 }

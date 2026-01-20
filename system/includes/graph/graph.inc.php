@@ -190,6 +190,7 @@ function saveGraph($data)
 {
     $graphId = isset($data['id']) ? intval($data['id']) : 0;
     $isUpdate = $graphId > 0;
+    $userId = Session::loggedInUid();
 
     $graph = $isUpdate ? new Graph($graphId) : new Graph();
 
@@ -220,10 +221,12 @@ function saveGraph($data)
     }
 
     if ($isUpdate) {
+        $graph->setUpdatedUid($userId);
         if (!$graph->update()) {
             Utility::ajaxResponseFalse('Failed to update graph');
         }
     } else {
+        $graph->setCreatedUid($userId);
         if (!$graph->insert()) {
             Utility::ajaxResponseFalse('Failed to create graph');
         }
