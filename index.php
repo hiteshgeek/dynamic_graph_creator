@@ -57,20 +57,15 @@ Session::init();
 $url = Utility::parseUrl();
 $page = isset($url[0]) ? $url[0] : 'graph';
 
-// Quick login/logout for testing (uncomment one line at a time, then comment back):
-// Quick login/logout for testing (uncomment one line at a time, then comment back):
-// Login by user ID
-// SimulateLogin::loginById(1);
-// header('Location: .?urlq=graph');
-// exit;
+// Auto-login for development (only if not logged in)
+if (!Session::isLoggedIn()) {
+    SimulateLogin::loginByEmail('admin@agt.com');
+    header('Location: .?urlq=graph');
+    exit;
+}
 
-// Login by email
-SimulateLogin::loginByEmail('admin@agt.com');
-header('Location: .?urlq=graph');
-exit;
-
-// Logout
-// SimulateLogin::logout(); 
+// Manual logout for testing (uncomment when needed):
+// SimulateLogin::logout();
 // header('Location: .?urlq=login'); exit;
 
 // Check if user is logged in (same as live project)
