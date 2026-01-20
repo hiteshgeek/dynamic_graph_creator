@@ -3,6 +3,10 @@
  * Handles both single date and date range pickers with preset ranges
  */
 class DatePickerInit {
+    // Display format for user (DD-MM-YYYY)
+    static DISPLAY_FORMAT = 'DD-MM-YYYY';
+    // Data format for storage/queries (YYYY-MM-DD)
+    static DATA_FORMAT = 'YYYY-MM-DD';
     /**
      * Get the current financial year (April to March for India)
      * @returns {Array} [startDate, endDate] as moment objects
@@ -124,29 +128,41 @@ class DatePickerInit {
      */
     static initSinglePicker($input) {
         const existingValue = $input.val();
-        const startDate = existingValue ? moment(existingValue, 'YYYY-MM-DD') : moment();
+        // Try parsing existing value in both formats
+        let startDate = moment(existingValue, DatePickerInit.DATA_FORMAT, true);
+        if (!startDate.isValid()) {
+            startDate = moment(existingValue, DatePickerInit.DISPLAY_FORMAT, true);
+        }
+        if (!startDate.isValid()) {
+            startDate = moment();
+        }
 
         $input.daterangepicker({
             singleDatePicker: true,
             showDropdowns: true,
-            autoUpdateInput: true,
-            startDate: startDate.isValid() ? startDate : moment(),
+            autoUpdateInput: false,
+            startDate: startDate,
             locale: {
-                format: 'YYYY-MM-DD',
+                format: DatePickerInit.DISPLAY_FORMAT,
                 cancelLabel: 'Clear'
             }
         });
 
         // Set initial display value if exists
-        if (existingValue && moment(existingValue, 'YYYY-MM-DD').isValid()) {
-            $input.val(existingValue);
+        if (existingValue && startDate.isValid()) {
+            $input.val(startDate.format(DatePickerInit.DISPLAY_FORMAT));
+            // Store data format value
+            $input[0].dataset.value = startDate.format(DatePickerInit.DATA_FORMAT);
         } else {
             $input.val(''); // Clear if no initial value
         }
 
         // Handle apply event
         $input.on('apply.daterangepicker', function(ev, picker) {
-            $(this).val(picker.startDate.format('YYYY-MM-DD'));
+            // Display in DD-MM-YYYY format
+            $(this).val(picker.startDate.format(DatePickerInit.DISPLAY_FORMAT));
+            // Store data format (YYYY-MM-DD) for queries
+            this.dataset.value = picker.startDate.format(DatePickerInit.DATA_FORMAT);
             // Trigger change event for other listeners
             this.dispatchEvent(new Event('change', { bubbles: true }));
         });
@@ -154,6 +170,7 @@ class DatePickerInit {
         // Handle cancel/clear event
         $input.on('cancel.daterangepicker', function() {
             $(this).val('');
+            delete this.dataset.value;
             this.dispatchEvent(new Event('change', { bubbles: true }));
         });
     }
@@ -168,7 +185,7 @@ class DatePickerInit {
             startDate: moment().subtract(6, 'days'),
             endDate: moment(),
             locale: {
-                format: 'YYYY-MM-DD',
+                format: DatePickerInit.DISPLAY_FORMAT,
                 separator: ' - ',
                 cancelLabel: 'Clear'
             },
@@ -178,19 +195,21 @@ class DatePickerInit {
 
         // Helper to update display and data attributes
         const updateValue = function($el, picker) {
-            const startDate = picker.startDate.format('YYYY-MM-DD');
-            const endDate = picker.endDate.format('YYYY-MM-DD');
+            const startDateDisplay = picker.startDate.format(DatePickerInit.DISPLAY_FORMAT);
+            const endDateDisplay = picker.endDate.format(DatePickerInit.DISPLAY_FORMAT);
+            const startDateData = picker.startDate.format(DatePickerInit.DATA_FORMAT);
+            const endDateData = picker.endDate.format(DatePickerInit.DATA_FORMAT);
 
-            // Set display value
-            $el.val(startDate + ' - ' + endDate);
+            // Set display value in DD-MM-YYYY format
+            $el.val(startDateDisplay + ' - ' + endDateDisplay);
 
-            // Store individual values as data attributes for FilterUtils
-            $el.data('from', startDate);
-            $el.data('to', endDate);
+            // Store data format values (YYYY-MM-DD) for queries
+            $el.data('from', startDateData);
+            $el.data('to', endDateData);
 
             // Also store in dataset for vanilla JS access
-            $el[0].dataset.from = startDate;
-            $el[0].dataset.to = endDate;
+            $el[0].dataset.from = startDateData;
+            $el[0].dataset.to = endDateData;
         };
 
         // Update preview as user selects dates (live preview)
@@ -224,7 +243,7 @@ class DatePickerInit {
             startDate: moment().subtract(6, 'days'),
             endDate: moment(),
             locale: {
-                format: 'YYYY-MM-DD',
+                format: DatePickerInit.DISPLAY_FORMAT,
                 separator: ' - ',
                 cancelLabel: 'Clear'
             },
@@ -234,19 +253,21 @@ class DatePickerInit {
 
         // Helper to update display and data attributes
         const updateValue = function($el, picker) {
-            const startDate = picker.startDate.format('YYYY-MM-DD');
-            const endDate = picker.endDate.format('YYYY-MM-DD');
+            const startDateDisplay = picker.startDate.format(DatePickerInit.DISPLAY_FORMAT);
+            const endDateDisplay = picker.endDate.format(DatePickerInit.DISPLAY_FORMAT);
+            const startDateData = picker.startDate.format(DatePickerInit.DATA_FORMAT);
+            const endDateData = picker.endDate.format(DatePickerInit.DATA_FORMAT);
 
-            // Set display value
-            $el.val(startDate + ' - ' + endDate);
+            // Set display value in DD-MM-YYYY format
+            $el.val(startDateDisplay + ' - ' + endDateDisplay);
 
-            // Store individual values as data attributes for FilterUtils
-            $el.data('from', startDate);
-            $el.data('to', endDate);
+            // Store data format values (YYYY-MM-DD) for queries
+            $el.data('from', startDateData);
+            $el.data('to', endDateData);
 
             // Also store in dataset for vanilla JS access
-            $el[0].dataset.from = startDate;
-            $el[0].dataset.to = endDate;
+            $el[0].dataset.from = startDateData;
+            $el[0].dataset.to = endDateData;
         };
 
         // Update preview as user selects dates (live preview)
@@ -268,7 +289,7 @@ class DatePickerInit {
     }
 
     /**
-     * Get the date values from a picker input
+     * Get the date values from a picker input (returns YYYY-MM-DD format for queries)
      * @param {HTMLInputElement} input - The picker input element
      * @returns {Object|null} Object with date value(s) or null
      */
@@ -276,9 +297,11 @@ class DatePickerInit {
         const pickerType = input.dataset.pickerType || 'single';
 
         if (pickerType === 'single') {
-            const value = input.value;
+            // Return stored data format value (YYYY-MM-DD)
+            const value = input.dataset.value;
             return value ? { value: value } : null;
         } else {
+            // Return stored data format values (YYYY-MM-DD)
             const from = input.dataset.from;
             const to = input.dataset.to;
 

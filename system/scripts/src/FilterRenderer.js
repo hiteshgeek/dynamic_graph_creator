@@ -327,6 +327,9 @@ class FilterRenderer {
      * Fallback date picker initialization
      */
     static initDatePickersFallback(container) {
+        const DISPLAY_FORMAT = 'DD-MM-YYYY';
+        const DATA_FORMAT = 'YYYY-MM-DD';
+
         const pickers = container.querySelectorAll('.dgc-datepicker');
         pickers.forEach(input => {
             if (input.dataset.daterangepickerInit === 'true') return;
@@ -343,11 +346,12 @@ class FilterRenderer {
                     singleDatePicker: true,
                     showDropdowns: true,
                     autoUpdateInput: false,
-                    locale: { format: 'YYYY-MM-DD', cancelLabel: 'Clear' }
+                    locale: { format: DISPLAY_FORMAT, cancelLabel: 'Clear' }
                 });
 
                 $input.on('apply.daterangepicker', function(ev, picker) {
-                    $(this).val(picker.startDate.format('YYYY-MM-DD'));
+                    $(this).val(picker.startDate.format(DISPLAY_FORMAT));
+                    this.dataset.value = picker.startDate.format(DATA_FORMAT);
                     this.dispatchEvent(new Event('change', { bubbles: true }));
                 });
             } else {
@@ -356,7 +360,7 @@ class FilterRenderer {
                     autoUpdateInput: false,
                     startDate: moment().subtract(6, 'days'),
                     endDate: moment(),
-                    locale: { format: 'YYYY-MM-DD', separator: ' - ', cancelLabel: 'Clear' },
+                    locale: { format: DISPLAY_FORMAT, separator: ' - ', cancelLabel: 'Clear' },
                     alwaysShowCalendars: true,
                     opens: 'left'
                 };
@@ -376,17 +380,20 @@ class FilterRenderer {
                 $input.daterangepicker(options);
 
                 $input.on('apply.daterangepicker', function(ev, picker) {
-                    const startDate = picker.startDate.format('YYYY-MM-DD');
-                    const endDate = picker.endDate.format('YYYY-MM-DD');
-                    $(this).val(startDate + ' - ' + endDate);
-                    this.dataset.from = startDate;
-                    this.dataset.to = endDate;
+                    const startDateDisplay = picker.startDate.format(DISPLAY_FORMAT);
+                    const endDateDisplay = picker.endDate.format(DISPLAY_FORMAT);
+                    const startDateData = picker.startDate.format(DATA_FORMAT);
+                    const endDateData = picker.endDate.format(DATA_FORMAT);
+                    $(this).val(startDateDisplay + ' - ' + endDateDisplay);
+                    this.dataset.from = startDateData;
+                    this.dataset.to = endDateData;
                     this.dispatchEvent(new Event('change', { bubbles: true }));
                 });
             }
 
             $input.on('cancel.daterangepicker', function() {
                 $(this).val('');
+                delete this.dataset.value;
                 delete this.dataset.from;
                 delete this.dataset.to;
                 this.dispatchEvent(new Event('change', { bubbles: true }));
