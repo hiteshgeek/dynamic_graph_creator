@@ -212,6 +212,13 @@ function saveGraph($data)
         $graph->setDataMapping(json_encode($mapping));
     }
 
+    $placeholderSettings = isset($data['placeholder_settings']) ? $data['placeholder_settings'] : '{}';
+    if (is_string($placeholderSettings)) {
+        $graph->setPlaceholderSettings($placeholderSettings);
+    } else {
+        $graph->setPlaceholderSettings(json_encode($placeholderSettings));
+    }
+
     if ($isUpdate) {
         if (!$graph->update()) {
             Utility::ajaxResponseFalse('Failed to update graph');

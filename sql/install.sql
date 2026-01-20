@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS graph (
     config TEXT NOT NULL,
     query TEXT NOT NULL,
     data_mapping TEXT NOT NULL,
+    placeholder_settings TEXT COMMENT 'JSON settings for placeholder behavior (allowEmpty per placeholder)',
     gsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=active, 3=deleted',
     created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_ts TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,

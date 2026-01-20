@@ -1301,15 +1301,27 @@ export default class GraphCreator {
                         this.setActiveSidebarTab(config.activeSidebarTab);
                     }
 
-                    // Restore placeholder settings
-                    if (this.placeholderSettings && config.placeholderSettings) {
-                        this.placeholderSettings.setSettings(config.placeholderSettings);
-                    }
-
                     // Set config panel values
                     if (this.configPanel) {
                         this.configPanel.setConfig(config);
                     }
+                }
+
+                // Restore placeholder settings (from separate field, or fallback to config for backwards compatibility)
+                if (this.placeholderSettings) {
+                    let placeholderSettings = {};
+                    if (graph.placeholder_settings) {
+                        placeholderSettings = typeof graph.placeholder_settings === 'string'
+                            ? JSON.parse(graph.placeholder_settings)
+                            : graph.placeholder_settings;
+                    } else if (graph.config) {
+                        // Fallback for old graphs that stored it in config
+                        const config = typeof graph.config === 'string' ? JSON.parse(graph.config) : graph.config;
+                        if (config.placeholderSettings) {
+                            placeholderSettings = config.placeholderSettings;
+                        }
+                    }
+                    this.placeholderSettings.setSettings(placeholderSettings);
                 }
 
                 // Set filters first (they may be needed for query testing)
@@ -1381,10 +1393,12 @@ export default class GraphCreator {
         Loading.show('Saving graph...');
 
         try {
-            // Include activeSidebarTab and placeholderSettings in config
+            // Include activeSidebarTab in config
             const config = this.configPanel ? this.configPanel.getConfig() : {};
             config.activeSidebarTab = this.activeSidebarTab;
-            config.placeholderSettings = this.placeholderSettings ? this.placeholderSettings.getSettings() : {};
+
+            // Get placeholder settings separately for saving to database
+            const placeholderSettings = this.placeholderSettings ? this.placeholderSettings.getSettings() : {};
 
             const data = {
                 id: this.graphId,
@@ -1394,6 +1408,7 @@ export default class GraphCreator {
                 query: query,
                 data_mapping: mapping,
                 config: config,
+                placeholder_settings: placeholderSettings,
                 filters: this.filterManager ? this.filterManager.getFilters() : []
             };
 

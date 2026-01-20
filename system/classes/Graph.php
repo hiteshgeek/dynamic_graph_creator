@@ -14,6 +14,7 @@ class Graph implements DatabaseObject
     private $config;
     private $query;
     private $data_mapping;
+    private $placeholder_settings;
     private $gsid;
     private $created_ts;
     private $updated_ts;
@@ -49,9 +50,9 @@ class Graph implements DatabaseObject
 
         $db = Rapidkart::getInstance()->getDB();
         $sql = "INSERT INTO " . SystemTables::DB_TBL_GRAPH . " (
-            name, description, graph_type, config, query, data_mapping, created_uid
+            name, description, graph_type, config, query, data_mapping, placeholder_settings, created_uid
         ) VALUES (
-            '::name', '::description', '::graph_type', '::config', '::query', '::data_mapping', '::created_uid'
+            '::name', '::description', '::graph_type', '::config', '::query', '::data_mapping', '::placeholder_settings', '::created_uid'
         )";
 
         $args = array(
@@ -61,6 +62,7 @@ class Graph implements DatabaseObject
             '::config' => $this->config ? $this->config : '{}',
             '::query' => $this->query,
             '::data_mapping' => $this->data_mapping ? $this->data_mapping : '{}',
+            '::placeholder_settings' => $this->placeholder_settings ? $this->placeholder_settings : '{}',
             '::created_uid' => $this->created_uid ? $this->created_uid : 0
         );
 
@@ -83,6 +85,7 @@ class Graph implements DatabaseObject
             config = '::config',
             query = '::query',
             data_mapping = '::data_mapping',
+            placeholder_settings = '::placeholder_settings',
             updated_uid = '::updated_uid'
         WHERE gid = '::gid'";
 
@@ -93,6 +96,7 @@ class Graph implements DatabaseObject
             '::config' => $this->config ? $this->config : '{}',
             '::query' => $this->query,
             '::data_mapping' => $this->data_mapping ? $this->data_mapping : '{}',
+            '::placeholder_settings' => $this->placeholder_settings ? $this->placeholder_settings : '{}',
             '::updated_uid' => $this->updated_uid ? $this->updated_uid : 0,
             '::gid' => $this->gid
         );
@@ -151,6 +155,7 @@ class Graph implements DatabaseObject
             'config' => $this->config,
             'query' => $this->query,
             'data_mapping' => $this->data_mapping,
+            'placeholder_settings' => $this->placeholder_settings,
             'created_ts' => $this->created_ts,
             'updated_ts' => $this->updated_ts
         );
@@ -166,7 +171,13 @@ class Graph implements DatabaseObject
         $filterSet = new DataFilterSet('graph', $this->gid);
         $filterSet->loadFilters();
 
-        $query = $filterSet->applyToQuery($this->query, $filter_values);
+        // Get placeholder settings saved with the graph
+        $placeholderSettings = $this->placeholder_settings ? json_decode($this->placeholder_settings, true) : array();
+        if (!is_array($placeholderSettings)) {
+            $placeholderSettings = array();
+        }
+
+        $query = $filterSet->applyToQuery($this->query, $filter_values, $placeholderSettings);
         $res = $db->query($query);
 
         if (!$res) {
@@ -233,6 +244,9 @@ class Graph implements DatabaseObject
 
     public function getDataMapping() { return $this->data_mapping; }
     public function setDataMapping($value) { $this->data_mapping = is_string($value) ? $value : json_encode($value); }
+
+    public function getPlaceholderSettings() { return $this->placeholder_settings; }
+    public function setPlaceholderSettings($value) { $this->placeholder_settings = is_string($value) ? $value : json_encode($value); }
 
     public function getCreatedTs() { return $this->created_ts; }
     public function getUpdatedTs() { return $this->updated_ts; }

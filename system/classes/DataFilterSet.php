@@ -108,9 +108,10 @@ class DataFilterSet
      *
      * @param string $query SQL query with placeholders
      * @param array $filter_values Values from user input (key => value)
+     * @param array $savedPlaceholderSettings Optional settings saved with the graph (overrides filter defaults)
      * @return string Query with placeholders replaced
      */
-    public function applyToQuery($query, $filter_values = array())
+    public function applyToQuery($query, $filter_values = array(), $savedPlaceholderSettings = array())
     {
         // Merge filter values with default values from filter definitions
         $mergedValues = array();
@@ -146,17 +147,36 @@ class DataFilterSet
             }
         }
 
-        // Build placeholder settings based on filter required flag
+        // Build placeholder settings - use saved settings if provided, otherwise use filter required flag
         $placeholderSettings = array();
         foreach ($this->filters as $key => $filter) {
-            $placeholderSettings[$key] = array(
-                'allowEmpty' => !$filter->getIsRequired()
-            );
+            // Check if saved settings exist for this placeholder
+            if (isset($savedPlaceholderSettings[$key])) {
+                $placeholderSettings[$key] = $savedPlaceholderSettings[$key];
+            } else {
+                // Fall back to filter's required flag
+                $placeholderSettings[$key] = array(
+                    'allowEmpty' => !$filter->getIsRequired()
+                );
+            }
+
             // For date range filters, also set settings for _from and _to variants
             $filterType = $filter->getFilterType();
             if ($filterType === 'date_range' || $filterType === 'main_datepicker') {
-                $placeholderSettings[$key . '_from'] = array('allowEmpty' => !$filter->getIsRequired());
-                $placeholderSettings[$key . '_to'] = array('allowEmpty' => !$filter->getIsRequired());
+                $fromKey = $key . '_from';
+                $toKey = $key . '_to';
+
+                if (isset($savedPlaceholderSettings[$fromKey])) {
+                    $placeholderSettings[$fromKey] = $savedPlaceholderSettings[$fromKey];
+                } else {
+                    $placeholderSettings[$fromKey] = $placeholderSettings[$key];
+                }
+
+                if (isset($savedPlaceholderSettings[$toKey])) {
+                    $placeholderSettings[$toKey] = $savedPlaceholderSettings[$toKey];
+                } else {
+                    $placeholderSettings[$toKey] = $placeholderSettings[$key];
+                }
             }
         }
 
