@@ -251,15 +251,19 @@ function testDataFilterQuery($data)
     $options = array();
     $columns = array();
 
+    $rows = array();
     while ($row = $db->fetchAssocArray($res)) {
         if (empty($columns)) {
             $columns = array_keys($row);
         }
+        // Store full row data for display
+        $rows[] = $row;
+
+        // Extract value/label/is_selected for filter preview
         $option = array(
             'value' => isset($row['value']) ? $row['value'] : '',
             'label' => isset($row['label']) ? $row['label'] : (isset($row['value']) ? $row['value'] : '')
         );
-        // Include is_selected if present
         if (isset($row['is_selected'])) {
             $isSelected = $row['is_selected'];
             $option['is_selected'] = ($isSelected === 1 || $isSelected === '1' || $isSelected === true || $isSelected === 'true' || $isSelected === 'yes');
@@ -288,6 +292,7 @@ function testDataFilterQuery($data)
 
     Utility::ajaxResponseTrue('Query is valid', array(
         'columns' => $columns,
+        'rows' => $rows,
         'options' => $options,
         'count' => count($options),
         'totalCount' => $totalCount,

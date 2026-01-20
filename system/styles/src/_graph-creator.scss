@@ -1202,7 +1202,8 @@
 
 .filter-multiselect-options {
   width: 100%;
-  padding: $spacing-xs 0;
+  // padding: $spacing-xs 0;
+  padding: 0;
   background: var(--dgc-bg-card);
   border: 1px solid var(--dgc-border-color);
   box-shadow: var(--dgc-shadow-2);

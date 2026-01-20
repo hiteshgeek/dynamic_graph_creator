@@ -196,7 +196,7 @@
 // Query test results (shared styling)
 .query-test-result {
   margin-top: $spacing-md;
-  padding: $spacing-md;
+  padding: $spacing-md $spacing-md $spacing-sm $spacing-md;
   border-radius: $border-radius;
   font-size: $font-size-sm;
 
@@ -263,7 +263,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: $spacing-sm 0;
+  padding-top: $spacing-sm;
   margin-top: $spacing-sm;
   border-top: 1px solid var(--dgc-border-color);
 
@@ -280,8 +280,14 @@
   gap: $spacing-sm;
 
   .query-page-btn {
-    padding: 2px 8px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
     font-size: 12px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 
     &:disabled {
       opacity: 0.5;

@@ -506,19 +506,32 @@ export default class DataFilterFormPage {
 
                     if (options.length > 0) {
                         const hasIsSelected = result.data.hasIsSelected || false;
+                        const columns = result.data.columns || ['value', 'label'];
+                        const rows = result.data.rows || [];
 
                         html += `
                             <div class="query-sample-data">
                                 <div class="query-result-table-wrapper">
                                     <table class="query-result-table" id="query-result-table">
                                         <thead>
-                                            <tr><th>Value</th><th>Label</th>${hasIsSelected ? '<th>Selected</th>' : ''}</tr>
+                                            <tr>${columns.map(col => `<th>${this.escapeHtml(col)}</th>`).join('')}</tr>
                                         </thead>
                                         <tbody id="query-result-tbody">
                         `;
-                        options.forEach(opt => {
-                            const selectedIcon = opt.is_selected ? '<i class="fas fa-check text-success"></i>' : '-';
-                            html += `<tr><td>${this.escapeHtml(opt.value) || '-'}</td><td>${this.escapeHtml(opt.label) || '-'}</td>${hasIsSelected ? `<td>${selectedIcon}</td>` : ''}</tr>`;
+                        rows.forEach(row => {
+                            html += '<tr>';
+                            columns.forEach(col => {
+                                let cellValue = row[col];
+                                // Special handling for is_selected column
+                                if (col === 'is_selected') {
+                                    const isSelected = cellValue === 1 || cellValue === '1' || cellValue === true;
+                                    cellValue = isSelected ? '<i class="fas fa-check text-success"></i>' : '-';
+                                    html += `<td>${cellValue}</td>`;
+                                } else {
+                                    html += `<td>${this.escapeHtml(String(cellValue ?? '')) || '-'}</td>`;
+                                }
+                            });
+                            html += '</tr>';
                         });
                         html += '</tbody></table></div>';
 
