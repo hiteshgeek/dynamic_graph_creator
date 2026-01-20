@@ -8,23 +8,25 @@
 
 // Poppins font is loaded via Google Fonts in html.tpl.php
 
-.navbar.navbar-inverse.navbar-fixed-top,
-#sidebar {
-  display: none !important;
-}
+.dgc-app {
+  .navbar.navbar-inverse.navbar-fixed-top,
+  #sidebar {
+    display: none !important;
+  }
 
-#main-content > .row {
-  margin: 0;
-}
+  #main-content > .row {
+    margin: 0;
+  }
 
-// Global textarea - disable resize handle (autosize handles it)
-textarea {
-  resize: none;
-}
+  // Global textarea - disable resize handle (autosize handles it)
+  textarea {
+    resize: none;
+  }
 
-// Add padding for fixed header
-body {
-  padding-top: 60px;
+  // Add padding for fixed header
+  body {
+    padding-top: 60px;
+  }
 }
 
 // Consistent spacing after page-header for all page content
