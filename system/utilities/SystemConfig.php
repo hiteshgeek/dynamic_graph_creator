@@ -303,4 +303,14 @@ class SystemConfig
     {
         return SystemConfig::baseUrl() . "services/";
     }
+
+    public static function distPath()
+    {
+        return SystemConfig::basePath() . "dist/";
+    }
+
+    public static function distUrl()
+    {
+        return SystemConfig::baseUrl() . "dist/";
+    }
 }

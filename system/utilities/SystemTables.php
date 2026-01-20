@@ -15,6 +15,9 @@ class SystemTables
       // FROM LIVE PROJECT - Tables used by login/session classes
       // =========================================================================
 
+      public static $inventory_set = "inventory_set";
+      public static $inventory_set_closed_stock_log = "inventory_set_closed_stock_log";
+
       /**
        * 
        */
