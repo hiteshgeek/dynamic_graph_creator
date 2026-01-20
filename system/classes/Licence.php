@@ -17,6 +17,7 @@
         private $licid, $name, $licence_number, $licsid, $start_date, $created_uid, $updated_uid, $created_ts, $updated_ts, $ssl_status, $customer_id, $printid, $prsegid, $custom_data, $gst_api;
         private $if_customized, $customization_box, $logo;
         private $users, $deferred_users, $floating_users;
+        private $user_count, $deferred_count, $floating_user_count;
 
         public function __toString()
         {

@@ -55,6 +55,15 @@
         private $hard_limit_cron_date;
         private $soft_limit;
         private $hard_limit;
+        private $non_login;
+        private $genderid;
+        private $nasid;
+        private $massid;
+        private $locked;
+        private $is_multipler;
+        private $ausid;
+        private $status_date;
+        private $status_updated_ts;
 
         /**
          * External

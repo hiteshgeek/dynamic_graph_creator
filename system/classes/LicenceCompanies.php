@@ -17,6 +17,9 @@
         private $liccoid, $name, $created_uid, $created_ts, $licid, $start_date;
         private $lock_date;
         private $gstr_date;
+        private $liccosid;
+        private $is_ecom;
+        private $is_architect;
 
         //put your code here
         public function __toString()
