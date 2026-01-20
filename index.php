@@ -31,13 +31,49 @@ require_once __DIR__ . '/system/classes/DashboardTemplate.php';
 require_once __DIR__ . '/system/classes/DashboardInstance.php';
 require_once __DIR__ . '/system/classes/DashboardBuilder.php';
 
+// Load session and authentication classes
+require_once __DIR__ . '/system/classes/AdminUser.php';
+require_once __DIR__ . '/system/classes/AdminUserManager.php';
+require_once __DIR__ . '/system/classes/Session.php';
+require_once __DIR__ . '/system/classes/SessionsManager.php';
+require_once __DIR__ . '/system/classes/SessionDetails.php';
+require_once __DIR__ . '/system/classes/Licence.php';
+require_once __DIR__ . '/system/classes/LicenceCompanies.php';
+require_once __DIR__ . '/system/classes/LicenceManager.php';
+require_once __DIR__ . '/system/classes/LicenceDomain.php';
+
 // Load Rapidkart stub classes (only defines classes if they don't exist)
 // These provide test data for company/outlet filters in DGC dev environment
 require_once __DIR__ . '/system/classes/RapidkartStubs.php';
 
+// Initialize session
+Session::init();
+
 // Parse URL
 $url = Utility::parseUrl();
 $page = isset($url[0]) ? $url[0] : 'graph';
+
+// Quick login/logout for testing (uncomment one line at a time, then comment back):
+// Session::loginUser(new AdminUser(1)); header('Location: .?urlq=graph'); exit; // Login as user ID 1
+// Session::logoutUser(); header('Location: .?urlq=login'); exit; // Logout
+
+// Check if user is logged in (same as live project)
+// Allow 'login' page without authentication
+if (!Session::isLoggedIn(true)) {
+    if ($page === 'login') {
+        // Handle login page - will be created later or redirect to main system login
+        require_once SystemConfig::includesPath() . 'login/login.inc.php';
+        exit;
+    } else {
+        // Not logged in and trying to access secure page
+        // For now, show a simple message. In live, this would redirect to login page.
+        header('HTTP/1.1 401 Unauthorized');
+        echo '<h1>Access Denied</h1>';
+        echo '<p>You must be logged in to access this page.</p>';
+        echo '<p>Use <code>simulate_login.php</code> to login for testing, or access via the main Rapidkart system.</p>';
+        exit;
+    }
+}
 
 // Load common assets for all DGC pages
 $theme = Rapidkart::getInstance()->getThemeRegistry();
