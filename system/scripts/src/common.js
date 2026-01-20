@@ -22,8 +22,15 @@ window.Toast = {
         toast.classList.add('exiting');
         setTimeout(() => toast.remove(), 300);
     },
+    dismissAll() {
+        if (!this.container) return;
+        const toasts = this.container.querySelectorAll('.dgc-toast');
+        toasts.forEach(toast => toast.remove());
+    },
     show(message, type = 'success', duration = 3000) {
         if (!this.container) this.init();
+        // Dismiss any existing toasts before showing new one
+        this.dismissAll();
         const toast = document.createElement('div');
         toast.className = `dgc-toast ${type}`;
         const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
