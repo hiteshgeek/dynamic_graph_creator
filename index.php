@@ -14,6 +14,7 @@ require_once __DIR__ . '/system/utilities/SystemConfig.php';
 require_once __DIR__ . '/system/utilities/SiteConfig.php';
 require_once __DIR__ . '/system/config/BaseConfig.php';
 require_once __DIR__ . '/system/utilities/SystemTables.php';
+require_once __DIR__ . '/system/utilities/SystemTablesStatus.php';
 require_once __DIR__ . '/system/interfaces/DatabaseObject.php';
 require_once __DIR__ . '/system/interfaces/User.php';
 require_once __DIR__ . '/system/interfaces/UniqueIdentifier.php';
@@ -57,9 +58,20 @@ $url = Utility::parseUrl();
 $page = isset($url[0]) ? $url[0] : 'graph';
 
 // Quick login/logout for testing (uncomment one line at a time, then comment back):
-// SimulateLogin::loginById(1); header('Location: .?urlq=graph'); exit; // Login by user ID
-// SimulateLogin::loginByEmail('your@email.com'); header('Location: .?urlq=graph'); exit; // Login by email
-// SimulateLogin::logout(); header('Location: .?urlq=login'); exit; // Logout
+// Quick login/logout for testing (uncomment one line at a time, then comment back):
+// Login by user ID
+// SimulateLogin::loginById(1);
+// header('Location: .?urlq=graph');
+// exit;
+
+// Login by email
+SimulateLogin::loginByEmail('admin@agt.com');
+header('Location: .?urlq=graph');
+exit;
+
+// Logout
+// SimulateLogin::logout(); 
+// header('Location: .?urlq=login'); exit;
 
 // Check if user is logged in (same as live project)
 // Allow 'login' page without authentication
