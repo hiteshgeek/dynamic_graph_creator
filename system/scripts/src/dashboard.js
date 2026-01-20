@@ -292,34 +292,39 @@ class DashboardBuilder {
     const modalElement = document.getElementById("template-modal");
     if (!modalElement) return;
 
-    const nameInputWrapper = modalElement.querySelector(
-      ".dashboard-name-input",
-    );
+    const nameInputWrapper = modalElement.querySelector(".dashboard-name-input");
+    const descriptionInputWrapper = modalElement.querySelector(".dashboard-description-input");
     const nameInput = document.getElementById("new-dashboard-name");
+    const descriptionInput = document.getElementById("new-dashboard-description");
     const modalTitle = modalElement.querySelector(".modal-title");
-    const hrDivider = modalElement.querySelector(".modal-body > hr");
+    const hrDivider = modalElement.querySelector(".dashboard-form-divider");
 
     // Check if dashboard already exists
     const isAddingSection = this.dashboardId !== null;
 
     if (isAddingSection) {
-      // Dashboard exists - hide name input and update title
-      if (nameInputWrapper) nameInputWrapper.style.display = "none";
-      if (hrDivider) hrDivider.style.display = "none";
+      // Dashboard exists - hide name/description inputs and update title
+      if (nameInputWrapper) nameInputWrapper.classList.add("d-none");
+      if (descriptionInputWrapper) descriptionInputWrapper.classList.add("d-none");
+      if (hrDivider) hrDivider.classList.add("d-none");
       if (modalTitle) modalTitle.textContent = "Add Section";
 
       // Set mode to add-section
       this.templateSelectorMode = "add-section";
     } else {
-      // New dashboard - show name input
-      if (nameInputWrapper) nameInputWrapper.style.display = "block";
-      if (hrDivider) hrDivider.style.display = "block";
+      // New dashboard - show name/description inputs
+      if (nameInputWrapper) nameInputWrapper.classList.remove("d-none");
+      if (descriptionInputWrapper) descriptionInputWrapper.classList.remove("d-none");
+      if (hrDivider) hrDivider.classList.remove("d-none");
       if (modalTitle) modalTitle.textContent = "Create New Dashboard";
 
-      // Clear input and validation state
+      // Clear inputs and validation state
       if (nameInput) {
         nameInput.value = "";
         nameInput.classList.remove("is-invalid");
+      }
+      if (descriptionInput) {
+        descriptionInput.value = "";
       }
 
       // Set mode to create-dashboard

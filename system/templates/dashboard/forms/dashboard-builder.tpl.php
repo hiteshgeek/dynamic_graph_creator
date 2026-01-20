@@ -66,11 +66,11 @@ echo DGCHelper::renderPageHeader([
                     <input type="text" class="form-control" id="new-dashboard-name" placeholder="Enter dashboard name" required>
                     <div class="invalid-feedback">Please enter a dashboard name</div>
                 </div>
-                <div class="mb-4">
+                <div class="dashboard-description-input mb-4">
                     <label for="new-dashboard-description" class="form-label">Description</label>
                     <textarea class="form-control" id="new-dashboard-description" rows="1" placeholder="Enter dashboard description (optional)"></textarea>
                 </div>
-                <hr class="mb-4">
+                <hr class="dashboard-form-divider mb-4">
                 <div id="template-list">
                     <div class="loader">
                         <div class="spinner"></div>
