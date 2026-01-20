@@ -43,6 +43,7 @@ require_once __DIR__ . '/system/classes/Licence.php';
 require_once __DIR__ . '/system/classes/LicenceCompanies.php';
 require_once __DIR__ . '/system/classes/LicenceManager.php';
 require_once __DIR__ . '/system/classes/LicenceDomain.php';
+require_once __DIR__ . '/system/classes/SimulateLogin.php';
 
 // Initialize session
 Session::init();
@@ -52,7 +53,8 @@ $url = Utility::parseUrl();
 $page = isset($url[0]) ? $url[0] : 'graph';
 
 // Quick login/logout for testing (uncomment one line at a time, then comment back):
-// Session::loginUser(new AdminUser(1)); header('Location: .?urlq=graph'); exit; // Login as user ID 1
+// Session::loginUser(new AdminUser(1)); header('Location: .?urlq=graph'); exit; // Login by user ID
+// Session::loginUser(new AdminUser(SimulateLogin::getUserIdByEmail('your@email.com'))); header('Location: .?urlq=graph'); exit; // Login by email
 // Session::logoutUser(); header('Location: .?urlq=login'); exit; // Logout
 
 // Check if user is logged in (same as live project)

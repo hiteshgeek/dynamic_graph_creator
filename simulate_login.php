@@ -139,6 +139,60 @@ function getLoggedInUser()
     return null;
 }
 
+/**
+ * Get user ID by email address
+ *
+ * @param string $email User email
+ * @return int|false User ID or false if not found
+ */
+function getUserIdByEmail($email)
+{
+    $db = Rapidkart::getInstance()->getDB();
+    $sql = "SELECT uid FROM " . SystemTables::DB_TBL_USER . " WHERE email = '::email' AND (ustatusid NOT IN (2,3) OR ustatusid IS NULL) LIMIT 1";
+    $res = $db->query($sql, ['::email' => $email]);
+
+    if ($res && $db->resultNumRows($res) > 0) {
+        $row = $db->fetchObject($res);
+        return (int) $row->uid;
+    }
+    return false;
+}
+
+/**
+ * Login directly by email (no password required - for development only)
+ *
+ * @param string $email User email
+ * @return array ['success' => bool, 'message' => string, 'user_id' => int|null]
+ */
+function loginByEmail($email)
+{
+    $uid = getUserIdByEmail($email);
+
+    if ($uid === false) {
+        return [
+            'success' => false,
+            'message' => 'User not found with email: ' . $email,
+            'user_id' => null
+        ];
+    }
+
+    $admin_user = new AdminUser($uid);
+
+    // Set company and licence IDs
+    BaseConfig::$company_id = $admin_user->getCompanyId();
+    $licence_company = new LicenceCompanies($admin_user->getCompanyId());
+    BaseConfig::$licence_id = $licence_company->getLicid();
+
+    // Login user
+    Session::loginUser($admin_user);
+
+    return [
+        'success' => true,
+        'message' => 'Logged in as: ' . $admin_user->getName(),
+        'user_id' => $uid
+    ];
+}
+
 
 // ============================================================================
 // EXAMPLE USAGE (uncomment to test)
