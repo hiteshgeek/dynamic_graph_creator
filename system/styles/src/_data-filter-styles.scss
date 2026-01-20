@@ -7,6 +7,12 @@
 .filter-list-page {
   // Padding handled by body > .container rule in _common.scss
 
+  // Ensure all card titles are bold and black (consistent styling)
+  .item-card h3 {
+    font-weight: 600;
+    color: var(--dgc-text-primary) !important;
+  }
+
   // Filter-specific styles for item cards
   .filter-key {
     margin-bottom: 0.5rem;
@@ -898,6 +904,35 @@
   }
 }
 
+// Filter key hints styling
+.filter-key-hints {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+}
+
+.filter-key-hint {
+  font-size: $font-size-sm;
+  color: var(--dgc-text-secondary);
+  line-height: 1.5;
+
+  &.highlighted {
+    display: inline-block;
+    padding: $spacing-xs $spacing-sm;
+    background: rgba($primary, 0.08);
+    border-radius: $border-radius;
+    border: 1px solid rgba($primary, 0.2);
+  }
+
+  code {
+    font-family: inherit;
+    font-size: inherit;
+    color: var(--dgc-primary);
+    background: none;
+    padding: 0;
+  }
+}
+
 // Data Filter Form layout with sidebar
 .data-filter-form-layout {
   display: flex;
@@ -997,8 +1032,8 @@
     background: rgba($primary, 0.1);
 
     .filter-nav-name {
-      color: $primary;
-      font-weight: $font-weight-medium;
+      color: var(--dgc-text-primary);
+      font-weight: 600;
     }
   }
 
@@ -1060,6 +1095,7 @@
 
   .filter-nav-name {
     font-size: $font-size-sm;
+    font-weight: 600;
     color: var(--dgc-text-primary);
     white-space: nowrap;
     overflow: hidden;
@@ -1232,7 +1268,7 @@
 
     input {
       width: 100%;
-      padding: 6px 10px 6px 32px;
+      padding: 6px 10px 6px 28px;
       font-size: 0.8rem;
       border: 1px solid var(--dgc-border-color);
       border-radius: $border-radius;
@@ -1242,6 +1278,7 @@
 
       &::placeholder {
         color: var(--dgc-text-hint);
+        font-size: 0.75rem;
       }
 
       &:focus {
@@ -1253,11 +1290,11 @@
 
     i {
       position: absolute;
-      left: 10px;
+      right: 8px;
       top: 50%;
       transform: translateY(-50%);
       color: var(--dgc-text-hint);
-      font-size: 0.8rem;
+      font-size: 0.7rem;
       pointer-events: none;
     }
   }

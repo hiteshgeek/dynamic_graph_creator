@@ -746,16 +746,25 @@ export default class DataFilterFormPage {
             return;
         }
 
-        // Check if query data source is selected but query hasn't been tested successfully
-        if (this.typesWithOptions.includes(filterType) && dataSource === 'query') {
-            const query = this.queryEditor ? this.queryEditor.getValue() : document.getElementById('data-query')?.value;
-            if (!query || !query.trim()) {
-                Toast.error('Please enter a SQL query');
-                return;
-            }
-            if (!this.queryTestPassed) {
-                Toast.error('Please test the query successfully before saving');
-                return;
+        // Validate data source for filter types that require options
+        if (this.typesWithOptions.includes(filterType)) {
+            if (dataSource === 'query') {
+                // Query data source - must be tested successfully
+                const query = this.queryEditor ? this.queryEditor.getValue() : document.getElementById('data-query')?.value;
+                if (!query || !query.trim()) {
+                    Toast.error('Please enter a SQL query');
+                    return;
+                }
+                if (!this.queryTestPassed) {
+                    Toast.error('Please test the query successfully before saving');
+                    return;
+                }
+            } else if (dataSource === 'static') {
+                // Static data source - at least one option is required
+                if (!this.hasStaticOptions()) {
+                    Toast.error('Please add at least one option for static data source');
+                    return;
+                }
             }
         }
 
@@ -1207,6 +1216,12 @@ export default class DataFilterFormPage {
         const statusContainer = document.querySelector('.page-header-right .status-indicators');
         if (!statusContainer) return;
 
+        // Dispose existing tooltips before updating HTML
+        statusContainer.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+            const tooltip = bootstrap.Tooltip.getInstance(el);
+            if (tooltip) tooltip.dispose();
+        });
+
         let html = '';
 
         // Save indicator
@@ -1218,27 +1233,57 @@ export default class DataFilterFormPage {
 
         // Error indicator (query error)
         if (this.queryError) {
-            html += `<span class="status-box status-error" title="${this.escapeHtml(this.queryError)}">
+            html += `<span class="status-box status-error" data-bs-toggle="tooltip" data-bs-placement="bottom" title="${this.escapeHtml(this.queryError)}">
                 <i class="fas fa-times-circle"></i>
             </span>`;
         }
 
-        // Query test status indicator (only for query data source)
+        // Data source status indicator (only for filter types that have options)
         const dataSource = document.getElementById('data-source')?.value;
         const filterType = document.getElementById('filter-type')?.value;
-        if (dataSource === 'query' && this.typesWithOptions.includes(filterType)) {
-            if (this.queryTestPassed) {
-                html += `<span class="status-box status-success" title="Query tested successfully">
-                    <i class="fas fa-database"></i>
-                </span>`;
-            } else if (!this.queryError) {
-                html += `<span class="status-box status-warning" title="Query not tested yet">
-                    <i class="fas fa-database"></i>
-                </span>`;
+
+        // Only show data source icon for types that have options
+        if (this.typesWithOptions.includes(filterType)) {
+            if (dataSource === 'query') {
+                // Query data source
+                if (this.queryTestPassed) {
+                    html += `<span class="status-box status-success" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Query tested successfully">
+                        <i class="fas fa-database"></i>
+                    </span>`;
+                } else if (!this.queryError) {
+                    html += `<span class="status-box status-warning" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Query not tested yet">
+                        <i class="fas fa-database"></i>
+                    </span>`;
+                }
+            } else if (dataSource === 'static') {
+                // Static data source - check if at least one option exists
+                const hasOptions = this.hasStaticOptions();
+                if (hasOptions) {
+                    html += `<span class="status-box status-success" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Static options configured">
+                        <i class="fas fa-list-ul"></i>
+                    </span>`;
+                } else {
+                    html += `<span class="status-box status-warning" data-bs-toggle="tooltip" data-bs-placement="bottom" title="At least one option is required">
+                        <i class="fas fa-list-ul"></i>
+                    </span>`;
+                }
             }
         }
 
         statusContainer.innerHTML = html;
+
+        // Initialize Bootstrap tooltips for the new elements
+        statusContainer.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+            new bootstrap.Tooltip(el);
+        });
+    }
+
+    /**
+     * Check if there are valid static options
+     */
+    hasStaticOptions() {
+        const options = this.getStaticOptions();
+        return options.length > 0 && options.some(opt => opt.value || opt.label);
     }
 
     /**

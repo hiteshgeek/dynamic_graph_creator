@@ -94,10 +94,10 @@
                                 <input type="text" id="filter-label" class="form-control" placeholder="Year" value="<?php echo $filter ? htmlspecialchars($filter->getFilterLabel()) : ''; ?>" required>
                             </div>
                         </div>
-                        <small class="form-hint d-block mb-3">
-                            Filter Key: Only letters, numbers, and underscores allowed.<br>
-                            <span class="badge bg-light text-dark"><code>::</code> prefix will be added automatically.</span>
-                        </small>
+                        <div class="filter-key-hints mb-3">
+                            <div class="filter-key-hint">Filter Key: Only letters, numbers, and underscores allowed.</div>
+                            <div class="filter-key-hint highlighted"><code>::</code> prefix will be added automatically.</div>
+                        </div>
 
                         <div class="form-row">
                             <div class="form-group">
