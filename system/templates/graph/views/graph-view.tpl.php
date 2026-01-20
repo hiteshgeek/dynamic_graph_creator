@@ -1,5 +1,8 @@
 
 <?php
+    // Set company start date for datepicker presets
+    echo DGCHelper::renderCompanyStartDateScript();
+
     echo DGCHelper::renderPageHeader([
         'title' => $graph->getName(),
         'backUrl' => '?urlq=graph',

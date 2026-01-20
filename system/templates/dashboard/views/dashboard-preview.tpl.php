@@ -1,5 +1,8 @@
 
 <?php
+    // Set company start date for datepicker presets
+    echo DGCHelper::renderCompanyStartDateScript();
+
     $badges = [];
     if ($dashboard->getIsSystem()) {
         $badges[] = ['label' => 'System', 'icon' => 'fa-lock', 'class' => 'badge-system'];

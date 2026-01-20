@@ -202,4 +202,22 @@ class DGCHelper
 
         return $html;
     }
+
+    /**
+     * Render JavaScript to set window.companyStartDate for datepicker presets
+     * Gets company start date from LicenceCompanies using BaseConfig::$company_id
+     *
+     * @return string HTML script tag or empty string if no valid date
+     */
+    public static function renderCompanyStartDateScript()
+    {
+        if (BaseConfig::$company_id > 0) {
+            $company = new LicenceCompanies(BaseConfig::$company_id);
+            $companyStartDate = $company->getStartDate();
+            if ($companyStartDate && $companyStartDate !== '0000-00-00') {
+                return '<script>window.companyStartDate = "' . htmlspecialchars($companyStartDate) . '";</script>';
+            }
+        }
+        return '';
+    }
 }

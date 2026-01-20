@@ -1,5 +1,8 @@
 
 <?php
+    // Set company start date for datepicker presets
+    echo DGCHelper::renderCompanyStartDateScript();
+
     $saveButtonClass = $filter ? 'btn-outline-warning' : 'btn-primary';
     echo DGCHelper::renderPageHeader([
         'title' => $filter ? 'Edit Data Filter' : 'Create Data Filter',

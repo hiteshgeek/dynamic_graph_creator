@@ -1,5 +1,8 @@
 
 <?php
+// Set company start date for datepicker presets
+echo DGCHelper::renderCompanyStartDateScript();
+
 $rightContent = '<div class="status-indicators"></div>';
 $saveButtonClass = $graph ? 'btn-outline-warning' : 'btn-primary';
 $rightContent .= '<button type="button" class="btn ' . $saveButtonClass . ' btn-sm save-graph-btn" data-save-btn><i class="fas fa-save"></i> ' . ($graph ? 'Save' : 'Create Graph') . '</button>';

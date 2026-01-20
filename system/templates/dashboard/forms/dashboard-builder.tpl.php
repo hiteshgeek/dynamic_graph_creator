@@ -1,5 +1,8 @@
 
 <?php
+// Set company start date for datepicker presets
+echo DGCHelper::renderCompanyStartDateScript();
+
 $rightContent = '';
 if ($dashboard && $dashboard->getId()) {
     $rightContent .= '<div class="save-indicator saved" style="display: flex;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
