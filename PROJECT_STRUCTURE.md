@@ -41,10 +41,11 @@ These files are direct copies from the live Rapidkart project. Any changes shoul
 
 #### Interfaces (`system/interfaces/`)
 
-| File                  | Purpose                            |
-| --------------------- | ---------------------------------- |
-| `DatabaseObject.php`  | Database object interface          |
-| `User.php`            | User interface (extends DatabaseObject) |
+| File                   | Purpose                                  |
+| ---------------------- | ---------------------------------------- |
+| `DatabaseObject.php`   | Database object interface                |
+| `User.php`             | User interface (extends DatabaseObject)  |
+| `UniqueIdentifier.php` | Unique ID interface (extends DatabaseObject) |
 
 #### Utilities (`system/utilities/`)
 
