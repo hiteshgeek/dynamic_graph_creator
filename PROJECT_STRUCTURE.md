@@ -14,26 +14,30 @@ These files are direct copies from the live Rapidkart project. Any changes shoul
 
 #### Classes (`system/classes/`)
 
-| File                   | Purpose                         |
-| ---------------------- | ------------------------------- |
-| `AdminUser.php`        | User entity class               |
-| `AdminUserManager.php` | User management functions       |
-| `Session.php`          | Session handling (login/logout) |
-| `SessionsManager.php`  | Session DB operations           |
-| `SessionDetails.php`   | Session details entity          |
-| `Licence.php`          | Licence entity class            |
-| `LicenceCompanies.php` | Company entity class            |
-| `LicenceManager.php`   | Licence management functions    |
-| `LicenceDomain.php`    | Domain entity class             |
-| `Outlet.php`           | Outlet entity class             |
-| `OutletManager.php`    | Outlet management functions     |
-| `Warehouse.php`        | Warehouse entity class          |
-| `WarehouseManager.php` | Warehouse management functions  |
-| `Rapidkart.php`        | Singleton pattern for DB access |
-| `SQLiDatabase.php`     | Database wrapper                |
-| `Template.php`         | Template engine                 |
-| `ThemeRegistry.php`    | Theme/asset management          |
-| `Utility.php`          | Utility functions               |
+| File                           | Purpose                         |
+| ------------------------------ | ------------------------------- |
+| `AdminUser.php`                | User entity class               |
+| `AdminUserManager.php`         | User management functions       |
+| `Session.php`                  | Session handling (login/logout) |
+| `SessionsManager.php`          | Session DB operations           |
+| `SessionDetails.php`           | Session details entity          |
+| `Licence.php`                  | Licence entity class            |
+| `LicenceCompanies.php`         | Company entity class            |
+| `LicenceManager.php`           | Licence management functions    |
+| `LicenceDomain.php`            | Domain entity class             |
+| `Outlet.php`                   | Outlet entity class             |
+| `OutletManager.php`            | Outlet management functions     |
+| `Warehouse.php`                | Warehouse entity class          |
+| `WarehouseManager.php`         | Warehouse management functions  |
+| `Rapidkart.php`                | Singleton pattern for DB access |
+| `SystemPreferences.php`        |                                 |
+| `SystemPreferencesGroup.php`   |                                 |
+| `SystemPreferencesManager.php` |                                 |
+| `SystemPreferencesMapping.php` |                                 |
+| `SQLiDatabase.php`             | Database wrapper                |
+| `Template.php`                 | Template engine                 |
+| `ThemeRegistry.php`            | Theme/asset management          |
+| `Utility.php`                  | Utility functions               |
 
 #### Configuration (`system/config/`)
 
