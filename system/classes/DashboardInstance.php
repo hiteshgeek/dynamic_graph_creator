@@ -216,14 +216,26 @@ class DashboardInstance implements DatabaseObject
 
     /**
      * Get all instances for a user (by created_uid)
+     * If user is admin, returns all dashboards for the company
      */
     public static function getUserDashboards($userId)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . "
-                WHERE created_uid = '::created_uid' AND disid != 3
-                ORDER BY updated_ts DESC";
-        $res = $db->query($sql, array('::created_uid' => intval($userId)));
+        $user = SystemConfig::getUser();
+
+        // Admin users can see all company dashboards
+        if ($user && $user->getIsAdmin()) {
+            $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . "
+                    WHERE company_id = '::company_id' AND disid != 3
+                    ORDER BY updated_ts DESC";
+            $res = $db->query($sql, array('::company_id' => BaseConfig::$company_id));
+        } else {
+            // Regular users only see their own dashboards
+            $sql = "SELECT * FROM " . SystemTables::DB_TBL_DASHBOARD_INSTANCE . "
+                    WHERE created_uid = '::created_uid' AND disid != 3
+                    ORDER BY updated_ts DESC";
+            $res = $db->query($sql, array('::created_uid' => intval($userId)));
+        }
 
         $dashboards = array();
         while ($row = $db->fetchObject($res)) {
