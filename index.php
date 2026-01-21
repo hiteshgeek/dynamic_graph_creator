@@ -12,6 +12,7 @@ ini_set('display_errors', 1);
 // Load configuration and classes
 require_once __DIR__ . '/system/utilities/SystemConfig.php';
 require_once __DIR__ . '/system/utilities/SiteConfig.php';
+require_once __DIR__ . '/system/utilities/LocalProjectConfig.php';
 require_once __DIR__ . '/system/config/BaseConfig.php';
 require_once __DIR__ . '/system/utilities/SystemTables.php';
 require_once __DIR__ . '/system/utilities/SystemTablesStatus.php';
@@ -33,6 +34,7 @@ require_once __DIR__ . '/system/classes/SystemPreferencesMapping.php';
 require_once __DIR__ . '/system/classes/DGCHelper.php';
 require_once __DIR__ . '/system/classes/Template.php';
 require_once __DIR__ . '/system/classes/Utility.php';
+require_once __DIR__ . '/system/classes/LocalUtility.php';
 require_once __DIR__ . '/system/classes/DataFilter.php';
 require_once __DIR__ . '/system/classes/DataFilterSet.php';
 require_once __DIR__ . '/system/classes/Graph.php';
@@ -86,7 +88,7 @@ if (Session::isLoggedIn()) {
 }
 
 // Parse URL
-$url = Utility::parseUrl();
+$url = LocalUtility::parseUrl();
 $page = isset($url[0]) ? $url[0] : 'graph';
 
 // Manual logout for testing (uncomment when needed):
@@ -113,8 +115,8 @@ if (!Session::isLoggedIn(true)) {
 
 // Load common assets for all DGC pages
 $theme = Rapidkart::getInstance()->getThemeRegistry();
-Utility::addModuleCss('common');
-Utility::addModuleJs('common');
+LocalUtility::addModuleCss('common');
+LocalUtility::addModuleJs('common');
 $theme->addScript(SiteConfig::themeLibrariessUrl() . 'bootstrap5/js/bootstrap.bundle.min.js', 5);
 
 // Route to controller

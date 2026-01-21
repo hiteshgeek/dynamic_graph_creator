@@ -63,6 +63,7 @@ These files are direct copies from the live Rapidkart project. Any changes shoul
 | `SystemTablesStatus.php` | Database table constants (subset from live) |
 | `SystemConfig.php`       | System configuration                        |
 | `SiteConfig.php`         | Site-specific configuration                 |
+| `LocalProjectConfig.php` | DGC-specific config (.env, DB, dist paths)  |
 
 #### Includes (`system/includes/`)
 
@@ -87,19 +88,26 @@ These files are specific to Dynamic Graph Creator and can be modified as needed.
 
 #### Classes (`system/classes/`)
 
-| File                            | Purpose                              |
-| ------------------------------- | ------------------------------------ |
-| `Graph.php`                     | Graph entity class                   |
-| `GraphManager.php`              | Graph CRUD operations                |
-| `DataFilter.php`                | Data filter entity class             |
-| `DataFilterSet.php`             | Filter set entity class              |
-| `DataFilterManager.php`         | Filter CRUD operations               |
-| `DashboardTemplate.php`         | Dashboard template entity            |
-| `DashboardTemplateCategory.php` | Template category entity             |
-| `DashboardInstance.php`         | Dashboard instance entity            |
-| `DashboardBuilder.php`          | Dashboard builder logic              |
-| `DGCHelper.php`                 | DGC-specific helper functions        |
-| `SimulateLogin.php`             | Login bootstrap helper (sets config) |
+| File                                    | Purpose                                |
+| --------------------------------------- | -------------------------------------- |
+| `Graph.php`                             | Graph entity class                     |
+| `GraphManager.php`                      | Graph CRUD operations                  |
+| `DataFilter.php`                        | Data filter entity class               |
+| `DataFilterSet.php`                     | Filter set entity class                |
+| `DataFilterManager.php`                 | Filter CRUD operations                 |
+| `DashboardTemplate.php`                 | Dashboard template entity              |
+| `DashboardTemplateCategory.php`         | Template category entity               |
+| `DashboardInstance.php`                 | Dashboard instance entity              |
+| `DashboardBuilder.php`                  | Dashboard builder logic                |
+| `DGCHelper.php`                         | DGC-specific helper functions          |
+| `SimulateLogin.php`                     | Login bootstrap helper (sets config)   |
+| `LocalUtility.php`                      | DGC-specific utility (assets, parsing) |
+| `SystemPlaceholder.php`                 | System placeholder entity              |
+| `SystemPlaceholderManager.php`          | Placeholder management                 |
+| `WidgetCategory.php`                    | Widget category entity                 |
+| `WidgetCategoryManager.php`             | Widget category management             |
+| `GraphWidgetCategoryMapping.php`        | Graph-category mapping entity          |
+| `GraphWidgetCategoryMappingManager.php` | Graph-category mapping management      |
 
 #### Includes (`system/includes/`)
 

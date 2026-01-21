@@ -9,8 +9,8 @@
 DGCHelper::requireAdminAccess();
 
 // Load data-filter module assets (common assets loaded in index.php)
-Utility::addModuleCss('data-filter');
-Utility::addModuleJs('data-filter');
+LocalUtility::addModuleCss('data-filter');
+LocalUtility::addModuleJs('data-filter');
 
 // $url is already parsed in index.php
 $action = isset($url[1]) ? $url[1] : 'list';
@@ -90,7 +90,7 @@ function showDataFilterForm($filterId = null)
     if ($filterId) {
         $filter = new DataFilter($filterId);
         if (!$filter->getId()) {
-            Utility::redirect('data-filter');
+            LocalUtility::redirect('data-filter');
             return;
         }
     }

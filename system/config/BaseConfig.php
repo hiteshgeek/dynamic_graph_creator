@@ -104,8 +104,8 @@ class BaseConfig
      public static $wondersoft_password = 'Wondersoft#12';
 }
 
-// Define DB constants from SystemConfig for DGC
-define('DB_SERVER', SystemConfig::getDbHost());
-define('DB_USER', SystemConfig::getDbUser());
-define('DB_PASS', SystemConfig::getDbPass());
-define('DB_NAME', SystemConfig::getDbName());
+// Define DB constants from LocalProjectConfig for DGC dev environment
+define('DB_SERVER', LocalProjectConfig::getDbHost());
+define('DB_USER', LocalProjectConfig::getDbUser());
+define('DB_PASS', LocalProjectConfig::getDbPass());
+define('DB_NAME', LocalProjectConfig::getDbName());

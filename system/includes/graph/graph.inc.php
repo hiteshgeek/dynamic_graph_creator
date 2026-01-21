@@ -9,8 +9,8 @@
 DGCHelper::requireAdminAccess();
 
 // Load graph module assets (common assets loaded in index.php)
-Utility::addModuleCss('graph');
-Utility::addModuleJs('graph');
+LocalUtility::addModuleCss('graph');
+LocalUtility::addModuleJs('graph');
 
 // $url is already parsed in index.php
 $action = isset($url[1]) ? $url[1] : 'list';
@@ -110,7 +110,7 @@ function showCreator($graphId = null)
     if ($graphId) {
         $graph = new Graph($graphId);
         if (!$graph->getId()) {
-            Utility::redirect('graph');
+            LocalUtility::redirect('graph');
             return;
         }
     }
@@ -157,7 +157,7 @@ function showView($graphId)
 
     $graph = new Graph($graphId);
     if (!$graph->getId()) {
-        Utility::redirect('graph');
+        LocalUtility::redirect('graph');
         return;
     }
 

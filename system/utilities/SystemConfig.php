@@ -9,48 +9,9 @@
  */
 class SystemConfig
 {
-    private static $config = null;
+
     private static $user = null;
     public static $lock_date = "";
-
-    /**
-     * Load configuration from .env file
-     */
-    private static function loadEnv()
-    {
-        if (self::$config !== null) {
-            return;
-        }
-
-        self::$config = array();
-        $envFile = self::basePath() . '.env';
-
-        if (file_exists($envFile)) {
-            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line) {
-                if (strpos($line, '#') === 0) {
-                    continue;
-                }
-                if (strpos($line, '=') !== false) {
-                    list($key, $value) = explode('=', $line, 2);
-                    self::$config[trim($key)] = trim($value);
-                }
-            }
-        }
-    }
-
-    /**
-     * Get a config value
-     *
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
-     */
-    public static function get($key, $default = null)
-    {
-        self::loadEnv();
-        return isset(self::$config[$key]) ? self::$config[$key] : $default;
-    }
 
     /**
      * Get logged in user
@@ -118,43 +79,6 @@ class SystemConfig
         return $_SERVER['SERVER_NAME'];
     }
 
-
-    /**
-     * Get database host
-     * @return string
-     */
-    public static function getDbHost()
-    {
-        return self::get('DB_HOST', 'localhost');
-    }
-
-    /**
-     * Get database user
-     * @return string
-     */
-    public static function getDbUser()
-    {
-        return self::get('DB_USER', 'root');
-    }
-
-    /**
-     * Get database password
-     * @return string
-     */
-    public static function getDbPass()
-    {
-        return self::get('DB_PASS', '');
-    }
-
-    /**
-     * Get database name
-     * @return string
-     */
-    public static function getDbName()
-    {
-        return self::get('DB_NAME', 'graph_creator');
-    }
-
     /**
      * @return String The Base URL of the website
      */
@@ -214,6 +138,14 @@ class SystemConfig
     public static function utilitiesPath()
     {
         return SystemConfig::systemsDirPath() . 'utilities/';
+    }
+
+    /**
+     * @return String The Path of the directory containing class files of the core system
+     */
+    public static function librariesPath()
+    {
+        return SystemConfig::systemsDirPath() . "libraries/";
     }
 
     /**
@@ -302,15 +234,5 @@ class SystemConfig
     public static function servicesPath()
     {
         return SystemConfig::baseUrl() . "services/";
-    }
-
-    public static function distPath()
-    {
-        return SystemConfig::basePath() . "dist/";
-    }
-
-    public static function distUrl()
-    {
-        return SystemConfig::baseUrl() . "dist/";
     }
 }

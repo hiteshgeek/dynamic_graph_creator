@@ -6,8 +6,8 @@
  */
 
 // Load dashboard module assets (common assets loaded in index.php)
-Utility::addModuleCss('dashboard');
-Utility::addModuleJs('dashboard');
+LocalUtility::addModuleCss('dashboard');
+LocalUtility::addModuleJs('dashboard');
 
 // Permission control for template ordering operations
 // Set to true to allow category reordering, template reordering, and moving templates between categories
@@ -139,7 +139,7 @@ switch ($action) {
                 showTemplatePreview($templateId);
                 break;
             default:
-                Utility::redirect('dashboard/templates');
+                LocalUtility::redirect('dashboard/templates');
                 break;
         }
         break;
@@ -190,7 +190,7 @@ function showBuilder($dashboardId = 0)
     if ($dashboardId) {
         $dashboard = new DashboardInstance($dashboardId);
         if (!$dashboard->getId()) {
-            Utility::redirect('dashboard');
+            LocalUtility::redirect('dashboard');
             return;
         }
     }
@@ -218,7 +218,7 @@ function showPreview($dashboardId)
 
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
-        Utility::redirect('dashboard');
+        LocalUtility::redirect('dashboard');
         return;
     }
 
@@ -705,13 +705,13 @@ function showTemplateEditor($templateId)
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     if (!$templateId) {
-        Utility::redirect('dashboard/templates');
+        LocalUtility::redirect('dashboard/templates');
         return;
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
-        Utility::redirect('dashboard/templates');
+        LocalUtility::redirect('dashboard/templates');
         return;
     }
 
@@ -738,13 +738,13 @@ function showTemplateBuilder($templateId)
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     if (!$templateId) {
-        Utility::redirect('dashboard/templates');
+        LocalUtility::redirect('dashboard/templates');
         return;
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId() || !$template->getName()) {
-        Utility::redirect('dashboard/templates');
+        LocalUtility::redirect('dashboard/templates');
         return;
     }
 
@@ -772,13 +772,13 @@ function showTemplatePreview($templateId)
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     if (!$templateId) {
-        Utility::redirect('dashboard/templates');
+        LocalUtility::redirect('dashboard/templates');
         return;
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId() || !$template->getName()) {
-        Utility::redirect('dashboard/templates');
+        LocalUtility::redirect('dashboard/templates');
         return;
     }
 

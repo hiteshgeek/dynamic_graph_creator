@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(git -C /var/www/html/dynamic_graph_creator log --oneline -5)"
+    ]
+  }
+}

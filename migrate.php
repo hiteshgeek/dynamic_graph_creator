@@ -117,7 +117,7 @@ $steps = [
     ],
     5 => [
         'title' => 'Copy Page Scripts & Include Files',
-        'description' => 'Copies page-specific JS files and include files. Include files are transformed: Utility::addModule*() → $theme->addCss()/addScript().',
+        'description' => 'Copies page-specific JS files and include files. Include files are transformed: LocalUtility::addModule*() → $theme->addCss()/addScript().',
         'files' => [
             'system/scripts/graph/graph-list.js',
             'system/scripts/graph/graph-creator.js',
@@ -283,13 +283,13 @@ if ($action === 'execute' && $step > 0 && isset($steps[$step])) {
 // Helper functions
 /**
  * Transform asset loading calls from DGC style to Rapidkart style
- * Utility::addModuleCss/Js() → $theme->addCss/Script()
+ * LocalLocalUtility::addModuleCss/Js() → $theme->addCss/Script()
  */
 function transformAssetLoading($content)
 {
-    // Transform Utility::addModuleCss('module') → $theme->addCss(SystemConfig::stylesUrl() . 'module/module.css')
+    // Transform LocalLocalUtility::addModuleCss('module') → $theme->addCss(SystemConfig::stylesUrl() . 'module/module.css')
     $content = preg_replace_callback(
-        "/Utility::addModuleCss\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/",
+        "/LocalLocalUtility::addModuleCss\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/",
         function ($matches) {
             $module = $matches[1];
             return "\$theme->addCss(SystemConfig::stylesUrl() . '{$module}/{$module}.css')";
@@ -297,9 +297,9 @@ function transformAssetLoading($content)
         $content
     );
 
-    // Transform Utility::addModuleJs('module') → $theme->addScript(SystemConfig::scriptsUrl() . 'module/module.js')
+    // Transform LocalLocalUtility::addModuleJs('module') → $theme->addScript(SystemConfig::scriptsUrl() . 'module/module.js')
     $content = preg_replace_callback(
-        "/Utility::addModuleJs\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/",
+        "/LocalLocalUtility::addModuleJs\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/",
         function ($matches) {
             $module = $matches[1];
             return "\$theme->addScript(SystemConfig::scriptsUrl() . '{$module}/{$module}.js')";
@@ -369,7 +369,7 @@ function copyFolder($src, $dst)
 
 /**
  * Copy include files with asset loading transformation
- * Replaces Utility::addModule*() calls with Rapidkart-style $theme->addCss()/addScript() calls
+ * Replaces LocalUtility::addModule*() calls with Rapidkart-style $theme->addCss()/addScript() calls
  */
 function copyIncludesTransformed($src, $dst)
 {
@@ -402,16 +402,16 @@ function copyIncludesTransformed($src, $dst)
                 $content = file_get_contents($srcPath);
                 $originalContent = $content;
 
-                // Transform Utility::addModuleCss() calls
+                // Transform LocalLocalUtility::addModuleCss() calls
                 $content = preg_replace(
-                    "/Utility::addModuleCss\('([^']+)'\);/",
+                    "/LocalLocalUtility::addModuleCss\('([^']+)'\);/",
                     "\$theme->addCss(SystemConfig::stylesUrl() . '$1/$1.css');",
                     $content
                 );
 
-                // Transform Utility::addModuleJs() calls
+                // Transform LocalLocalUtility::addModuleJs() calls
                 $content = preg_replace(
-                    "/Utility::addModuleJs\('([^']+)'\);/",
+                    "/LocalLocalUtility::addModuleJs\('([^']+)'\);/",
                     "\$theme->addScript(SystemConfig::scriptsUrl() . '$1/$1.js');",
                     $content
                 );
@@ -541,6 +541,7 @@ function copyDistRenamed($src, $targetDir)
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Migration Tool - Dynamic Graph Creator</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
@@ -1204,22 +1205,22 @@ function copyDistRenamed($src, $targetDir)
                                             'system/includes/graph/graph.inc.php' => [
                                                 'module' => 'graph',
                                                 'transforms' => [
-                                                    "Utility::addModuleCss('graph')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')",
-                                                    "Utility::addModuleJs('graph')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')",
+                                                    "LocalUtility::addModuleCss('graph')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')",
+                                                    "LocalUtility::addModuleJs('graph')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')",
                                                 ]
                                             ],
                                             'system/includes/data-filter/data-filter.inc.php' => [
                                                 'module' => 'data-filter',
                                                 'transforms' => [
-                                                    "Utility::addModuleCss('data-filter')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css')",
-                                                    "Utility::addModuleJs('data-filter')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js')",
+                                                    "LocalUtility::addModuleCss('data-filter')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css')",
+                                                    "LocalUtility::addModuleJs('data-filter')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js')",
                                                 ]
                                             ],
                                             'system/includes/dashboard/dashboard.inc.php' => [
                                                 'module' => 'dashboard',
                                                 'transforms' => [
-                                                    "Utility::addModuleCss('dashboard')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css')",
-                                                    "Utility::addModuleJs('dashboard')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js')",
+                                                    "LocalUtility::addModuleCss('dashboard')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css')",
+                                                    "LocalUtility::addModuleJs('dashboard')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js')",
                                                 ]
                                             ],
                                             'system/includes/dashboard/template-preview-component.php' => [
@@ -1260,7 +1261,7 @@ function copyDistRenamed($src, $targetDir)
                                     </div>
                                     <p class="small text-muted mb-2">
                                         <i class="fas fa-magic me-1"></i>
-                                        <strong>Auto-transform:</strong> <code>Utility::addModuleCss/Js()</code> &rarr; <code>$theme->addCss/Script()</code>
+                                        <strong>Auto-transform:</strong> <code>LocalUtility::addModuleCss/Js()</code> &rarr; <code>$theme->addCss/Script()</code>
                                     </p>
                                     <div class="transform-details small mb-2" style="border-left: 2px solid #6c757d; padding-left: 10px; background: #f8f9fa; padding: 8px 10px; border-radius: 4px;">
                                         <div class="text-muted mb-1"><strong>Note:</strong> Common assets are loaded in Theme.php. Only module-specific transforms shown above.</div>
@@ -1470,7 +1471,9 @@ const DB_TBL_DATA_FILTER = "data_filter";
 const DB_TBL_DASHBOARD_TEMPLATE_CATEGORY = "dashboard_template_category";
 const DB_TBL_DASHBOARD_TEMPLATE = "dashboard_template";
 const DB_TBL_DASHBOARD_INSTANCE = "dashboard_instance";
-const DB_TBL_SYSTEM_PLACEHOLDER = "system_placeholder";</code></pre></div>
+const DB_TBL_SYSTEM_PLACEHOLDER = "system_placeholder";
+const DB_TBL_WIDGET_CATEGORY = "widget_category";
+const DB_TBL_GRAPH_WIDGET_CATEGORY_MAPPING = "graph_widget_category_mapping";</code></pre></div>
 
                                     <a href="sql/install.sql" target="_blank" class="btn btn-outline-secondary btn-sm">
                                         <i class="fas fa-eye me-1"></i> View SQL File
@@ -1507,17 +1510,17 @@ case "dashboard":
                                     <h6 class="text-primary mt-3"><i class="fas fa-check-circle me-1"></i> 2. Asset Loading (Automatic)</h6>
                                     <div class="alert alert-success mb-3">
                                         <i class="fas fa-magic me-1"></i>
-                                        <strong>Step 2 handles this automatically!</strong> The include files are copied with <code>Utility::addModule*()</code> calls transformed to Rapidkart-style <code>$theme->addCss()</code> / <code>$theme->addScript()</code> calls.
+                                        <strong>Step 2 handles this automatically!</strong> The include files are copied with <code>LocalUtility::addModule*()</code> calls transformed to Rapidkart-style <code>$theme->addCss()</code> / <code>$theme->addScript()</code> calls.
                                     </div>
                                     <p class="small text-muted mb-2">
                                         <strong>Transformation applied (module-specific only):</strong>
                                     </p>
-                                    <div class="code-block mb-3"><pre><code class="language-php">Utility::addModuleCss('graph') → $theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')
-Utility::addModuleJs('graph') → $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')
-Utility::addModuleCss('data-filter') → $theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css')
-Utility::addModuleJs('data-filter') → $theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js')
-Utility::addModuleCss('dashboard') → $theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css')
-Utility::addModuleJs('dashboard') → $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js')</code></pre></div>
+                                    <div class="code-block mb-3"><pre><code class="language-php">LocalUtility::addModuleCss('graph') → $theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')
+LocalUtility::addModuleJs('graph') → $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')
+LocalUtility::addModuleCss('data-filter') → $theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css')
+LocalUtility::addModuleJs('data-filter') → $theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js')
+LocalUtility::addModuleCss('dashboard') → $theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css')
+LocalUtility::addModuleJs('dashboard') → $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js')</code></pre></div>
                                     <p class="small text-muted mb-2">
                                         <strong>Note:</strong> Common module assets are loaded in Theme.php for DGC pages.
                                     </p>
