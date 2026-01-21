@@ -11,10 +11,13 @@ import { keyboardNavigation } from "./dashboard/KeyboardNavigation.js";
 import templateModalNavigation from "./dashboard/TemplateModalNavigation.js";
 import FilterRenderer from "./FilterRenderer.js";
 import DatePickerInit from "./DatePickerInit.js";
+import { WidgetSelectorModal } from "./dashboard/WidgetSelectorModal.js";
+import GraphPreview from "./GraphPreview.js";
 
-// Export to window for FilterRenderer to use
+// Export to window for other scripts to use
 window.DatePickerInit = DatePickerInit;
 window.FilterRenderer = FilterRenderer;
+window.GraphPreview = GraphPreview;
 
 // Use globals from common.js (Toast, Loading, Ajax, ConfirmDialog)
 const Toast = window.Toast;
@@ -123,13 +126,9 @@ function handleEmptyCellAction(cell) {
   });
   cell.dispatchEvent(event);
 
-  // TODO: Implement default action (e.g., open widget selector)
-  if (window.Toast) {
-    // Determine current mode from body class
-    const isDesignMode = document.body.classList.contains("dashboard-builder-page");
-    const modeLabel = isDesignMode ? "Design Mode" : "View Mode";
-    window.Toast.info(`${modeLabel} | Perspective: ${colFr}w x ${perspectiveHeight}h | Actual: ${colFr}w x ${rowFr}h`);
-    console.log(context);
+  // Open widget selector modal if dashboard builder is available
+  if (window.dashboardBuilderInstance && window.dashboardBuilderInstance.openWidgetSelector) {
+    window.dashboardBuilderInstance.openWidgetSelector(context);
   }
 }
 
@@ -240,9 +239,16 @@ function initDashboardFilterBar() {
     }
   }
 
-  // Restore collapse state from localStorage
+  // Restore collapse state from localStorage (without transitions)
   const savedCollapsed = localStorage.getItem(COLLAPSE_KEY) === "1";
   updateCollapseState(savedCollapsed);
+
+  // Enable transitions after initial state is applied (use requestAnimationFrame to ensure DOM is settled)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      filterBar.classList.add("transitions-enabled");
+    });
+  });
 
   // Collapse button handler
   if (collapseBtn) {
@@ -345,9 +351,14 @@ class DashboardBuilder {
     this.autoSaveTimeout = null;
     this.templateSelectorMode = "create-dashboard"; // or 'add-section'
     this.lastFocusedCell = null; // Track cell that had focus before modal opened
+    this.widgetSelectorModal = null; // Widget selector modal instance
+    this.widgetCharts = new Map(); // Map of graphId -> GraphPreview instance
   }
 
-  init() {
+  async init() {
+    // Initialize widget selector modal and wait for data to load
+    await this.initWidgetSelector();
+
     if (this.mode === "template" && this.templateId) {
       this.loadTemplate();
     } else if (this.dashboardId) {
@@ -356,6 +367,237 @@ class DashboardBuilder {
       this.showTemplateSelector();
     }
     this.initEventHandlers();
+  }
+
+  /**
+   * Initialize the widget selector modal
+   * @returns {Promise} Resolves when widget data is loaded
+   */
+  async initWidgetSelector() {
+    this.widgetSelectorModal = new WidgetSelectorModal({
+      onSelect: (graphId, context) => this.handleWidgetSelect(graphId, context),
+      onDeselect: (context) => this.handleWidgetDeselect(context),
+    });
+    this.widgetSelectorModal.init();
+
+    // Preload graph data so we can show widget names in the builder
+    // Wait for this to complete before continuing
+    await this.widgetSelectorModal.loadData();
+  }
+
+  /**
+   * Handle widget selection from modal
+   * @param {number} graphId - Selected graph ID
+   * @param {Object} context - Area context
+   */
+  async handleWidgetSelect(graphId, context) {
+    const content = {
+      type: "graph",
+      widgetId: graphId,
+      widgetType: "graph",
+      config: {},
+    };
+
+    // Update the area content in the structure
+    this.updateAreaContentInStructure(context.sectionId, context.areaId, context.rowId, content);
+
+    // Mark as dirty and trigger auto-save
+    this.markDirty();
+    this.renderDashboard();
+
+    Toast.success("Widget added");
+  }
+
+  /**
+   * Handle widget deselection (remove widget)
+   * @param {Object} context - Area context
+   */
+  async handleWidgetDeselect(context) {
+    const content = {
+      type: "empty",
+      widgetId: null,
+      widgetType: null,
+      config: {},
+    };
+
+    // Update the area content in the structure
+    this.updateAreaContentInStructure(context.sectionId, context.areaId, context.rowId, content);
+
+    // Mark as dirty and trigger auto-save
+    this.markDirty();
+    this.renderDashboard();
+
+    Toast.success("Widget removed");
+  }
+
+  /**
+   * Update area content in the dashboard structure
+   * @param {string} sectionId
+   * @param {string} areaId
+   * @param {string|null} rowId - Sub-row ID if applicable
+   * @param {Object} content - New content object
+   */
+  updateAreaContentInStructure(sectionId, areaId, rowId, content) {
+    if (!this.currentDashboard) return;
+
+    const structure =
+      typeof this.currentDashboard.structure === "string"
+        ? JSON.parse(this.currentDashboard.structure)
+        : this.currentDashboard.structure;
+
+    if (!structure || !structure.sections) return;
+
+    for (const section of structure.sections) {
+      if (section.sid === sectionId) {
+        for (const area of section.areas) {
+          if (area.aid === areaId) {
+            // Check if we're updating a sub-row
+            if (rowId && area.subRows) {
+              for (const subRow of area.subRows) {
+                if (subRow.rowId === rowId) {
+                  subRow.content = content;
+                  break;
+                }
+              }
+            } else {
+              // Update the area directly
+              area.content = content;
+            }
+            break;
+          }
+        }
+        break;
+      }
+    }
+
+    // Update the dashboard structure
+    this.currentDashboard.structure = JSON.stringify(structure);
+  }
+
+  /**
+   * Open widget selector modal for an area
+   * @param {Object} context - Area context from emptyCellClick event
+   * @param {number|null} widgetId - Optional widget ID for edit mode
+   */
+  openWidgetSelector(context, widgetId = null) {
+    if (!this.widgetSelectorModal) return;
+
+    // Use provided widgetId or get from data structure
+    const currentWidgetId = widgetId !== null
+      ? widgetId
+      : this.getAreaWidgetId(context.sectionId, context.areaId, context.rowId);
+
+    // Get all widget IDs used in the dashboard
+    const usedWidgetIds = this.getAllUsedWidgetIds();
+
+    this.widgetSelectorModal.show(context, currentWidgetId, usedWidgetIds);
+  }
+
+  /**
+   * Get all widget IDs currently used in the dashboard
+   * @returns {Set<number>} Set of widget IDs
+   */
+  getAllUsedWidgetIds() {
+    const usedIds = new Set();
+
+    if (!this.currentDashboard) return usedIds;
+
+    const structure =
+      typeof this.currentDashboard.structure === "string"
+        ? JSON.parse(this.currentDashboard.structure)
+        : this.currentDashboard.structure;
+
+    if (!structure || !structure.sections) return usedIds;
+
+    for (const section of structure.sections) {
+      if (!section.areas) continue;
+
+      for (const area of section.areas) {
+        // Check area's direct content
+        if (area.content?.widgetId) {
+          usedIds.add(area.content.widgetId);
+        }
+
+        // Check sub-rows
+        if (area.subRows) {
+          for (const subRow of area.subRows) {
+            if (subRow.content?.widgetId) {
+              usedIds.add(subRow.content.widgetId);
+            }
+          }
+        }
+      }
+    }
+
+    return usedIds;
+  }
+
+  /**
+   * Get the widget ID for an area
+   * @param {string} sectionId
+   * @param {string} areaId
+   * @param {string|null} rowId
+   * @returns {number|null}
+   */
+  getAreaWidgetId(sectionId, areaId, rowId) {
+    if (!this.currentDashboard) return null;
+
+    const structure =
+      typeof this.currentDashboard.structure === "string"
+        ? JSON.parse(this.currentDashboard.structure)
+        : this.currentDashboard.structure;
+
+    if (!structure || !structure.sections) return null;
+
+    for (const section of structure.sections) {
+      if (section.sid === sectionId) {
+        for (const area of section.areas) {
+          if (area.aid === areaId) {
+            if (rowId && area.subRows) {
+              for (const subRow of area.subRows) {
+                if (subRow.rowId === rowId) {
+                  return subRow.content?.widgetId || null;
+                }
+              }
+            }
+            return area.content?.widgetId || null;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Get area context from DOM elements
+   * @param {HTMLElement|null} area - dashboard-area element
+   * @param {HTMLElement|null} subRow - dashboard-sub-row element
+   * @returns {Object|null} Context object or null
+   */
+  getAreaContext(area, subRow) {
+    if (subRow) {
+      const parentArea = subRow.closest(".dashboard-area-nested");
+      const section = subRow.closest(".dashboard-section");
+      if (parentArea && section) {
+        return {
+          dashboardId: this.dashboardId,
+          sectionId: section.dataset.sectionId,
+          areaId: parentArea.dataset.areaId,
+          rowId: subRow.dataset.rowId,
+        };
+      }
+    } else if (area) {
+      const section = area.closest(".dashboard-section");
+      if (section) {
+        return {
+          dashboardId: this.dashboardId,
+          sectionId: section.dataset.sectionId,
+          areaId: area.dataset.areaId,
+          rowId: null,
+        };
+      }
+    }
+    return null;
   }
 
   async loadTemplate() {
@@ -979,6 +1221,126 @@ class DashboardBuilder {
     if (window.Tooltips) {
       window.Tooltips.init();
     }
+
+    // Load and render widget graphs
+    this.loadWidgetGraphs();
+
+    // Check description truncation after layout is computed
+    requestAnimationFrame(() => {
+      this.checkDescriptionTruncation();
+    });
+  }
+
+  /**
+   * Load and render all widget graphs in the dashboard
+   */
+  async loadWidgetGraphs() {
+    // Dispose existing chart instances
+    this.disposeWidgetCharts();
+
+    // Find all widget graph containers
+    const graphContainers = this.container.querySelectorAll(".widget-graph-container[data-graph-id]");
+
+    for (const container of graphContainers) {
+      const graphId = parseInt(container.dataset.graphId, 10);
+      if (!graphId) continue;
+
+      // Get graph type from parent element
+      const areaContent = container.closest(".area-content");
+      const graphType = areaContent?.dataset.graphType || "bar";
+
+      // Load and render the graph
+      this.loadWidgetGraph(container, graphId, graphType);
+    }
+  }
+
+  /**
+   * Load and render a single widget graph
+   * @param {HTMLElement} container - The container element
+   * @param {number} graphId - The graph ID
+   * @param {string} graphType - The graph type
+   */
+  async loadWidgetGraph(container, graphId, graphType) {
+    try {
+      // Fetch graph data
+      const result = await Ajax.post("preview_graph", {
+        id: graphId,
+        filters: {},
+      });
+
+      if (result.success && result.data) {
+        // Clear loading state
+        container.innerHTML = "";
+
+        // Create GraphPreview instance and render
+        const preview = new GraphPreview(container);
+
+        // Use graph type from API response if available, fallback to provided type
+        const actualGraphType = result.data.graphType || graphType;
+        preview.setType(actualGraphType);
+
+        // Get config from graph data if available
+        if (result.data.config) {
+          preview.setConfig(result.data.config);
+        }
+
+        preview.setData(result.data.chartData);
+        preview.render();
+
+        // Store reference for cleanup
+        this.widgetCharts.set(graphId, preview);
+      } else {
+        // Show error state
+        container.innerHTML = `
+          <div class="widget-graph-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>${result.message || "Failed to load chart"}</span>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error("Error loading widget graph:", error);
+      container.innerHTML = `
+        <div class="widget-graph-error">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Failed to load chart</span>
+        </div>
+      `;
+    }
+  }
+
+  /**
+   * Dispose all widget chart instances
+   */
+  disposeWidgetCharts() {
+    for (const preview of this.widgetCharts.values()) {
+      if (preview && preview.chart) {
+        preview.chart.dispose();
+      }
+    }
+    this.widgetCharts.clear();
+  }
+
+  /**
+   * Check description text truncation and add is-truncated class
+   */
+  checkDescriptionTruncation() {
+    const descriptions = this.container.querySelectorAll('.widget-graph-description');
+    descriptions.forEach((desc) => {
+      // Only check when collapsed
+      if (!desc.classList.contains('collapsed')) {
+        desc.classList.add('is-truncated');
+        return;
+      }
+
+      // Check the text span for truncation
+      const textSpan = desc.querySelector('.description-text');
+      if (textSpan && textSpan.scrollWidth > textSpan.clientWidth) {
+        desc.classList.add('is-truncated');
+      } else {
+        desc.classList.remove('is-truncated');
+      }
+    });
   }
 
   initAddSectionBorderButtons() {
@@ -1323,9 +1685,79 @@ class DashboardBuilder {
   }
 
   renderContent(content) {
-    return `<div class="area-content">
-            <p>Widget: ${content?.widgetType || "Unknown"}</p>
+    const widgetId = content?.widgetId || null;
+    const widgetType = content?.widgetType || "Unknown";
+
+    // Get graph details from the widget selector modal if available
+    let graphName = `Graph #${widgetId}`;
+    let graphType = "bar";
+    let graphDescription = "";
+
+    if (this.widgetSelectorModal && this.widgetSelectorModal.isDataLoaded()) {
+      const graph = this.widgetSelectorModal.getGraphById(widgetId);
+      if (graph) {
+        graphName = graph.name;
+        graphType = graph.graph_type || "bar";
+        graphDescription = graph.description || "";
+      }
+    }
+
+    // Edit overlay for design mode (visible on hover)
+    const editOverlay = `
+      <div class="widget-edit-overlay">
+        <div class="widget-edit-overlay-buttons">
+          <button class="btn btn-primary btn-sm widget-edit-btn" data-widget-id="${widgetId}" title="Change widget">
+            <i class="fas fa-edit"></i> Edit
+          </button>
+          <button class="btn btn-danger btn-sm widget-delete-btn" data-widget-id="${widgetId}" title="Remove widget">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Build description HTML if available
+    let descriptionHtml = "";
+    if (graphDescription) {
+      const escapedDesc = this.escapeHtml(graphDescription);
+      descriptionHtml = `
+        <div class="widget-graph-description collapsed" data-full-text="${escapedDesc}">
+          <span class="description-text">${escapedDesc}</span>
+          <span class="description-toggle" onclick="this.parentElement.classList.toggle('collapsed'); this.parentElement.classList.toggle('expanded'); this.textContent = this.parentElement.classList.contains('collapsed') ? 'read more' : 'read less';">read more</span>
+        </div>
+      `;
+    }
+
+    // Render actual graph chart container
+    return `<div class="area-content has-widget" data-widget-id="${widgetId}" data-widget-type="${widgetType}" data-graph-type="${graphType}">
+            <div class="widget-graph-wrapper">
+              <div class="widget-graph-header">
+                <div class="widget-graph-title-section">
+                  <span class="widget-graph-name">${this.escapeHtml(graphName)}</span>
+                  ${descriptionHtml}
+                </div>
+              </div>
+              <div class="widget-graph-container" data-graph-id="${widgetId}">
+                <div class="widget-graph-loading">
+                  <div class="spinner"></div>
+                  <span>Loading chart...</span>
+                </div>
+              </div>
+            </div>
+            ${editOverlay}
         </div>`;
+  }
+
+  /**
+   * Escape HTML special characters
+   * @param {string} str
+   * @returns {string}
+   */
+  escapeHtml(str) {
+    if (!str) return "";
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
   }
 
   initDragDrop() {
@@ -1794,6 +2226,11 @@ class DashboardBuilder {
       }
     });
 
+    // Re-check description truncation on window resize
+    window.addEventListener("resize", () => {
+      this.checkDescriptionTruncation();
+    });
+
     // Choose template button (when no dashboard exists)
     const chooseTemplateBtn = document.querySelector(".choose-template-btn");
     if (chooseTemplateBtn) {
@@ -1986,6 +2423,39 @@ class DashboardBuilder {
         const areaIndex = parseInt(btn.dataset.areaIndex);
         const rowIndex = parseInt(btn.dataset.rowIndex);
         this.resizeRow(sectionId, areaIndex, rowIndex, "decrease");
+      }
+
+      // Widget edit button - open widget selector to change the widget
+      if (e.target.closest(".widget-edit-btn")) {
+        e.stopPropagation();
+        const btn = e.target.closest(".widget-edit-btn");
+        const widgetId = parseInt(btn.dataset.widgetId);
+        const areaContent = btn.closest(".area-content");
+        const area = areaContent?.closest(".dashboard-area");
+        const subRow = areaContent?.closest(".dashboard-sub-row");
+
+        if (area || subRow) {
+          const context = this.getAreaContext(area, subRow);
+          if (context) {
+            this.openWidgetSelector(context, widgetId);
+          }
+        }
+      }
+
+      // Widget delete button - remove widget and return to empty state
+      if (e.target.closest(".widget-delete-btn")) {
+        e.stopPropagation();
+        const btn = e.target.closest(".widget-delete-btn");
+        const areaContent = btn.closest(".area-content");
+        const area = areaContent?.closest(".dashboard-area");
+        const subRow = areaContent?.closest(".dashboard-sub-row");
+
+        if (area || subRow) {
+          const context = this.getAreaContext(area, subRow);
+          if (context) {
+            this.handleWidgetDeselect(context);
+          }
+        }
       }
     });
 

@@ -72,7 +72,7 @@ $grid-gap: $spacing-md;
   .dashboard-preview-page &,
   .template-preview-page &,
   .dashboard-preview & {
-    padding: 0;
+    padding: $spacing-xs; // Small padding to prevent hover border clipping
     background: transparent;
     border: none;
     box-shadow: none;
@@ -192,6 +192,15 @@ $grid-gap: $spacing-md;
       font-size: 0.875rem;
       margin: 0;
     }
+
+    // When area has widget, fill container using absolute positioning
+    &.has-widget {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
   }
 
   .empty-state {
@@ -230,6 +239,15 @@ $grid-gap: $spacing-md;
     .dashboard-cell-empty {
       cursor: pointer;
     }
+  }
+
+  // Widget content fills the sub-row
+  .area-content.has-widget {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 }
 

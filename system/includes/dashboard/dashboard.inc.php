@@ -103,6 +103,12 @@ if (isset($_POST['submit'])) {
         case 'get_filters_by_keys':
             getFiltersByKeys($_POST);
             break;
+        case 'get_widgets_for_selector':
+            getWidgetsForSelector($_POST);
+            break;
+        case 'preview_graph':
+            previewGraphForDashboard($_POST);
+            break;
     }
 }
 
@@ -226,8 +232,8 @@ function showPreview($dashboardId)
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/css/daterangepicker.css', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 3);
 
-    // Add page-specific JS
-    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-preview.js');
+    // Add page-specific JS (weight 15 to load after common.js which has weight 10)
+    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-preview.js', 15);
 
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
@@ -1406,4 +1412,88 @@ function getFiltersByKeys($data)
     }
 
     Utility::ajaxResponseTrue('Filters loaded', $result);
+}
+
+/**
+ * Get all widgets (graphs) with their categories for the widget selector modal
+ * Returns graphs and categories data for filtering
+ */
+function getWidgetsForSelector($data)
+{
+    // Get all active graphs
+    $graphs = GraphManager::getAll();
+
+    // Get all widget categories
+    $categories = WidgetCategoryManager::getAll();
+
+    // Build graphs data with category mappings
+    $graphsData = array();
+    foreach ($graphs as $graph) {
+        $categoryIds = GraphWidgetCategoryMappingManager::getCategoryIdsForGraph($graph->getId());
+        $graphCategories = GraphWidgetCategoryMappingManager::getCategoriesForGraph($graph->getId());
+
+        $graphsData[] = array(
+            'gid' => $graph->getId(),
+            'name' => $graph->getName(),
+            'description' => $graph->getDescription(),
+            'graph_type' => $graph->getGraphType(),
+            'category_ids' => $categoryIds,
+            'categories' => array_map(function ($cat) {
+                return $cat->toArray();
+            }, $graphCategories)
+        );
+    }
+
+    // Build categories data with graph counts
+    $categoriesData = array();
+    foreach ($categories as $cat) {
+        $catArray = $cat->toArray();
+        $catArray['graph_count'] = count(
+            GraphWidgetCategoryMappingManager::getGraphsForCategory($cat->getId())
+        );
+        $categoriesData[] = $catArray;
+    }
+
+    Utility::ajaxResponseTrue('Widgets loaded', array(
+        'graphs' => $graphsData,
+        'categories' => $categoriesData,
+        'total_count' => count($graphsData)
+    ));
+}
+
+/**
+ * Preview a graph for dashboard widget rendering
+ * This is a simplified version for loading existing graphs by ID
+ * @param array $data
+ */
+function previewGraphForDashboard($data)
+{
+    $graphId = isset($data['id']) ? intval($data['id']) : 0;
+
+    if (!$graphId) {
+        Utility::ajaxResponseFalse('Graph ID required');
+    }
+
+    // Load graph
+    $graph = new Graph($graphId);
+    if (!$graph->getId()) {
+        Utility::ajaxResponseFalse('Graph not found');
+    }
+
+    // Get filter values (for dashboard filters)
+    $filters = isset($data['filters']) ? $data['filters'] : array();
+    if (is_string($filters)) {
+        $filters = json_decode($filters, true);
+    }
+
+    // Execute graph query and get chart data
+    $chartData = $graph->execute($filters ? $filters : array());
+    $config = json_decode($graph->getConfig(), true);
+
+    Utility::ajaxResponseTrue('Graph data loaded', array(
+        'chartData' => $chartData,
+        'config' => $config,
+        'graphType' => $graph->getGraphType(),
+        'name' => $graph->getName()
+    ));
 }

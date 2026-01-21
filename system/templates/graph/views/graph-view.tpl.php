@@ -3,12 +3,19 @@
     // Set company start date for datepicker presets
     echo DGCHelper::renderCompanyStartDateScript();
 
+    $rightContent = '<a href="?urlq=graph/edit/' . $graph->getId() . '" class="btn btn-icon btn-outline-design btn-design-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Design Mode"><i class="fas fa-paint-brush"></i></a>';
+    $rightContent .= '<a href="?urlq=graph/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create New Graph"><i class="fas fa-plus"></i></a>';
+    // Navigation links to Filter and Dashboard pages (admin only)
+    if (DGCHelper::hasAdminAccess()) {
+        $rightContent .= '<a href="?urlq=filter" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
+        $rightContent .= '<a href="?urlq=dashboard" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Dashboards"><i class="fas fa-th-large"></i></a>';
+    }
+
     echo DGCHelper::renderPageHeader([
         'title' => $graph->getName(),
         'backUrl' => '?urlq=graph',
         'backLabel' => 'Graphs',
-        'rightContent' => '<a href="?urlq=graph/edit/' . $graph->getId() . '" class="btn btn-icon btn-outline-design btn-design-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Design Mode"><i class="fas fa-paint-brush"></i></a>'
-            . '<a href="?urlq=graph/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create New Graph"><i class="fas fa-plus"></i></a>'
+        'rightContent' => $rightContent
     ]);
     ?>
 

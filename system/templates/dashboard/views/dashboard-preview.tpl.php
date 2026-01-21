@@ -72,16 +72,21 @@
                                         <?php foreach ($area['subRows'] as $subRow): ?>
                                             <?php $rowFr = isset($subRow['height']) ? intval($subRow['height']) : 1; ?>
                                             <div class="dashboard-sub-row" data-row-id="<?php echo htmlspecialchars($subRow['rowId']); ?>" data-rows="<?php echo $rowFr ?: 1; ?>">
-                                                <?php if (isset($subRow['content']) && $subRow['content']['type'] === 'empty'): ?>
+                                                <?php
+                                                // Check if subRow has widget content
+                                                $hasSubRowWidget = isset($subRow['content']) &&
+                                                                   isset($subRow['content']['type']) &&
+                                                                   $subRow['content']['type'] !== 'empty' &&
+                                                                   !empty($subRow['content']['widgetId']);
+                                                ?>
+                                                <?php if ($hasSubRowWidget): ?>
+                                                    <?php echo DGCHelper::renderDashboardWidgetContent($subRow['content']); ?>
+                                                <?php else: ?>
                                                     <?php
                                                     $icon = isset($subRow['emptyState']['icon']) ? $subRow['emptyState']['icon'] : 'fa-plus-circle';
                                                     $message = isset($subRow['emptyState']['message']) ? $subRow['emptyState']['message'] : 'Add content here';
                                                     echo DGCHelper::renderDashboardCellEmpty($icon, $message);
                                                     ?>
-                                                <?php else: ?>
-                                                    <div class="area-content">
-                                                        <p>Widget: <?php echo isset($subRow['content']['widgetType']) ? htmlspecialchars($subRow['content']['widgetType']) : 'Unknown'; ?></p>
-                                                    </div>
                                                 <?php endif; ?>
                                             </div>
                                         <?php endforeach; ?>
@@ -93,16 +98,21 @@
                                         data-area-id="<?php echo htmlspecialchars($area['aid']); ?>"
                                         style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>;">
 
-                                        <?php if (isset($area['content']) && $area['content']['type'] === 'empty'): ?>
+                                        <?php
+                                        // Check if area has widget content (non-empty with widgetId)
+                                        $hasWidget = isset($area['content']) &&
+                                                     isset($area['content']['type']) &&
+                                                     $area['content']['type'] !== 'empty' &&
+                                                     !empty($area['content']['widgetId']);
+                                        ?>
+                                        <?php if ($hasWidget): ?>
+                                            <?php echo DGCHelper::renderDashboardWidgetContent($area['content']); ?>
+                                        <?php else: ?>
                                             <?php
                                             $icon = isset($area['emptyState']['icon']) ? $area['emptyState']['icon'] : 'fa-plus-circle';
                                             $message = isset($area['emptyState']['message']) ? $area['emptyState']['message'] : 'Add content here';
                                             echo DGCHelper::renderDashboardCellEmpty($icon, $message);
                                             ?>
-                                        <?php else: ?>
-                                            <div class="area-content">
-                                                <p>Widget: <?php echo isset($area['content']['widgetType']) ? htmlspecialchars($area['content']['widgetType']) : 'Unknown'; ?></p>
-                                            </div>
                                         <?php endif; ?>
                                     </div>
                                 <?php endif; ?>

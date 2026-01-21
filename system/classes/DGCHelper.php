@@ -77,6 +77,61 @@ class DGCHelper
     }
 
     /**
+     * Render dashboard widget content (graph, etc.)
+     * Used in preview mode to render actual widget containers
+     *
+     * @param array $content The content object with type, widgetId, widgetType, config
+     * @return string HTML for the widget content
+     */
+    public static function renderDashboardWidgetContent($content)
+    {
+        $widgetId = isset($content['widgetId']) ? intval($content['widgetId']) : 0;
+        $widgetType = isset($content['widgetType']) ? $content['widgetType'] : 'graph';
+
+        // Get graph info for display
+        $graphName = 'Graph #' . $widgetId;
+        $graphType = 'bar';
+        $graphDescription = '';
+
+        if ($widgetId) {
+            $graph = new Graph($widgetId);
+            if ($graph->getId()) {
+                $graphName = $graph->getName();
+                $graphType = $graph->getGraphType();
+                $graphDescription = $graph->getDescription();
+            }
+        }
+
+        $html = '<div class="area-content has-widget" data-widget-id="' . $widgetId . '" data-widget-type="' . htmlspecialchars($widgetType) . '" data-graph-type="' . htmlspecialchars($graphType) . '">';
+        $html .= '<div class="widget-graph-wrapper">';
+        $html .= '<div class="widget-graph-header">';
+        $html .= '<div class="widget-graph-title-section">';
+        $html .= '<span class="widget-graph-name">' . htmlspecialchars($graphName) . '</span>';
+
+        // Add description with read more/less toggle if description exists
+        if (!empty($graphDescription)) {
+            $escapedDesc = htmlspecialchars($graphDescription);
+            $html .= '<div class="widget-graph-description collapsed" data-full-text="' . $escapedDesc . '">';
+            $html .= '<span class="description-text">' . $escapedDesc . '</span>';
+            $html .= '<span class="description-toggle" onclick="this.parentElement.classList.toggle(\'collapsed\'); this.parentElement.classList.toggle(\'expanded\'); this.textContent = this.parentElement.classList.contains(\'collapsed\') ? \'read more\' : \'read less\';">read more</span>';
+            $html .= '</div>';
+        }
+
+        $html .= '</div>'; // end title-section
+        $html .= '</div>'; // end header
+        $html .= '<div class="widget-graph-container" data-graph-id="' . $widgetId . '">';
+        $html .= '<div class="widget-graph-loading">';
+        $html .= '<div class="spinner"></div>';
+        $html .= '<span>Loading chart...</span>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
      * Generate a UUID v4
      * Format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
      * PHP 5.6 compatible
