@@ -9,6 +9,12 @@ const Sortable = window.Sortable;
 import { TemplateManager } from "./dashboard/TemplateManager.js";
 import { keyboardNavigation } from "./dashboard/KeyboardNavigation.js";
 import templateModalNavigation from "./dashboard/TemplateModalNavigation.js";
+import FilterRenderer from "./FilterRenderer.js";
+import DatePickerInit from "./DatePickerInit.js";
+
+// Export to window for FilterRenderer to use
+window.DatePickerInit = DatePickerInit;
+window.FilterRenderer = FilterRenderer;
 
 // Use globals from common.js (Toast, Loading, Ajax, ConfirmDialog)
 const Toast = window.Toast;
@@ -119,7 +125,10 @@ function handleEmptyCellAction(cell) {
 
   // TODO: Implement default action (e.g., open widget selector)
   if (window.Toast) {
-    window.Toast.info(`Perspective: ${colFr}w x ${perspectiveHeight}h | Actual: ${colFr}w x ${rowFr}h`);
+    // Determine current mode from body class
+    const isDesignMode = document.body.classList.contains("dashboard-builder-page");
+    const modeLabel = isDesignMode ? "Design Mode" : "View Mode";
+    window.Toast.info(`${modeLabel} | Perspective: ${colFr}w x ${perspectiveHeight}h | Actual: ${colFr}w x ${rowFr}h`);
     console.log(context);
   }
 }
@@ -183,7 +192,125 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Expose to window for cross-module access
   window.keyboardNavigation = keyboardNavigation;
+
+  // Initialize dashboard filter bar if present
+  initDashboardFilterBar();
 });
+
+/**
+ * Initialize dashboard filter bar
+ * Filters are rendered via PHP, this just initializes the pickers
+ * Same approach as GraphView.js initFilters()
+ */
+function initDashboardFilterBar() {
+  const filterBar = document.querySelector(".dashboard-filter-bar");
+  if (!filterBar) return;
+
+  const filtersContainer = filterBar.querySelector("#dashboard-filters");
+  if (!filtersContainer) return;
+
+  // Use FilterRenderer for initialization (handles datepickers, multi-selects, etc.)
+  // Same as GraphView.initFilters()
+  if (typeof FilterRenderer !== "undefined") {
+    FilterRenderer.initPickers(filtersContainer);
+  } else if (typeof DatePickerInit !== "undefined") {
+    // Fallback to just datepickers
+    DatePickerInit.init(filtersContainer);
+  }
+
+  // Get UI elements
+  const applyBtn = filterBar.querySelector(".filter-apply-btn");
+  const separator = filterBar.querySelector(".filter-actions-separator:not(:first-of-type)");
+  const autoApplySwitch = filterBar.querySelector("#dashboard-auto-apply-switch");
+  const collapseBtn = filterBar.querySelector(".filter-collapse-btn");
+
+  // Track auto-apply state
+  let autoApplyEnabled = false;
+
+  // Collapse/Expand functionality
+  const COLLAPSE_KEY = "dgc_dashboard_filters_collapsed";
+
+  function updateCollapseState(collapsed) {
+    if (collapsed) {
+      filterBar.classList.add("collapsed");
+      if (collapseBtn) collapseBtn.title = "Expand Filters";
+    } else {
+      filterBar.classList.remove("collapsed");
+      if (collapseBtn) collapseBtn.title = "Collapse Filters";
+    }
+  }
+
+  // Restore collapse state from localStorage
+  const savedCollapsed = localStorage.getItem(COLLAPSE_KEY) === "1";
+  updateCollapseState(savedCollapsed);
+
+  // Collapse button handler
+  if (collapseBtn) {
+    collapseBtn.addEventListener("click", () => {
+      const isCollapsed = filterBar.classList.contains("collapsed");
+      const newState = !isCollapsed;
+      updateCollapseState(newState);
+      localStorage.setItem(COLLAPSE_KEY, newState ? "1" : "0");
+    });
+  }
+
+  // Update UI based on auto-apply state
+  function updateAutoApplyUI() {
+    if (autoApplyEnabled) {
+      // Hide apply button and separator when live filtering is ON
+      applyBtn?.classList.remove("visible");
+      separator?.classList.remove("visible");
+    } else {
+      // Show apply button and separator when live filtering is OFF
+      applyBtn?.classList.add("visible");
+      separator?.classList.add("visible");
+    }
+  }
+
+  // Restore setting from localStorage
+  const savedSetting = localStorage.getItem("dgc_dashboard_auto_apply");
+  autoApplyEnabled = savedSetting === "1";
+  if (autoApplySwitch) {
+    autoApplySwitch.checked = autoApplyEnabled;
+  }
+  updateAutoApplyUI();
+
+  // Auto-apply toggle handler
+  if (autoApplySwitch) {
+    autoApplySwitch.addEventListener("change", () => {
+      autoApplyEnabled = autoApplySwitch.checked;
+      localStorage.setItem("dgc_dashboard_auto_apply", autoApplyEnabled ? "1" : "0");
+      updateAutoApplyUI();
+
+      // If auto-apply is enabled, apply filters immediately
+      if (autoApplyEnabled) {
+        applyFilters();
+      }
+    });
+  }
+
+  // Apply filters function
+  function applyFilters() {
+    if (typeof FilterRenderer !== "undefined") {
+      const values = FilterRenderer.getValues(filtersContainer);
+      console.log("Dashboard filter values:", values);
+      // TODO: Apply filters to dashboard graphs
+      Toast.success("Filters applied");
+    }
+  }
+
+  // Apply button handler
+  if (applyBtn) {
+    applyBtn.addEventListener("click", applyFilters);
+  }
+
+  // Listen for filter changes (for live filtering)
+  filtersContainer.addEventListener("change", () => {
+    if (autoApplyEnabled) {
+      applyFilters();
+    }
+  });
+}
 
 // Grid configuration constants
 // Max total fr for a section is MAX_COLUMNS (6fr), not numColumns * MAX_FR_UNITS

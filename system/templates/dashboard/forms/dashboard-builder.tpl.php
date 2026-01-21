@@ -28,6 +28,10 @@ echo DGCHelper::renderPageHeader([
     'titleDescription' => ($dashboard && $dashboard->getId()) ? $dashboard->getDescription() : '',
     'rightContent' => $rightContent
 ]);
+
+// Dashboard filter bar - filters shown in array order
+$dashboardFilters = array('company_list', 'outlet_list', 'main_datepicker');
+echo DGCHelper::renderDashboardFilterBar($dashboardFilters);
 ?>
 
 <div id="dashboard-builder"

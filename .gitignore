@@ -16,6 +16,7 @@ out/
 
 # Environment files
 .env
+.local_db.env
 .env.local
 .env.*.local
 *.local

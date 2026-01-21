@@ -100,6 +100,9 @@ if (isset($_POST['submit'])) {
             if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
             moveTemplateCategory($_POST);
             break;
+        case 'get_filters_by_keys':
+            getFiltersByKeys($_POST);
+            break;
     }
 }
 
@@ -180,6 +183,11 @@ function showBuilder($dashboardId = 0)
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs-dgc/Sortable.min.js', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
+    // jQuery and Daterangepicker for filter bar
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery3/jquery.min.js', 1);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment-dgc/moment.min.js', 2);
+    $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/css/daterangepicker.css', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 3);
 
     // Add page-specific JS
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-builder.js');
@@ -212,6 +220,11 @@ function showPreview($dashboardId)
 
     // Add libraries
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
+    // jQuery and Daterangepicker for filter bar
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'jquery3/jquery.min.js', 1);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'moment-dgc/moment.min.js', 2);
+    $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/css/daterangepicker.css', 5);
+    $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 3);
 
     // Add page-specific JS
     $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-preview.js');
@@ -1355,4 +1368,42 @@ function moveTemplateCategory($data)
         'category_id' => $categoryId,
         'category_name' => $categoryName
     ));
+}
+
+/**
+ * Get filters by keys for dashboard filter bar
+ * Returns filter data with options for FilterRenderer
+ */
+function getFiltersByKeys($data)
+{
+    $keys = isset($data['keys']) ? $data['keys'] : array();
+
+    // Handle case where keys is a JSON string
+    if (is_string($keys)) {
+        $decoded = json_decode($keys, true);
+        $keys = is_array($decoded) ? $decoded : array();
+    }
+
+    if (empty($keys) || !is_array($keys)) {
+        Utility::ajaxResponseTrue('No filters', array());
+    }
+
+    // Get filters from DataFilterManager
+    $filters = DataFilterManager::getByKeys($keys);
+
+    if (empty($filters)) {
+        Utility::ajaxResponseTrue('No filters found', array());
+    }
+
+    // Build filter data with options (ordered by input array)
+    // Note: toArray() already includes options via getOptions()
+    $result = array();
+    foreach ($keys as $key) {
+        if (isset($filters[$key])) {
+            $filter = $filters[$key];
+            $result[] = $filter->toArray();
+        }
+    }
+
+    Utility::ajaxResponseTrue('Filters loaded', $result);
 }

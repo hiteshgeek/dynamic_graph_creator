@@ -307,4 +307,199 @@ class DGCHelper
         $html .= '</div>';
         return $html;
     }
+
+    /**
+     * Render dashboard filter bar with filters
+     * Renders filters directly via PHP using same markup as graph-view.tpl.php
+     *
+     * @param array $filterKeys Array of filter keys in display order (e.g., ['company_list', 'outlet_list', 'main_datepicker'])
+     * @return string HTML markup for the filter bar with filters
+     */
+    public static function renderDashboardFilterBar($filterKeys = array())
+    {
+        if (empty($filterKeys)) {
+            return '';
+        }
+
+        // Normalize keys (ensure :: prefix)
+        $normalizedKeys = array();
+        foreach ($filterKeys as $key) {
+            $normalizedKeys[] = (strpos($key, '::') === 0) ? $key : '::' . $key;
+        }
+
+        // Fetch filters by keys
+        $matchedFilters = DataFilterManager::getByKeys($normalizedKeys);
+
+        // Build filters array in order of keys
+        $filters = array();
+        foreach ($normalizedKeys as $key) {
+            if (isset($matchedFilters[$key])) {
+                $filters[] = $matchedFilters[$key]->toArray();
+            }
+        }
+
+        if (empty($filters)) {
+            return '';
+        }
+
+        // Use dashboard-filter-bar class (styles in _filter-bar.scss)
+        $html = '<div class="dashboard-filter-bar">';
+
+        // Filters list
+        $html .= '<div class="filters-list" id="dashboard-filters">';
+        foreach ($filters as $filter) {
+            $html .= self::renderFilterInput($filter);
+        }
+        $html .= '</div>';
+
+        // Filter actions (same as graph-view)
+        $html .= '<div class="filter-actions">';
+        // Collapse/Expand toggle button
+        $html .= '<button type="button" class="btn btn-icon btn-outline-secondary filter-collapse-btn" title="Collapse Filters">';
+        $html .= '<i class="fas fa-chevron-up"></i>';
+        $html .= '</button>';
+        $html .= '<span class="filter-collapsed-label">Filters</span>';
+        $html .= '<div class="filter-actions-separator visible"></div>';
+        $html .= '<div class="auto-apply-toggle">';
+        $html .= '<span class="auto-apply-label">Live Filtering</span>';
+        $html .= '<div class="form-check form-switch custom-switch">';
+        $html .= '<input class="form-check-input" type="checkbox" role="switch" id="dashboard-auto-apply-switch">';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '<div class="filter-actions-separator"></div>';
+        $html .= '<button type="button" class="btn btn-primary btn-sm filter-apply-btn dashboard-filter-apply-btn">';
+        $html .= '<i class="fas fa-check"></i> Apply Filters';
+        $html .= '</button>';
+        $html .= '</div>';
+
+        $html .= '</div>'; // End card
+
+        return $html;
+    }
+
+    /**
+     * Render a single filter input
+     * Same markup as used in graph-view.tpl.php for consistency
+     *
+     * @param array $filter Filter data array from toArray()
+     * @return string HTML markup for the filter input
+     */
+    public static function renderFilterInput($filter)
+    {
+        $filterKey = $filter['filter_key'];
+        $filterKeyClean = ltrim($filterKey, ':');
+        $filterType = $filter['filter_type'];
+        $filterLabel = $filter['filter_label'];
+        $defaultValue = isset($filter['default_value']) ? $filter['default_value'] : '';
+        $options = isset($filter['options']) ? $filter['options'] : array();
+
+        // Get filter config for inline display
+        $filterConfig = isset($filter['filter_config']) ? $filter['filter_config'] : '';
+        $filterConfigArr = $filterConfig ? json_decode($filterConfig, true) : array();
+        $isInline = isset($filterConfigArr['inline']) && $filterConfigArr['inline'];
+
+        $html = '<div class="filter-input-item" data-filter-key="' . htmlspecialchars($filterKeyClean) . '">';
+        $html .= '<div class="filter-input-header">';
+        $html .= '<label class="filter-input-label">' . htmlspecialchars($filterLabel) . '</label>';
+        $html .= '</div>';
+
+        // Render input based on type
+        switch ($filterType) {
+            case 'select':
+                $html .= '<select class="form-control form-control-sm filter-input" name="' . htmlspecialchars($filterKeyClean) . '">';
+                $html .= '<option value="">-- Select --</option>';
+                foreach ($options as $opt) {
+                    $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
+                    $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                    $selected = ($value == $defaultValue) ? 'selected' : '';
+                    $html .= '<option value="' . htmlspecialchars($value) . '" ' . $selected . '>' . htmlspecialchars($label) . '</option>';
+                }
+                $html .= '</select>';
+                break;
+
+            case 'multi_select':
+                $html .= '<div class="dropdown filter-multiselect-dropdown" data-filter-name="' . htmlspecialchars($filterKeyClean) . '">';
+                $html .= '<button class="btn btn-outline-secondary dropdown-toggle filter-multiselect-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">';
+                $html .= '<span class="filter-multiselect-placeholder">-- Select multiple --</span>';
+                $html .= '</button>';
+                $html .= '<div class="dropdown-menu filter-multiselect-options">';
+                $html .= '<div class="filter-multiselect-header">';
+                $html .= '<div class="filter-multiselect-actions">';
+                $html .= '<button type="button" class="btn btn-link btn-sm multiselect-select-all">All</button>';
+                $html .= '<span class="filter-multiselect-divider">|</span>';
+                $html .= '<button type="button" class="btn btn-link btn-sm multiselect-select-none">None</button>';
+                $html .= '</div>';
+                $html .= '<input type="text" class="form-control form-control-sm multiselect-search" placeholder="Search...">';
+                $html .= '</div>';
+                foreach ($options as $index => $opt) {
+                    $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
+                    $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                    $isSelected = is_array($opt) && isset($opt['is_selected']) && $opt['is_selected'];
+                    $optId = 'multiselect-' . $filterKeyClean . '-' . $index;
+                    $html .= '<div class="dropdown-item filter-multiselect-option">';
+                    $html .= '<div class="form-check">';
+                    $html .= '<input class="form-check-input" type="checkbox" name="' . htmlspecialchars($filterKeyClean) . '[]" value="' . htmlspecialchars($value) . '" id="' . $optId . '" ' . ($isSelected ? 'checked' : '') . '>';
+                    $html .= '<label class="form-check-label" for="' . $optId . '">' . htmlspecialchars($label) . '</label>';
+                    $html .= '</div>';
+                    $html .= '</div>';
+                }
+                $html .= '</div>'; // End dropdown-menu
+                $html .= '</div>'; // End dropdown
+                break;
+
+            case 'checkbox':
+                $html .= '<div class="filter-checkbox-group' . ($isInline ? ' inline' : '') . '">';
+                foreach ($options as $index => $opt) {
+                    $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
+                    $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                    $isSelected = is_array($opt) && isset($opt['is_selected']) && $opt['is_selected'];
+                    $optId = 'checkbox-' . $filterKeyClean . '-' . $index;
+                    $html .= '<div class="form-check">';
+                    $html .= '<input class="form-check-input" type="checkbox" name="' . htmlspecialchars($filterKeyClean) . '[]" value="' . htmlspecialchars($value) . '" id="' . $optId . '" ' . ($isSelected ? 'checked' : '') . '>';
+                    $html .= '<label class="form-check-label" for="' . $optId . '">' . htmlspecialchars($label) . '</label>';
+                    $html .= '</div>';
+                }
+                $html .= '</div>';
+                break;
+
+            case 'radio':
+                $html .= '<div class="filter-radio-group' . ($isInline ? ' inline' : '') . '">';
+                foreach ($options as $index => $opt) {
+                    $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
+                    $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                    $isSelected = is_array($opt) && isset($opt['is_selected']) && $opt['is_selected'];
+                    $checked = $isSelected || ($value == $defaultValue) ? 'checked' : '';
+                    $optId = 'radio-' . $filterKeyClean . '-' . $index;
+                    $html .= '<div class="form-check">';
+                    $html .= '<input class="form-check-input" type="radio" name="' . htmlspecialchars($filterKeyClean) . '" value="' . htmlspecialchars($value) . '" id="' . $optId . '" ' . $checked . '>';
+                    $html .= '<label class="form-check-label" for="' . $optId . '">' . htmlspecialchars($label) . '</label>';
+                    $html .= '</div>';
+                }
+                $html .= '</div>';
+                break;
+
+            case 'date':
+                $html .= '<input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="' . htmlspecialchars($filterKeyClean) . '" value="' . htmlspecialchars($defaultValue) . '" data-picker-type="single" placeholder="Select date" autocomplete="off">';
+                break;
+
+            case 'date_range':
+                $html .= '<input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="' . htmlspecialchars($filterKeyClean) . '" data-picker-type="range" placeholder="Select date range" autocomplete="off">';
+                break;
+
+            case 'main_datepicker':
+                $html .= '<input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="' . htmlspecialchars($filterKeyClean) . '" data-picker-type="main" placeholder="Select date range" autocomplete="off">';
+                break;
+
+            case 'number':
+                $html .= '<input type="number" class="form-control form-control-sm filter-input" name="' . htmlspecialchars($filterKeyClean) . '" value="' . htmlspecialchars($defaultValue) . '" placeholder="Enter number">';
+                break;
+
+            default: // text
+                $html .= '<input type="text" class="form-control form-control-sm filter-input" name="' . htmlspecialchars($filterKeyClean) . '" value="' . htmlspecialchars($defaultValue) . '" placeholder="Enter value">';
+        }
+
+        $html .= '</div>'; // End filter-input-item
+
+        return $html;
+    }
 }

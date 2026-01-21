@@ -1575,7 +1575,9 @@ export default class GraphCreator {
       const result = await Ajax.post("save_graph", data);
 
       if (result.success) {
-        Toast.success(result.message);
+        // Handle both 'message' (DGC) and fallback for live site which uses 'screen_message'
+        const successMsg = result.message || (this.graphId ? 'Graph updated successfully' : 'Graph created successfully');
+        Toast.success(successMsg);
 
         // Mark as saved
         this.captureState();
@@ -1586,7 +1588,7 @@ export default class GraphCreator {
           window.location.href = `?urlq=graph/edit/${result.data.id}`;
         }
       } else {
-        Toast.error(result.message);
+        Toast.error(result.message || 'Failed to save graph');
       }
     } catch (error) {
       Toast.error("Failed to save graph");

@@ -399,21 +399,26 @@ class DataFilterManager
     {
         $escapedPlaceholder = preg_quote($placeholder, '/');
 
+        // Column pattern: matches table.column, alias.column, or just column
+        // Also matches simple function calls like DATE(column) or FUNC(table.column)
+        // The function pattern uses \w+\s*\([\w.,\s]+\) to avoid matching complex expressions
+        $columnPattern = '(?:\w+\s*\([\w.,\s]+\)|(?:\w+\.)?+\w+)';
+
         // Pattern for IN/NOT IN clauses: field IN (::placeholder) or field NOT IN (::placeholder)
-        $inPattern = '/\w+\s+(?:NOT\s+)?IN\s*\(\s*' . $escapedPlaceholder . '\s*\)/i';
+        $inPattern = '/' . $columnPattern . '\s+(?:NOT\s+)?IN\s*\(\s*' . $escapedPlaceholder . '\s*\)/i';
         $query = preg_replace($inPattern, '1=1', $query);
 
         // Pattern for BETWEEN: field BETWEEN ::placeholder AND value or value AND ::placeholder
         // Also handles the case where both sides are placeholders (::x_from AND ::x_to)
-        $betweenPattern = '/\w+\s+BETWEEN\s+(?:' . $escapedPlaceholder . '\s+AND\s+(?:::\w+|[^\s,)]+)|(?:::\w+|[^\s,)]+)\s+AND\s+' . $escapedPlaceholder . ')/i';
+        $betweenPattern = '/' . $columnPattern . '\s+BETWEEN\s+(?:' . $escapedPlaceholder . '\s+AND\s+(?:::\w+|[^\s,)]+)|(?:::\w+|[^\s,)]+)\s+AND\s+' . $escapedPlaceholder . ')/i';
         $query = preg_replace($betweenPattern, '1=1', $query);
 
         // Pattern for comparison operators: field = ::placeholder, field >= ::placeholder, etc.
-        $comparisonPattern = '/\w+\s*(?:=|!=|<>|>=|<=|>|<)\s*' . $escapedPlaceholder . '/i';
+        $comparisonPattern = '/' . $columnPattern . '\s*(?:=|!=|<>|>=|<=|>|<)\s*' . $escapedPlaceholder . '/i';
         $query = preg_replace($comparisonPattern, '1=1', $query);
 
         // Pattern for LIKE: field LIKE ::placeholder
-        $likePattern = '/\w+\s+(?:NOT\s+)?LIKE\s+' . $escapedPlaceholder . '/i';
+        $likePattern = '/' . $columnPattern . '\s+(?:NOT\s+)?LIKE\s+' . $escapedPlaceholder . '/i';
         $query = preg_replace($likePattern, '1=1', $query);
 
         // If placeholder still exists (not part of a recognized condition), just replace with 'test'

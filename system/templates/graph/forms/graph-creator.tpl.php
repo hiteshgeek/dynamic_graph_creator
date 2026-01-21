@@ -8,6 +8,7 @@ $saveButtonClass = $graph ? 'btn-outline-warning' : 'btn-primary';
 $rightContent .= '<button type="button" class="btn ' . $saveButtonClass . ' btn-sm save-graph-btn" data-save-btn><i class="fas fa-save"></i> ' . ($graph ? 'Save' : 'Create Graph') . '</button>';
 if ($graph) {
     $rightContent .= '<a href="?urlq=graph/view/' . $graph->getId() . '" class="btn btn-icon btn-outline-primary btn-view-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Mode"><i class="fas fa-eye"></i></a>';
+    $rightContent .= '<a href="?urlq=graph/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create New Graph"><i class="fas fa-plus"></i></a>';
 }
 echo DGCHelper::renderPageHeader([
     'title' => $graph ? 'Edit Graph' : 'Create Graph',

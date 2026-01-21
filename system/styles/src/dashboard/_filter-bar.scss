@@ -1,0 +1,293 @@
+// Dashboard Filter Bar Styles
+// Same design as .graph-view-filters from _graph-creator.scss
+@use "../variables" as *;
+
+// Main container - card style like graph-view-filters
+.dashboard-filter-bar {
+  background: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
+  border-radius: $border-radius;
+  padding: $spacing-md;
+  margin: $spacing-lg $spacing-lg 0 $spacing-lg;
+
+  // Filters list - horizontal flex layout
+  .filters-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+    margin-bottom: $spacing-md;
+  }
+
+  // Filter input items
+  .filter-input-item {
+    flex: 1 1 200px;
+    max-width: 300px;
+    padding: $spacing-sm;
+    background: var(--dgc-gray-50);
+    border: 1px solid var(--dgc-border-color);
+    border-radius: $border-radius;
+
+    &:hover {
+      border-color: var(--dgc-primary-light);
+    }
+  }
+
+  .filter-input-header {
+    margin-bottom: $spacing-xs;
+  }
+
+  .filter-input-label {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: var(--dgc-text-primary);
+    margin: 0;
+  }
+
+  .filter-input {
+    font-size: $font-size-sm !important;
+  }
+
+  // Multi-select dropdown styling
+  .filter-multiselect-dropdown {
+    width: 100%;
+  }
+
+  .filter-multiselect-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-xs $spacing-sm;
+    border: 1px solid var(--dgc-border-color) !important;
+    background: var(--dgc-bg-card) !important;
+    color: var(--dgc-text-primary) !important;
+    font-size: $font-size-sm;
+    text-align: left;
+
+    &:hover {
+      border-color: var(--dgc-primary-light) !important;
+    }
+
+    &:focus {
+      border-color: var(--dgc-primary) !important;
+      box-shadow: none !important;
+    }
+  }
+
+  .filter-multiselect-placeholder {
+    color: var(--dgc-text-hint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.has-selection {
+      color: var(--dgc-text-primary);
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  .filter-multiselect-options {
+    width: 100%;
+    padding: $spacing-xs 0;
+    background: var(--dgc-bg-card);
+    border: 1px solid var(--dgc-border-color);
+    box-shadow: var(--dgc-shadow-2);
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  .filter-multiselect-header {
+    position: sticky;
+    top: 0;
+    background: var(--dgc-bg-card);
+    z-index: 1;
+    padding: $spacing-xs $spacing-sm;
+    border-bottom: 1px solid var(--dgc-border-color);
+    margin-bottom: $spacing-xs;
+  }
+
+  .filter-multiselect-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-xs;
+
+    .btn-link {
+      padding: 0 $spacing-xs;
+      font-size: $font-size-sm;
+      text-decoration: none;
+      color: var(--dgc-primary);
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .filter-multiselect-divider {
+    color: var(--dgc-text-hint);
+    font-size: $font-size-sm;
+  }
+
+  .multiselect-search {
+    width: 100%;
+    padding: $spacing-xs !important;
+    font-size: $font-size-sm !important;
+  }
+
+  .filter-multiselect-option {
+    padding: $spacing-xs $spacing-sm;
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+      background: var(--dgc-gray-50);
+    }
+
+    .form-check {
+      margin: 0;
+    }
+
+    .form-check-label {
+      font-size: $font-size-sm;
+      color: var(--dgc-text-primary);
+    }
+  }
+
+  // Checkbox and radio groups
+  .filter-checkbox-group,
+  .filter-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 120px;
+    overflow-y: auto;
+    padding: $spacing-xs;
+    background: var(--dgc-bg-card);
+    border: 1px solid var(--dgc-border-color);
+    border-radius: $border-radius;
+
+    &.inline {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: $spacing-md;
+      max-height: none;
+    }
+  }
+
+  // Filter actions bar (Live Filtering toggle + Apply button)
+  .filter-actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding-top: $spacing-sm;
+    border-top: 1px solid var(--dgc-border-color);
+
+    // Collapse/Expand button
+    .filter-collapse-btn {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: transform 0.3s ease, background-color 0.2s ease;
+
+      i {
+        transition: transform 0.3s ease;
+      }
+    }
+
+    // Filter label
+    .filter-collapsed-label {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-bold;
+      color: var(--dgc-text-secondary);
+    }
+
+    .auto-apply-toggle {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+
+      .auto-apply-label {
+        font-size: $font-size-sm;
+        color: var(--dgc-text-secondary);
+      }
+    }
+
+    .filter-actions-separator {
+      display: none;
+
+      &.visible {
+        display: block;
+        width: 1px;
+        height: 20px;
+        background: var(--dgc-border-color);
+      }
+    }
+
+    .filter-apply-btn {
+      display: none;
+
+      &.visible {
+        display: inline-flex;
+      }
+    }
+  }
+
+  // Collapsed state
+  &.collapsed {
+    display: inline-flex;
+    width: auto;
+    padding: $spacing-xs $spacing-sm;
+
+    .filters-list {
+      display: none;
+    }
+
+    .filter-actions {
+      padding-top: 0;
+      border-top: none;
+      gap: $spacing-sm;
+
+      // Hide everything except collapse button and label when collapsed
+      .filter-actions-separator,
+      .auto-apply-toggle,
+      .filter-apply-btn {
+        display: none !important;
+      }
+
+      .filter-collapse-btn {
+        i {
+          transform: rotate(180deg);
+        }
+      }
+
+      .filter-collapsed-label {
+        display: block;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .dashboard-filter-bar {
+    margin: 0 $spacing-sm $spacing-md;
+
+    .filters-list {
+      .filter-input-item {
+        flex: 1 1 calc(50% - #{$spacing-sm});
+        max-width: none;
+      }
+    }
+
+    .filter-actions {
+      flex-wrap: wrap;
+      gap: $spacing-sm;
+    }
+  }
+}

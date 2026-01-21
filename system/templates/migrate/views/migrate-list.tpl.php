@@ -384,22 +384,22 @@
                 </div>
 
                 <!-- Combined Validation Table -->
-                <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
-                    <table class="table table-sm table-hover mb-0" style="font-size: 0.75rem;">
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-sm table-hover mb-0" style="font-size: 0.875rem;">
                         <thead class="sticky-top" style="background: #fff;">
                             <tr>
-                                <th rowspan="2" class="align-middle" style="width: 20%; border-bottom: 2px solid #dee2e6;">Table Name</th>
-                                <th rowspan="2" class="align-middle text-center" style="width: 10%; border-bottom: 2px solid #dee2e6;">install.sql</th>
-                                <th rowspan="2" class="align-middle" style="width: 22%; border-bottom: 2px solid #dee2e6;">Constant</th>
-                                <th colspan="2" class="text-center" style="background: #e3f2fd; border-bottom: 1px solid #bbdefb;">Local DB</th>
-                                <th colspan="2" class="text-center" style="background: #fff3e0; border-bottom: 1px solid #ffe0b2;">Live DB</th>
-                                <th rowspan="2" class="align-middle text-center" style="width: 10%; border-bottom: 2px solid #dee2e6;">Data Match</th>
+                                <th rowspan="2" class="align-middle" style="border-bottom: 2px solid #dee2e6;">Table Name</th>
+                                <th rowspan="2" class="align-middle text-center" style="border-bottom: 2px solid #dee2e6;">install.sql</th>
+                                <th rowspan="2" class="align-middle" style="border-bottom: 2px solid #dee2e6;">Constant</th>
+                                <th colspan="2" class="text-center" style="background: #e3f2fd; border-bottom: 1px solid #bbdefb;"><i class="fas fa-laptop me-1"></i>Local DB</th>
+                                <th colspan="2" class="text-center" style="background: #fff3e0; border-bottom: 1px solid #ffe0b2;"><i class="fas fa-cloud me-1"></i>Live DB</th>
+                                <th rowspan="2" class="align-middle text-center" style="border-bottom: 2px solid #dee2e6;">Data Match</th>
                             </tr>
                             <tr>
-                                <th class="text-center" style="width: 8%; background: #e3f2fd; border-bottom: 2px solid #bbdefb;">Exists</th>
-                                <th class="text-center" style="width: 8%; background: #e3f2fd; border-bottom: 2px solid #bbdefb;">Rows</th>
-                                <th class="text-center" style="width: 8%; background: #fff3e0; border-bottom: 2px solid #ffe0b2;">Exists</th>
-                                <th class="text-center" style="width: 8%; background: #fff3e0; border-bottom: 2px solid #ffe0b2;">Rows</th>
+                                <th class="text-center" style="background: #e3f2fd; border-bottom: 2px solid #bbdefb;">Exists</th>
+                                <th class="text-center" style="background: #e3f2fd; border-bottom: 2px solid #bbdefb;">Rows</th>
+                                <th class="text-center" style="background: #fff3e0; border-bottom: 2px solid #ffe0b2;">Exists</th>
+                                <th class="text-center" style="background: #fff3e0; border-bottom: 2px solid #ffe0b2;">Rows</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -806,7 +806,8 @@
                                         ];
                                         $includeNum = 1;
                                         foreach ($stepData['include_files'] as $file):
-                                            $status = $targetExists ? getFileStatus($sourceDir, $targetDir, $file) : 'unknown';
+                                            // Pass true to apply transformation before comparison (for include files)
+                                            $status = $targetExists ? getFileStatus($sourceDir, $targetDir, $file, true) : 'unknown';
                                             if ($status === 'exists') $totalFolderExists++;
                                             $fileTransforms = isset($includeTransformations[$file]) ? $includeTransformations[$file] : null;
                                         ?>

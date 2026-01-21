@@ -9,6 +9,11 @@
     }
 
     $rightContent = '';
+    // Navigation links to Graph and Filter pages (admin only)
+    if (DGCHelper::hasAdminAccess()) {
+        $rightContent .= '<a href="?urlq=graph" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-bar"></i></a>';
+        $rightContent .= '<a href="?urlq=filter" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
+    }
     if (!$dashboard->getIsSystem()) {
         $rightContent .= '<a href="?urlq=dashboard/builder/' . $dashboard->getId() . '" class="btn btn-icon btn-outline-design btn-design-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Design Mode"><i class="fas fa-paint-brush"></i></a>';
         $rightContent .= '<button class="btn btn-icon btn-outline-danger delete-dashboard-btn" data-dashboard-id="' . $dashboard->getId() . '" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Delete Dashboard"><i class="fas fa-trash"></i></button>';
@@ -21,6 +26,10 @@
         'badges' => $badges,
         'rightContent' => $rightContent
     ]);
+
+    // Dashboard filter bar - filters shown in array order
+    $dashboardFilters = array('company_list', 'outlet_list', 'global_datepicker');
+    echo DGCHelper::renderDashboardFilterBar($dashboardFilters);
     ?>
 
     <div class="container-fluid">

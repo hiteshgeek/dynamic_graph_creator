@@ -377,7 +377,7 @@ function copyFolder($src, $dst)
     return $results;
 }
 
-function getFileStatus($sourceDir, $targetDir, $file)
+function getFileStatus($sourceDir, $targetDir, $file, $applyTransformation = false)
 {
     $src = $sourceDir . '/' . $file;
     $dst = $targetDir . '/' . $file;
@@ -389,8 +389,18 @@ function getFileStatus($sourceDir, $targetDir, $file)
     if (!$dstExists) return 'new';
 
     // Compare file contents
-    if (md5_file($src) === md5_file($dst)) {
-        return 'same';
+    // For transformed files, apply transformation before comparison
+    if ($applyTransformation) {
+        $srcContent = file_get_contents($src);
+        $srcContent = transformAssetLoading($srcContent);
+        $dstContent = file_get_contents($dst);
+        if (md5($srcContent) === md5($dstContent)) {
+            return 'same';
+        }
+    } else {
+        if (md5_file($src) === md5_file($dst)) {
+            return 'same';
+        }
     }
     return 'different';
 }
