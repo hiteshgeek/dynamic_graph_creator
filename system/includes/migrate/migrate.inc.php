@@ -16,7 +16,7 @@ $targetDir = '/var/www/html/rapidkartprocessadminv2';
 $targetExists = is_dir($targetDir);
 
 // =========================================================================
-// DATABASE VALIDATION - Check local database tables against install.sql
+// DATABASE VALIDATION - Check local and live database tables against install.sql
 // =========================================================================
 
 /**
@@ -59,24 +59,76 @@ function getTablesFromInstallSql($sqlFile)
 }
 
 /**
- * Check which tables exist in the local database
+ * Get live database credentials from .developer_db.env
  */
-function checkDatabaseTables($tables)
+function getLiveDbCredentials()
+{
+    $envFile = SystemConfig::basePath() . '/export_tables/.developer_db.env';
+    if (!file_exists($envFile)) {
+        return ['error' => '.developer_db.env not found'];
+    }
+
+    $credentials = [];
+    $content = file_get_contents($envFile);
+    $lines = explode("\n", $content);
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+        if (empty($line) || strpos($line, '#') === 0) continue;
+
+        if (preg_match('/^([A-Z_]+)=["\']?([^"\']*)["\']?$/', $line, $matches)) {
+            $credentials[$matches[1]] = $matches[2];
+        }
+    }
+
+    if (empty($credentials['DB_HOST']) || empty($credentials['DB_USER'])) {
+        return ['error' => 'Invalid .developer_db.env format'];
+    }
+
+    return $credentials;
+}
+
+/**
+ * Check which tables exist in a database and get row counts
+ * @param array $tables List of table names to check
+ * @param string $host Database host
+ * @param string $user Database user
+ * @param string $pass Database password
+ * @param string $dbName Database name
+ * @return array Results with table => ['exists' => bool, 'count' => int|null] or ['error' => message]
+ */
+function checkDatabaseTablesWithCredentials($tables, $host, $user, $pass, $dbName)
 {
     $results = [];
 
     try {
         $pdo = new PDO(
-            'mysql:host=' . LocalProjectConfig::getDbHost() . ';dbname=' . LocalProjectConfig::getDbName(),
-            LocalProjectConfig::getDbUser(),
-            LocalProjectConfig::getDbPass(),
+            'mysql:host=' . $host . ';dbname=' . $dbName,
+            $user,
+            $pass,
             [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
         );
 
         foreach ($tables as $table) {
             $stmt = $pdo->prepare("SHOW TABLES LIKE ?");
             $stmt->execute([$table]);
-            $results[$table] = $stmt->rowCount() > 0;
+            $exists = $stmt->rowCount() > 0;
+
+            $count = null;
+            if ($exists) {
+                try {
+                    $countStmt = $pdo->query("SELECT COUNT(*) FROM `{$table}`");
+                    $count = (int) $countStmt->fetchColumn();
+                } catch (PDOException $e) {
+                    // Table might exist but can't count (permissions, etc.)
+                    $count = null;
+                }
+            }
+
+            $results[$table] = [
+                'exists' => $exists,
+                'count' => $count
+            ];
         }
     } catch (PDOException $e) {
         return ['error' => 'Database connection failed: ' . $e->getMessage()];
@@ -86,66 +138,123 @@ function checkDatabaseTables($tables)
 }
 
 /**
- * Perform full database validation
+ * Perform full database validation for both local and live databases
+ * Returns combined table data for easy comparison
  */
 function validateDatabaseSetup($sourceDir)
 {
-    $validation = [
-        'install_sql_tables' => [],
-        'systemtables_constants' => [],
-        'database_tables' => [],
-        'issues' => [],
+    $result = [
+        'tables' => [],           // Combined table data for both DBs
+        'local_info' => null,     // Local DB connection info
+        'live_info' => null,      // Live DB connection info
+        'local_error' => null,
+        'live_error' => null,
         'all_passed' => true
     ];
 
     // 1. Get tables from install.sql
     $installSqlTables = getTablesFromInstallSql($sourceDir . '/sql/install.sql');
     if (isset($installSqlTables['error'])) {
-        $validation['issues'][] = $installSqlTables['error'];
-        $validation['all_passed'] = false;
-        return $validation;
+        $result['local_error'] = $installSqlTables['error'];
+        $result['live_error'] = $installSqlTables['error'];
+        $result['all_passed'] = false;
+        return $result;
     }
-    $validation['install_sql_tables'] = $installSqlTables;
 
     // 2. Get DGC table constants from SystemTables
     $dgcConstants = getDgcTableConstants();
-    $validation['systemtables_constants'] = $dgcConstants;
 
-    // 3. Check if all DGC constants have corresponding tables in install.sql
-    foreach ($dgcConstants as $const => $table) {
-        if (!in_array($table, $installSqlTables)) {
-            $validation['issues'][] = "SystemTables constant {$const} references table '{$table}' which is NOT in install.sql";
-            $validation['all_passed'] = false;
+    // 3. Check LOCAL database
+    $result['local_info'] = [
+        'host' => LocalProjectConfig::getDbHost(),
+        'db_name' => LocalProjectConfig::getDbName()
+    ];
+
+    $localDbCheck = checkDatabaseTablesWithCredentials(
+        $installSqlTables,
+        LocalProjectConfig::getDbHost(),
+        LocalProjectConfig::getDbUser(),
+        LocalProjectConfig::getDbPass(),
+        LocalProjectConfig::getDbName()
+    );
+
+    if (isset($localDbCheck['error'])) {
+        $result['local_error'] = $localDbCheck['error'];
+        $result['all_passed'] = false;
+        $localDbCheck = [];
+    }
+
+    // 4. Check LIVE database
+    $liveCredentials = getLiveDbCredentials();
+    $liveDbCheck = [];
+
+    if (isset($liveCredentials['error'])) {
+        $result['live_error'] = $liveCredentials['error'];
+        $result['live_info'] = ['host' => 'N/A', 'db_name' => 'N/A'];
+        $result['all_passed'] = false;
+    } else {
+        // Use DB_NAME from .env if provided, otherwise fall back to local DB name
+        $liveDbName = !empty($liveCredentials['DB_NAME']) ? $liveCredentials['DB_NAME'] : LocalProjectConfig::getDbName();
+
+        $result['live_info'] = [
+            'host' => $liveCredentials['DB_HOST'],
+            'db_name' => $liveDbName
+        ];
+
+        $liveDbCheck = checkDatabaseTablesWithCredentials(
+            $installSqlTables,
+            $liveCredentials['DB_HOST'],
+            $liveCredentials['DB_USER'],
+            $liveCredentials['DB_PASS'],
+            $liveDbName
+        );
+
+        if (isset($liveDbCheck['error'])) {
+            $result['live_error'] = $liveDbCheck['error'];
+            $result['all_passed'] = false;
+            $liveDbCheck = [];
         }
     }
 
-    // 4. Check if all install.sql tables have constants in SystemTables
-    $dgcTableValues = array_values($dgcConstants);
+    // 5. Build combined table data
     foreach ($installSqlTables as $table) {
-        if (!in_array($table, $dgcTableValues)) {
-            $validation['issues'][] = "Table '{$table}' in install.sql has NO constant in SystemTables";
-            $validation['all_passed'] = false;
+        $constantName = array_search($table, $dgcConstants);
+
+        // Local DB status
+        $localExists = isset($localDbCheck[$table]) ? $localDbCheck[$table]['exists'] : null;
+        $localCount = isset($localDbCheck[$table]) ? $localDbCheck[$table]['count'] : null;
+
+        // Live DB status
+        $liveExists = isset($liveDbCheck[$table]) ? $liveDbCheck[$table]['exists'] : null;
+        $liveCount = isset($liveDbCheck[$table]) ? $liveDbCheck[$table]['count'] : null;
+
+        // Data match check (only if both tables exist and have counts)
+        $dataMatch = null; // null = N/A, true = match, false = mismatch
+        if ($localCount !== null && $liveCount !== null) {
+            $dataMatch = ($localCount === $liveCount);
+        }
+
+        $result['tables'][] = [
+            'name' => $table,
+            'in_install_sql' => true,
+            'constant' => $constantName !== false ? $constantName : null,
+            'local_exists' => $localExists,
+            'local_count' => $localCount,
+            'live_exists' => $liveExists,
+            'live_count' => $liveCount,
+            'data_match' => $dataMatch
+        ];
+
+        // Check for issues
+        if ($localExists === false || $liveExists === false) {
+            $result['all_passed'] = false;
+        }
+        if ($constantName === false) {
+            $result['all_passed'] = false;
         }
     }
 
-    // 5. Check if tables exist in local database
-    $dbCheck = checkDatabaseTables($installSqlTables);
-    if (isset($dbCheck['error'])) {
-        $validation['issues'][] = $dbCheck['error'];
-        $validation['all_passed'] = false;
-        return $validation;
-    }
-    $validation['database_tables'] = $dbCheck;
-
-    // 6. Check for missing tables in database
-    foreach ($dbCheck as $table => $exists) {
-        if (!$exists) {
-            $validation['issues'][] = "Table '{$table}' from install.sql does NOT exist in database";
-            $validation['all_passed'] = false;
-        }
-    }
-
-    return $validation;
+    return $result;
 }
 
 // Run validation

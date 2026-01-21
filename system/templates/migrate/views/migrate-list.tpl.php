@@ -350,7 +350,7 @@
     </div>
 
     <div class="container pb-5">
-        <!-- Database Validation Section -->
+        <!-- Database Validation Section - Combined Table -->
         <div class="card mb-4" style="border-radius: 12px; border: none; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
             <div class="card-header d-flex justify-content-between align-items-center" style="background: #f8f9fa; border-radius: 12px 12px 0 0; border-bottom: 1px solid #e9ecef;">
                 <h6 class="mb-0">
@@ -362,57 +362,116 @@
                     <span class="badge bg-danger"><i class="fas fa-times me-1"></i>Issues Found</span>
                 <?php endif; ?>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <!-- Tables in install.sql -->
-                    <div class="col-md-4 mb-3">
-                        <h6 class="text-muted mb-2"><small>Tables in install.sql</small></h6>
-                        <div class="d-flex flex-wrap gap-1">
-                            <?php foreach ($dbValidation['install_sql_tables'] as $table): ?>
-                                <?php
-                                $inDb = isset($dbValidation['database_tables'][$table]) && $dbValidation['database_tables'][$table];
-                                $badgeClass = $inDb ? 'bg-success' : 'bg-danger';
-                                $icon = $inDb ? 'fa-check' : 'fa-times';
-                                ?>
-                                <span class="badge <?php echo $badgeClass; ?>" style="font-size: 0.7rem; font-weight: normal;">
-                                    <i class="fas <?php echo $icon; ?> me-1"></i><?php echo htmlspecialchars($table); ?>
-                                </span>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-
-                    <!-- SystemTables Constants -->
-                    <div class="col-md-4 mb-3">
-                        <h6 class="text-muted mb-2"><small>SystemTables Constants</small></h6>
-                        <div class="d-flex flex-wrap gap-1">
-                            <?php foreach ($dbValidation['systemtables_constants'] as $const => $table): ?>
-                                <?php
-                                $inSql = in_array($table, $dbValidation['install_sql_tables']);
-                                $badgeClass = $inSql ? 'bg-primary' : 'bg-warning';
-                                ?>
-                                <span class="badge <?php echo $badgeClass; ?>" style="font-size: 0.7rem; font-weight: normal;" title="<?php echo $const; ?>">
-                                    <?php echo htmlspecialchars($table); ?>
-                                </span>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-
-                    <!-- Validation Status -->
-                    <div class="col-md-4 mb-3">
-                        <h6 class="text-muted mb-2"><small>Validation Status</small></h6>
-                        <?php if (empty($dbValidation['issues'])): ?>
-                            <div class="alert alert-success mb-0 py-2" style="font-size: 0.8rem;">
-                                <i class="fas fa-check-circle me-1"></i>
-                                All DGC tables exist in database and have constants in SystemTables
-                            </div>
-                        <?php else: ?>
-                            <div class="alert alert-danger mb-0 py-2" style="font-size: 0.75rem; max-height: 150px; overflow-y: auto;">
-                                <?php foreach ($dbValidation['issues'] as $issue): ?>
-                                    <div class="mb-1"><i class="fas fa-exclamation-circle me-1"></i><?php echo htmlspecialchars($issue); ?></div>
-                                <?php endforeach; ?>
-                            </div>
+            <div class="card-body p-0">
+                <!-- Connection Info Bar -->
+                <div class="row g-0 border-bottom" style="font-size: 0.75rem;">
+                    <div class="col-6 px-3 py-2" style="background: #e3f2fd;">
+                        <i class="fas fa-laptop me-1"></i><strong>Local:</strong>
+                        <?php echo htmlspecialchars($dbValidation['local_info']['host'] ?? 'N/A'); ?> /
+                        <?php echo htmlspecialchars($dbValidation['local_info']['db_name'] ?? 'N/A'); ?>
+                        <?php if ($dbValidation['local_error']): ?>
+                            <span class="badge bg-danger ms-1" title="<?php echo htmlspecialchars($dbValidation['local_error']); ?>"><i class="fas fa-exclamation-triangle"></i></span>
                         <?php endif; ?>
                     </div>
+                    <div class="col-6 px-3 py-2" style="background: #fff3e0;">
+                        <i class="fas fa-cloud me-1"></i><strong>Live:</strong>
+                        <?php echo htmlspecialchars($dbValidation['live_info']['host'] ?? 'N/A'); ?> /
+                        <?php echo htmlspecialchars($dbValidation['live_info']['db_name'] ?? 'N/A'); ?>
+                        <?php if ($dbValidation['live_error']): ?>
+                            <span class="badge bg-danger ms-1" title="<?php echo htmlspecialchars($dbValidation['live_error']); ?>"><i class="fas fa-exclamation-triangle"></i></span>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Combined Validation Table -->
+                <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                    <table class="table table-sm table-hover mb-0" style="font-size: 0.75rem;">
+                        <thead class="sticky-top" style="background: #fff;">
+                            <tr>
+                                <th rowspan="2" class="align-middle" style="width: 20%; border-bottom: 2px solid #dee2e6;">Table Name</th>
+                                <th rowspan="2" class="align-middle text-center" style="width: 10%; border-bottom: 2px solid #dee2e6;">install.sql</th>
+                                <th rowspan="2" class="align-middle" style="width: 22%; border-bottom: 2px solid #dee2e6;">Constant</th>
+                                <th colspan="2" class="text-center" style="background: #e3f2fd; border-bottom: 1px solid #bbdefb;">Local DB</th>
+                                <th colspan="2" class="text-center" style="background: #fff3e0; border-bottom: 1px solid #ffe0b2;">Live DB</th>
+                                <th rowspan="2" class="align-middle text-center" style="width: 10%; border-bottom: 2px solid #dee2e6;">Data Match</th>
+                            </tr>
+                            <tr>
+                                <th class="text-center" style="width: 8%; background: #e3f2fd; border-bottom: 2px solid #bbdefb;">Exists</th>
+                                <th class="text-center" style="width: 8%; background: #e3f2fd; border-bottom: 2px solid #bbdefb;">Rows</th>
+                                <th class="text-center" style="width: 8%; background: #fff3e0; border-bottom: 2px solid #ffe0b2;">Exists</th>
+                                <th class="text-center" style="width: 8%; background: #fff3e0; border-bottom: 2px solid #ffe0b2;">Rows</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($dbValidation['tables'] as $tableData): ?>
+                                <tr>
+                                    <td><code><?php echo htmlspecialchars($tableData['name']); ?></code></td>
+                                    <td class="text-center">
+                                        <?php if ($tableData['in_install_sql']): ?>
+                                            <span class="badge bg-success"><i class="fas fa-check"></i></span>
+                                        <?php else: ?>
+                                            <span class="badge bg-secondary"><i class="fas fa-minus"></i></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if ($tableData['constant']): ?>
+                                            <small class="text-primary" title="<?php echo htmlspecialchars($tableData['constant']); ?>" style="cursor: help;">
+                                                <?php echo htmlspecialchars($tableData['constant']); ?>
+                                            </small>
+                                        <?php else: ?>
+                                            <span class="text-muted">N/A</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <!-- Local Exists -->
+                                    <td class="text-center" style="background: #f8fbff;">
+                                        <?php if ($tableData['local_exists'] === null): ?>
+                                            <span class="badge bg-secondary"><i class="fas fa-question"></i></span>
+                                        <?php elseif ($tableData['local_exists']): ?>
+                                            <span class="badge bg-success"><i class="fas fa-check"></i></span>
+                                        <?php else: ?>
+                                            <span class="badge bg-danger"><i class="fas fa-times"></i></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <!-- Local Rows -->
+                                    <td class="text-center" style="background: #f8fbff;">
+                                        <?php if ($tableData['local_count'] !== null): ?>
+                                            <span class="badge bg-light text-dark"><?php echo number_format($tableData['local_count']); ?></span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <!-- Live Exists -->
+                                    <td class="text-center" style="background: #fffbf5;">
+                                        <?php if ($tableData['live_exists'] === null): ?>
+                                            <span class="badge bg-secondary"><i class="fas fa-question"></i></span>
+                                        <?php elseif ($tableData['live_exists']): ?>
+                                            <span class="badge bg-success"><i class="fas fa-check"></i></span>
+                                        <?php else: ?>
+                                            <span class="badge bg-danger"><i class="fas fa-times"></i></span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <!-- Live Rows -->
+                                    <td class="text-center" style="background: #fffbf5;">
+                                        <?php if ($tableData['live_count'] !== null): ?>
+                                            <span class="badge bg-light text-dark"><?php echo number_format($tableData['live_count']); ?></span>
+                                        <?php else: ?>
+                                            <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <!-- Data Match -->
+                                    <td class="text-center">
+                                        <?php if ($tableData['data_match'] === null): ?>
+                                            <span class="text-muted">N/A</span>
+                                        <?php elseif ($tableData['data_match']): ?>
+                                            <span class="badge bg-success"><i class="fas fa-equals"></i></span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning text-dark"><i class="fas fa-not-equal"></i></span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
