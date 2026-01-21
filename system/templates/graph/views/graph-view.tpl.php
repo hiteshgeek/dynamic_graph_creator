@@ -192,6 +192,9 @@
                                 <i class="fas fa-chart-<?php echo $graph->getGraphType(); ?>"></i>
                             </span>
                             <span class="text-muted"><?php echo ucfirst($graph->getGraphType()); ?> Chart</span>
+                            <?php if (!empty($categories)): ?>
+                                <?php echo DGCHelper::renderWidgetCategoryBadges($categories, 'lg'); ?>
+                            <?php endif; ?>
                         </div>
                         <button type="button" class="btn btn-sm btn-outline-secondary" id="export-chart" title="Save chart as PNG image">
                             <i class="fas fa-image"></i> Save Image

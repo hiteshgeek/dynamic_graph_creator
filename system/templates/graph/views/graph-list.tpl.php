@@ -29,12 +29,13 @@ echo DGCHelper::renderPageHeader([
             <div class="item-card" data-graph-id="<?php echo $g->getId(); ?>">
                 <div class="item-card-content">
                     <div class="item-card-header">
-                        <span class="graph-type-icon <?php echo $g->getGraphType(); ?>">
-                            <i class="fas fa-chart-<?php echo $g->getGraphType(); ?>"></i>
-                        </span>
                         <span class="graph-type-badge <?php echo $g->getGraphType(); ?>">
+                            <i class="fas fa-chart-<?php echo $g->getGraphType(); ?>"></i>
                             <?php echo ucfirst($g->getGraphType()); ?>
                         </span>
+                        <?php if (!empty($graphCategories[$g->getId()])): ?>
+                            <?php echo DGCHelper::renderWidgetCategoryBadges($graphCategories[$g->getId()], 'md', true); ?>
+                        <?php endif; ?>
                     </div>
                     <h3><?php echo htmlspecialchars($g->getName()); ?></h3>
                     <?php if ($g->getDescription()): ?>

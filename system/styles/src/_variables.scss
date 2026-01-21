@@ -206,8 +206,9 @@ $chart-colors: (
 // Item card header (icon + title area)
 @mixin item-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: $spacing-sm;
   margin-bottom: 0.75rem;
 }
 

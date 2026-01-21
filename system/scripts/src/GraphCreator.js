@@ -78,6 +78,9 @@ export default class GraphCreator {
       this.captureState();
     }
 
+    // Initialize category chips
+    this.initCategoryChips();
+
     // Initialize change tracking
     this.initChangeTracking();
 
@@ -504,6 +507,89 @@ export default class GraphCreator {
       validateOnBlur: true,
       validateOnInput: true,
     });
+  }
+
+  /**
+   * Initialize category chips for multi-select
+   */
+  initCategoryChips() {
+    const chipsContainer = this.container.querySelector("#category-chips");
+    const hiddenInput = this.container.querySelector("#selected-categories");
+    const wrapper = this.container.querySelector("#graph-categories-wrapper");
+
+    if (!chipsContainer || !hiddenInput) return;
+
+    // Parse initial selected categories from hidden input
+    let selectedCategories = [];
+    try {
+      selectedCategories = JSON.parse(hiddenInput.value) || [];
+    } catch (e) {
+      selectedCategories = [];
+    }
+
+    // Store reference for validation
+    this.selectedCategories = selectedCategories;
+
+    // Handle chip click
+    const chips = chipsContainer.querySelectorAll(".category-chip");
+    chips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const categoryId = parseInt(chip.dataset.categoryId, 10);
+        const color = chip.dataset.color || "#6c757d";
+        const isActive = chip.classList.contains("active");
+
+        if (isActive) {
+          // Deselect
+          chip.classList.remove("active");
+          chip.style.backgroundColor = "";
+          chip.style.borderColor = "";
+          chip.style.color = "";
+          this.selectedCategories = this.selectedCategories.filter(
+            (id) => id !== categoryId,
+          );
+        } else {
+          // Select
+          chip.classList.add("active");
+          chip.style.backgroundColor = color;
+          chip.style.borderColor = color;
+          chip.style.color = "#fff";
+          if (!this.selectedCategories.includes(categoryId)) {
+            this.selectedCategories.push(categoryId);
+          }
+        }
+
+        // Update hidden input
+        hiddenInput.value = JSON.stringify(this.selectedCategories);
+
+        // Remove validation error if at least one is selected
+        if (wrapper && this.selectedCategories.length > 0) {
+          wrapper.classList.remove("is-invalid");
+        }
+
+        // Track changes
+        this.checkForChanges();
+      });
+    });
+  }
+
+  /**
+   * Validate category selection (at least one required)
+   * @returns {boolean}
+   */
+  validateCategories() {
+    const wrapper = this.container.querySelector("#graph-categories-wrapper");
+    const isValid =
+      this.selectedCategories && this.selectedCategories.length > 0;
+
+    if (wrapper) {
+      if (isValid) {
+        wrapper.classList.remove("is-invalid");
+      } else {
+        wrapper.classList.add("is-invalid");
+      }
+    }
+
+    return isValid;
   }
 
   /**
@@ -1433,6 +1519,12 @@ export default class GraphCreator {
       errors.push("Graph name is required");
     }
 
+    // Validate categories (at least one required)
+    if (!this.validateCategories()) {
+      this.expandSidebar();
+      errors.push("At least one category is required");
+    }
+
     // Additional validations for query and mapping
     const query = this.queryBuilder ? this.queryBuilder.getQuery() : "";
     if (!query.trim()) {
@@ -1477,6 +1569,7 @@ export default class GraphCreator {
         config: config,
         placeholder_settings: placeholderSettings,
         filters: this.filterManager ? this.filterManager.getFilters() : [],
+        categories: this.selectedCategories || [],
       };
 
       const result = await Ajax.post("save_graph", data);
@@ -1581,6 +1674,9 @@ export default class GraphCreator {
       placeholderSettings: this.placeholderSettings
         ? JSON.stringify(this.placeholderSettings.getSettings())
         : "{}",
+      categories: this.selectedCategories
+        ? JSON.stringify(this.selectedCategories.slice().sort())
+        : "[]",
     };
   }
 
@@ -1602,7 +1698,8 @@ export default class GraphCreator {
       currentState.mapping !== this.savedState.mapping ||
       currentState.config !== this.savedState.config ||
       currentState.filters !== this.savedState.filters ||
-      currentState.placeholderSettings !== this.savedState.placeholderSettings;
+      currentState.placeholderSettings !== this.savedState.placeholderSettings ||
+      currentState.categories !== this.savedState.categories;
 
     this.setUnsavedChanges(hasChanges);
   }

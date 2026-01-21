@@ -44,6 +44,10 @@ require_once __DIR__ . '/system/classes/DashboardTemplateCategory.php';
 require_once __DIR__ . '/system/classes/DashboardTemplate.php';
 require_once __DIR__ . '/system/classes/DashboardInstance.php';
 require_once __DIR__ . '/system/classes/DashboardBuilder.php';
+require_once __DIR__ . '/system/classes/WidgetCategory.php';
+require_once __DIR__ . '/system/classes/WidgetCategoryManager.php';
+require_once __DIR__ . '/system/classes/GraphWidgetCategoryMapping.php';
+require_once __DIR__ . '/system/classes/GraphWidgetCategoryMappingManager.php';
 
 // Load session and authentication classes
 require_once __DIR__ . '/system/classes/AdminUser.php';
@@ -121,6 +125,10 @@ switch ($page) {
     case 'dashboard':
         require_once SystemConfig::includesPath() . 'dashboard/dashboard.inc.php';
         break;
+    case 'migrate':
+        // Migration tool - standalone page with its own HTML
+        require_once __DIR__ . '/migrate.php';
+        exit; // migrate.php handles its own output
     case 'graph':
     default:
         require_once SystemConfig::includesPath() . 'graph/graph.inc.php';

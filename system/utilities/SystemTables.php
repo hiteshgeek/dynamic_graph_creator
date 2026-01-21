@@ -188,4 +188,10 @@ class SystemTables
 
       // System placeholder table (status in spsid column: 1=active, 3=deleted)
       const DB_TBL_SYSTEM_PLACEHOLDER = "system_placeholder";
+
+      // Widget category table (status in wcsid column: 1=active, 3=deleted)
+      const DB_TBL_WIDGET_CATEGORY = "widget_category";
+
+      // Graph-Widget category mapping table
+      const DB_TBL_GRAPH_WIDGET_CATEGORY_MAPPING = "graph_widget_category_mapping";
 }

@@ -31,14 +31,20 @@
   }
 }
 
-// Graph type badge (small badge)
+// Graph type badge (with icon + text)
 .graph-type-badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 500;
+
+  i {
+    font-size: 0.75rem;
+    line-height: 1;
+  }
 
   &.bar {
     background: rgba($graph-color-bar, 0.1);

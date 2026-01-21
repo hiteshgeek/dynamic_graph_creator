@@ -48,6 +48,63 @@ CREATE TABLE IF NOT EXISTS data_filter (
     INDEX idx_filter_key (filter_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Standalone filter definitions';
 
+-- System Placeholder table (special placeholders resolved at runtime)
+CREATE TABLE IF NOT EXISTS system_placeholder (
+    spid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    placeholder_key VARCHAR(50) NOT NULL UNIQUE COMMENT 'Key without :: prefix, e.g. logged_in_uid',
+    placeholder_label VARCHAR(100) NOT NULL COMMENT 'Display label for UI',
+    description TEXT COMMENT 'Description of what this placeholder returns',
+    resolver_method VARCHAR(100) NOT NULL COMMENT 'Static method name in SystemPlaceholderManager',
+    spsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=active, 3=deleted',
+    created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_spsid (spsid),
+    INDEX idx_placeholder_key (placeholder_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System-level placeholders resolved at runtime';
+
+-- Default System Placeholders
+INSERT INTO system_placeholder (placeholder_key, placeholder_label, description, resolver_method) VALUES
+('logged_in_uid', 'Logged In User ID', 'Returns the currently logged in user ID', 'getLoggedInUid'),
+('logged_in_company_id', 'Logged In Company ID', 'Returns the company ID of the logged in user', 'getLoggedInCompanyId'),
+('logged_in_licence_id', 'Logged In Licence ID', 'Returns the licence ID of the logged in user', 'getLoggedInLicenceId'),
+('logged_in_is_admin', 'Logged In Is Admin', 'Returns 1 if the logged in user is an admin, 0 otherwise', 'getLoggedInIsAdmin');
+
+-- ============================================================================
+-- WIDGET CATEGORY TABLES
+-- ============================================================================
+
+-- Widget Category table (categories for dashboard widgets like graphs)
+CREATE TABLE IF NOT EXISTS widget_category (
+    wcid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL COMMENT 'Category name (e.g., Sales, Finance)',
+    description TEXT COMMENT 'Category description',
+    icon VARCHAR(50) DEFAULT NULL COMMENT 'Font Awesome icon class (e.g., fa-dollar-sign)',
+    color VARCHAR(20) DEFAULT NULL COMMENT 'Category color for UI (e.g., #28a745)',
+    display_order INT(11) DEFAULT 0 COMMENT 'Display order (lower numbers first)',
+    wcsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Status: 1=active, 3=deleted',
+    created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_ts TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_wcsid (wcsid),
+    INDEX idx_display_order (display_order)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Categories for dashboard widgets';
+
+-- Insert default categories
+INSERT INTO widget_category (name, description, icon, color, display_order) VALUES
+('Sales', 'Sales and revenue related graphs', 'fa-dollar-sign', '#28a745', 10),
+('Purchase', 'Purchase and procurement related graphs', 'fa-shopping-cart', '#007bff', 20);
+
+-- Graph-Widget Category Mapping table
+CREATE TABLE IF NOT EXISTS graph_widget_category_mapping (
+    gwcmid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    gid INT(11) NOT NULL COMMENT 'Graph ID (foreign key to graph)',
+    wcid INT(11) NOT NULL COMMENT 'Category ID (foreign key to widget_category)',
+    created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_gid (gid),
+    INDEX idx_wcid (wcid),
+    UNIQUE KEY unique_graph_widget_category (gid, wcid),
+    FOREIGN KEY (gid) REFERENCES graph(gid) ON DELETE CASCADE,
+    FOREIGN KEY (wcid) REFERENCES widget_category(wcid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Maps graphs to widget categories';
+
 -- ============================================================================
 -- DASHBOARD TABLES
 -- ============================================================================

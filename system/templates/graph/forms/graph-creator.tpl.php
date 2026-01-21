@@ -55,6 +55,34 @@ echo DGCHelper::renderPageHeader([
                                 <label class="graph-description-label" for="graph-description-input">Description</label>
                                 <textarea class="form-control graph-description-input" id="graph-description-input" placeholder="Enter graph description (optional)" rows="1"><?php echo $graph ? htmlspecialchars($graph->getDescription()) : ''; ?></textarea>
                             </div>
+                            <div class="graph-categories-wrapper" id="graph-categories-wrapper">
+                                <label class="graph-categories-label">Categories <span class="required">*</span></label>
+                                <div class="category-chips-container" id="category-chips">
+                                    <?php if (!empty($categories)): ?>
+                                        <?php foreach ($categories as $cat): ?>
+                                            <?php
+                                            $isSelected = isset($selectedCategoryIds) && in_array($cat['wcid'], $selectedCategoryIds);
+                                            $activeClass = $isSelected ? 'active' : '';
+                                            $activeStyle = $isSelected ? 'background-color: ' . htmlspecialchars($cat['color']) . '; border-color: ' . htmlspecialchars($cat['color']) . '; color: #fff;' : '';
+                                            ?>
+                                            <button type="button"
+                                                    class="btn category-chip <?php echo $activeClass; ?>"
+                                                    data-category-id="<?php echo $cat['wcid']; ?>"
+                                                    data-color="<?php echo htmlspecialchars($cat['color']); ?>"
+                                                    style="<?php echo $activeStyle; ?>">
+                                                <?php if (!empty($cat['icon'])): ?>
+                                                    <i class="fas <?php echo htmlspecialchars($cat['icon']); ?>"></i>
+                                                <?php endif; ?>
+                                                <?php echo htmlspecialchars($cat['name']); ?>
+                                            </button>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <p class="text-muted mb-0">No categories available</p>
+                                    <?php endif; ?>
+                                </div>
+                                <input type="hidden" id="selected-categories" name="categories" value="<?php echo isset($selectedCategoryIds) ? htmlspecialchars(json_encode($selectedCategoryIds)) : '[]'; ?>">
+                                <div class="invalid-feedback" id="categories-error">At least one category is required</div>
+                            </div>
                         </div>
                     </form>
                 </div>

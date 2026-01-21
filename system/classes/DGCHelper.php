@@ -262,4 +262,49 @@ class DGCHelper
             exit;
         }
     }
+
+    /**
+     * Render widget category badges HTML
+     * Reusable component for displaying category badges across all pages
+     *
+     * @param array $categories Array of WidgetCategory objects or arrays
+     * @param string $size Size variant: 'sm', 'md' (default), 'lg', 'xl', 'xxl'
+     * @param bool $stacked If true, badges are displayed vertically stacked
+     * @return string HTML for category badges
+     */
+    public static function renderWidgetCategoryBadges($categories, $size = 'md', $stacked = false)
+    {
+        if (empty($categories)) {
+            return '';
+        }
+
+        // Build size class (md is default, no class needed)
+        $sizeClass = '';
+        if (in_array($size, array('sm', 'lg', 'xl', 'xxl'))) {
+            $sizeClass = ' widget-category-badge-' . $size;
+        }
+
+        // Build container class with optional stacked modifier
+        $containerClass = 'widget-category-badges';
+        if ($stacked) {
+            $containerClass .= ' widget-category-badges-stacked';
+        }
+        $html = '<div class="' . $containerClass . '">';
+
+        foreach ($categories as $cat) {
+            $name = is_array($cat) ? $cat['name'] : $cat->getName();
+            $color = is_array($cat) ? $cat['color'] : $cat->getColor();
+            $icon = is_array($cat) ? (isset($cat['icon']) ? $cat['icon'] : '') : $cat->getIcon();
+
+            $html .= '<span class="widget-category-badge' . $sizeClass . '" style="background-color: ' . htmlspecialchars($color) . ';">';
+            if (!empty($icon)) {
+                $html .= '<i class="fas ' . htmlspecialchars($icon) . '"></i> ';
+            }
+            $html .= htmlspecialchars($name);
+            $html .= '</span>';
+        }
+
+        $html .= '</div>';
+        return $html;
+    }
 }

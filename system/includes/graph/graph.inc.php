@@ -67,9 +67,19 @@ function showList()
 
     $theme->setPageTitle('Graphs - Dynamic Graph Creator');
 
+    // Get all graphs
+    $graphs = GraphManager::getAll();
+
+    // Get categories for each graph
+    $graphCategories = array();
+    foreach ($graphs as $graph) {
+        $graphCategories[$graph->getId()] = GraphWidgetCategoryMappingManager::getCategoriesForGraph($graph->getId());
+    }
+
     // Get content from template
     $tpl = new Template(SystemConfig::templatesPath() . 'graph/views/graph-list');
-    $tpl->graphs = GraphManager::getAll();
+    $tpl->graphs = $graphs;
+    $tpl->graphCategories = $graphCategories;
     $theme->setContent('full_main', $tpl->parse());
 }
 
@@ -113,10 +123,21 @@ function showCreator($graphId = null)
     // Permission to create filters (replace with actual framework permission check)
     $canCreateFilter = true;
 
+    // Get all widget categories
+    $categories = WidgetCategoryManager::getAllAsArray();
+
+    // Get selected category IDs for this graph (if editing)
+    $selectedCategoryIds = array();
+    if ($graph && $graph->getId()) {
+        $selectedCategoryIds = GraphWidgetCategoryMappingManager::getCategoryIdsForGraph($graph->getId());
+    }
+
     $tpl = new Template(SystemConfig::templatesPath() . 'graph/forms/graph-creator');
     $tpl->graph = $graph;
     $tpl->allFilters = $allFilters;
     $tpl->canCreateFilter = $canCreateFilter;
+    $tpl->categories = $categories;
+    $tpl->selectedCategoryIds = $selectedCategoryIds;
     $theme->setContent('full_main', $tpl->parse());
 }
 
@@ -173,9 +194,13 @@ function showView($graphId)
         $filters[] = $filter->toArray();
     }
 
+    // Get categories for this graph
+    $categories = GraphWidgetCategoryMappingManager::getCategoriesForGraph($graphId);
+
     $tpl = new Template(SystemConfig::templatesPath() . 'graph/views/graph-view');
     $tpl->graph = $graph;
     $tpl->filters = $filters;
+    $tpl->categories = $categories;
     $tpl->allGraphs = $allGraphs;
     $tpl->totalGraphs = $totalGraphs;
     $tpl->currentIndex = $currentIndex;
@@ -234,6 +259,16 @@ function saveGraph($data)
             Utility::ajaxResponseFalse('Failed to create graph');
         }
     }
+
+    // Save widget categories
+    $categoryIds = isset($data['categories']) ? $data['categories'] : array();
+    if (is_string($categoryIds)) {
+        $categoryIds = json_decode($categoryIds, true);
+    }
+    if (!is_array($categoryIds)) {
+        $categoryIds = array();
+    }
+    GraphWidgetCategoryMappingManager::setGraphCategories($graph->getId(), $categoryIds);
 
     $message = $isUpdate ? 'Graph updated successfully' : 'Graph created successfully';
     Utility::ajaxResponseTrue($message, array('id' => $graph->getId()));

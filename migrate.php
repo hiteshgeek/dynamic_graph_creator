@@ -61,7 +61,7 @@ if ($action === 'count_files') {
 $steps = [
     1 => [
         'title' => 'Copy PHP Classes',
-        'description' => 'Copies 12 PHP class files to handle graphs, data filters, dashboards, templates, system placeholders, and UI components.',
+        'description' => 'Copies 16 PHP class files to handle graphs, data filters, dashboards, templates, system placeholders, widget categories, and UI components.',
         'files' => [
             'system/classes/DGCHelper.php',
             'system/classes/Graph.php',
@@ -75,6 +75,10 @@ $steps = [
             'system/classes/DashboardBuilder.php',
             'system/classes/SystemPlaceholder.php',
             'system/classes/SystemPlaceholderManager.php',
+            'system/classes/WidgetCategory.php',
+            'system/classes/WidgetCategoryManager.php',
+            'system/classes/GraphWidgetCategoryMapping.php',
+            'system/classes/GraphWidgetCategoryMappingManager.php',
         ],
         'type' => 'copy'
     ],
