@@ -1,539 +1,3 @@
-<?php
-
-/**
- * Dynamic Graph Creator - Migration Tool
- *
- * This tool helps migrate the Dynamic Graph Creator module to your live rapidkart project.
- * Each step can be executed individually with preview and verification.
- */
-
-// Configuration
-$sourceDir = __DIR__;
-$targetDir = '/var/www/html/rapidkartprocessadminv2';
-
-// Check if target exists
-$targetExists = is_dir($targetDir);
-
-// Get action
-$action = isset($_GET['action']) ? $_GET['action'] : '';
-$step = isset($_GET['step']) ? intval($_GET['step']) : 0;
-
-// Handle file count AJAX request (target directory only)
-if ($action === 'count_files') {
-    header('Content-Type: application/json');
-    $path = isset($_GET['path']) ? $_GET['path'] : '';
-    $recursive = isset($_GET['recursive']) ? $_GET['recursive'] === '1' : false;
-    $countType = isset($_GET['count_type']) ? $_GET['count_type'] : 'files'; // 'files' or 'folders'
-
-    $fullPath = $targetDir . '/' . $path;
-
-    if (!is_dir($fullPath)) {
-        echo json_encode(['count' => 0, 'exists' => false, 'path' => $path, 'type' => $countType]);
-        exit;
-    }
-
-    // Count files or folders
-    $count = 0;
-    if ($countType === 'folders') {
-        // Count only immediate subdirectories
-        $items = glob($fullPath . '/*', GLOB_ONLYDIR);
-        $count = count($items);
-    } else if ($recursive) {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($fullPath, RecursiveDirectoryIterator::SKIP_DOTS),
-            RecursiveIteratorIterator::LEAVES_ONLY
-        );
-        foreach ($iterator as $file) {
-            if ($file->isFile()) $count++;
-        }
-    } else {
-        $files = glob($fullPath . '/*');
-        foreach ($files as $f) {
-            if (is_file($f)) $count++;
-        }
-    }
-
-    echo json_encode(['count' => $count, 'exists' => true, 'path' => $path, 'type' => $countType]);
-    exit;
-}
-
-// Define migration steps
-$steps = [
-    1 => [
-        'title' => 'Copy PHP Classes',
-        'description' => 'Copies 16 PHP class files to handle graphs, data filters, dashboards, templates, system placeholders, widget categories, and UI components.',
-        'files' => [
-            'system/classes/DGCHelper.php',
-            'system/classes/Graph.php',
-            'system/classes/GraphManager.php',
-            'system/classes/DataFilter.php',
-            'system/classes/DataFilterManager.php',
-            'system/classes/DataFilterSet.php',
-            'system/classes/DashboardInstance.php',
-            'system/classes/DashboardTemplate.php',
-            'system/classes/DashboardTemplateCategory.php',
-            'system/classes/DashboardBuilder.php',
-            'system/classes/SystemPlaceholder.php',
-            'system/classes/SystemPlaceholderManager.php',
-            'system/classes/WidgetCategory.php',
-            'system/classes/WidgetCategoryManager.php',
-            'system/classes/GraphWidgetCategoryMapping.php',
-            'system/classes/GraphWidgetCategoryMappingManager.php',
-        ],
-        'type' => 'copy'
-    ],
-    2 => [
-        'title' => 'Copy Graph Templates',
-        'description' => 'Copies template files for the Graph module (views and forms).',
-        'files' => [
-            'system/templates/graph/views/graph-list.tpl.php',
-            'system/templates/graph/views/graph-view.tpl.php',
-            'system/templates/graph/forms/graph-creator.tpl.php',
-        ],
-        'type' => 'copy'
-    ],
-    3 => [
-        'title' => 'Copy Data Filter Templates',
-        'description' => 'Copies template files for the Data Filter module (views and forms).',
-        'files' => [
-            'system/templates/data-filter/views/data-filter-list.tpl.php',
-            'system/templates/data-filter/forms/data-filter-form.tpl.php',
-        ],
-        'type' => 'copy'
-    ],
-    4 => [
-        'title' => 'Copy Dashboard Templates',
-        'description' => 'Copies template files for the Dashboard module (views and forms).',
-        'files' => [
-            'system/templates/dashboard/views/dashboard-list.tpl.php',
-            'system/templates/dashboard/views/dashboard-preview.tpl.php',
-            'system/templates/dashboard/views/template-list.tpl.php',
-            'system/templates/dashboard/views/template-preview.tpl.php',
-            'system/templates/dashboard/forms/dashboard-builder.tpl.php',
-            'system/templates/dashboard/forms/template-editor.tpl.php',
-            'system/templates/dashboard/forms/template-builder.tpl.php',
-        ],
-        'type' => 'copy'
-    ],
-    5 => [
-        'title' => 'Copy Page Scripts & Include Files',
-        'description' => 'Copies page-specific JS files and include files. Include files are transformed: LocalUtility::addModule*() → $theme->addCss()/addScript().',
-        'files' => [
-            'system/scripts/graph/graph-list.js',
-            'system/scripts/graph/graph-creator.js',
-            'system/scripts/data-filter/data-filter-list.js',
-            'system/scripts/dashboard/dashboard-list.js',
-            'system/scripts/dashboard/dashboard-builder.js',
-            'system/scripts/dashboard/dashboard-preview.js',
-            'system/scripts/dashboard/template-list.js',
-            'system/scripts/dashboard/template-editor.js',
-            'system/scripts/dashboard/template-builder.js',
-            'system/scripts/dashboard/template-preview.js',
-        ],
-        'include_files' => [
-            'system/includes/graph/graph.inc.php',
-            'system/includes/data-filter/data-filter.inc.php',
-            'system/includes/dashboard/dashboard.inc.php',
-            'system/includes/dashboard/template-preview-component.php',
-        ],
-        'type' => 'copy_scripts_and_includes'
-    ],
-    6 => [
-        'title' => 'Copy Compiled Assets (dist/)',
-        'description' => 'Copies compiled CSS/JS bundles to module-specific folders and removes hashes (e.g., common.abc123.css → system/styles/common/common.css).',
-        'folder' => 'dist',
-        'type' => 'copy_dist_renamed'
-    ],
-    7 => [
-        'title' => 'Copy Theme Libraries',
-        'description' => 'Copies JavaScript/CSS libraries to the target project.',
-        'libraries' => [
-            ['source' => 'themes/libraries/bootstrap5', 'target' => 'themes/libraries/bootstrap5'],
-            ['source' => 'themes/libraries/jquery3', 'target' => 'themes/libraries/jquery3'],
-            ['source' => 'themes/libraries/fontawesome6', 'target' => 'themes/libraries/fontawesome6'],
-            ['source' => 'themes/libraries/moment-dgc', 'target' => 'themes/libraries/moment-dgc'],
-            ['source' => 'themes/libraries/echarts-dgc', 'target' => 'themes/libraries/echarts-dgc'],
-            ['source' => 'themes/libraries/codemirror-dgc', 'target' => 'themes/libraries/codemirror-dgc'],
-            ['source' => 'themes/libraries/daterangepicker-dgc', 'target' => 'themes/libraries/daterangepicker-dgc'],
-            ['source' => 'themes/libraries/autosize-dgc', 'target' => 'themes/libraries/autosize-dgc'],
-            ['source' => 'themes/libraries/sortablejs-dgc', 'target' => 'themes/libraries/sortablejs-dgc'],
-        ],
-        'type' => 'copy_libraries_versioned'
-    ],
-    8 => [
-        'title' => 'Run Database Setup',
-        'description' => 'Shows the SQL that needs to be executed to create tables and insert system data.',
-        'type' => 'sql_preview'
-    ],
-    9 => [
-        'title' => 'Code Modifications Required',
-        'description' => 'Manual changes needed: add routes to system.inc.php and update asset loading in include files.',
-        'type' => 'code_modifications'
-    ],
-];
-
-// Check if this is an AJAX request
-$isAjax = isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-
-// Process action
-$result = null;
-$error = null;
-
-if ($action === 'execute' && $step > 0 && isset($steps[$step])) {
-    $stepData = $steps[$step];
-
-    try {
-        if ($stepData['type'] === 'copy') {
-            $result = copyFiles($sourceDir, $targetDir, $stepData['files']);
-        } elseif ($stepData['type'] === 'copy_folder') {
-            $result = copyFolder($sourceDir . '/' . $stepData['folder'], $targetDir . '/' . $stepData['folder']);
-        } elseif ($stepData['type'] === 'copy_folders') {
-            $results = [];
-            foreach ($stepData['folders'] as $folder) {
-                $srcFolder = $sourceDir . '/' . $folder;
-                $dstFolder = $targetDir . '/' . $folder;
-                if (is_dir($srcFolder)) {
-                    $results[$folder] = copyFolder($srcFolder, $dstFolder);
-                }
-            }
-            $result = $results;
-        } elseif ($stepData['type'] === 'copy_libraries') {
-            $results = [];
-            foreach ($stepData['folders'] as $folder) {
-                $srcFolder = $sourceDir . '/' . $folder;
-                $dstFolder = $targetDir . '/' . $folder;
-                if (is_dir($srcFolder)) {
-                    $results[$folder] = copyFolder($srcFolder, $dstFolder);
-                }
-            }
-            $result = $results;
-        } elseif ($stepData['type'] === 'copy_libraries_versioned') {
-            $results = [];
-            foreach ($stepData['libraries'] as $lib) {
-                $srcFolder = $sourceDir . '/' . $lib['source'];
-                $dstFolder = $targetDir . '/' . $lib['target'];
-                if (is_dir($srcFolder)) {
-                    $results[$lib['target']] = copyFolder($srcFolder, $dstFolder);
-                }
-            }
-            $result = $results;
-        } elseif ($stepData['type'] === 'copy_scripts_and_includes') {
-            // Copy page scripts (regular copy) and include files (with transformation)
-            $results = ['scripts' => [], 'includes' => []];
-
-            // Copy page scripts
-            if (!empty($stepData['files'])) {
-                $results['scripts'] = copyFiles($sourceDir, $targetDir, $stepData['files']);
-            }
-
-            // Copy include files with transformation
-            if (!empty($stepData['include_files'])) {
-                foreach ($stepData['include_files'] as $file) {
-                    $srcFile = $sourceDir . '/' . $file;
-                    $dstFile = $targetDir . '/' . $file;
-                    if (file_exists($srcFile)) {
-                        // Ensure target directory exists
-                        $dstDir = dirname($dstFile);
-                        if (!is_dir($dstDir)) {
-                            mkdir($dstDir, 0755, true);
-                        }
-                        // Copy with transformation
-                        $content = file_get_contents($srcFile);
-                        $content = transformAssetLoading($content);
-                        file_put_contents($dstFile, $content);
-                        $results['includes'][$file] = 'copied';
-                    }
-                }
-            }
-            $result = $results;
-        } elseif ($stepData['type'] === 'copy_dist_renamed') {
-            // Copy to module-specific folders (system/styles/module/ and system/scripts/module/)
-            $result = copyDistRenamed($sourceDir . '/' . $stepData['folder'], $targetDir);
-        }
-
-        // If AJAX request, return JSON response
-        if ($isAjax) {
-            header('Content-Type: application/json');
-            echo json_encode([
-                'success' => true,
-                'step' => $step,
-                'title' => $stepData['title'],
-                'result' => $result,
-                'timestamp' => time()
-            ]);
-            exit;
-        }
-    } catch (Exception $e) {
-        $error = $e->getMessage();
-
-        // If AJAX request, return JSON error
-        if ($isAjax) {
-            header('Content-Type: application/json');
-            echo json_encode([
-                'success' => false,
-                'step' => $step,
-                'error' => $error,
-                'timestamp' => time()
-            ]);
-            exit;
-        }
-    }
-}
-
-// Helper functions
-/**
- * Transform asset loading calls from DGC style to Rapidkart style
- * LocalLocalUtility::addModuleCss/Js() → $theme->addCss/Script()
- */
-function transformAssetLoading($content)
-{
-    // Transform LocalLocalUtility::addModuleCss('module') → $theme->addCss(SystemConfig::stylesUrl() . 'module/module.css')
-    $content = preg_replace_callback(
-        "/LocalLocalUtility::addModuleCss\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/",
-        function ($matches) {
-            $module = $matches[1];
-            return "\$theme->addCss(SystemConfig::stylesUrl() . '{$module}/{$module}.css')";
-        },
-        $content
-    );
-
-    // Transform LocalLocalUtility::addModuleJs('module') → $theme->addScript(SystemConfig::scriptsUrl() . 'module/module.js')
-    $content = preg_replace_callback(
-        "/LocalLocalUtility::addModuleJs\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/",
-        function ($matches) {
-            $module = $matches[1];
-            return "\$theme->addScript(SystemConfig::scriptsUrl() . '{$module}/{$module}.js')";
-        },
-        $content
-    );
-
-    return $content;
-}
-
-function copyFiles($sourceDir, $targetDir, $files)
-{
-    $results = [];
-    foreach ($files as $file) {
-        $src = $sourceDir . '/' . $file;
-        $dst = $targetDir . '/' . $file;
-
-        // Create directory if needed
-        $dstDir = dirname($dst);
-        if (!is_dir($dstDir)) {
-            mkdir($dstDir, 0755, true);
-        }
-
-        if (file_exists($src)) {
-            $copied = copy($src, $dst);
-            $results[$file] = $copied ? 'success' : 'failed';
-        } else {
-            $results[$file] = 'source not found';
-        }
-    }
-    return $results;
-}
-
-function copyFolder($src, $dst)
-{
-    $results = ['files' => 0, 'dirs' => 0];
-
-    if (!is_dir($src)) {
-        return ['error' => 'Source folder not found: ' . $src];
-    }
-
-    if (!is_dir($dst)) {
-        mkdir($dst, 0755, true);
-        $results['dirs']++;
-    }
-
-    $dir = opendir($src);
-    while (($file = readdir($dir)) !== false) {
-        if ($file === '.' || $file === '..') continue;
-
-        $srcPath = $src . '/' . $file;
-        $dstPath = $dst . '/' . $file;
-
-        if (is_dir($srcPath)) {
-            $subResult = copyFolder($srcPath, $dstPath);
-            $results['files'] += $subResult['files'];
-            $results['dirs'] += $subResult['dirs'];
-        } else {
-            copy($srcPath, $dstPath);
-            $results['files']++;
-        }
-    }
-    closedir($dir);
-
-    return $results;
-}
-
-/**
- * Copy include files with asset loading transformation
- * Replaces LocalUtility::addModule*() calls with Rapidkart-style $theme->addCss()/addScript() calls
- */
-function copyIncludesTransformed($src, $dst)
-{
-    $results = ['files' => 0, 'dirs' => 0, 'transformed' => 0];
-
-    if (!is_dir($src)) {
-        return ['error' => 'Source folder not found: ' . $src];
-    }
-
-    if (!is_dir($dst)) {
-        mkdir($dst, 0755, true);
-        $results['dirs']++;
-    }
-
-    $dir = opendir($src);
-    while (($file = readdir($dir)) !== false) {
-        if ($file === '.' || $file === '..') continue;
-
-        $srcPath = $src . '/' . $file;
-        $dstPath = $dst . '/' . $file;
-
-        if (is_dir($srcPath)) {
-            $subResult = copyIncludesTransformed($srcPath, $dstPath);
-            $results['files'] += $subResult['files'];
-            $results['dirs'] += $subResult['dirs'];
-            $results['transformed'] += $subResult['transformed'];
-        } else {
-            // Only transform .inc.php files
-            if (strpos($file, '.inc.php') !== false) {
-                $content = file_get_contents($srcPath);
-                $originalContent = $content;
-
-                // Transform LocalLocalUtility::addModuleCss() calls
-                $content = preg_replace(
-                    "/LocalLocalUtility::addModuleCss\('([^']+)'\);/",
-                    "\$theme->addCss(SystemConfig::stylesUrl() . '$1/$1.css');",
-                    $content
-                );
-
-                // Transform LocalLocalUtility::addModuleJs() calls
-                $content = preg_replace(
-                    "/LocalLocalUtility::addModuleJs\('([^']+)'\);/",
-                    "\$theme->addScript(SystemConfig::scriptsUrl() . '$1/$1.js');",
-                    $content
-                );
-
-                file_put_contents($dstPath, $content);
-
-                if ($content !== $originalContent) {
-                    $results['transformed']++;
-                }
-            } else {
-                copy($srcPath, $dstPath);
-            }
-            $results['files']++;
-        }
-    }
-    closedir($dir);
-
-    return $results;
-}
-
-function getFileStatus($sourceDir, $targetDir, $file)
-{
-    $src = $sourceDir . '/' . $file;
-    $dst = $targetDir . '/' . $file;
-
-    $srcExists = file_exists($src);
-    $dstExists = file_exists($dst);
-
-    if (!$srcExists) return 'missing';
-    if (!$dstExists) return 'new';
-
-    // Compare file contents
-    if (md5_file($src) === md5_file($dst)) {
-        return 'same';
-    }
-    return 'different';
-}
-
-function getFolderStatus($sourceDir, $targetDir, $folder)
-{
-    $src = $sourceDir . '/' . $folder;
-    $dst = $targetDir . '/' . $folder;
-
-    if (!is_dir($src)) return 'missing';
-    if (!is_dir($dst)) return 'new';
-    return 'exists';
-}
-
-/**
- * Get status for versioned library (source and target have different paths)
- */
-function getVersionedLibraryStatus($sourceDir, $targetDir, $sourcePath, $targetPath)
-{
-    $src = $sourceDir . '/' . $sourcePath;
-    $dst = $targetDir . '/' . $targetPath;
-
-    if (!is_dir($src)) return 'missing';
-    if (!is_dir($dst)) return 'new';
-    return 'exists';
-}
-
-function copyDistRenamed($src, $targetDir)
-{
-    $results = ['copied' => [], 'skipped' => []];
-
-    if (!is_dir($src)) {
-        return ['error' => 'Source folder not found: ' . $src];
-    }
-
-    $dir = opendir($src);
-    while (($file = readdir($dir)) !== false) {
-        if ($file === '.' || $file === '..') continue;
-
-        $srcPath = $src . '/' . $file;
-
-        // Skip .map files and manifest.json
-        if (strpos($file, '.map') !== false || $file === 'manifest.json') {
-            $results['skipped'][] = $file;
-            continue;
-        }
-
-        // Remove hash from filename: common.abc123.css -> common.css
-        // Pattern: modulename.hash.ext -> modulename.ext
-        // Route to module-specific folder: system/styles/modulename/ or system/scripts/modulename/
-        if (preg_match('/^(.+)\.([a-f0-9]{8})\.([a-z]+)$/', $file, $matches)) {
-            $moduleName = $matches[1]; // e.g., "common", "graph", "data-filter", "dashboard"
-            $ext = $matches[3];
-            $newName = $moduleName . '.' . $ext;
-
-            // Route to module-specific folder based on file type
-            if ($ext === 'css') {
-                $moduleDir = $targetDir . '/system/styles/' . $moduleName;
-            } else if ($ext === 'js') {
-                $moduleDir = $targetDir . '/system/scripts/' . $moduleName;
-            } else {
-                // Skip unknown extensions
-                $results['skipped'][] = $file;
-                continue;
-            }
-
-            // Create module directory if needed
-            if (!is_dir($moduleDir)) {
-                mkdir($moduleDir, 0755, true);
-            }
-
-            $dstPath = $moduleDir . '/' . $newName;
-            copy($srcPath, $dstPath);
-
-            // Store with full relative path for display
-            $relativePath = ($ext === 'css' ? 'system/styles/' : 'system/scripts/') . $moduleName . '/' . $newName;
-            $results['copied'][$file] = $relativePath;
-        } else {
-            // Skip files without hash pattern (shouldn't happen with build output)
-            $results['skipped'][] = $file;
-        }
-    }
-    closedir($dir);
-
-    return $results;
-}
-
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -552,8 +16,24 @@ function copyDistRenamed($src, $targetDir)
         .migration-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
+            padding: 1rem 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .migration-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .migration-header .home-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .migration-header .home-link:hover {
+            color: white;
         }
 
         .step-card {
@@ -863,13 +343,80 @@ function copyDistRenamed($src, $targetDir)
 
 <body>
     <div class="migration-header">
-        <div class="container">
-            <h1><i class="fas fa-truck-moving me-2"></i>Migration Tool</h1>
-            <p class="mb-0 opacity-75">Dynamic Graph Creator &rarr; Rapidkart Process Admin</p>
+        <div class="container d-flex justify-content-between align-items-center">
+            <h3><i class="fas fa-truck-moving me-2"></i>Migration Tool</h3>
+            <a href=".?urlq=graph" class="home-link"><i class="fas fa-home me-1"></i>Back to App</a>
         </div>
     </div>
 
     <div class="container pb-5">
+        <!-- Database Validation Section -->
+        <div class="card mb-4" style="border-radius: 12px; border: none; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background: #f8f9fa; border-radius: 12px 12px 0 0; border-bottom: 1px solid #e9ecef;">
+                <h6 class="mb-0">
+                    <i class="fas fa-database me-2"></i>Database Validation
+                </h6>
+                <?php if ($dbValidation['all_passed']): ?>
+                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>All Checks Passed</span>
+                <?php else: ?>
+                    <span class="badge bg-danger"><i class="fas fa-times me-1"></i>Issues Found</span>
+                <?php endif; ?>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Tables in install.sql -->
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-muted mb-2"><small>Tables in install.sql</small></h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            <?php foreach ($dbValidation['install_sql_tables'] as $table): ?>
+                                <?php
+                                $inDb = isset($dbValidation['database_tables'][$table]) && $dbValidation['database_tables'][$table];
+                                $badgeClass = $inDb ? 'bg-success' : 'bg-danger';
+                                $icon = $inDb ? 'fa-check' : 'fa-times';
+                                ?>
+                                <span class="badge <?php echo $badgeClass; ?>" style="font-size: 0.7rem; font-weight: normal;">
+                                    <i class="fas <?php echo $icon; ?> me-1"></i><?php echo htmlspecialchars($table); ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- SystemTables Constants -->
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-muted mb-2"><small>SystemTables Constants</small></h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            <?php foreach ($dbValidation['systemtables_constants'] as $const => $table): ?>
+                                <?php
+                                $inSql = in_array($table, $dbValidation['install_sql_tables']);
+                                $badgeClass = $inSql ? 'bg-primary' : 'bg-warning';
+                                ?>
+                                <span class="badge <?php echo $badgeClass; ?>" style="font-size: 0.7rem; font-weight: normal;" title="<?php echo $const; ?>">
+                                    <?php echo htmlspecialchars($table); ?>
+                                </span>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- Validation Status -->
+                    <div class="col-md-4 mb-3">
+                        <h6 class="text-muted mb-2"><small>Validation Status</small></h6>
+                        <?php if (empty($dbValidation['issues'])): ?>
+                            <div class="alert alert-success mb-0 py-2" style="font-size: 0.8rem;">
+                                <i class="fas fa-check-circle me-1"></i>
+                                All DGC tables exist in database and have constants in SystemTables
+                            </div>
+                        <?php else: ?>
+                            <div class="alert alert-danger mb-0 py-2" style="font-size: 0.75rem; max-height: 150px; overflow-y: auto;">
+                                <?php foreach ($dbValidation['issues'] as $issue): ?>
+                                    <div class="mb-1"><i class="fas fa-exclamation-circle me-1"></i><?php echo htmlspecialchars($issue); ?></div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <?php if (!$targetExists): ?>
             <div class="alert alert-danger alert-custom">
                 <i class="fas fa-exclamation-triangle me-2"></i>
@@ -891,37 +438,7 @@ function copyDistRenamed($src, $targetDir)
             </div>
         </div>
 
-        <?php if ($result !== null): ?>
-            <div class="alert alert-success alert-custom mb-4">
-                <i class="fas fa-check-circle me-2"></i>
-                <strong>Step <?php echo $step; ?> completed successfully!</strong>
-                <?php if (is_array($result)): ?>
-                    <div class="mt-2 small">
-                        <?php
-                        if (isset($result['files'])) {
-                            echo "Copied {$result['files']} files, created {$result['dirs']} directories";
-                        } else {
-                            foreach ($result as $file => $status) {
-                                if (is_array($status)) {
-                                    echo "<br>{$file}: {$status['files']} files";
-                                } else {
-                                    $icon = $status === 'success' ? '✓' : '✗';
-                                    echo "<br>{$icon} {$file}";
-                                }
-                            }
-                        }
-                        ?>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if ($error): ?>
-            <div class="alert alert-danger alert-custom mb-4">
-                <i class="fas fa-times-circle me-2"></i>
-                <strong>Error:</strong> <?php echo htmlspecialchars($error); ?>
-            </div>
-        <?php endif; ?>
+        <!-- Results are shown via Toast notifications (AJAX responses) -->
 
         <h4 class="mb-3">Migration Steps</h4>
 
@@ -2033,26 +1550,35 @@ LocalUtility::addModuleJs('dashboard') → $theme->addScript(SystemConfig::scrip
 
         // Execute action via AJAX
         document.querySelector('#confirmModal .confirm-execute').addEventListener('click', function() {
-            if (!pendingActionUrl) return;
+            if (!pendingStep) return;
 
             const btn = this;
             const originalHtml = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Executing...';
             btn.disabled = true;
 
-            fetch(pendingActionUrl, {
-                    method: 'GET',
+            // Use POST to current page with form data
+            const formData = new FormData();
+            formData.append('submit', 'execute_step');
+            formData.append('step', pendingStep);
+
+            fetch('.?urlq=migrate', {
+                    method: 'POST',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
-                    }
+                    },
+                    body: formData
                 })
                 .then(response => response.json())
-                .then(data => {
+                .then(response => {
                     confirmModal.hide();
                     btn.innerHTML = originalHtml;
                     btn.disabled = false;
 
-                    if (data.success) {
+                    if (response.success) {
+                        // Data is nested in response.data
+                        const data = response.data;
+
                         // Save execution time
                         saveExecutionTime(data.step, data.timestamp);
                         updateExecBadge(data.step, data.timestamp);
@@ -2071,7 +1597,7 @@ LocalUtility::addModuleJs('dashboard') → $theme->addScript(SystemConfig::scrip
                         }
                         Toast.success(resultMsg);
                     } else {
-                        Toast.error('Error: ' + data.error);
+                        Toast.error('Error: ' + response.message);
                     }
                 })
                 .catch(error => {
@@ -2116,9 +1642,24 @@ LocalUtility::addModuleJs('dashboard') → $theme->addScript(SystemConfig::scrip
                 this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Counting...';
                 this.disabled = true;
 
-                fetch('?action=count_files&path=' + encodeURIComponent(path) + '&recursive=' + recursive + '&count_type=' + countType)
+                // Use POST to current page with form data
+                const formData = new FormData();
+                formData.append('submit', 'count_files');
+                formData.append('path', path);
+                formData.append('recursive', recursive);
+                formData.append('count_type', countType);
+
+                fetch('.?urlq=migrate', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
                     .then(response => response.json())
-                    .then(data => {
+                    .then(response => {
+                        // Data is nested in response.data
+                        const data = response.data;
                         if (data.exists) {
                             const icon = data.type === 'folders' ? 'fa-folder' : 'fa-file';
                             const label = data.type === 'folders' ? 'folders' : 'files';

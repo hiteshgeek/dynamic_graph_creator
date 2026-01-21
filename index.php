@@ -129,8 +129,8 @@ switch ($page) {
         break;
     case 'migrate':
         // Migration tool - standalone page with its own HTML
-        require_once __DIR__ . '/migrate.php';
-        exit; // migrate.php handles its own output
+        require_once SystemConfig::includesPath() . 'migrate/migrate.inc.php';
+        break; // migrate.inc.php calls exit after rendering
     case 'graph':
     default:
         require_once SystemConfig::includesPath() . 'graph/graph.inc.php';
