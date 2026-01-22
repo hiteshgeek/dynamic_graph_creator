@@ -263,6 +263,74 @@ class DashboardInstance implements DatabaseObject
     }
 
     /**
+     * Get all widget (graph) IDs from the dashboard structure
+     * @return array Array of unique graph IDs
+     */
+    public function getAllWidgetIds()
+    {
+        $structure = $this->getStructureArray();
+        $widgetIds = array();
+
+        if (!isset($structure['sections']) || !is_array($structure['sections'])) {
+            return $widgetIds;
+        }
+
+        foreach ($structure['sections'] as $section) {
+            if (!isset($section['areas']) || !is_array($section['areas'])) {
+                continue;
+            }
+
+            foreach ($section['areas'] as $area) {
+                // Check area's direct content
+                if (isset($area['content']['widgetId']) && !empty($area['content']['widgetId'])) {
+                    $widgetIds[] = intval($area['content']['widgetId']);
+                }
+
+                // Check sub-rows
+                if (isset($area['subRows']) && is_array($area['subRows'])) {
+                    foreach ($area['subRows'] as $subRow) {
+                        if (isset($subRow['content']['widgetId']) && !empty($subRow['content']['widgetId'])) {
+                            $widgetIds[] = intval($subRow['content']['widgetId']);
+                        }
+                    }
+                }
+            }
+        }
+
+        return array_unique($widgetIds);
+    }
+
+    /**
+     * Get all unique filter keys from all widgets in the dashboard
+     * Extracts placeholders from each graph's SQL query
+     * @return array Array of unique filter keys (e.g., ['::company_list', '::global_datepicker'])
+     */
+    public function getAllFilterKeys()
+    {
+        $widgetIds = $this->getAllWidgetIds();
+        $filterKeys = array();
+
+        foreach ($widgetIds as $graphId) {
+            $graph = new Graph($graphId);
+            if ($graph->getId()) {
+                $query = $graph->getQuery();
+                if ($query) {
+                    // Extract placeholders from query using DataFilterManager
+                    $placeholders = DataFilterManager::extractPlaceholders($query);
+                    $filterKeys = array_merge($filterKeys, $placeholders);
+                }
+            }
+        }
+
+        // Expand derived placeholders (_from, _to) to get base filter keys
+        // e.g., ::global_datepicker_from -> ::global_datepicker
+        $filterKeys = DataFilterManager::expandDerivedPlaceholders($filterKeys);
+
+        // Return unique keys
+        return array_values(array_unique($filterKeys));
+    }
+
+    /**
      * Update a specific section's content
      */
     public function updateAreaContent($sectionId, $areaId, $content)

@@ -103,6 +103,9 @@ if (isset($_POST['submit'])) {
         case 'get_filters_by_keys':
             getFiltersByKeys($_POST);
             break;
+        case 'get_dashboard_filters':
+            getDashboardFilters($_POST);
+            break;
         case 'get_widgets_for_selector':
             getWidgetsForSelector($_POST);
             break;
@@ -1412,6 +1415,49 @@ function getFiltersByKeys($data)
     }
 
     Utility::ajaxResponseTrue('Filters loaded', $result);
+}
+
+/**
+ * Get all filters for a dashboard based on its widgets
+ * Extracts filter keys from all graph queries in the dashboard
+ */
+function getDashboardFilters($data)
+{
+    $dashboardId = isset($data['dashboard_id']) ? intval($data['dashboard_id']) : 0;
+
+    if (!$dashboardId || !DashboardInstance::isExistent($dashboardId)) {
+        Utility::ajaxResponseTrue('No filters', array(
+            'keys' => array(),
+            'filters' => array()
+        ));
+    }
+
+    $dashboard = new DashboardInstance($dashboardId);
+    $filterKeys = $dashboard->getAllFilterKeys();
+
+    if (empty($filterKeys)) {
+        Utility::ajaxResponseTrue('No filters', array(
+            'keys' => array(),
+            'filters' => array()
+        ));
+    }
+
+    // Get full filter data for these keys
+    $filters = DataFilterManager::getByKeys($filterKeys);
+
+    // Build filter data with options (ordered by extracted keys)
+    $result = array();
+    foreach ($filterKeys as $key) {
+        if (isset($filters[$key])) {
+            $filter = $filters[$key];
+            $result[] = $filter->toArray();
+        }
+    }
+
+    Utility::ajaxResponseTrue('Filters loaded', array(
+        'keys' => $filterKeys,
+        'filters' => $result
+    ));
 }
 
 /**

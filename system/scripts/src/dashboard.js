@@ -431,6 +431,37 @@ class DashboardBuilder {
   }
 
   /**
+   * Refresh the dashboard filter bar based on current widgets
+   * Fetches filter keys from all widgets and re-renders the filter bar
+   */
+  async refreshFilterBar() {
+    if (!this.dashboardId) return;
+
+    const filtersContainer = document.querySelector("#dashboard-filters");
+    if (!filtersContainer) return;
+
+    try {
+      const result = await Ajax.post("get_dashboard_filters", {
+        dashboard_id: this.dashboardId,
+      });
+
+      if (result.success && result.data) {
+        const filters = result.data.filters || [];
+
+        if (typeof FilterRenderer !== "undefined") {
+          // Re-render filters into the container
+          FilterRenderer.render(filtersContainer, filters, {
+            showLabels: true,
+            compact: false,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("[DashboardBuilder] Error refreshing filter bar:", error);
+    }
+  }
+
+  /**
    * Update area content in the dashboard structure
    * @param {string} sectionId
    * @param {string} areaId
@@ -2167,6 +2198,10 @@ class DashboardBuilder {
               ? "Template saved successfully"
               : "Dashboard saved successfully",
           );
+        }
+        // Refresh filter bar after dashboard save (not for templates)
+        if (this.mode === "dashboard") {
+          this.refreshFilterBar();
         }
       } else {
         this.updateSaveIndicator("error");

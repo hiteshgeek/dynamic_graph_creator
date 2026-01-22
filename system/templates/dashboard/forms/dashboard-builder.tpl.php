@@ -29,8 +29,8 @@ echo DGCHelper::renderPageHeader([
     'rightContent' => $rightContent
 ]);
 
-// Dashboard filter bar - filters shown in array order
-$dashboardFilters = array('company_list', 'outlet_list', 'global_datepicker');
+// Dashboard filter bar - dynamically get filters from all widgets in this dashboard
+$dashboardFilters = $dashboard ? $dashboard->getAllFilterKeys() : array();
 echo DGCHelper::renderDashboardFilterBar($dashboardFilters);
 ?>
 
