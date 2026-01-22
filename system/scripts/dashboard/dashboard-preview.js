@@ -143,20 +143,63 @@
                 if (applyBtn) {
                     applyBtn.style.display = autoApplyEnabled ? 'none' : '';
                 }
+                // If turning on auto-apply, immediately apply current filters
+                if (autoApplyEnabled) {
+                    applyFilters();
+                }
             });
+        }
+
+        // Function to apply filters and reload charts
+        function applyFilters() {
+            console.log('[dashboard-preview.js] Applying filters...');
+            var previewContainer = document.getElementById('dashboard-preview');
+            if (previewContainer && widgetLoader) {
+                var filterValues = getDashboardFilterValues();
+                console.log('[dashboard-preview.js] Filter values:', filterValues);
+                widgetLoader.loadAll(previewContainer, filterValues);
+            }
         }
 
         // Apply button click - reload charts with new filters
         if (applyBtn) {
-            applyBtn.addEventListener('click', function() {
-                console.log('[dashboard-preview.js] Applying filters...');
-                var previewContainer = document.getElementById('dashboard-preview');
-                if (previewContainer && widgetLoader) {
-                    var filterValues = getDashboardFilterValues();
-                    widgetLoader.loadAll(previewContainer, filterValues);
+            applyBtn.addEventListener('click', applyFilters);
+        }
+
+        // Live filtering: Add event listeners to all filter inputs
+        // Selects
+        filtersContainer.querySelectorAll('select.filter-input').forEach(function(select) {
+            select.addEventListener('change', function() {
+                if (autoApplyEnabled) applyFilters();
+            });
+        });
+
+        // Checkboxes and radios
+        filtersContainer.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(function(input) {
+            input.addEventListener('change', function() {
+                if (autoApplyEnabled) applyFilters();
+            });
+        });
+
+        // Text and number inputs (with debounce)
+        var debounceTimer = null;
+        filtersContainer.querySelectorAll('input.filter-input:not(.dgc-datepicker)').forEach(function(input) {
+            input.addEventListener('input', function() {
+                if (autoApplyEnabled) {
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(applyFilters, 500);
                 }
             });
-        }
+        });
+
+        // Datepickers - listen for change event (dispatched by DatePickerInit after apply/cancel)
+        // DatePickerInit updates data attributes before dispatching the change event
+        filtersContainer.querySelectorAll('.dgc-datepicker').forEach(function(input) {
+            input.addEventListener('change', function() {
+                console.log('[dashboard-preview.js] Datepicker changed:', this.dataset.from, '-', this.dataset.to);
+                if (autoApplyEnabled) applyFilters();
+            });
+        });
     }
 
     /**
