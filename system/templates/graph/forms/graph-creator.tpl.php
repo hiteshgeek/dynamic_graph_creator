@@ -348,7 +348,11 @@ echo DGCHelper::renderPageHeader([
                         </button>
                     </div>
                 </div>
-                <div class="graph-preview-container"></div>
+                <div class="graph-preview-container">
+                    <?php if ($graph): ?>
+                        <?php echo DGCHelper::renderChartSkeleton($graph->getGraphType()); ?>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <!-- Data Mapping Section -->

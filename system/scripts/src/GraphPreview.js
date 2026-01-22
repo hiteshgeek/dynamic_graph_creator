@@ -3,8 +3,10 @@
  * Handles chart preview with dummy or real data
  */
 
+import ChartSkeleton from './ChartSkeleton.js';
+
 export default class GraphPreview {
-    constructor(container) {
+    constructor(container, options = {}) {
         this.container = container;
         this.chart = null;
         this.type = 'bar';
@@ -12,10 +14,21 @@ export default class GraphPreview {
         this.mapping = {};
         this.data = null;
 
+        // Skeleton loader state
+        this.skeletonElement = null;
+        this.showSkeletonOnInit = options.showSkeleton !== false; // Default true
+
+        // Lazy init - delay echarts creation until first render to keep PHP skeleton visible
+        this.lazyInit = options.lazyInit !== false; // Default true
+
         // Data view toggle state
         this.dataViewActive = false;
         this.toggleButton = null;
         this.tableContainer = null;
+
+        // Dummy data state
+        this.isDummyData = false;
+        this.dummyDataLabel = null;
 
         this.init();
     }
@@ -24,6 +37,23 @@ export default class GraphPreview {
      * Initialize ECharts instance
      */
     init() {
+        // Show skeleton while loading (if not already present in DOM)
+        if (this.showSkeletonOnInit && !this.container.querySelector('.chart-skeleton')) {
+            this.showSkeleton();
+        }
+
+        // If not lazy init, create echarts immediately
+        if (!this.lazyInit) {
+            this.initEcharts();
+        }
+    }
+
+    /**
+     * Initialize ECharts instance (called lazily on first render or immediately if lazyInit=false)
+     */
+    initEcharts() {
+        if (this.chart) return; // Already initialized
+
         if (typeof echarts !== 'undefined') {
             this.chart = echarts.init(this.container);
 
@@ -39,6 +69,25 @@ export default class GraphPreview {
         } else {
             console.error('ECharts not loaded');
         }
+    }
+
+    /**
+     * Show skeleton loader
+     * @param {string} type - Chart type for skeleton style (bar, line, pie)
+     */
+    showSkeleton(type) {
+        const chartType = type || this.type;
+        // ChartSkeleton.show keeps existing skeleton (e.g., from PHP) if present
+        this.skeletonElement = ChartSkeleton.show(this.container, chartType);
+    }
+
+    /**
+     * Hide/remove skeleton loader
+     * @param {boolean} animate - Whether to animate the fade out
+     */
+    hideSkeleton(animate = false) {
+        ChartSkeleton.hide(this.container, animate);
+        this.skeletonElement = null;
     }
 
     /**
@@ -117,6 +166,8 @@ export default class GraphPreview {
      */
     setData(data) {
         this.data = data;
+        this.isDummyData = false;
+        this.hideDummyDataLabel();
     }
 
     /**
@@ -130,7 +181,16 @@ export default class GraphPreview {
      * Render chart with current data and config
      */
     render() {
-        if (!this.chart || !this.data) return;
+        if (!this.data) return;
+
+        // Initialize echarts lazily if not yet created
+        if (!this.chart) {
+            this.initEcharts();
+        }
+        if (!this.chart) return; // Failed to init
+
+        // Hide skeleton loader before rendering chart
+        this.hideSkeleton();
 
         const option = this.buildOption();
         this.chart.setOption(option, true);
@@ -153,7 +213,31 @@ export default class GraphPreview {
     showDummyData(type) {
         this.type = type || this.type;
         this.data = this.getDummyData(this.type);
+        this.isDummyData = true;
         this.render();
+        this.showDummyDataLabel();
+    }
+
+    /**
+     * Show dummy data label
+     */
+    showDummyDataLabel() {
+        this.hideDummyDataLabel();
+
+        this.dummyDataLabel = document.createElement('div');
+        this.dummyDataLabel.className = 'dummy-data-label';
+        this.dummyDataLabel.innerHTML = '<i class="fas fa-info-circle"></i> Sample Data';
+        this.container.appendChild(this.dummyDataLabel);
+    }
+
+    /**
+     * Hide dummy data label
+     */
+    hideDummyDataLabel() {
+        if (this.dummyDataLabel) {
+            this.dummyDataLabel.remove();
+            this.dummyDataLabel = null;
+        }
     }
 
     /**
@@ -719,6 +803,9 @@ export default class GraphPreview {
      * Destroy chart instance
      */
     destroy() {
+        // Clean up skeleton
+        this.hideSkeleton();
+
         // Clean up toggle button
         if (this.toggleButton) {
             this.toggleButton.remove();

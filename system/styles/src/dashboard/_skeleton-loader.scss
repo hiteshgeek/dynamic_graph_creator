@@ -364,70 +364,7 @@
 }
 
 // =========================================================================
-// Widget Chart Skeleton (used inside widget containers)
+// Widget Chart Skeleton - Now centralized in _chart-skeleton.scss
 // =========================================================================
-
-// Match specificity with _widget-selector.scss (.area-content.has-widget context)
-.area-content.has-widget .widget-graph-loading.chart-skeleton,
-.widget-graph-loading.chart-skeleton {
-  display: flex;
-  flex-direction: row; // Override column from base
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  min-height: 200px;
-  padding: $spacing-md;
-  background: var(--dgc-bg-card);
-
-  .skeleton-chart-bar {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    gap: $spacing-xs;
-    width: 100%;
-    height: 80%;
-    max-width: 300px;
-
-    .skeleton-bar {
-      @extend .skeleton;
-      flex: 1;
-      border-radius: 3px 3px 0 0;
-
-      &:nth-child(1) { height: 60%; }
-      &:nth-child(2) { height: 85%; }
-      &:nth-child(3) { height: 45%; }
-      &:nth-child(4) { height: 95%; }
-      &:nth-child(5) { height: 70%; }
-      &:nth-child(6) { height: 55%; }
-    }
-  }
-
-  .skeleton-chart-pie {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-
-    .skeleton-pie {
-      @extend .skeleton;
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      position: relative;
-
-      &::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 60px;
-        height: 60px;
-        background: var(--dgc-bg-card);
-        border-radius: 50%;
-      }
-    }
-  }
-}
+// Chart skeleton styles have been moved to /system/styles/src/_chart-skeleton.scss
+// which is imported via shared.scss for use across all modules.

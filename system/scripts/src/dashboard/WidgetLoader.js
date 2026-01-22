@@ -88,14 +88,15 @@ export class WidgetLoader {
         container.style.minWidth = '100%';
       }
 
-      // Render using GraphPreview
-      const preview = new window.GraphPreview(container);
+      // Render using GraphPreview (don't show skeleton - data is already loaded)
+      const preview = new window.GraphPreview(container, { showSkeleton: false });
       const actualGraphType = result.data.graphType || graphType;
       preview.setType(actualGraphType);
 
-      if (result.data.config) {
-        preview.setConfig(result.data.config);
-      }
+      // Always set config (API now guarantees it's an array)
+      const config = result.data.config || {};
+      console.log(this.logPrefix, 'Graph', graphId, 'config:', config, 'showDataViewToggle:', config.showDataViewToggle);
+      preview.setConfig(config);
 
       if (chartData && chartData.mapping) {
         preview.setMapping(chartData.mapping);

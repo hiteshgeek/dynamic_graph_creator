@@ -9,7 +9,6 @@ import DataFilterUtils from './DataFilterUtils.js';
 
 // Use global helpers from main.js
 const Ajax = window.Ajax;
-const Loading = window.Loading;
 const Toast = window.Toast;
 
 
@@ -55,7 +54,8 @@ export default class GraphView {
     initPreview() {
         const previewContainer = this.container.querySelector('.graph-preview-container');
         if (previewContainer && !this.preview) {
-            this.preview = new GraphPreview(previewContainer);
+            // Don't show skeleton on init - loadGraphData will show it with correct type
+            this.preview = new GraphPreview(previewContainer, { showSkeleton: false });
             this.preview.setType(this.graphType);
             this.preview.setConfig(this.config);
         }
@@ -261,23 +261,29 @@ export default class GraphView {
     loadGraphData() {
         const filterValues = this.getFilterValues();
 
-        Loading.show('Loading graph...');
+        // Show skeleton (ChartSkeleton.show keeps existing PHP-rendered skeleton)
+        this.ensurePreviewReady();
+        if (this.preview) {
+            this.preview.showSkeleton(this.graphType);
+        }
 
         Ajax.post('preview_graph', {
             id: this.graphId,
             filters: filterValues
         }).then(result => {
-            Loading.hide();
             if (result.success && result.data) {
-                // Clear any filter message and ensure preview is initialized
-                this.ensurePreviewReady();
                 this.preview.setData(result.data.chartData);
-                this.preview.render();
+                this.preview.render(); // This hides skeleton
             } else {
+                if (this.preview) {
+                    this.preview.hideSkeleton();
+                }
                 Toast.error(result.message || 'Failed to load graph');
             }
         }).catch(error => {
-            Loading.hide();
+            if (this.preview) {
+                this.preview.hideSkeleton();
+            }
             Toast.error('Failed to load graph');
         });
     }

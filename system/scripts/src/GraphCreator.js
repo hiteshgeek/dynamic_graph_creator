@@ -39,6 +39,7 @@ export default class GraphCreator {
     // State
     this.columns = [];
     this.isLoading = false;
+    this.initialLoad = !!options.graphId; // True when editing - PHP rendered skeleton
     this.activeSidebarTab = "config"; // Default to config tab
 
     // Unsaved changes tracking
@@ -112,7 +113,8 @@ export default class GraphCreator {
       ".graph-preview-container",
     );
     if (previewContainer) {
-      this.preview = new GraphPreview(previewContainer);
+      // Don't show skeleton on init - loadGraph or showDummyData will handle it
+      this.preview = new GraphPreview(previewContainer, { showSkeleton: false });
     }
   }
 
@@ -1379,10 +1381,13 @@ export default class GraphCreator {
 
     if (this.preview) {
       this.preview.setType(type);
-      if (this.columns.length === 0) {
-        this.preview.showDummyData(type);
-      } else {
-        this.updatePreview();
+      // Don't show dummy data while loading existing graph - keep skeleton
+      if (!this.isLoading) {
+        if (this.columns.length === 0) {
+          this.preview.showDummyData(type);
+        } else {
+          this.updatePreview();
+        }
       }
     }
 
@@ -1454,6 +1459,9 @@ export default class GraphCreator {
   async updatePreview() {
     if (!this.preview) return;
 
+    // Skip during initial load - PHP skeleton is shown, let it stay until final render
+    if (this.isLoading || this.initialLoad) return;
+
     const config = this.configPanel ? this.configPanel.getConfig() : {};
     const mapping = this.dataMapper ? this.dataMapper.getMapping() : {};
 
@@ -1479,6 +1487,9 @@ export default class GraphCreator {
     const filterValues = this.getSidebarFilterValues();
     const placeholderSettings = this.getPlaceholderSettingsForQuery();
 
+    // Show skeleton while loading
+    this.preview.showSkeleton(this.graphType);
+
     try {
       const result = await Ajax.post("preview_graph", {
         query: query,
@@ -1493,9 +1504,15 @@ export default class GraphCreator {
         this.preview.setData(result.data.chartData);
         this.preview.setConfig(config);
         this.preview.setMapping(mapping);
-        this.preview.render();
+        this.preview.render(); // This hides skeleton
+      } else {
+        this.preview.hideSkeleton();
       }
+      // Clear initial load flag - subsequent changes will show skeleton
+      this.initialLoad = false;
     } catch (error) {
+      this.preview.hideSkeleton();
+      this.initialLoad = false;
       console.error("Preview update failed:", error);
     }
   }
@@ -1504,7 +1521,9 @@ export default class GraphCreator {
    * Load existing graph for editing
    */
   async loadGraph(graphId) {
-    Loading.show("Loading graph...");
+    this.isLoading = true;
+
+    // PHP already rendered skeleton with correct type - don't override it
 
     try {
       const result = await Ajax.post("load_graph", { id: graphId });
@@ -1597,6 +1616,10 @@ export default class GraphCreator {
           // Set mapping without triggering onChange (we'll update preview after testQuery)
           this.dataMapper.setMapping(mapping, false);
 
+          // Mark loading complete before testQuery so updatePreview will run
+          this.isLoading = false;
+          this.initialLoad = false;
+
           // Test query to get columns - this will call onQueryTest which now
           // calls updatePreview(), and since mapping is already set, it should work
           if (graph.query) {
@@ -1611,13 +1634,19 @@ export default class GraphCreator {
         this.captureState();
         this.setUnsavedChanges(false);
       } else {
+        if (this.preview) {
+          this.preview.hideSkeleton();
+        }
         Toast.error(result.message || "Failed to load graph");
       }
     } catch (error) {
+      if (this.preview) {
+        this.preview.hideSkeleton();
+      }
       Toast.error("Failed to load graph");
       console.error(error);
     } finally {
-      Loading.hide();
+      this.isLoading = false;
     }
   }
 

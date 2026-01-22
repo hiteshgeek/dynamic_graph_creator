@@ -476,11 +476,18 @@ function previewGraph($data)
         }
 
         $chartData = $graph->execute($filters ? $filters : array());
-        $config = json_decode($graph->getConfig(), true);
+        $configJson = $graph->getConfig();
+        $config = $configJson ? json_decode($configJson, true) : array();
+
+        // Ensure config is always an array (even if json_decode fails)
+        if (!is_array($config)) {
+            $config = array();
+        }
 
         Utility::ajaxResponseTrue('Graph data loaded', array(
             'chartData' => $chartData,
-            'config' => $config
+            'config' => $config,
+            'graphType' => $graph->getGraphType()
         ));
     } else {
         // Preview with provided data

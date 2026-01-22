@@ -1,0 +1,199 @@
+// Chart Skeleton - Shared skeleton loader for charts/graphs
+// Used by GraphPreview component in both dashboard widgets and graph pages
+@use "variables" as *;
+
+// =========================================================================
+// Skeleton Animation Keyframes
+// =========================================================================
+
+@keyframes chart-skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// =========================================================================
+// Base Skeleton Mixin
+// =========================================================================
+
+@mixin skeleton-base {
+  background: linear-gradient(
+    90deg,
+    var(--dgc-skeleton-base, rgba(0, 0, 0, 0.06)) 0%,
+    var(--dgc-skeleton-highlight, rgba(0, 0, 0, 0.12)) 20%,
+    var(--dgc-skeleton-highlight, rgba(0, 0, 0, 0.12)) 40%,
+    var(--dgc-skeleton-base, rgba(0, 0, 0, 0.06)) 60%,
+    var(--dgc-skeleton-base, rgba(0, 0, 0, 0.06)) 100%
+  );
+  background-size: 200% 100%;
+  animation: chart-skeleton-shimmer 1.5s ease-in-out infinite;
+
+  // Dark mode support
+  .theme-dark & {
+    --dgc-skeleton-base: rgba(255, 255, 255, 0.06);
+    --dgc-skeleton-highlight: rgba(255, 255, 255, 0.12);
+  }
+}
+
+// =========================================================================
+// Chart Skeleton Container
+// =========================================================================
+
+.chart-skeleton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  padding: $spacing-md;
+  background: var(--dgc-bg-card);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+
+  // Bar chart skeleton
+  .skeleton-chart-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: $spacing-xs;
+    width: 100%;
+    height: 80%;
+    max-width: 300px;
+
+    .skeleton-bar {
+      @include skeleton-base;
+      flex: 1;
+      border-radius: 3px 3px 0 0;
+
+      &:nth-child(1) { height: 60%; }
+      &:nth-child(2) { height: 85%; }
+      &:nth-child(3) { height: 45%; }
+      &:nth-child(4) { height: 95%; }
+      &:nth-child(5) { height: 70%; }
+      &:nth-child(6) { height: 55%; }
+    }
+  }
+
+  // Pie chart skeleton
+  .skeleton-chart-pie {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+
+    .skeleton-pie {
+      @include skeleton-base;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 60px;
+        height: 60px;
+        background: var(--dgc-bg-card);
+        border-radius: 50%;
+      }
+    }
+  }
+
+  // Line chart skeleton
+  .skeleton-chart-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 80%;
+    max-width: 300px;
+
+    .skeleton-line-wave {
+      @include skeleton-base;
+      width: 100%;
+      height: 100%;
+      border-radius: $border-radius;
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Cpath d='M0,80 Q30,60 50,70 T100,40 T150,60 T200,30' fill='none' stroke='black' stroke-width='20'/%3E%3C/svg%3E");
+      mask-size: cover;
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100'%3E%3Cpath d='M0,80 Q30,60 50,70 T100,40 T150,60 T200,30' fill='none' stroke='black' stroke-width='20'/%3E%3C/svg%3E");
+      -webkit-mask-size: cover;
+    }
+  }
+
+  // Fade out animation when content loads
+  &.fade-out {
+    animation: chart-skeleton-fade-out 0.3s ease-out forwards;
+  }
+}
+
+@keyframes chart-skeleton-fade-out {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+// =========================================================================
+// Context-specific overrides
+// =========================================================================
+
+// Inside widget containers (dashboard)
+.area-content.has-widget .chart-skeleton,
+.widget-graph-loading.chart-skeleton {
+  background: var(--dgc-bg-card);
+}
+
+// Inside graph preview containers
+.graph-preview-container {
+  position: relative;
+
+  .chart-skeleton {
+    border-radius: $border-radius;
+  }
+}
+
+// =========================================================================
+// Dummy Data Label
+// =========================================================================
+
+.dummy-data-label {
+  position: absolute;
+  top: $spacing-sm;
+  left: $spacing-sm;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--dgc-text-secondary);
+  background: var(--dgc-bg-tertiary, rgba(0, 0, 0, 0.05));
+  border: 1px solid var(--dgc-border-color);
+  border-radius: $border-radius;
+
+  i {
+    font-size: 10px;
+    color: var(--dgc-primary);
+  }
+
+  // Dark mode
+  .theme-dark & {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}

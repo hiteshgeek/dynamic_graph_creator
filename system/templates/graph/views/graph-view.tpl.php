@@ -207,7 +207,9 @@
                         <!-- Export dropdown rendered by GraphExporter.js -->
                         <div id="export-chart-container"></div>
                     </div>
-                    <div class="graph-preview-container" style="height: 500px;"></div>
+                    <div class="graph-preview-container" style="height: 500px;">
+                        <?php echo DGCHelper::renderChartSkeleton($graph->getGraphType()); ?>
+                    </div>
                 </div>
             </div>
         </main>

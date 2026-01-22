@@ -144,14 +144,18 @@ class DGCHelper
      */
     public static function renderChartSkeleton($chartType = 'bar')
     {
-        $html = '<div class="widget-graph-loading chart-skeleton">';
+        $html = '<div class="chart-skeleton">';
 
         if ($chartType === 'pie') {
             $html .= '<div class="skeleton-chart-pie">';
             $html .= '<div class="skeleton-pie"></div>';
             $html .= '</div>';
+        } elseif ($chartType === 'line') {
+            $html .= '<div class="skeleton-chart-line">';
+            $html .= '<div class="skeleton-line-wave"></div>';
+            $html .= '</div>';
         } else {
-            // Bar/Line chart skeleton
+            // Bar chart skeleton (default)
             $html .= '<div class="skeleton-chart-bar">';
             $html .= '<div class="skeleton-bar"></div>';
             $html .= '<div class="skeleton-bar"></div>';

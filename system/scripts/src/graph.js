@@ -12,6 +12,7 @@ import ConfigPanel from './ConfigPanel.js';
 import GraphView from './GraphView.js';
 import DatePickerInit from './DatePickerInit.js';
 import FilterRenderer from './FilterRenderer.js';
+import ChartSkeleton from './ChartSkeleton.js';
 
 window.GraphCreator = GraphCreator;
 window.GraphPreview = GraphPreview;
@@ -23,6 +24,7 @@ window.ConfigPanel = ConfigPanel;
 window.GraphView = GraphView;
 window.DatePickerInit = DatePickerInit;
 window.FilterRenderer = FilterRenderer;
+window.ChartSkeleton = ChartSkeleton;
 
 document.addEventListener('DOMContentLoaded', () => {
     const creatorContainer = document.getElementById('graph-creator');
