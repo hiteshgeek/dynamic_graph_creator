@@ -114,8 +114,44 @@ export class WidgetSelectorModal {
     // Widget card clicks (event delegation)
     if (this.widgetGridEl) {
       this.widgetGridEl.addEventListener("click", (e) => {
+        // Handle "Read more" button click
+        const readMoreBtn = e.target.closest(".widget-card-readmore");
+        if (readMoreBtn) {
+          e.stopPropagation();
+          const card = readMoreBtn.closest(".widget-card");
+          const expandedEl = card.querySelector(".widget-card-description-expanded");
+          if (expandedEl) {
+            expandedEl.classList.add("visible");
+          }
+          return;
+        }
+
+        // Handle expanded description close button
+        const closeBtn = e.target.closest(".description-expanded-close");
+        if (closeBtn) {
+          e.stopPropagation();
+          const expandedEl = closeBtn.closest(".widget-card-description-expanded");
+          if (expandedEl) {
+            expandedEl.classList.remove("visible");
+          }
+          return;
+        }
+
+        // Handle card selection (but not if clicking inside expanded description)
+        if (e.target.closest(".widget-card-description-expanded")) {
+          e.stopPropagation();
+          return;
+        }
+
         const card = e.target.closest(".widget-card");
         if (card) {
+          // Close any visible expanded description when clicking outside it
+          const expandedEl = card.querySelector(".widget-card-description-expanded.visible");
+          if (expandedEl) {
+            expandedEl.classList.remove("visible");
+            return;
+          }
+
           const graphId = parseInt(card.dataset.graphId, 10);
           this.handleGraphSelect(graphId);
         }
@@ -133,6 +169,18 @@ export class WidgetSelectorModal {
         }
       });
     }
+
+    // Close expanded descriptions when clicking outside (anywhere in modal)
+    this.modalElement.addEventListener("click", (e) => {
+      // Don't close if clicking inside expanded description or on read more button
+      if (e.target.closest(".widget-card-description-expanded") ||
+          e.target.closest(".widget-card-readmore")) {
+        return;
+      }
+      // Close all visible expanded descriptions
+      const visibleExpanded = this.modalElement.querySelectorAll(".widget-card-description-expanded.visible");
+      visibleExpanded.forEach(el => el.classList.remove("visible"));
+    });
 
     // Modal hidden event - clear state
     this.modalElement.addEventListener("hidden.bs.modal", () => {
@@ -423,7 +471,18 @@ export class WidgetSelectorModal {
             <span class="widget-card-type">${graph.graph_type} Chart</span>
           </div>
         </div>
-        ${graph.description ? `<p class="widget-card-description">${this.escapeHtml(graph.description)}</p>` : ""}
+        ${graph.description ? `
+          <div class="widget-card-description-wrapper">
+            <p class="widget-card-description">${this.escapeHtml(graph.description)}</p>
+            <button type="button" class="widget-card-readmore">Read more</button>
+          </div>
+          <div class="widget-card-description-expanded">
+            <div class="description-expanded-content">
+              <p>${this.escapeHtml(graph.description)}</p>
+            </div>
+            <button type="button" class="description-expanded-close"><i class="fas fa-times"></i></button>
+          </div>
+        ` : ""}
         ${categoriesHtml}
       </div>
     `;

@@ -225,8 +225,8 @@
     // Status indicator - bottom right corner check icon
     .widget-card-status {
       position: absolute;
-      bottom: $spacing-xs;
-      right: $spacing-xs;
+      bottom: $spacing-sm;
+      right: $spacing-sm;
       opacity: 0;
       visibility: hidden;
       transition:
@@ -368,6 +368,10 @@
       flex-shrink: 0;
     }
 
+    .widget-card-description-wrapper {
+      position: relative;
+    }
+
     .widget-card-description {
       font-size: 11px;
       color: var(--dgc-text-secondary);
@@ -376,6 +380,81 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
       line-height: 1.4;
+      margin: 0;
+    }
+
+    .widget-card-readmore {
+      background: none;
+      border: none;
+      padding: 0;
+      margin-top: $spacing-xs;
+      font-size: 11px;
+      color: var(--dgc-primary);
+      cursor: pointer;
+      font-weight: $font-weight-medium;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    // Expanded description overlay
+    .widget-card-description-expanded {
+      position: absolute;
+      inset: 0;
+      background: var(--dgc-card-bg, #fff);
+      border: 1px solid var(-- dgc-border-color, #e0e0e0);
+      border-radius: $border-radius;
+      padding: $spacing-sm;
+      display: flex;
+      flex-direction: column;
+      z-index: 15;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.2s, visibility 0.2s;
+      box-shadow: $shadow-2;
+
+      &.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .description-expanded-content {
+        flex: 1;
+        overflow-y: auto;
+        font-size: 12px;
+        color: var(--dgc-text-secondary);
+        line-height: 1.5;
+
+        p {
+          margin: 0;
+        }
+      }
+
+      .description-expanded-close {
+        position: absolute;
+        bottom: $spacing-sm;
+        left: $spacing-sm;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--dgc-bg-tertiary, #e0e0e0);
+        border: 1px solid var(--dgc-border-color);
+        border-radius: 50%;
+        padding: 0;
+        color: var(--dgc-text-secondary);
+        cursor: pointer;
+        font-size: 12px;
+        line-height: 1;
+        transition: all 0.2s;
+
+        &:hover {
+          background: var(--dgc-text-hint, #bdbdbd);
+          color: var(--dgc-text-primary);
+        }
+      }
     }
 
     .widget-card-categories {
