@@ -1306,10 +1306,10 @@ export default class GraphCreator {
       }
     });
 
-    // Initialize pickers for newly visible filters (datepickers need to be visible to init properly)
+    // Initialize pickers for newly visible filters (datepickers, dropdowns need to be visible to init properly)
     const filtersContainer = this.container.querySelector("#graph-filters");
     if (filtersContainer && typeof FilterRenderer !== "undefined") {
-      FilterRenderer.initPickers(filtersContainer);
+      FilterRenderer.init(filtersContainer);
     }
 
     // Update placeholder settings to reflect new filter selection

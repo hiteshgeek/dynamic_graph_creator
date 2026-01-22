@@ -614,15 +614,56 @@ class DGCHelper
         // Render input based on type
         switch ($filterType) {
             case 'select':
-                $html .= '<select class="form-control form-control-sm filter-input" name="' . htmlspecialchars($filterKeyClean) . '">';
-                $html .= '<option value="">-- Select --</option>';
+                // Find selected option for placeholder
+                $selectedLabel = '-- Select --';
                 foreach ($options as $opt) {
                     $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                     $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
-                    $selected = ($value == $defaultValue) ? 'selected' : '';
-                    $html .= '<option value="' . htmlspecialchars($value) . '" ' . $selected . '>' . htmlspecialchars($label) . '</option>';
+                    if ($value == $defaultValue) {
+                        $selectedLabel = $label;
+                        break;
+                    }
                 }
-                $html .= '</select>';
+
+                // Searchable dropdown with radio buttons
+                $html .= '<div class="dropdown filter-select-dropdown" data-filter-name="' . htmlspecialchars($filterKeyClean) . '">';
+                $html .= '<button class="btn btn-outline-secondary dropdown-toggle filter-select-trigger btn-sm" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">';
+                $html .= '<span class="filter-select-placeholder">' . htmlspecialchars($selectedLabel) . '</span>';
+                $html .= '</button>';
+                $html .= '<div class="dropdown-menu filter-select-options">';
+
+                // Search header
+                $html .= '<div class="filter-select-header">';
+                $html .= '<input type="text" class="form-control form-control-sm select-search" placeholder="Search...">';
+                $html .= '</div>';
+
+                // Empty option
+                $html .= '<div class="dropdown-item filter-select-option" data-value="">';
+                $html .= '<div class="form-check">';
+                $html .= '<input class="form-check-input" type="radio" name="' . htmlspecialchars($filterKeyClean) . '" value="" id="select-' . htmlspecialchars($filterKeyClean) . '-none"' . (empty($defaultValue) ? ' checked' : '') . '>';
+                $html .= '<label class="form-check-label" for="select-' . htmlspecialchars($filterKeyClean) . '-none">-- Select --</label>';
+                $html .= '</div></div>';
+
+                // Options
+                foreach ($options as $index => $opt) {
+                    $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
+                    $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                    $isSelected = ($value == $defaultValue);
+                    $optId = 'select-' . $filterKeyClean . '-' . $index;
+
+                    $html .= '<div class="dropdown-item filter-select-option" data-value="' . htmlspecialchars($value) . '">';
+                    $html .= '<div class="form-check">';
+                    $html .= '<input class="form-check-input" type="radio" name="' . htmlspecialchars($filterKeyClean) . '" value="' . htmlspecialchars($value) . '" id="' . $optId . '"' . ($isSelected ? ' checked' : '') . '>';
+                    $html .= '<label class="form-check-label" for="' . $optId . '">' . htmlspecialchars($label) . '</label>';
+                    $html .= '</div></div>';
+                }
+
+                $html .= '</div>'; // End dropdown-menu
+
+                // Hidden input to store value
+                $inputId = 'filter-input-' . htmlspecialchars($filterKeyClean);
+                $html .= '<input type="hidden" class="filter-input" id="' . $inputId . '" name="' . htmlspecialchars($filterKeyClean) . '" data-filter-key="' . htmlspecialchars($filterKeyClean) . '" value="' . htmlspecialchars($defaultValue) . '">';
+                $html .= '</div>'; // End dropdown
                 break;
 
             case 'multi_select':

@@ -437,12 +437,12 @@ export default class DataFilterManager {
     }
 
     /**
-     * Initialize filter pickers (date pickers, multi-selects, etc.)
+     * Initialize filter pickers (date pickers, single selects, multi-selects, etc.)
      * Delegates to FilterRenderer
      */
     static initPickers(container) {
         if (typeof FilterRenderer !== 'undefined') {
-            FilterRenderer.initPickers(container);
+            FilterRenderer.init(container);
         } else if (typeof DatePickerInit !== 'undefined') {
             DatePickerInit.init(container);
         }

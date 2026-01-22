@@ -34,8 +34,8 @@
 
   // Filter input items
   .filter-input-item {
-    flex: 1 1 200px;
-    max-width: 300px;
+    flex: 0 0 auto;
+    width: 220px;
     padding: $spacing-sm;
     background: var(--dgc-gray-50);
     border: 1px solid var(--dgc-border-color);
@@ -59,6 +59,96 @@
 
   .filter-input {
     font-size: $font-size-sm !important;
+  }
+
+  // Single select dropdown styling
+  .filter-select-dropdown {
+    width: 100%;
+  }
+
+  .filter-select-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-xs $spacing-sm;
+    border: 1px solid var(--dgc-border-color) !important;
+    background: var(--dgc-bg-card) !important;
+    color: var(--dgc-text-primary) !important;
+    font-size: $font-size-sm;
+    text-align: left;
+
+    &:hover {
+      border-color: var(--dgc-primary-light) !important;
+    }
+
+    &:focus {
+      border-color: var(--dgc-primary) !important;
+      box-shadow: none !important;
+    }
+  }
+
+  .filter-select-placeholder {
+    color: var(--dgc-text-hint);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &.has-selection {
+      color: var(--dgc-text-primary);
+      font-weight: $font-weight-medium;
+    }
+  }
+
+  .filter-select-options {
+    width: 100%;
+    padding: $spacing-xs 0;
+    background: var(--dgc-bg-card);
+    border: 1px solid var(--dgc-border-color);
+    box-shadow: var(--dgc-shadow-2);
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  .filter-select-header {
+    position: sticky;
+    top: 0;
+    background: var(--dgc-bg-card);
+    z-index: 1;
+    padding: $spacing-xs $spacing-sm;
+    border-bottom: 1px solid var(--dgc-border-color);
+    margin-bottom: $spacing-xs;
+  }
+
+  .select-search {
+    width: 100%;
+    padding: $spacing-xs !important;
+    font-size: $font-size-sm !important;
+  }
+
+  .filter-select-option {
+    padding: $spacing-xs $spacing-sm;
+    cursor: pointer;
+
+    &:hover,
+    &:focus {
+      background: var(--dgc-gray-50);
+    }
+
+    .form-check {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: auto;
+      padding-left: 0;
+    }
+
+    .form-check-label {
+      font-size: $font-size-sm;
+      color: var(--dgc-text-primary);
+      cursor: pointer;
+    }
   }
 
   // Multi-select dropdown styling

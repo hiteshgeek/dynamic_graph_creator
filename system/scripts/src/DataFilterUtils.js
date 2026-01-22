@@ -44,10 +44,16 @@ export default class DataFilterUtils {
      * @returns {Object|null} Filter value object or null if no value
      */
     static getItemValue(item, filterKey) {
-        // Single select
+        // Single select (legacy select element)
         const select = item.querySelector('select.filter-input');
         if (select && select.value) {
             return { ['::' + filterKey]: select.value };
+        }
+
+        // Single select dropdown (new searchable dropdown with hidden input)
+        const selectDropdownInput = item.querySelector('.filter-select-dropdown input[type="hidden"].filter-input');
+        if (selectDropdownInput && selectDropdownInput.value) {
+            return { ['::' + filterKey]: selectDropdownInput.value };
         }
 
         // Multi-select dropdown (checkboxes)

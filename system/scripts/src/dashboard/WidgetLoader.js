@@ -17,13 +17,9 @@ export class WidgetLoader {
    * @param {Object} filters - Filter values to apply
    */
   loadAll(rootContainer, filters = {}) {
-    console.log(this.logPrefix, 'loadAll called');
-
     const graphContainers = rootContainer.querySelectorAll('.widget-graph-container[data-graph-id]');
-    console.log(this.logPrefix, 'Found', graphContainers.length, 'graph containers');
 
     if (graphContainers.length === 0) {
-      console.log(this.logPrefix, 'No graph containers found');
       return;
     }
 
@@ -31,16 +27,13 @@ export class WidgetLoader {
 
     containers.forEach((container) => {
       const graphId = parseInt(container.dataset.graphId, 10);
-      console.log(this.logPrefix, 'Processing container with graphId:', graphId);
 
       if (!graphId) {
-        console.log(this.logPrefix, 'Skipping container - no valid graphId');
         return;
       }
 
       const areaContent = container.closest('.area-content');
       const graphType = (areaContent && areaContent.dataset.graphType) ? areaContent.dataset.graphType : 'bar';
-      console.log(this.logPrefix, 'Graph type:', graphType);
 
       this.loadWidget(container, graphId, graphType, filters);
     });
@@ -54,15 +47,11 @@ export class WidgetLoader {
    * @param {Object} filters - Filter values to apply
    */
   async loadWidget(container, graphId, graphType, filters = {}) {
-    console.log(this.logPrefix, 'Loading widget graph:', graphId, 'type:', graphType, 'filters:', filters);
-
     try {
       const result = await Ajax.post('preview_graph', {
         id: graphId,
         filters: filters
       });
-
-      console.log(this.logPrefix, 'Graph API result:', result);
 
       if (!result.success || !result.data) {
         const errorMsg = result.message || 'Failed to load chart';
@@ -107,7 +96,6 @@ export class WidgetLoader {
 
       // Always set config (API now guarantees it's an array)
       const config = result.data.config || {};
-      console.log(this.logPrefix, 'Graph', graphId, 'config:', config, 'showDataViewToggle:', config.showDataViewToggle);
       preview.setConfig(config);
 
       if (chartData && chartData.mapping) {
@@ -117,7 +105,6 @@ export class WidgetLoader {
       preview.setData(chartData);
       preview.render();
 
-      console.log(this.logPrefix, 'Chart rendered successfully for graph', graphId);
       if (this.onGraphLoaded) this.onGraphLoaded(graphId);
 
     } catch (error) {

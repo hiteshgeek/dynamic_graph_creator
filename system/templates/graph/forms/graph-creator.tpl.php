@@ -226,17 +226,49 @@ echo DGCHelper::renderPageHeader([
                                                     <?php endif; ?>
                                                 </div>
 
-                                                <?php if ($filterType === 'select'): ?>
-                                                    <select class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>">
-                                                        <option value="">-- Select --</option>
-                                                        <?php foreach ($options as $opt):
-                                                            $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
-                                                            $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
-                                                            $selected = ($value == $defaultValue) ? 'selected' : '';
-                                                        ?>
-                                                            <option value="<?php echo htmlspecialchars($value); ?>" <?php echo $selected; ?>><?php echo htmlspecialchars($label); ?></option>
-                                                        <?php endforeach; ?>
-                                                    </select>
+                                                <?php if ($filterType === 'select'):
+                                                    // Find selected option for placeholder
+                                                    $selectedLabel = '-- Select --';
+                                                    foreach ($options as $opt) {
+                                                        $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
+                                                        $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                                        if ($value == $defaultValue) {
+                                                            $selectedLabel = $label;
+                                                            break;
+                                                        }
+                                                    }
+                                                ?>
+                                                    <!-- Searchable dropdown with radio buttons -->
+                                                    <div class="dropdown filter-select-dropdown" data-filter-name="<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                        <button class="btn btn-outline-secondary dropdown-toggle filter-select-trigger btn-sm" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                                            <span class="filter-select-placeholder"><?php echo htmlspecialchars($selectedLabel); ?></span>
+                                                        </button>
+                                                        <div class="dropdown-menu filter-select-options">
+                                                            <div class="filter-select-header">
+                                                                <input type="text" class="form-control form-control-sm select-search" placeholder="Search...">
+                                                            </div>
+                                                            <div class="dropdown-item filter-select-option" data-value="">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="" id="select-<?php echo htmlspecialchars($filterKeyClean); ?>-none"<?php echo empty($defaultValue) ? ' checked' : ''; ?>>
+                                                                    <label class="form-check-label" for="select-<?php echo htmlspecialchars($filterKeyClean); ?>-none">-- Select --</label>
+                                                                </div>
+                                                            </div>
+                                                            <?php foreach ($options as $index => $opt):
+                                                                $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
+                                                                $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
+                                                                $isSelected = ($value == $defaultValue);
+                                                                $optId = 'select-' . $filterKeyClean . '-' . $index;
+                                                            ?>
+                                                                <div class="dropdown-item filter-select-option" data-value="<?php echo htmlspecialchars($value); ?>">
+                                                                    <div class="form-check">
+                                                                        <input class="form-check-input" type="radio" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($value); ?>" id="<?php echo $optId; ?>"<?php echo $isSelected ? ' checked' : ''; ?>>
+                                                                        <label class="form-check-label" for="<?php echo $optId; ?>"><?php echo htmlspecialchars($label); ?></label>
+                                                                    </div>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                        <input type="hidden" class="filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($defaultValue); ?>">
+                                                    </div>
 
                                                 <?php elseif ($filterType === 'multi_select'): ?>
                                                     <div class="dropdown filter-multiselect-dropdown" data-filter-name="<?php echo htmlspecialchars($filterKeyClean); ?>">

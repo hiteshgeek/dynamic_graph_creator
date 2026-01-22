@@ -312,12 +312,12 @@
 // Filters Panel in Graph Creator Sidebar
 .filters-panel {
   margin-top: $spacing-md;
-}
 
-.filters-list {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-xs;
+  .filters-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+  }
 }
 
 // Filter Input Items (Graph Creator Sidebar)
@@ -562,6 +562,229 @@
   margin-left: auto;
 }
 
+// ============================================================================
+// Reusable Filter Components (used across dashboard, filter pages, etc.)
+// ============================================================================
+
+// Single select dropdown (searchable select using Bootstrap dropdown)
+.filter-select-dropdown {
+  max-width: 300px;
+}
+
+.filter-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-xs $spacing-sm;
+  border: 1px solid var(--dgc-border-color) !important;
+  background: var(--dgc-bg-card) !important;
+  color: var(--dgc-text-primary) !important;
+  font-size: $font-size-sm;
+  text-align: left;
+
+  &:hover {
+    border-color: var(--dgc-primary-light) !important;
+    background: var(--dgc-bg-card) !important;
+  }
+
+  &:focus {
+    border-color: var(--dgc-primary) !important;
+    box-shadow: none !important;
+    background: var(--dgc-bg-card) !important;
+  }
+
+  &::after {
+    color: var(--dgc-text-hint);
+  }
+}
+
+.filter-select-placeholder {
+  color: var(--dgc-text-hint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  // When an item is selected, show primary text color
+  &.has-selection {
+    color: var(--dgc-text-primary);
+    font-weight: $font-weight-medium;
+  }
+}
+
+.filter-select-options {
+  min-width: 250px;
+  width: 100%;
+  padding: 0;
+  background: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
+  box-shadow: var(--dgc-shadow-2);
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.filter-select-header {
+  position: sticky;
+  top: 0;
+  background: var(--dgc-bg-card);
+  z-index: 1;
+  padding: $spacing-xs $spacing-sm;
+  border-bottom: 1px solid var(--dgc-border-color);
+  margin-bottom: $spacing-xs;
+}
+
+.filter-select-option {
+  padding: $spacing-xs $spacing-sm;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    background: var(--dgc-gray-50);
+  }
+
+  &:active {
+    background: var(--dgc-gray-50);
+  }
+
+  .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: $font-size-sm;
+  }
+
+  .form-check-label {
+    color: var(--dgc-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    cursor: pointer;
+  }
+}
+
+// Multi-select dropdown with checkboxes (using Bootstrap dropdown)
+.filter-multiselect-dropdown {
+  max-width: 300px;
+}
+
+.filter-multiselect-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-xs $spacing-sm;
+  border: 1px solid var(--dgc-border-color) !important;
+  background: var(--dgc-bg-card) !important;
+  color: var(--dgc-text-primary) !important;
+  font-size: $font-size-sm;
+  text-align: left;
+
+  &:hover {
+    border-color: var(--dgc-primary-light) !important;
+    background: var(--dgc-bg-card) !important;
+  }
+
+  &:focus {
+    border-color: var(--dgc-primary) !important;
+    box-shadow: none !important;
+    background: var(--dgc-bg-card) !important;
+  }
+
+  &::after {
+    color: var(--dgc-text-hint);
+  }
+}
+
+.filter-multiselect-placeholder {
+  color: var(--dgc-text-hint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  // When items are selected, show primary text color
+  &.has-selection {
+    color: var(--dgc-text-primary);
+    font-weight: $font-weight-medium;
+  }
+}
+
+.filter-multiselect-options {
+  min-width: 250px;
+  width: 100%;
+  padding: 0;
+  background: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
+  box-shadow: var(--dgc-shadow-2);
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.filter-multiselect-header {
+  position: sticky;
+  top: 0;
+  background: var(--dgc-bg-card);
+  z-index: 1;
+  padding: $spacing-xs $spacing-sm;
+  border-bottom: 1px solid var(--dgc-border-color);
+  margin-bottom: $spacing-xs;
+}
+
+.filter-multiselect-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-xs;
+
+  .btn-link {
+    padding: 0 $spacing-xs;
+    font-size: $font-size-sm;
+    text-decoration: none;
+    color: var(--dgc-primary);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.filter-multiselect-divider {
+  color: var(--dgc-text-hint);
+  font-size: $font-size-sm;
+}
+
+.filter-multiselect-option {
+  padding: $spacing-xs $spacing-sm;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    background: var(--dgc-gray-50);
+  }
+
+  &:active {
+    background: var(--dgc-gray-50);
+  }
+
+  .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    font-size: $font-size-sm;
+  }
+
+  .form-check-label {
+    color: var(--dgc-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+  }
+}
+
 // Data Filter Form Page Styles
 .data-filter-form-page {
   .form-row {
@@ -688,129 +911,7 @@
     max-width: 300px;
   }
 
-  // Multi-select dropdown with checkboxes (using Bootstrap dropdown)
-  .filter-multiselect-dropdown {
-    max-width: 300px;
-  }
-
-  .filter-multiselect-trigger {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: $spacing-xs $spacing-sm;
-    border: 1px solid var(--dgc-border-color) !important;
-    background: var(--dgc-bg-card) !important;
-    color: var(--dgc-text-primary) !important;
-    font-size: $font-size-sm;
-    text-align: left;
-
-    &:hover {
-      border-color: var(--dgc-primary-light) !important;
-      background: var(--dgc-bg-card) !important;
-    }
-
-    &:focus {
-      border-color: var(--dgc-primary) !important;
-      box-shadow: none !important;
-      background: var(--dgc-bg-card) !important;
-    }
-
-    &::after {
-      color: var(--dgc-text-hint);
-    }
-  }
-
-  .filter-multiselect-placeholder {
-    color: var(--dgc-text-hint);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    // When items are selected, show primary text color
-    &.has-selection {
-      color: var(--dgc-text-primary);
-      font-weight: $font-weight-medium;
-    }
-  }
-
-  .filter-multiselect-options {
-    width: 100%;
-    padding: 0;
-    // padding: $spacing-xs 0;
-    background: var(--dgc-bg-card);
-    border: 1px solid var(--dgc-border-color);
-    box-shadow: var(--dgc-shadow-2);
-    max-height: 250px;
-    overflow-y: auto;
-  }
-
-  .filter-multiselect-header {
-    position: sticky;
-    top: 0;
-    background: var(--dgc-bg-card);
-    z-index: 1;
-    padding: $spacing-xs $spacing-sm;
-    border-bottom: 1px solid var(--dgc-border-color);
-    margin-bottom: $spacing-xs;
-  }
-
-  .filter-multiselect-actions {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: $spacing-xs;
-    margin-bottom: $spacing-xs;
-
-    .btn-link {
-      padding: 0 $spacing-xs;
-      font-size: $font-size-sm;
-      text-decoration: none;
-      color: var(--dgc-primary);
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
-  }
-
-  .filter-multiselect-divider {
-    color: var(--dgc-text-hint);
-    font-size: $font-size-sm;
-  }
-
-  .multiselect-search {
-    width: 100%;
-    padding: $spacing-xs !important;
-    font-size: $font-size-sm !important;
-  }
-
-  .filter-multiselect-option {
-    padding: $spacing-xs $spacing-sm;
-    cursor: pointer;
-
-    &:hover,
-    &:focus {
-      background: var(--dgc-gray-50);
-    }
-
-    &:active {
-      background: var(--dgc-gray-50);
-    }
-
-    .form-check {
-      margin: 0;
-    }
-
-    .form-check-label {
-      font-size: $font-size-sm;
-      color: var(--dgc-text-primary);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 1;
-    }
-  }
+  // Note: Filter dropdown styles (single/multi select) moved to reusable components section above
 
   .filter-preview-checkboxes,
   .filter-preview-radios {

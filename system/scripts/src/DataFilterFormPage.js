@@ -893,6 +893,11 @@ export default class DataFilterFormPage {
         if (typeof DatePickerInit !== 'undefined') {
             DatePickerInit.init(section);
         }
+
+        // Initialize single select dropdowns with FilterRenderer
+        if (typeof FilterRenderer !== 'undefined') {
+            FilterRenderer.init(section);
+        }
     }
 
     /**
@@ -1069,13 +1074,37 @@ export default class DataFilterFormPage {
                     </div>
                 `;
             } else {
-                // Single select dropdown
-                previewHtml += '<select class="form-control filter-preview-select">';
-                previewHtml += '<option value="">-- Select --</option>';
-                options.forEach(opt => {
-                    previewHtml += `<option value="${this.escapeHtml(opt.value)}">${this.escapeHtml(opt.label)}</option>`;
-                });
-                previewHtml += '</select>';
+                // Single select dropdown with search (using FilterRenderer structure)
+                const selectedOption = options.find(opt => opt.is_selected);
+                const selectedLabel = selectedOption ? selectedOption.label : '-- Select --';
+
+                previewHtml += `
+                    <div class="dropdown filter-select-dropdown" data-filter-name="preview_select">
+                        <button class="btn btn-outline-secondary dropdown-toggle filter-select-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            <span class="filter-select-placeholder${selectedOption ? ' has-selection' : ''}">${this.escapeHtml(selectedLabel)}</span>
+                        </button>
+                        <div class="dropdown-menu filter-select-options">
+                            <div class="filter-select-header">
+                                <input type="text" class="form-control form-control-sm select-search" placeholder="Search...">
+                            </div>
+                            <div class="dropdown-item filter-select-option" data-value="">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="preview_select" value="" id="preview-select-none" ${!selectedOption ? 'checked' : ''}>
+                                    <label class="form-check-label" for="preview-select-none">-- Select --</label>
+                                </div>
+                            </div>
+                            ${options.map((opt, index) => `
+                                <div class="dropdown-item filter-select-option" data-value="${this.escapeHtml(opt.value)}">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="preview_select" value="${this.escapeHtml(opt.value)}" id="preview-select-${index}" ${opt.is_selected ? 'checked' : ''}>
+                                        <label class="form-check-label" for="preview-select-${index}">${this.escapeHtml(opt.label)}</label>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <input type="hidden" class="filter-input" name="preview_select" data-filter-key="preview_select" value="${selectedOption ? this.escapeHtml(selectedOption.value) : ''}">
+                    </div>
+                `;
             }
         } else if (filterType === 'checkbox') {
             // Checkboxes

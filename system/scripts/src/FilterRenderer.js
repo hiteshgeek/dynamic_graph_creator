@@ -10,7 +10,7 @@
  *   const values = FilterRenderer.getValues(container);
  *
  *   // Re-initialize pickers (after DOM changes)
- *   FilterRenderer.initPickers(container);
+ *   FilterRenderer.init(container);
  */
 
 class FilterRenderer {
@@ -55,7 +55,7 @@ class FilterRenderer {
         container.innerHTML = html;
 
         // Initialize pickers after DOM is updated
-        FilterRenderer.initPickers(container);
+        FilterRenderer.init(container);
     }
 
     /**
@@ -178,22 +178,63 @@ class FilterRenderer {
     }
 
     /**
-     * Render select input
+     * Render select input (searchable dropdown)
      */
     static renderSelectInput(keyClean, inputId, options, defaultValue, compact) {
-        const optionsHtml = options.map(opt => {
+        const selectedOption = options.find(opt => {
+            const value = opt.value !== undefined ? opt.value : opt;
+            return value == defaultValue;
+        });
+
+        const selectedLabel = selectedOption
+            ? (selectedOption.label !== undefined ? selectedOption.label : selectedOption.value || selectedOption)
+            : '-- Select --';
+
+        const optionsHtml = options.map((opt, index) => {
             const value = opt.value !== undefined ? opt.value : opt;
             const label = opt.label !== undefined ? opt.label : value;
-            const selected = value == defaultValue ? 'selected' : '';
-            return `<option value="${FilterRenderer.escapeHtml(value)}" ${selected}>${FilterRenderer.escapeHtml(label)}</option>`;
+            const isSelected = value == defaultValue;
+            const optId = `select-${keyClean}-${index}`;
+
+            return `
+                <div class="dropdown-item filter-select-option" data-value="${FilterRenderer.escapeHtml(value)}">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio"
+                            name="${keyClean}"
+                            value="${FilterRenderer.escapeHtml(value)}"
+                            id="${optId}"
+                            ${isSelected ? 'checked' : ''}>
+                        <label class="form-check-label" for="${optId}">${FilterRenderer.escapeHtml(label)}</label>
+                    </div>
+                </div>
+            `;
         }).join('');
 
         return `
-            <select class="form-control form-control-sm filter-input"
-                id="${inputId}" name="${keyClean}" data-filter-key="${keyClean}">
-                <option value="">-- Select --</option>
-                ${optionsHtml}
-            </select>
+            <div class="dropdown filter-select-dropdown" data-filter-name="${keyClean}">
+                <button class="btn btn-outline-secondary dropdown-toggle filter-select-trigger ${compact ? 'btn-sm' : ''}"
+                    type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    <span class="filter-select-placeholder">${FilterRenderer.escapeHtml(selectedLabel)}</span>
+                </button>
+                <div class="dropdown-menu filter-select-options">
+                    <div class="filter-select-header">
+                        <input type="text" class="form-control form-control-sm select-search" placeholder="Search...">
+                    </div>
+                    <div class="dropdown-item filter-select-option" data-value="">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio"
+                                name="${keyClean}"
+                                value=""
+                                id="select-${keyClean}-none"
+                                ${!defaultValue ? 'checked' : ''}>
+                            <label class="form-check-label" for="select-${keyClean}-none">-- Select --</label>
+                        </div>
+                    </div>
+                    ${optionsHtml}
+                </div>
+                <input type="hidden" class="filter-input" id="${inputId}" name="${keyClean}"
+                    data-filter-key="${keyClean}" value="${FilterRenderer.escapeHtml(defaultValue)}">
+            </div>
         `;
     }
 
@@ -313,10 +354,11 @@ class FilterRenderer {
     }
 
     /**
-     * Initialize date pickers and other enhanced inputs
-     * @param {HTMLElement} container - Container to search for pickers
+     * Initialize all filter components (date pickers, dropdowns, etc.)
+     * Main entry point for filter initialization
+     * @param {HTMLElement} container - Container to search for filter components
      */
-    static initPickers(container) {
+    static init(container) {
         if (!container) return;
 
         // Initialize date pickers - check both local and global scope
@@ -329,11 +371,22 @@ class FilterRenderer {
             FilterRenderer.initDatePickersFallback(container);
         }
 
+        // Initialize single select dropdowns
+        FilterRenderer.initSelects(container);
+
         // Initialize multi-select dropdowns
         FilterRenderer.initMultiSelects(container);
 
         // Initialize tokeninput if available
         FilterRenderer.initTokenInputs(container);
+    }
+
+    /**
+     * Alias for init() - kept for backward compatibility
+     * @param {HTMLElement} container - Container to search for pickers
+     */
+    static initPickers(container) {
+        FilterRenderer.init(container);
     }
 
     /**
@@ -413,6 +466,80 @@ class FilterRenderer {
             });
 
             input.dataset.daterangepickerInit = 'true';
+        });
+    }
+
+    /**
+     * Initialize single select dropdowns
+     */
+    static initSelects(container) {
+        const dropdowns = container.querySelectorAll('.filter-select-dropdown');
+
+        dropdowns.forEach(dropdown => {
+            if (dropdown.dataset.selectInit === 'true') return;
+
+            const trigger = dropdown.querySelector('.filter-select-trigger');
+            const radios = dropdown.querySelectorAll('.form-check-input[type="radio"]');
+            const search = dropdown.querySelector('.select-search');
+            const hiddenInput = dropdown.querySelector('input[type="hidden"].filter-input');
+
+            // Update placeholder text and hidden input value
+            const updateSelection = (selectedRadio) => {
+                const placeholder = trigger.querySelector('.filter-select-placeholder');
+                const label = selectedRadio ? selectedRadio.nextElementSibling.textContent : '-- Select --';
+                const value = selectedRadio ? selectedRadio.value : '';
+
+                placeholder.textContent = label;
+
+                // Add/remove has-selection class based on whether a value is selected
+                if (value) {
+                    placeholder.classList.add('has-selection');
+                } else {
+                    placeholder.classList.remove('has-selection');
+                }
+
+                if (hiddenInput) {
+                    hiddenInput.value = value;
+                    // Trigger change event for FilterView listeners
+                    hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            };
+
+            // Radio change
+            radios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    if (radio.checked) {
+                        updateSelection(radio);
+                        // Close dropdown after selection
+                        const bsDropdown = bootstrap.Dropdown.getInstance(trigger);
+                        if (bsDropdown) {
+                            bsDropdown.hide();
+                        }
+                    }
+                });
+            });
+
+            // Search filter
+            if (search) {
+                search.addEventListener('input', () => {
+                    const term = search.value.toLowerCase();
+                    dropdown.querySelectorAll('.filter-select-option').forEach(opt => {
+                        const label = opt.querySelector('.form-check-label').textContent.toLowerCase();
+                        opt.style.display = label.includes(term) ? '' : 'none';
+                    });
+                });
+
+                // Clear search when dropdown opens
+                trigger.addEventListener('shown.bs.dropdown', () => {
+                    search.value = '';
+                    dropdown.querySelectorAll('.filter-select-option').forEach(opt => {
+                        opt.style.display = '';
+                    });
+                    search.focus();
+                });
+            }
+
+            dropdown.dataset.selectInit = 'true';
         });
     }
 
@@ -723,7 +850,7 @@ class FilterRenderer {
         });
 
         // Re-init pickers for newly visible filters
-        FilterRenderer.initPickers(container);
+        FilterRenderer.init(container);
     }
 
     /**

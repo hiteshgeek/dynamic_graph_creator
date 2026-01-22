@@ -4,6 +4,7 @@
 @use "config-panel";
 @use "graph-creator";
 @use "graph-list";
+@use "data-filter-styles";
 
 @media (max-width: 1200px) {
   .graph-creator { grid-template-columns: 200px 1fr 250px; }

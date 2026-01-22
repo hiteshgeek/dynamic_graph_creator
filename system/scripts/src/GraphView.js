@@ -84,9 +84,9 @@ export default class GraphView {
         const filtersContainer = this.container.querySelector('#graph-filters');
         if (!filtersContainer) return;
 
-        // Use FilterRenderer for initialization (handles datepickers, multi-selects, etc.)
+        // Use FilterRenderer for initialization (handles datepickers, single selects, multi-selects, etc.)
         if (typeof FilterRenderer !== 'undefined') {
-            FilterRenderer.initPickers(filtersContainer);
+            FilterRenderer.init(filtersContainer);
 
             // Listen for filter changes from FilterRenderer-initialized components
             filtersContainer.addEventListener('change', () => {

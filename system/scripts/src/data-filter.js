@@ -6,11 +6,13 @@ import DataFilterManagerPage from './DataFilterManagerPage.js';
 import DataFilterFormPage from './DataFilterFormPage.js';
 import DataFilterListPage from './DataFilterListPage.js';
 import DatePickerInit from './DatePickerInit.js';
+import FilterRenderer from './FilterRenderer.js';
 
 window.DataFilterManagerPage = DataFilterManagerPage;
 window.DataFilterFormPage = DataFilterFormPage;
 window.DataFilterListPage = DataFilterListPage;
 window.DatePickerInit = DatePickerInit;
+window.FilterRenderer = FilterRenderer;
 
 document.addEventListener('DOMContentLoaded', () => {
     // Data filter manager page (embedded in graphs)

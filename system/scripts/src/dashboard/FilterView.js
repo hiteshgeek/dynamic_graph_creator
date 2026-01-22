@@ -89,12 +89,12 @@ export class FilterView {
     }
 
     /**
-     * Initialize pickers using FilterRenderer (handles datepickers, multi-selects, etc.)
+     * Initialize pickers using FilterRenderer (handles datepickers, single selects, multi-selects, etc.)
      */
     initPickers() {
-        // Use FilterRenderer for comprehensive initialization
+        // Use FilterRenderer for comprehensive initialization (datepickers, dropdowns, etc.)
         if (typeof window.FilterRenderer !== 'undefined') {
-            window.FilterRenderer.initPickers(this.filtersContainer);
+            window.FilterRenderer.init(this.filtersContainer);
         } else if (typeof window.DatePickerInit !== 'undefined') {
             // Fallback to just datepickers
             window.DatePickerInit.init(this.filtersContainer);
@@ -266,7 +266,15 @@ export class FilterView {
      * @returns {Object|null} Filter value object or null
      */
     getFilterItemValue(item, filterKey) {
-        // Single select
+        // Single select dropdown (new searchable dropdown)
+        const selectDropdown = item.querySelector('.filter-select-dropdown input[type="hidden"].filter-input');
+        if (selectDropdown && selectDropdown.value) {
+            const result = {};
+            result['::' + filterKey] = selectDropdown.value;
+            return result;
+        }
+
+        // Single select (legacy select element)
         const select = item.querySelector('select.filter-input');
         if (select && select.value) {
             const result = {};
@@ -414,7 +422,30 @@ export class FilterView {
             const fromKey = filterKeyWithPrefix + '_from';
             const toKey = filterKeyWithPrefix + '_to';
 
-            // Single select
+            // Single select dropdown (new searchable dropdown)
+            const selectDropdown = item.querySelector('.filter-select-dropdown');
+            if (selectDropdown && filterValues[filterKeyWithPrefix]) {
+                const hiddenInput = selectDropdown.querySelector('input[type="hidden"].filter-input');
+                const radio = selectDropdown.querySelector(`input[type="radio"][value="${filterValues[filterKeyWithPrefix]}"]`);
+                const trigger = selectDropdown.querySelector('.filter-select-trigger');
+                const placeholder = trigger?.querySelector('.filter-select-placeholder');
+
+                if (hiddenInput) {
+                    hiddenInput.value = filterValues[filterKeyWithPrefix];
+                }
+                if (radio) {
+                    radio.checked = true;
+                    if (placeholder && radio.nextElementSibling) {
+                        placeholder.textContent = radio.nextElementSibling.textContent;
+                        // Add has-selection class when value is restored
+                        if (filterValues[filterKeyWithPrefix]) {
+                            placeholder.classList.add('has-selection');
+                        }
+                    }
+                }
+            }
+
+            // Single select (legacy select element)
             const select = item.querySelector('select.filter-input');
             if (select && filterValues[filterKeyWithPrefix]) {
                 select.value = filterValues[filterKeyWithPrefix];
