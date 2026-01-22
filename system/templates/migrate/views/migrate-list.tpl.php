@@ -148,6 +148,11 @@
             color: #323330;
         }
 
+        .type-page {
+            background: #6f42c1;
+            color: white;
+        }
+
         /* Module badges */
         .module-badge {
             font-size: 0.65rem;
@@ -628,8 +633,9 @@
                                         // Separate CSS and JS files
                                         $cssFiles = [];
                                         $jsFiles = [];
+                                        $pageScripts = [];
                                         foreach ($files as $f) {
-                                            if ($f === '.' || $f === '..' || strpos($f, '.map') !== false || $f === 'manifest.json') continue;
+                                            if ($f === '.' || $f === '..' || strpos($f, '.map') !== false || $f === 'manifest.json' || $f === 'per_page') continue;
                                             if (preg_match('/^(.+)\.([a-f0-9]{8})\.([a-z]+)$/', $f, $matches)) {
                                                 $moduleName = $matches[1];
                                                 $ext = $matches[3];
@@ -644,6 +650,33 @@
                                                 }
                                             }
                                         }
+
+                                        // Scan per_page directory for page-specific scripts
+                                        $perPagePath = $folderPath . '/per_page';
+                                        if (is_dir($perPagePath)) {
+                                            $modules = scandir($perPagePath);
+                                            foreach ($modules as $module) {
+                                                if ($module === '.' || $module === '..') continue;
+                                                $modulePath = $perPagePath . '/' . $module;
+                                                if (!is_dir($modulePath)) continue;
+                                                $scripts = scandir($modulePath);
+                                                foreach ($scripts as $script) {
+                                                    if ($script === '.' || $script === '..' || strpos($script, '.map') !== false) continue;
+                                                    if (preg_match('/^(.+)\.([a-f0-9]{8})\.js$/', $script, $matches)) {
+                                                        $scriptName = $matches[1];
+                                                        $newName = $scriptName . '.js';
+                                                        $targetPath = 'system/scripts/' . $module . '/' . $newName;
+                                                        $pageScripts[] = [
+                                                            'source' => 'per_page/' . $module . '/' . $script,
+                                                            'target' => $targetPath,
+                                                            'module' => $module,
+                                                            'scriptName' => $scriptName
+                                                        ];
+                                                    }
+                                                }
+                                            }
+                                        }
+
                                         // Display CSS files
                                         foreach ($cssFiles as $file) {
                                             $moduleClass = 'module-' . $file['module'];
@@ -656,7 +689,7 @@
                                             echo '<strong>' . htmlspecialchars($file['target']) . '</strong>';
                                             echo '</div>';
                                         }
-                                        // Display JS files
+                                        // Display JS files (module bundles)
                                         foreach ($jsFiles as $file) {
                                             $moduleClass = 'module-' . $file['module'];
                                             echo '<div class="file-item">';
@@ -667,6 +700,21 @@
                                             echo '<span>&rarr;</span>';
                                             echo '<strong>' . htmlspecialchars($file['target']) . '</strong>';
                                             echo '</div>';
+                                        }
+                                        // Display per-page scripts
+                                        if (!empty($pageScripts)) {
+                                            echo '<div class="file-section-header mt-2 mb-1"><small class="text-muted fw-bold">Per-Page Scripts</small></div>';
+                                            foreach ($pageScripts as $file) {
+                                                $moduleClass = 'module-' . $file['module'];
+                                                echo '<div class="file-item">';
+                                                echo '<span class="file-number">' . $assetNum++ . '.</span>';
+                                                echo '<span class="type-badge type-page">PAGE</span>';
+                                                echo '<span class="module-badge ' . $moduleClass . '">' . strtoupper($file['module']) . '</span>';
+                                                echo '<span class="text-muted">' . htmlspecialchars($file['source']) . '</span>';
+                                                echo '<span>&rarr;</span>';
+                                                echo '<strong>' . htmlspecialchars($file['target']) . '</strong>';
+                                                echo '</div>';
+                                            }
                                         }
                                     }
                                     ?>
@@ -783,6 +831,8 @@
                                                 'transforms' => [
                                                     "LocalUtility::addModuleCss('graph')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')",
                                                     "LocalUtility::addModuleJs('graph')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')",
+                                                    "LocalUtility::addPageScript('graph', 'graph-list')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-list.js')",
+                                                    "LocalUtility::addPageScript('graph', 'graph-creator')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-creator.js')",
                                                 ]
                                             ],
                                             'system/includes/data-filter/data-filter.inc.php' => [
@@ -790,6 +840,7 @@
                                                 'transforms' => [
                                                     "LocalUtility::addModuleCss('data-filter')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css')",
                                                     "LocalUtility::addModuleJs('data-filter')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js')",
+                                                    "LocalUtility::addPageScript('data-filter', 'data-filter-list')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter-list.js')",
                                                 ]
                                             ],
                                             'system/includes/dashboard/dashboard.inc.php' => [
@@ -797,6 +848,13 @@
                                                 'transforms' => [
                                                     "LocalUtility::addModuleCss('dashboard')" => "\$theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css')",
                                                     "LocalUtility::addModuleJs('dashboard')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard.js')",
+                                                    "LocalUtility::addPageScript('dashboard', 'dashboard-list')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-list.js')",
+                                                    "LocalUtility::addPageScript('dashboard', 'dashboard-builder')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-builder.js')",
+                                                    "LocalUtility::addPageScript('dashboard', 'dashboard-preview', 15)" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-preview.js', 15)",
+                                                    "LocalUtility::addPageScript('dashboard', 'template-list')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-list.js')",
+                                                    "LocalUtility::addPageScript('dashboard', 'template-editor')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js')",
+                                                    "LocalUtility::addPageScript('dashboard', 'template-builder')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-builder.js')",
+                                                    "LocalUtility::addPageScript('dashboard', 'template-preview')" => "\$theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-preview.js')",
                                                 ]
                                             ],
                                             'system/includes/dashboard/template-preview-component.php' => [
@@ -838,10 +896,10 @@
                                     </div>
                                     <p class="small text-muted mb-2">
                                         <i class="fas fa-magic me-1"></i>
-                                        <strong>Auto-transform:</strong> <code>LocalUtility::addModuleCss/Js()</code> &rarr; <code>$theme->addCss/Script()</code>
+                                        <strong>Auto-transform:</strong> <code>LocalUtility::addModuleCss/Js()</code> and <code>LocalUtility::addPageScript()</code> &rarr; <code>$theme->addCss/Script()</code>
                                     </p>
                                     <div class="transform-details small mb-2" style="border-left: 2px solid #6c757d; padding-left: 10px; background: #f8f9fa; padding: 8px 10px; border-radius: 4px;">
-                                        <div class="text-muted mb-1"><strong>Note:</strong> Common assets are loaded in Theme.php. Only module-specific transforms shown above.</div>
+                                        <div class="text-muted mb-1"><strong>Note:</strong> Common assets are loaded in Theme.php. Module bundles and page scripts transforms shown above.</div>
                                     </div>
                                 </div>
 

@@ -567,7 +567,7 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15),
   }
 
   // Fallback for arrows without specific class - primary
-  &:hover:not([disabled]):not(.row-resize):not(.col-resize):not(.delete-btn) {
+  &:hover:not([disabled]):not(.row-resize):not(.col-resize):not(.delete-btn):not(.edit-btn) {
     background: var(--dgc-primary);
     border-color: var(--dgc-primary);
   }
@@ -582,6 +582,20 @@ $builder-icon-btn-box-shadow: 0 0 8px rgba(0, 0, 0, 0.15),
       background: var(--dgc-error);
       border-color: var(--dgc-error);
       box-shadow: $builder-btn-box-shadow-hover rgba(244, 67, 54, 0.3);
+    }
+  }
+
+  // Edit button in center - visible colored border (warning/orange), colored hover
+  &.edit-btn {
+    border-width: $builder-icon-btn-border-width;
+    border-color: var(--dgc-warning);
+    color: var(--dgc-warning);
+
+    &:hover:not([disabled]) {
+      background: var(--dgc-warning);
+      border-color: var(--dgc-warning);
+      color: var(--dgc-text-inverse);
+      box-shadow: $builder-btn-box-shadow-hover rgba(255, 152, 0, 0.3);
     }
   }
 }

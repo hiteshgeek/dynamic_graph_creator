@@ -59,7 +59,7 @@ function showDataFilterList()
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     // Add page-specific JS
-    $theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter-list.js');
+    LocalUtility::addPageScript('data-filter', 'data-filter-list');
 
     $theme->setPageTitle('Data Filters - Dynamic Graph Creator');
 

@@ -515,14 +515,14 @@ class DashboardBuilder {
       for (const area of section.areas) {
         // Check area's direct content
         if (area.content?.widgetId) {
-          usedIds.add(area.content.widgetId);
+          usedIds.add(parseInt(area.content.widgetId, 10));
         }
 
         // Check sub-rows
         if (area.subRows) {
           for (const subRow of area.subRows) {
             if (subRow.content?.widgetId) {
-              usedIds.add(subRow.content.widgetId);
+              usedIds.add(parseInt(subRow.content.widgetId, 10));
             }
           }
         }
@@ -556,11 +556,13 @@ class DashboardBuilder {
             if (rowId && area.subRows) {
               for (const subRow of area.subRows) {
                 if (subRow.rowId === rowId) {
-                  return subRow.content?.widgetId || null;
+                  const widgetId = subRow.content?.widgetId;
+                  return widgetId ? parseInt(widgetId, 10) : null;
                 }
               }
             }
-            return area.content?.widgetId || null;
+            const widgetId = area.content?.widgetId;
+            return widgetId ? parseInt(widgetId, 10) : null;
           }
         }
       }
@@ -1718,16 +1720,18 @@ class DashboardBuilder {
       }
     }
 
-    // Edit overlay for design mode (visible on hover)
+    // Edit overlay for design mode (visible on hover) - uses center-controls styling
     const editOverlay = `
       <div class="widget-edit-overlay">
-        <div class="widget-edit-overlay-buttons">
-          <button class="btn btn-primary btn-sm widget-edit-btn" data-widget-id="${widgetId}" title="Change widget">
-            <i class="fas fa-edit"></i> Edit
-          </button>
-          <button class="btn btn-danger btn-sm widget-delete-btn" data-widget-id="${widgetId}" title="Remove widget">
-            <i class="fas fa-trash"></i> Delete
-          </button>
+        <div class="center-controls">
+          <div class="center-row">
+            <button class="center-btn edit-btn widget-edit-btn" data-widget-id="${widgetId}" data-bs-toggle="tooltip" data-bs-title="Change widget">
+              <i class="fas fa-pencil"></i>
+            </button>
+            <button class="center-btn delete-btn widget-delete-btn" data-widget-id="${widgetId}" data-bs-toggle="tooltip" data-bs-title="Remove widget">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -2493,7 +2497,26 @@ class DashboardBuilder {
         if (area || subRow) {
           const context = this.getAreaContext(area, subRow);
           if (context) {
-            this.handleWidgetDeselect(context);
+            // Get widget and dashboard names for confirmation message
+            const widgetId = btn.dataset.widgetId;
+            let graphName = "this widget";
+            if (this.widgetSelectorModal && this.widgetSelectorModal.isDataLoaded()) {
+              const graph = this.widgetSelectorModal.getGraphById(widgetId);
+              if (graph) {
+                graphName = `"${graph.name}"`;
+              }
+            }
+            const dashboardName = this.currentDashboard?.name || "the dashboard";
+
+            // Show confirmation dialog before removing widget
+            ConfirmDialog.delete(
+              `Remove ${graphName} from "${dashboardName}"?`,
+              "Confirm Remove",
+            ).then((confirmed) => {
+              if (confirmed) {
+                this.handleWidgetDeselect(context);
+              }
+            });
           }
         }
       }

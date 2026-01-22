@@ -82,11 +82,7 @@
                                                 <?php if ($hasSubRowWidget): ?>
                                                     <?php echo DGCHelper::renderDashboardWidgetContent($subRow['content']); ?>
                                                 <?php else: ?>
-                                                    <?php
-                                                    $icon = isset($subRow['emptyState']['icon']) ? $subRow['emptyState']['icon'] : 'fa-plus-circle';
-                                                    $message = isset($subRow['emptyState']['message']) ? $subRow['emptyState']['message'] : 'Add content here';
-                                                    echo DGCHelper::renderDashboardCellEmpty($icon, $message);
-                                                    ?>
+                                                    <?php echo DGCHelper::renderDashboardCellEmpty('', '', true); ?>
                                                 <?php endif; ?>
                                             </div>
                                         <?php endforeach; ?>
@@ -94,9 +90,14 @@
 
                                 <?php else: ?>
                                     <!-- Regular single area -->
+                                    <?php
+                                    // Get row height for non-nested areas (default 1fr = 150px)
+                                    $areaRowHeight = isset($area['rowHeight']) ? intval($area['rowHeight']) : 1;
+                                    $minHeightStyle = $areaRowHeight > 1 ? "min-height: " . ($areaRowHeight * 150) . "px;" : "";
+                                    ?>
                                     <div class="dashboard-area"
                                         data-area-id="<?php echo htmlspecialchars($area['aid']); ?>"
-                                        style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>;">
+                                        style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>; <?php echo $minHeightStyle; ?>">
 
                                         <?php
                                         // Check if area has widget content (non-empty with widgetId)
@@ -108,11 +109,7 @@
                                         <?php if ($hasWidget): ?>
                                             <?php echo DGCHelper::renderDashboardWidgetContent($area['content']); ?>
                                         <?php else: ?>
-                                            <?php
-                                            $icon = isset($area['emptyState']['icon']) ? $area['emptyState']['icon'] : 'fa-plus-circle';
-                                            $message = isset($area['emptyState']['message']) ? $area['emptyState']['message'] : 'Add content here';
-                                            echo DGCHelper::renderDashboardCellEmpty($icon, $message);
-                                            ?>
+                                            <?php echo DGCHelper::renderDashboardCellEmpty('', '', true); ?>
                                         <?php endif; ?>
                                     </div>
                                 <?php endif; ?>

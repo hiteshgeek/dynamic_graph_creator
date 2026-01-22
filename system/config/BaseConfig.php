@@ -52,10 +52,10 @@ class BaseConfig
     /**
      * Files directory and whether the given directory is relative to the base directory of the system.
      */
-    // const FILES_DIR = "/var/www/html/rpkfiles/";
-    // const FILES_DIR_RELATIVE = false;
-    // const FILES_URL = "/rpkfiles/";
-    // const FILES_URL_RELATIVE = false;
+    const FILES_DIR = "/var/www/html/rpkfiles/";
+    const FILES_DIR_RELATIVE = false;
+    const FILES_URL = "/rpkfiles";
+    const FILES_URL_RELATIVE = false;
 
     const MONETARY_LOCAL = "en_IN";
 

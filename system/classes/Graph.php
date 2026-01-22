@@ -15,6 +15,7 @@ class Graph implements DatabaseObject
     private $query;
     private $data_mapping;
     private $placeholder_settings;
+    private $snapshot;
     private $gsid;
     private $created_ts;
     private $updated_ts;
@@ -116,6 +117,28 @@ class Graph implements DatabaseObject
         return $result ? true : false;
     }
 
+    /**
+     * Update only the snapshot field
+     */
+    public function updateSnapshot()
+    {
+        if (!$this->gid) return false;
+
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "UPDATE " . SystemTables::DB_TBL_GRAPH . " SET
+            snapshot = '::snapshot',
+            updated_uid = '::updated_uid'
+        WHERE gid = '::gid'";
+
+        $args = array(
+            '::snapshot' => $this->snapshot ? $this->snapshot : '',
+            '::updated_uid' => $this->updated_uid ? $this->updated_uid : 0,
+            '::gid' => $this->gid
+        );
+
+        return $db->query($sql, $args) ? true : false;
+    }
+
     public function load()
     {
         if (!$this->gid) return false;
@@ -156,6 +179,7 @@ class Graph implements DatabaseObject
             'query' => $this->query,
             'data_mapping' => $this->data_mapping,
             'placeholder_settings' => $this->placeholder_settings,
+            'snapshot' => $this->snapshot,
             'created_ts' => $this->created_ts,
             'updated_ts' => $this->updated_ts
         );
@@ -280,6 +304,9 @@ class Graph implements DatabaseObject
 
     public function getPlaceholderSettings() { return $this->placeholder_settings; }
     public function setPlaceholderSettings($value) { $this->placeholder_settings = is_string($value) ? $value : json_encode($value); }
+
+    public function getSnapshot() { return $this->snapshot; }
+    public function setSnapshot($value) { $this->snapshot = $value; }
 
     public function getCreatedTs() { return $this->created_ts; }
     public function getUpdatedTs() { return $this->updated_ts; }

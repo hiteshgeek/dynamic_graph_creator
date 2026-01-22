@@ -60,11 +60,18 @@ class DGCHelper
      *
      * @param string $icon FontAwesome icon class (e.g., 'fa-chart-line', 'fa-plus-circle')
      * @param string $message The message to display below the icon
+     * @param bool $viewMode If true, renders view mode (no "add" prompt)
      * @return string HTML markup for the dashboard cell empty state
      */
-    public static function renderDashboardCellEmpty($icon = 'fa-plus-circle', $message = 'Add content here')
+    public static function renderDashboardCellEmpty($icon = 'fa-plus-circle', $message = 'Add content here', $viewMode = false)
     {
-        $html = '<div class="dashboard-cell-empty" tabindex="0" role="button">';
+        // In view mode (preview), show different icon and message
+        if ($viewMode) {
+            $icon = 'fa-chart-simple';
+            $message = 'No widget assigned';
+        }
+
+        $html = '<div class="dashboard-cell-empty' . ($viewMode ? ' view-mode' : '') . '">';
         $html .= '<div class="cell-empty-icon">';
         $html .= '<i class="fas ' . htmlspecialchars($icon) . '"></i>';
         $html .= '</div>';

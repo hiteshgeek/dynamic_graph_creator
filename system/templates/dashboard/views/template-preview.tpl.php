@@ -61,11 +61,7 @@
                                     <?php foreach ($area['subRows'] as $subRow): ?>
                                         <?php $rowFr = isset($subRow['height']) ? intval($subRow['height']) : 1; ?>
                                         <div class="dashboard-sub-row" data-row-id="<?php echo htmlspecialchars($subRow['rowId']); ?>" data-rows="<?php echo $rowFr ?: 1; ?>">
-                                            <?php
-                                            $icon = isset($subRow['emptyState']['icon']) ? $subRow['emptyState']['icon'] : 'fa-plus-circle';
-                                            $message = isset($subRow['emptyState']['message']) ? $subRow['emptyState']['message'] : 'Empty cell';
-                                            echo DGCHelper::renderDashboardCellEmpty($icon, $message);
-                                            ?>
+                                            <?php echo DGCHelper::renderDashboardCellEmpty('', '', true); ?>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -76,11 +72,7 @@
                                     data-area-id="<?php echo htmlspecialchars($area['aid']); ?>"
                                     style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>;">
 
-                                    <?php
-                                    $icon = isset($area['emptyState']['icon']) ? $area['emptyState']['icon'] : 'fa-plus-circle';
-                                    $message = isset($area['emptyState']['message']) ? $area['emptyState']['message'] : 'Empty cell';
-                                    echo DGCHelper::renderDashboardCellEmpty($icon, $message);
-                                    ?>
+                                    <?php echo DGCHelper::renderDashboardCellEmpty('', '', true); ?>
                                 </div>
                             <?php endif; ?>
                         <?php endforeach; ?>

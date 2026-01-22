@@ -86,3 +86,29 @@
     pointer-events: none;
   }
 }
+
+// View mode (preview) - subtle styling, no interactivity
+.dashboard-cell-empty.view-mode {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.5;
+
+  .cell-empty-icon {
+    font-size: 1.25rem;
+    color: var(--dgc-text-hint);
+  }
+
+  .cell-empty-message {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--dgc-text-hint);
+  }
+
+  &:hover,
+  &:focus {
+    .cell-empty-icon,
+    .cell-empty-message {
+      color: var(--dgc-text-hint);
+    }
+  }
+}

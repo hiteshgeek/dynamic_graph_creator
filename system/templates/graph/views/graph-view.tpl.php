@@ -204,9 +204,8 @@
                                 <?php echo DGCHelper::renderWidgetCategoryBadges($categories, 'lg'); ?>
                             <?php endif; ?>
                         </div>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="export-chart" title="Save chart as PNG image">
-                            <i class="fas fa-image"></i> Save Image
-                        </button>
+                        <!-- Export dropdown rendered by GraphExporter.js -->
+                        <div id="export-chart-container"></div>
                     </div>
                     <div class="graph-preview-container" style="height: 500px;"></div>
                 </div>

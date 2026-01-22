@@ -327,9 +327,8 @@ echo DGCHelper::renderPageHeader([
                 <div class="graph-preview-header">
                     <h3><i class="fas fa-chart-bar"></i> Preview</h3>
                     <div class="graph-preview-actions">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="export-chart" title="Save chart as PNG image">
-                            <i class="fas fa-image"></i> Save Image
-                        </button>
+                        <!-- Export dropdown rendered by GraphExporter.js -->
+                        <div id="export-chart-container"></div>
                         <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-preview">
                             <i class="fas fa-sync-alt"></i> Refresh
                         </button>

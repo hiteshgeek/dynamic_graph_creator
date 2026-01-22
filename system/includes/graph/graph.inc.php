@@ -5,6 +5,12 @@
  * Handles all graph-related actions
  */
 
+// Graph snapshot image size constants
+define('GRAPH_SNAPSHOT_LARGE_WIDTH', 1200);
+define('GRAPH_SNAPSHOT_LARGE_HEIGHT', 800);
+define('GRAPH_SNAPSHOT_THUMB_WIDTH', 300);
+define('GRAPH_SNAPSHOT_THUMB_HEIGHT', 200);
+
 // Require admin access (company 232 + admin user)
 DGCHelper::requireAdminAccess();
 
@@ -32,6 +38,9 @@ if (isset($_POST['submit'])) {
             break;
         case 'load_graph':
             loadGraph($_POST);
+            break;
+        case 'graph-save-snapshot':
+            graphSaveSnapshot($_POST);
             break;
     }
 }
@@ -63,7 +72,7 @@ function showList()
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     // Add page-specific JS
-    $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-list.js');
+    LocalUtility::addPageScript('graph', 'graph-list');
 
     $theme->setPageTitle('Graphs - Dynamic Graph Creator');
 
@@ -103,7 +112,7 @@ function showCreator($graphId = null)
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 7);
 
     // Add page-specific JS
-    $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-creator.js');
+    LocalUtility::addPageScript('graph', 'graph-creator');
 
     $graph = null;
 
@@ -553,4 +562,120 @@ function loadGraph($data)
     }
 
     Utility::ajaxResponseTrue('Graph loaded', $response);
+}
+
+/**
+ * Save graph snapshot image to filesystem and database
+ */
+function graphSaveSnapshot($data)
+{
+    $gid = isset($data['gid']) ? intval($data['gid']) : 0;
+    $imageData = isset($data['image_data']) ? $data['image_data'] : '';
+
+    if (!$gid || !Graph::isExistent($gid)) {
+        Utility::ajaxResponseFalse('Invalid graph');
+    }
+
+    // Validate base64 PNG data
+    if (!preg_match('/^data:image\/png;base64,/', $imageData)) {
+        Utility::ajaxResponseFalse('Invalid image data');
+    }
+
+    // Decode base64
+    $base64 = preg_replace('/^data:image\/png;base64,/', '', $imageData);
+    $binary = base64_decode($base64);
+
+    if ($binary === false) {
+        Utility::ajaxResponseFalse('Failed to decode image data');
+    }
+
+    // Generate filename: graph_{gid}_{timestamp}.png
+    $filename = 'graph_' . $gid . '_' . time() . '.png';
+
+    // Create directories
+    $baseDir = SiteConfig::filesDirectory() . 'graph/';
+    $largeDir = $baseDir . 'large/';
+    $thumbDir = $baseDir . 'thumbnail/';
+
+    if (!is_dir($largeDir)) {
+        mkdir($largeDir, 0755, true);
+    }
+    if (!is_dir($thumbDir)) {
+        mkdir($thumbDir, 0755, true);
+    }
+
+    // Delete old snapshots if exist
+    $graph = new Graph($gid);
+    if ($graph->getSnapshot()) {
+        $oldLarge = $largeDir . $graph->getSnapshot();
+        $oldThumb = $thumbDir . $graph->getSnapshot();
+        if (file_exists($oldLarge)) {
+            unlink($oldLarge);
+        }
+        if (file_exists($oldThumb)) {
+            unlink($oldThumb);
+        }
+    }
+
+    // Create image from binary data
+    $srcImage = imagecreatefromstring($binary);
+    if (!$srcImage) {
+        Utility::ajaxResponseFalse('Failed to process image');
+    }
+
+    $srcWidth = imagesx($srcImage);
+    $srcHeight = imagesy($srcImage);
+
+    // Create and save LARGE version
+    $largeImage = imagecreatetruecolor(GRAPH_SNAPSHOT_LARGE_WIDTH, GRAPH_SNAPSHOT_LARGE_HEIGHT);
+    $white = imagecolorallocate($largeImage, 255, 255, 255);
+    imagefill($largeImage, 0, 0, $white);
+    imagecopyresampled(
+        $largeImage,
+        $srcImage,
+        0,
+        0,
+        0,
+        0,
+        GRAPH_SNAPSHOT_LARGE_WIDTH,
+        GRAPH_SNAPSHOT_LARGE_HEIGHT,
+        $srcWidth,
+        $srcHeight
+    );
+    imagepng($largeImage, $largeDir . $filename, 6);
+    imagedestroy($largeImage);
+
+    // Create and save THUMBNAIL version
+    $thumbImage = imagecreatetruecolor(GRAPH_SNAPSHOT_THUMB_WIDTH, GRAPH_SNAPSHOT_THUMB_HEIGHT);
+    $white = imagecolorallocate($thumbImage, 255, 255, 255);
+    imagefill($thumbImage, 0, 0, $white);
+    imagecopyresampled(
+        $thumbImage,
+        $srcImage,
+        0,
+        0,
+        0,
+        0,
+        GRAPH_SNAPSHOT_THUMB_WIDTH,
+        GRAPH_SNAPSHOT_THUMB_HEIGHT,
+        $srcWidth,
+        $srcHeight
+    );
+    imagepng($thumbImage, $thumbDir . $filename, 6);
+    imagedestroy($thumbImage);
+
+    imagedestroy($srcImage);
+
+    // Update database
+    $graph->setSnapshot($filename);
+    $graph->setUpdatedUid(Session::loggedInUid());
+    if (!$graph->updateSnapshot()) {
+        Utility::ajaxResponseFalse('Failed to update graph');
+    }
+
+    Utility::ajaxResponseTrue('Image saved successfully', array(
+        'filename' => $filename,
+        'large_url' => SiteConfig::filesUrl() . 'graph/large/' . $filename,
+        'thumb_url' => SiteConfig::filesUrl() . 'graph/thumbnail/' . $filename
+    ));
 }

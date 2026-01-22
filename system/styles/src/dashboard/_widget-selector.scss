@@ -199,12 +199,7 @@
     display: flex;
     flex-direction: column;
     gap: $spacing-sm;
-
-    // Add extra top padding only when checkbox is present
-    &.selected,
-    &.used-elsewhere {
-      padding-top: $spacing-lg + $spacing-sm;
-    }
+    min-height: 160px; // Uniform height for all cards
 
     &:hover {
       border-color: var(--dgc-primary-light);
@@ -217,41 +212,84 @@
       box-shadow: 0 0 0 3px rgba(var(--dgc-primary-rgb), 0.15);
     }
 
+    // Current selection - highlighted with primary color
     &.selected {
       border-color: var(--dgc-primary);
-      background: rgba(var(--dgc-primary-rgb), 0.05);
+
+      .widget-card-status {
+        opacity: 1;
+        visibility: visible;
+      }
     }
 
-    // Checkbox at top-left corner - only shown for used widgets
-    .widget-card-checkbox {
+    // Status indicator - bottom right corner check icon
+    .widget-card-status {
       position: absolute;
-      top: $spacing-sm;
-      left: $spacing-sm;
-      font-size: 18px;
-      transition: all 0.2s ease;
+      bottom: $spacing-xs;
+      right: $spacing-xs;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.2s,
+        visibility 0.2s;
+      z-index: 10;
 
-      &.checked {
-        opacity: 1;
+      i {
+        font-size: 18px;
+      }
 
-        // Current selection - primary/green color
-        &.current {
+      // Current selection - primary color
+      &.current {
+        color: var(--dgc-primary);
+
+        i {
           color: var(--dgc-primary);
         }
 
-        // Used elsewhere in dashboard - gray
-        &.used {
-          color: var(--dgc-gray-500);
+        span {
+          color: #fff;
+        }
+      }
+
+      // Used elsewhere in dashboard - gray/muted
+      &.used {
+        color: var(--dgc-gray-400);
+
+        i {
+          color: var(--dgc-gray-400);
+        }
+
+        span {
+          color: var(--dgc-gray-300);
         }
       }
     }
 
-    // Style for cards used elsewhere
+    // Style for cards used elsewhere - disabled state
     &.used-elsewhere {
-      opacity: 0.7;
+      cursor: not-allowed;
+      border-color: var(--dgc-gray-300);
+
+      // Always show status overlay for used-elsewhere cards
+      .widget-card-status {
+        opacity: 1;
+        visibility: visible;
+      }
 
       &:hover {
-        opacity: 1;
+        border-color: var(--dgc-gray-400);
+        box-shadow: none;
       }
+
+      &:focus {
+        box-shadow: none;
+        border-color: var(--dgc-gray-400);
+      }
+    }
+
+    // Disabled class for additional styling
+    &.disabled {
+      pointer-events: auto; // Allow hover for tooltip but block click in JS
     }
 
     .widget-card-header {
@@ -412,7 +450,7 @@
     width: 100%;
     min-width: 0; // Allow flex child to shrink below content size
     background: var(--dgc-bg-card);
-    border-radius: $border-radius;
+    border-radius: $border-radius-lg;
     border: 2px solid transparent;
     transition:
       border-color 0.2s ease,
@@ -576,16 +614,10 @@
     z-index: 20;
     border-radius: $border-radius;
 
-    .widget-edit-overlay-buttons {
-      display: flex;
-      align-items: center;
-      gap: $spacing-sm;
-    }
-
-    .btn {
-      display: flex;
-      align-items: center;
-      gap: $spacing-xs;
+    // Override center-controls positioning for overlay context
+    .center-controls {
+      position: static;
+      transform: none;
     }
   }
 

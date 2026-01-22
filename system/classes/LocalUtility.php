@@ -102,6 +102,59 @@ class LocalUtility
     }
 
     /**
+     * Get per-page script URL with cache busting hash
+     *
+     * @param string $module Module name ('graph', 'dashboard', 'data-filter')
+     * @param string $scriptName Script name without extension (e.g., 'graph-list', 'dashboard-preview')
+     * @return string|null
+     */
+    public static function getPageScript($module, $scriptName)
+    {
+        $manifestPath = LocalProjectConfig::distPath() . 'manifest.json';
+
+        if (!file_exists($manifestPath)) {
+            return null;
+        }
+
+        $manifest = json_decode(file_get_contents($manifestPath), true);
+
+        // Convert dashes to underscores for manifest key lookup
+        $moduleKey = str_replace('-', '_', $module);
+        $scriptKey = str_replace('-', '_', $scriptName);
+        $key = 'page_' . $moduleKey . '_' . $scriptKey;
+
+        if (isset($manifest[$key])) {
+            return LocalProjectConfig::distUrl() . $manifest[$key];
+        }
+
+        return null;
+    }
+
+    /**
+     * Add per-page script from dist folder to ThemeRegistry
+     * Helper function to simplify adding page-specific scripts with cache busting
+     *
+     * @param string $module Module name ('graph', 'dashboard', 'data-filter')
+     * @param string $scriptName Script name without extension (e.g., 'graph-list', 'dashboard-preview')
+     * @param int $weight Load order (lower = earlier)
+     *
+     * Usage in .inc.php:
+     *   LocalUtility::addPageScript('graph', 'graph-list');
+     *   LocalUtility::addPageScript('dashboard', 'dashboard-preview', 15);
+     *
+     * TODO: When migrating to rapidkart structure, change to:
+     *   $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph-list.js');
+     */
+    public static function addPageScript($module, $scriptName, $weight = 10)
+    {
+        $theme = Rapidkart::getInstance()->getThemeRegistry();
+        $js = self::getPageScript($module, $scriptName);
+        if ($js) {
+            $theme->addScript($js, $weight);
+        }
+    }
+
+    /**
      * Parse URL into segments
      * @return array
      */

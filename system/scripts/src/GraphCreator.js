@@ -110,18 +110,24 @@ export default class GraphCreator {
    * Initialize graph exporter component
    */
   initExporter() {
+    const exportContainer = this.container.querySelector("#export-chart-container");
+    if (!exportContainer) return;
+
     this.exporter = new GraphExporter({
-      filename: "chart-preview",
+      filename: this.graphName || "chart-preview",
+      container: exportContainer,
+      graphId: this.graphId,
+      onSaveSuccess: (data) => {
+        console.log('Snapshot saved:', data);
+      }
     });
 
-    const exportBtn = this.container.querySelector("#export-chart");
-    if (exportBtn) {
-      exportBtn.addEventListener("click", () => {
-        if (this.preview && this.preview.chart) {
-          // Use graph name if available, otherwise default
-          this.exporter.setFilename(this.graphName || "chart-preview");
+    // Update chart reference when preview renders
+    if (this.preview) {
+      this.preview.onRender(() => {
+        if (this.preview.chart) {
           this.exporter.setChart(this.preview.chart);
-          this.exporter.exportImage();
+          this.exporter.setFilename(this.graphName || "chart-preview");
         }
       });
     }

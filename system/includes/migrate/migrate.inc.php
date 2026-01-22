@@ -317,6 +317,23 @@ function transformAssetLoading($content)
         $content
     );
 
+    // Transform LocalUtility::addPageScript('module', 'script-name') or LocalUtility::addPageScript('module', 'script-name', weight)
+    // -> $theme->addScript(SystemConfig::scriptsUrl() . 'module/script-name.js') or $theme->addScript(SystemConfig::scriptsUrl() . 'module/script-name.js', weight)
+    $content = preg_replace_callback(
+        "/LocalUtility::addPageScript\s*\(\s*['\"]([^'\"]+)['\"]\s*,\s*['\"]([^'\"]+)['\"]\s*(?:,\s*(\d+)\s*)?\)/",
+        function ($matches) {
+            $module = $matches[1];
+            $scriptName = $matches[2];
+            $weight = isset($matches[3]) && $matches[3] !== '' ? $matches[3] : null;
+
+            if ($weight !== null) {
+                return "\$theme->addScript(SystemConfig::scriptsUrl() . '{$module}/{$scriptName}.js', {$weight})";
+            }
+            return "\$theme->addScript(SystemConfig::scriptsUrl() . '{$module}/{$scriptName}.js')";
+        },
+        $content
+    );
+
     return $content;
 }
 
@@ -435,7 +452,7 @@ function copyDistRenamed($src, $targetDir)
 
     $dir = opendir($src);
     while (($file = readdir($dir)) !== false) {
-        if ($file === '.' || $file === '..') continue;
+        if ($file === '.' || $file === '..' || $file === 'per_page') continue;
 
         $srcPath = $src . '/' . $file;
 
@@ -476,6 +493,50 @@ function copyDistRenamed($src, $targetDir)
         }
     }
     closedir($dir);
+
+    // Handle per_page directory (per-page scripts with cache-busting hashes)
+    $perPageSrc = $src . '/per_page';
+    if (is_dir($perPageSrc)) {
+        $modules = scandir($perPageSrc);
+        foreach ($modules as $module) {
+            if ($module === '.' || $module === '..') continue;
+
+            $moduleSrc = $perPageSrc . '/' . $module;
+            if (!is_dir($moduleSrc)) continue;
+
+            $scripts = scandir($moduleSrc);
+            foreach ($scripts as $file) {
+                if ($file === '.' || $file === '..') continue;
+
+                // Skip .map files
+                if (strpos($file, '.map') !== false) {
+                    $results['skipped'][] = "per_page/{$module}/{$file}";
+                    continue;
+                }
+
+                // Remove hash: script-name.abc123.js -> script-name.js
+                if (preg_match('/^(.+)\.([a-f0-9]{8})\.js$/', $file, $matches)) {
+                    $scriptName = $matches[1];
+                    $newName = $scriptName . '.js';
+
+                    // Target: system/scripts/{module}/{script-name}.js
+                    $moduleDir = $targetDir . '/system/scripts/' . $module;
+                    if (!is_dir($moduleDir)) {
+                        mkdir($moduleDir, 0755, true);
+                    }
+
+                    $srcPathFile = $moduleSrc . '/' . $file;
+                    $dstPath = $moduleDir . '/' . $newName;
+                    copy($srcPathFile, $dstPath);
+
+                    $relativePath = "system/scripts/{$module}/{$newName}";
+                    $results['copied']["per_page/{$module}/{$file}"] = $relativePath;
+                } else {
+                    $results['skipped'][] = "per_page/{$module}/{$file}";
+                }
+            }
+        }
+    }
 
     return $results;
 }
@@ -668,20 +729,9 @@ function getMigrationSteps()
             'type' => 'copy'
         ],
         5 => [
-            'title' => 'Copy Page Scripts & Include Files',
-            'description' => 'Copies page-specific JS files and include files. Include files are transformed: LocalUtility::addModule*() -> $theme->addCss()/addScript().',
-            'files' => [
-                'system/scripts/graph/graph-list.js',
-                'system/scripts/graph/graph-creator.js',
-                'system/scripts/data-filter/data-filter-list.js',
-                'system/scripts/dashboard/dashboard-list.js',
-                'system/scripts/dashboard/dashboard-builder.js',
-                'system/scripts/dashboard/dashboard-preview.js',
-                'system/scripts/dashboard/template-list.js',
-                'system/scripts/dashboard/template-editor.js',
-                'system/scripts/dashboard/template-builder.js',
-                'system/scripts/dashboard/template-preview.js',
-            ],
+            'title' => 'Copy Include Files',
+            'description' => 'Copies include files with transforms. Page scripts now come from dist/per_page/. Include files are transformed: LocalUtility::addModule*() and addPageScript() -> $theme->addCss()/addScript().',
+            'files' => [], // Page scripts now come from dist/per_page/ via Step 6
             'include_files' => [
                 'system/includes/graph/graph.inc.php',
                 'system/includes/data-filter/data-filter.inc.php',

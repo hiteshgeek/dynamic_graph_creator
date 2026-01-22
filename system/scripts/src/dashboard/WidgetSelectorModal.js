@@ -164,8 +164,9 @@ export class WidgetSelectorModal {
     }
 
     this.currentAreaContext = context;
-    this.currentWidgetId = currentWidgetId;
-    // Convert to Set if array was passed
+    // Ensure currentWidgetId is an integer or null
+    this.currentWidgetId = currentWidgetId ? parseInt(currentWidgetId, 10) : null;
+    // Convert to Set if array was passed (usedWidgetIds should already contain integers)
     this.usedWidgetIds = usedWidgetIds instanceof Set ? usedWidgetIds : new Set(usedWidgetIds);
 
     // Load data if not already loaded
@@ -348,8 +349,8 @@ export class WidgetSelectorModal {
    * @returns {string} HTML string
    */
   renderGraphCard(graph) {
-    const isCurrent = this.currentWidgetId === graph.gid;
-    const isUsedElsewhere = this.usedWidgetIds.has(graph.gid) && !isCurrent;
+    const isCurrent = this.currentWidgetId === parseInt(graph.gid, 10);
+    const isUsedElsewhere = this.usedWidgetIds.has(parseInt(graph.gid, 10)) && !isCurrent;
     const graphTypeIcons = {
       bar: "fa-chart-bar",
       line: "fa-chart-line",
@@ -378,30 +379,41 @@ export class WidgetSelectorModal {
       categoriesHtml += "</div>";
     }
 
-    // Checkbox - only show for widgets that are used in the dashboard
-    // Current selection: green/primary color with check
-    // Used elsewhere in dashboard: gray with check
-    let checkboxHtml = "";
+    // Status badge - show check icon for current selection or used elsewhere
+    let statusBadgeHtml = "";
     if (isCurrent) {
-      // Current selection - primary color
-      checkboxHtml = `<div class="widget-card-checkbox checked current"><i class="fas fa-check-circle"></i></div>`;
+      // Current selection - primary color check
+      statusBadgeHtml = `
+        <div class="widget-card-status current" title="Current selection">
+          <i class="fas fa-check-circle"></i>
+        </div>
+      `;
     } else if (isUsedElsewhere) {
-      // Used elsewhere in dashboard - gray
-      checkboxHtml = `<div class="widget-card-checkbox checked used"><i class="fas fa-check-circle"></i></div>`;
+      // Used elsewhere in dashboard - gray check
+      statusBadgeHtml = `
+        <div class="widget-card-status used" title="Already added">
+          <i class="fas fa-check-circle"></i>
+        </div>
+      `;
     }
 
     // Card classes
     const cardClasses = ["widget-card"];
     if (isCurrent) cardClasses.push("selected");
-    if (isUsedElsewhere) cardClasses.push("used-elsewhere");
+    if (isUsedElsewhere) cardClasses.push("used-elsewhere", "disabled");
+
+    // Accessibility attributes
+    const ariaDisabled = isUsedElsewhere ? 'aria-disabled="true"' : '';
+    const tabIndex = isUsedElsewhere ? 'tabindex="-1"' : 'tabindex="0"';
 
     return `
       <div class="${cardClasses.join(" ")}"
            data-graph-id="${graph.gid}"
-           tabindex="0"
+           ${tabIndex}
            role="button"
-           aria-label="Select ${this.escapeHtml(graph.name)}">
-        ${checkboxHtml}
+           ${ariaDisabled}
+           aria-label="${isCurrent ? 'Current selection: ' : isUsedElsewhere ? 'Already added: ' : 'Select '}${this.escapeHtml(graph.name)}">
+        ${statusBadgeHtml}
         <div class="widget-card-header">
           <div class="widget-card-icon ${graph.graph_type}">
             <i class="fas ${icon}"></i>
@@ -490,6 +502,12 @@ export class WidgetSelectorModal {
     // If clicking the currently selected graph, deselect it
     if (this.currentWidgetId === graphId) {
       this.handleGraphDeselect();
+      return;
+    }
+
+    // Prevent selecting graphs that are already used elsewhere in the dashboard
+    if (this.usedWidgetIds.has(graphId) && this.currentWidgetId !== graphId) {
+      // Graph is already used in another area - don't allow selection
       return;
     }
 

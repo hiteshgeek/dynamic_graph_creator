@@ -35,11 +35,6 @@ export default class GraphView {
      * Initialize graph view
      */
     init() {
-        // Initialize exporter
-        this.exporter = new GraphExporter({
-            filename: this.graphName
-        });
-
         this.initFilters();
         this.bindEvents();
         this.initSidebarCollapse();
@@ -50,6 +45,7 @@ export default class GraphView {
         // Always initialize preview and load graph data
         // Filter values will be automatically picked up from pre-selected options (is_selected)
         this.initPreview();
+        this.initExporter();
         this.loadGraphData();
     }
 
@@ -103,15 +99,36 @@ export default class GraphView {
     }
 
     /**
+     * Initialize exporter component
+     */
+    initExporter() {
+        const exportContainer = this.container.querySelector('#export-chart-container');
+        if (!exportContainer) return;
+
+        this.exporter = new GraphExporter({
+            filename: this.graphName,
+            container: exportContainer,
+            graphId: this.graphId,
+            onSaveSuccess: (data) => {
+                console.log('Snapshot saved:', data);
+            }
+        });
+
+        // Update chart reference when preview renders
+        if (this.preview) {
+            this.preview.onRender(() => {
+                if (this.preview.chart) {
+                    this.exporter.setChart(this.preview.chart);
+                    this.exporter.setFilename(this.graphName);
+                }
+            });
+        }
+    }
+
+    /**
      * Bind event listeners
      */
     bindEvents() {
-        // Export button
-        const exportBtn = this.container.querySelector('#export-chart');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => this.exportChart());
-        }
-
         // Apply filters button
         this.applyBtn = this.container.querySelector('.filter-apply-btn');
         if (this.applyBtn) {

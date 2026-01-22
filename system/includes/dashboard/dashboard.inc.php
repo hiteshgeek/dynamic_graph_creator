@@ -166,7 +166,7 @@ function showList()
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     // Add page-specific JS
-    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-list.js');
+    LocalUtility::addPageScript('dashboard', 'dashboard-list');
 
     $theme->setPageTitle('Dashboards - Dynamic Graph Creator');
 
@@ -196,7 +196,7 @@ function showBuilder($dashboardId = 0)
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 3);
 
     // Add page-specific JS
-    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-builder.js');
+    LocalUtility::addPageScript('dashboard', 'dashboard-builder');
 
     $dashboard = null;
     $templates = DashboardTemplate::getAllGrouped();
@@ -233,7 +233,7 @@ function showPreview($dashboardId)
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 3);
 
     // Add page-specific JS (weight 15 to load after common.js which has weight 10)
-    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/dashboard-preview.js', 15);
+    LocalUtility::addPageScript('dashboard', 'dashboard-preview', 15);
 
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
@@ -684,7 +684,7 @@ function showTemplateList()
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'sortablejs-dgc/Sortable.min.js', 5);
 
     // Add page-specific JS
-    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-list.js');
+    LocalUtility::addPageScript('dashboard', 'template-list');
 
     $theme->setPageTitle('Dashboard Templates - Dynamic Graph Creator');
 
@@ -705,7 +705,7 @@ function showTemplateCreator()
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
 
     // Add page-specific JS
-    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js');
+    LocalUtility::addPageScript('dashboard', 'template-editor');
 
     $theme->setPageTitle('Create Template - Dynamic Graph Creator');
 
@@ -738,7 +738,7 @@ function showTemplateEditor($templateId)
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
 
     // Add page-specific JS
-    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-editor.js');
+    LocalUtility::addPageScript('dashboard', 'template-editor');
 
     $theme->setPageTitle('Edit Template - Dynamic Graph Creator');
 
@@ -773,7 +773,7 @@ function showTemplateBuilder($templateId)
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'autosize-dgc/autosize.min.js', 5);
 
     // Add page-specific JS
-    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-builder.js');
+    LocalUtility::addPageScript('dashboard', 'template-builder');
 
     $theme->setPageTitle('Template Builder - ' . htmlspecialchars($template->getName()));
 
@@ -805,7 +805,7 @@ function showTemplatePreview($templateId)
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'echarts-dgc/echarts.min.js', 5);
 
     // Add page-specific JS
-    $theme->addScript(SystemConfig::scriptsUrl() . 'dashboard/template-preview.js');
+    LocalUtility::addPageScript('dashboard', 'template-preview');
 
     $theme->setPageTitle('Template Preview - ' . htmlspecialchars($template->getName()));
 
