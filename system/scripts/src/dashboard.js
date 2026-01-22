@@ -13,6 +13,7 @@ import FilterRenderer from "./FilterRenderer.js";
 import DatePickerInit from "./DatePickerInit.js";
 import { WidgetSelectorModal } from "./dashboard/WidgetSelectorModal.js";
 import { WidgetLoader } from "./dashboard/WidgetLoader.js";
+import { FilterView } from "./dashboard/FilterView.js";
 import GraphPreview from "./GraphPreview.js";
 import ChartSkeleton from "./ChartSkeleton.js";
 
@@ -21,6 +22,7 @@ window.DatePickerInit = DatePickerInit;
 window.FilterRenderer = FilterRenderer;
 window.GraphPreview = GraphPreview;
 window.WidgetLoader = WidgetLoader;
+window.FilterView = FilterView;
 
 // Use globals from common.js (Toast, Loading, Ajax, ConfirmDialog)
 const Toast = window.Toast;
@@ -200,123 +202,34 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /**
- * Initialize dashboard filter bar
- * Filters are rendered via PHP, this just initializes the pickers
- * Same approach as GraphView.js initFilters()
+ * Initialize dashboard filter bar using FilterView
+ * Centralized filter handling shared with dashboard-preview
  */
 function initDashboardFilterBar() {
-  const filterBar = document.querySelector(".dashboard-filter-bar");
-  if (!filterBar) return;
-
-  const filtersContainer = filterBar.querySelector("#dashboard-filters");
-  if (!filtersContainer) return;
-
-  // Use FilterRenderer for initialization (handles datepickers, multi-selects, etc.)
-  // Same as GraphView.initFilters()
-  if (typeof FilterRenderer !== "undefined") {
-    FilterRenderer.initPickers(filtersContainer);
-  } else if (typeof DatePickerInit !== "undefined") {
-    // Fallback to just datepickers
-    DatePickerInit.init(filtersContainer);
-  }
-
-  // Get UI elements
-  const applyBtn = filterBar.querySelector(".filter-apply-btn");
-  const separator = filterBar.querySelector(".filter-actions-separator:not(:first-of-type)");
-  const autoApplySwitch = filterBar.querySelector("#dashboard-auto-apply-switch");
-  const collapseBtn = filterBar.querySelector(".filter-collapse-btn");
-
-  // Track auto-apply state
-  let autoApplyEnabled = false;
-
-  // Collapse/Expand functionality
-  const COLLAPSE_KEY = "dgc_dashboard_filters_collapsed";
-
-  function updateCollapseState(collapsed) {
-    if (collapsed) {
-      filterBar.classList.add("collapsed");
-      if (collapseBtn) collapseBtn.title = "Expand Filters";
-    } else {
-      filterBar.classList.remove("collapsed");
-      if (collapseBtn) collapseBtn.title = "Collapse Filters";
+  // Get dashboard ID from URL or container
+  let dashboardId = null;
+  const urlMatch = window.location.search.match(/urlq=dashboard\/builder\/(\d+)/);
+  if (urlMatch) {
+    dashboardId = parseInt(urlMatch[1], 10);
+  } else {
+    const builderContainer = document.querySelector('.dashboard-builder[data-dashboard-id]');
+    if (builderContainer) {
+      dashboardId = parseInt(builderContainer.dataset.dashboardId, 10);
     }
   }
 
-  // Restore collapse state from localStorage (without transitions)
-  const savedCollapsed = localStorage.getItem(COLLAPSE_KEY) === "1";
-  updateCollapseState(savedCollapsed);
-
-  // Enable transitions after initial state is applied (use requestAnimationFrame to ensure DOM is settled)
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      filterBar.classList.add("transitions-enabled");
-    });
-  });
-
-  // Collapse button handler
-  if (collapseBtn) {
-    collapseBtn.addEventListener("click", () => {
-      const isCollapsed = filterBar.classList.contains("collapsed");
-      const newState = !isCollapsed;
-      updateCollapseState(newState);
-      localStorage.setItem(COLLAPSE_KEY, newState ? "1" : "0");
-    });
-  }
-
-  // Update UI based on auto-apply state
-  function updateAutoApplyUI() {
-    if (autoApplyEnabled) {
-      // Hide apply button and separator when live filtering is ON
-      applyBtn?.classList.remove("visible");
-      separator?.classList.remove("visible");
-    } else {
-      // Show apply button and separator when live filtering is OFF
-      applyBtn?.classList.add("visible");
-      separator?.classList.add("visible");
-    }
-  }
-
-  // Restore setting from localStorage
-  const savedSetting = localStorage.getItem("dgc_dashboard_auto_apply");
-  autoApplyEnabled = savedSetting === "1";
-  if (autoApplySwitch) {
-    autoApplySwitch.checked = autoApplyEnabled;
-  }
-  updateAutoApplyUI();
-
-  // Auto-apply toggle handler
-  if (autoApplySwitch) {
-    autoApplySwitch.addEventListener("change", () => {
-      autoApplyEnabled = autoApplySwitch.checked;
-      localStorage.setItem("dgc_dashboard_auto_apply", autoApplyEnabled ? "1" : "0");
-      updateAutoApplyUI();
-
-      // If auto-apply is enabled, apply filters immediately
-      if (autoApplyEnabled) {
-        applyFilters();
+  // Initialize FilterView with Bar layout
+  new FilterView({
+    containerSelector: ".dashboard-filter-bar",
+    dashboardId: dashboardId,
+    onFilterChange: () => {
+      // Reload all widget graphs with new filter values
+      if (window.dashboardBuilderInstance && window.dashboardBuilderInstance.loadWidgetGraphs) {
+        window.dashboardBuilderInstance.loadWidgetGraphs();
       }
-    });
-  }
-
-  // Apply filters function
-  function applyFilters() {
-    // Reload all widget graphs with new filter values
-    if (window.dashboardBuilderInstance && window.dashboardBuilderInstance.loadWidgetGraphs) {
-      window.dashboardBuilderInstance.loadWidgetGraphs();
-    }
-  }
-
-  // Apply button handler
-  if (applyBtn) {
-    applyBtn.addEventListener("click", applyFilters);
-  }
-
-  // Listen for filter changes (for live filtering)
-  filtersContainer.addEventListener("change", () => {
-    if (autoApplyEnabled) {
-      applyFilters();
-    }
-  });
+    },
+    logPrefix: "[dashboard.js]",
+  }).Bar();
 }
 
 // Grid configuration constants
@@ -1438,6 +1351,17 @@ class DashboardBuilder {
       });
 
       if (result.success && result.data) {
+        // Dispose any existing ECharts instance on this container before clearing
+        // This prevents "Cannot read properties of null" errors
+        const existingChart = echarts.getInstanceByDom(container);
+        if (existingChart) {
+          try {
+            existingChart.dispose();
+          } catch (e) {
+            console.warn("[DashboardBuilder] Error disposing existing chart:", e);
+          }
+        }
+
         // Clear loading state
         container.innerHTML = "";
 
@@ -1483,8 +1407,12 @@ class DashboardBuilder {
    */
   disposeWidgetCharts() {
     for (const preview of this.widgetCharts.values()) {
-      if (preview && preview.chart) {
-        preview.chart.dispose();
+      if (preview && preview.destroy) {
+        try {
+          preview.destroy();
+        } catch (e) {
+          console.warn('[DashboardBuilder] Error disposing chart:', e);
+        }
       }
     }
     this.widgetCharts.clear();

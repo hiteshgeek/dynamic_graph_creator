@@ -79,6 +79,16 @@ export class WidgetLoader {
         return;
       }
 
+      // Dispose existing chart instance if present (to prevent memory leaks and errors)
+      if (container._graphPreviewInstance) {
+        try {
+          container._graphPreviewInstance.destroy();
+        } catch (e) {
+          console.warn(this.logPrefix, 'Error destroying previous chart instance:', e);
+        }
+        delete container._graphPreviewInstance;
+      }
+
       // Clear loading state
       container.innerHTML = '';
 
@@ -90,6 +100,8 @@ export class WidgetLoader {
 
       // Render using GraphPreview (don't show skeleton - data is already loaded)
       const preview = new window.GraphPreview(container, { showSkeleton: false });
+      // Store instance reference for future disposal
+      container._graphPreviewInstance = preview;
       const actualGraphType = result.data.graphType || graphType;
       preview.setType(actualGraphType);
 
@@ -121,6 +133,16 @@ export class WidgetLoader {
    * @param {string} message - Error message
    */
   showError(container, message) {
+    // Dispose existing chart instance if present
+    if (container._graphPreviewInstance) {
+      try {
+        container._graphPreviewInstance.destroy();
+      } catch (e) {
+        console.warn(this.logPrefix, 'Error destroying chart instance on error:', e);
+      }
+      delete container._graphPreviewInstance;
+    }
+
     container.innerHTML = '<div class="widget-graph-error"><i class="fas fa-exclamation-triangle"></i><span>' + message + '</span></div>';
   }
 }

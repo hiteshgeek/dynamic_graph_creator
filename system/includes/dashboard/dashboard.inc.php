@@ -55,6 +55,12 @@ if (isset($_POST['submit'])) {
         case 'reorder_sections':
             reorderSections($_POST);
             break;
+        case 'save_dashboard_filter_values':
+            saveDashboardFilterValues($_POST);
+            break;
+        case 'get_dashboard_filter_values':
+            getDashboardFilterValues($_POST);
+            break;
         // Template management actions (require admin access)
         case 'create_template':
             if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
@@ -1542,4 +1548,46 @@ function previewGraphForDashboard($data)
         'graphType' => $graph->getGraphType(),
         'name' => $graph->getName()
     ));
+}
+
+/**
+ * Save dashboard filter values to session
+ */
+function saveDashboardFilterValues($data)
+{
+    $dashboardId = isset($data['dashboard_id']) ? intval($data['dashboard_id']) : 0;
+    $filters = isset($data['filters']) ? $data['filters'] : array();
+
+    if (!$dashboardId) {
+        Utility::ajaxResponseFalse('Dashboard ID is required');
+    }
+
+    // Decode filters if they're JSON string
+    if (is_string($filters)) {
+        $filters = json_decode($filters, true);
+    }
+
+    // Store in session with dashboard ID as key
+    $sessionKey = 'dashboard_filters_' . $dashboardId;
+    $_SESSION[$sessionKey] = $filters;
+
+    Utility::ajaxResponseTrue('Filters saved', array('filters' => $filters));
+}
+
+/**
+ * Get dashboard filter values from session
+ */
+function getDashboardFilterValues($data)
+{
+    $dashboardId = isset($data['dashboard_id']) ? intval($data['dashboard_id']) : 0;
+
+    if (!$dashboardId) {
+        Utility::ajaxResponseFalse('Dashboard ID is required');
+    }
+
+    // Get from session with dashboard ID as key
+    $sessionKey = 'dashboard_filters_' . $dashboardId;
+    $filters = isset($_SESSION[$sessionKey]) ? $_SESSION[$sessionKey] : array();
+
+    Utility::ajaxResponseTrue('Filters loaded', array('filters' => $filters));
 }

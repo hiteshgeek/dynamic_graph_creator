@@ -894,7 +894,7 @@
             return self::getAdminUserUrl($id, array('updated_uid' => $row['updated_uid']));
         }
 
-        public static function getOnlineUsersGraph($uid = NULL, $start, $end)
+        public static function getOnlineUsersGraph($start, $end, $uid = NULL)
         {
             $db = Rapidkart::getInstance()->getDB();
             $condition = " AND 1";

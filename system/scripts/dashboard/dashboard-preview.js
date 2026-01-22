@@ -7,6 +7,7 @@
 
     // Shared widget loader instance
     var widgetLoader = null;
+    var filterView = null;
 
     // Wait for dependencies to be available
     function waitForDependencies(callback, maxAttempts) {
@@ -19,10 +20,10 @@
             var echartsReady = typeof window.echarts !== 'undefined';
             var graphPreviewReady = typeof window.GraphPreview !== 'undefined';
             var widgetLoaderReady = typeof window.WidgetLoader !== 'undefined';
+            var filterViewReady = typeof window.FilterView !== 'undefined';
+            var filterRendererReady = typeof window.FilterRenderer !== 'undefined';
 
-            var datePickerReady = typeof window.DatePickerInit !== 'undefined';
-
-            if (ajaxReady && echartsReady && graphPreviewReady && widgetLoaderReady && datePickerReady) {
+            if (ajaxReady && echartsReady && graphPreviewReady && widgetLoaderReady && filterViewReady && filterRendererReady) {
                 callback();
             } else if (attempts < maxAttempts) {
                 setTimeout(check, 100);
@@ -47,19 +48,19 @@
         document.body.classList.add('dashboard-preview-page');
 
         // Wait for dependencies then initialize everything
-        waitForDependencies(function() {
+        waitForDependencies(async function() {
             // Initialize filter bar (needs DatePickerInit)
-            initDashboardFilterBar();
+            await initDashboardFilterBar();
 
             // Initialize shared WidgetLoader
             widgetLoader = new window.WidgetLoader({
                 logPrefix: '[dashboard-preview.js]'
             });
 
-            // Load widgets with current filter values
+            // Load widgets with current filter values (filters are now loaded from session)
             var previewContainer = document.getElementById('dashboard-preview');
-            if (previewContainer) {
-                var filterValues = getDashboardFilterValues();
+            if (previewContainer && filterView) {
+                var filterValues = filterView.getFilterValues();
                 widgetLoader.loadAll(previewContainer, filterValues);
             }
 
@@ -69,123 +70,36 @@
     }
 
     /**
-     * Initialize dashboard filter bar
-     * Handles datepickers, collapse state, auto-apply toggle
+     * Initialize dashboard filter bar using FilterView
+     * Centralized filter handling shared with dashboard-builder
+     * @returns {Promise} Resolves when filter bar is initialized and filters are loaded from session
      */
-    function initDashboardFilterBar() {
-        var filterBar = document.querySelector('.dashboard-filter-bar');
-        if (!filterBar) return;
-
-        var filtersContainer = filterBar.querySelector('#dashboard-filters');
-        if (!filtersContainer) return;
-
-        // Initialize datepickers using centralized DatePickerInit class
-        if (window.DatePickerInit) {
-            window.DatePickerInit.init(filtersContainer);
+    async function initDashboardFilterBar() {
+        // Get dashboard ID from page
+        var dashboardId = null;
+        var deleteBtn = document.querySelector('.delete-dashboard-btn');
+        if (deleteBtn && deleteBtn.dataset.dashboardId) {
+            dashboardId = parseInt(deleteBtn.dataset.dashboardId, 10);
         }
 
-        // Get UI elements
-        var applyBtn = filterBar.querySelector('.filter-apply-btn');
-        var autoApplySwitch = filterBar.querySelector('#dashboard-auto-apply-switch');
-        var collapseBtn = filterBar.querySelector('.filter-collapse-btn');
-
-        // Track auto-apply state
-        var autoApplyEnabled = false;
-
-        // Collapse/Expand functionality
-        var COLLAPSE_KEY = 'dgc_dashboard_filters_collapsed';
-
-        function updateCollapseState(collapsed) {
-            if (collapsed) {
-                filterBar.classList.add('collapsed');
-                if (collapseBtn) collapseBtn.title = 'Expand Filters';
-            } else {
-                filterBar.classList.remove('collapsed');
-                if (collapseBtn) collapseBtn.title = 'Collapse Filters';
-            }
-        }
-
-        // Restore collapse state from localStorage
-        var savedCollapsed = localStorage.getItem(COLLAPSE_KEY) === '1';
-        updateCollapseState(savedCollapsed);
-
-        // Enable transitions after initial state is applied
-        requestAnimationFrame(function() {
-            requestAnimationFrame(function() {
-                filterBar.classList.add('transitions-enabled');
-            });
-        });
-
-        // Collapse button click handler
-        if (collapseBtn) {
-            collapseBtn.addEventListener('click', function() {
-                var isCollapsed = filterBar.classList.contains('collapsed');
-                var newState = !isCollapsed;
-                updateCollapseState(newState);
-                localStorage.setItem(COLLAPSE_KEY, newState ? '1' : '0');
-            });
-        }
-
-        // Auto-apply switch handler
-        if (autoApplySwitch) {
-            autoApplySwitch.addEventListener('change', function() {
-                autoApplyEnabled = this.checked;
-                if (applyBtn) {
-                    applyBtn.style.display = autoApplyEnabled ? 'none' : '';
+        // Initialize FilterView with Bar layout
+        filterView = new window.FilterView({
+            containerSelector: '.dashboard-filter-bar',
+            dashboardId: dashboardId,
+            onFilterChange: function(filterValues) {
+                // Reload all widgets with new filter values
+                var previewContainer = document.getElementById('dashboard-preview');
+                if (previewContainer && widgetLoader) {
+                    widgetLoader.loadAll(previewContainer, filterValues);
                 }
-                // If turning on auto-apply, immediately apply current filters
-                if (autoApplyEnabled) {
-                    applyFilters();
-                }
-            });
+            },
+            logPrefix: '[dashboard-preview.js]'
+        }).Bar();
+
+        // Wait for filters to load from session before proceeding
+        if (filterView.filtersLoadedPromise) {
+            await filterView.filtersLoadedPromise;
         }
-
-        // Function to apply filters and reload charts
-        function applyFilters() {
-            var previewContainer = document.getElementById('dashboard-preview');
-            if (previewContainer && widgetLoader) {
-                var filterValues = getDashboardFilterValues();
-                widgetLoader.loadAll(previewContainer, filterValues);
-            }
-        }
-
-        // Apply button click - reload charts with new filters
-        if (applyBtn) {
-            applyBtn.addEventListener('click', applyFilters);
-        }
-
-        // Live filtering: Add event listeners to all filter inputs
-        // Selects
-        filtersContainer.querySelectorAll('select.filter-input').forEach(function(select) {
-            select.addEventListener('change', function() {
-                if (autoApplyEnabled) applyFilters();
-            });
-        });
-
-        // Checkboxes and radios
-        filtersContainer.querySelectorAll('input[type="checkbox"], input[type="radio"]').forEach(function(input) {
-            input.addEventListener('change', function() {
-                if (autoApplyEnabled) applyFilters();
-            });
-        });
-
-        // Text and number inputs (with debounce)
-        var debounceTimer = null;
-        filtersContainer.querySelectorAll('input.filter-input:not(.dgc-datepicker)').forEach(function(input) {
-            input.addEventListener('input', function() {
-                if (autoApplyEnabled) {
-                    clearTimeout(debounceTimer);
-                    debounceTimer = setTimeout(applyFilters, 500);
-                }
-            });
-        });
-
-        // Datepickers - listen for change event (dispatched by DatePickerInit after apply/cancel)
-        filtersContainer.querySelectorAll('.dgc-datepicker').forEach(function(input) {
-            input.addEventListener('change', function() {
-                if (autoApplyEnabled) applyFilters();
-            });
-        });
     }
 
     /**
@@ -266,104 +180,6 @@
                     btn.innerHTML = '<i class="fas fa-trash"></i>';
                 });
         });
-    }
-
-    /**
-     * Get filter values from dashboard filter bar
-     * Reusable utility for extracting filter values
-     */
-    function getDashboardFilterValues() {
-        var filtersContainer = document.querySelector('#dashboard-filters');
-        if (!filtersContainer) return {};
-
-        var filterValues = {};
-        var filterItems = filtersContainer.querySelectorAll('.filter-input-item');
-
-        filterItems.forEach(function(item) {
-            var filterKey = item.dataset.filterKey;
-            if (!filterKey) return;
-
-            var value = getFilterItemValue(item, filterKey);
-            if (value !== null) {
-                Object.keys(value).forEach(function(key) {
-                    filterValues[key] = value[key];
-                });
-            }
-        });
-
-        return filterValues;
-    }
-
-    /**
-     * Get value from a single filter item
-     */
-    function getFilterItemValue(item, filterKey) {
-        // Single select
-        var select = item.querySelector('select.filter-input');
-        if (select && select.value) {
-            var result = {};
-            result['::' + filterKey] = select.value;
-            return result;
-        }
-
-        // Multi-select dropdown (checkboxes)
-        var multiSelectChecked = item.querySelectorAll('.filter-multiselect-options input[type="checkbox"]:checked');
-        if (multiSelectChecked.length > 0) {
-            var values = Array.prototype.slice.call(multiSelectChecked).map(function(cb) { return cb.value; });
-            var result = {};
-            result['::' + filterKey] = values;
-            return result;
-        }
-
-        // Checkbox group
-        var checkboxChecked = item.querySelectorAll('.filter-checkbox-group input[type="checkbox"]:checked');
-        if (checkboxChecked.length > 0) {
-            var values = Array.prototype.slice.call(checkboxChecked).map(function(cb) { return cb.value; });
-            var result = {};
-            result['::' + filterKey] = values;
-            return result;
-        }
-
-        // Radio group
-        var radioChecked = item.querySelector('.filter-radio-group input[type="radio"]:checked');
-        if (radioChecked) {
-            var result = {};
-            result['::' + filterKey] = radioChecked.value;
-            return result;
-        }
-
-        // Date range picker
-        var dateRangePicker = item.querySelector('.dgc-datepicker[data-picker-type="range"], .dgc-datepicker[data-picker-type="main"]');
-        if (dateRangePicker) {
-            var from = dateRangePicker.dataset.from;
-            var to = dateRangePicker.dataset.to;
-
-            if (from || to) {
-                var result = {};
-                if (from) result['::' + filterKey + '_from'] = from;
-                if (to) result['::' + filterKey + '_to'] = to;
-                return result;
-            }
-            return null;
-        }
-
-        // Single date picker
-        var singleDatePicker = item.querySelector('.dgc-datepicker[data-picker-type="single"]');
-        if (singleDatePicker && singleDatePicker.value) {
-            var result = {};
-            result['::' + filterKey] = singleDatePicker.value;
-            return result;
-        }
-
-        // Text/number input
-        var textInput = item.querySelector('input.filter-input:not(.dgc-datepicker)');
-        if (textInput && textInput.value) {
-            var result = {};
-            result['::' + filterKey] = textInput.value;
-            return result;
-        }
-
-        return null;
     }
 
 })();

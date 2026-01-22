@@ -684,6 +684,7 @@ function getMigrationSteps()
                 'system/classes/DataFilter.php',
                 'system/classes/DataFilterManager.php',
                 'system/classes/DataFilterSet.php',
+                'system/classes/QueryHelper.php',
                 'system/classes/DashboardInstance.php',
                 'system/classes/DashboardTemplate.php',
                 'system/classes/DashboardTemplateCategory.php',
