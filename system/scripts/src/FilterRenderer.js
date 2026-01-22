@@ -29,19 +29,28 @@ class FilterRenderer {
         const showLabels = options.showLabels !== false;
         const compact = options.compact === true;
         const wrapperClass = options.wrapperClass || '';
+        const noWrapper = options.noWrapper === true;
+        const showPlaceholderKey = options.showPlaceholderKey !== false;
+        const useControlWrapper = options.useControlWrapper !== false;
 
         if (!filters || filters.length === 0) {
             container.innerHTML = '';
             return;
         }
 
-        let html = `<div class="filter-renderer ${wrapperClass} ${compact ? 'compact' : ''}">`;
+        let html = '';
+
+        if (!noWrapper) {
+            html += `<div class="filter-renderer ${wrapperClass} ${compact ? 'compact' : ''}">`;
+        }
 
         filters.forEach(filter => {
-            html += FilterRenderer.renderFilterInput(filter, { showLabels, compact });
+            html += FilterRenderer.renderFilterInput(filter, { showLabels, compact, showPlaceholderKey, useControlWrapper });
         });
 
-        html += '</div>';
+        if (!noWrapper) {
+            html += '</div>';
+        }
 
         container.innerHTML = html;
 
@@ -58,6 +67,8 @@ class FilterRenderer {
     static renderFilterInput(filter, options = {}) {
         const showLabels = options.showLabels !== false;
         const compact = options.compact === true;
+        const showPlaceholderKey = options.showPlaceholderKey !== false;
+        const useControlWrapper = options.useControlWrapper !== false;
 
         const key = filter.filter_key || '';
         const keyClean = key.replace(/^::/, '');
@@ -92,23 +103,23 @@ class FilterRenderer {
                 break;
 
             case 'date':
-                inputHtml = `<input type="text" class="form-control ${compact ? 'form-control-sm' : ''} dgc-datepicker"
-                    id="${inputId}" data-filter-key="${keyClean}"
+                inputHtml = `<input type="text" class="form-control form-control-sm filter-input dgc-datepicker"
+                    id="${inputId}" name="${keyClean}" data-filter-key="${keyClean}"
                     data-picker-type="single"
                     value="${FilterRenderer.escapeHtml(defaultValue)}"
                     placeholder="Select date" autocomplete="off">`;
                 break;
 
             case 'date_range':
-                inputHtml = `<input type="text" class="form-control ${compact ? 'form-control-sm' : ''} dgc-datepicker"
-                    id="${inputId}" data-filter-key="${keyClean}"
+                inputHtml = `<input type="text" class="form-control form-control-sm filter-input dgc-datepicker"
+                    id="${inputId}" name="${keyClean}" data-filter-key="${keyClean}"
                     data-picker-type="range"
                     placeholder="Select date range" autocomplete="off">`;
                 break;
 
             case 'main_datepicker':
-                inputHtml = `<input type="text" class="form-control ${compact ? 'form-control-sm' : ''} dgc-datepicker"
-                    id="${inputId}" data-filter-key="${keyClean}"
+                inputHtml = `<input type="text" class="form-control form-control-sm filter-input dgc-datepicker"
+                    id="${inputId}" name="${keyClean}" data-filter-key="${keyClean}"
                     data-picker-type="main"
                     placeholder="Select date range" autocomplete="off">`;
                 break;
@@ -141,15 +152,19 @@ class FilterRenderer {
         }
 
         const labelHtml = showLabels ? `
-            <label class="filter-label" for="${inputId}">
+            <label class="filter-input-label" for="${inputId}">
                 ${FilterRenderer.escapeHtml(label)}
                 ${isRequired ? '<span class="required">*</span>' : ''}
             </label>
         ` : '';
 
-        const placeholderHtml = showLabels ? `
+        const placeholderHtml = showLabels && showPlaceholderKey ? `
             <code class="placeholder-key" title="Use in query">::${keyClean}</code>
         ` : '';
+
+        const inputContent = useControlWrapper
+            ? `<div class="filter-input-control">${inputHtml}</div>`
+            : inputHtml;
 
         return `
             <div class="filter-input-item" data-filter-key="${keyClean}" data-filter-type="${filterType}">
@@ -157,9 +172,7 @@ class FilterRenderer {
                     ${labelHtml}
                     ${placeholderHtml}
                 </div>
-                <div class="filter-input-control">
-                    ${inputHtml}
-                </div>
+                ${inputContent}
             </div>
         `;
     }
@@ -176,8 +189,8 @@ class FilterRenderer {
         }).join('');
 
         return `
-            <select class="form-select ${compact ? 'form-select-sm' : ''}"
-                id="${inputId}" data-filter-key="${keyClean}">
+            <select class="form-control form-control-sm filter-input"
+                id="${inputId}" name="${keyClean}" data-filter-key="${keyClean}">
                 <option value="">-- Select --</option>
                 ${optionsHtml}
             </select>

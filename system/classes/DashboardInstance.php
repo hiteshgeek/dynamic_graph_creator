@@ -37,7 +37,10 @@ class DashboardInstance implements DatabaseObject
         return $db->resultNumRows($res) > 0;
     }
 
-    public function getId() { return $this->diid; }
+    public function getId()
+    {
+        return $this->diid;
+    }
 
     public function hasMandatoryData()
     {
@@ -177,7 +180,10 @@ class DashboardInstance implements DatabaseObject
         return true;
     }
 
-    public function __toString() { return $this->name ? $this->name : ''; }
+    public function __toString()
+    {
+        return $this->name ? $this->name : '';
+    }
 
     public function toArray()
     {
@@ -381,7 +387,7 @@ class DashboardInstance implements DatabaseObject
     {
         $structure = $this->getStructureArray();
 
-        $structure['sections'] = array_filter($structure['sections'], function($section) use ($sectionId) {
+        $structure['sections'] = array_filter($structure['sections'], function ($section) use ($sectionId) {
             return $section['sid'] !== $sectionId;
         });
 
@@ -416,37 +422,93 @@ class DashboardInstance implements DatabaseObject
     }
 
     // Getters and Setters
-    public function getDtid() { return $this->dtid; }
-    public function setDtid($value) { $this->dtid = $value ? intval($value) : NULL; }
+    public function getDtid()
+    {
+        return $this->dtid;
+    }
+    public function setDtid($value)
+    {
+        $this->dtid = $value ? intval($value) : NULL;
+    }
 
-    public function getName() { return $this->name; }
-    public function setName($value) { $this->name = $value; }
+    public function getName()
+    {
+        return $this->name;
+    }
+    public function setName($value)
+    {
+        $this->name = $value;
+    }
 
-    public function getDescription() { return $this->description; }
-    public function setDescription($value) { $this->description = $value; }
+    public function getDescription()
+    {
+        return $this->description;
+    }
+    public function setDescription($value)
+    {
+        $this->description = $value;
+    }
 
-    public function getStructure() { return $this->structure; }
-    public function setStructure($value) {
+    public function getStructure()
+    {
+        return $this->structure;
+    }
+    public function setStructure($value)
+    {
         $this->structure = is_string($value) ? $value : json_encode($value);
     }
 
-    public function getConfig() { return $this->config; }
-    public function setConfig($value) {
+    public function getConfig()
+    {
+        return $this->config;
+    }
+    public function setConfig($value)
+    {
         $this->config = is_string($value) ? $value : json_encode($value);
     }
 
-    public function getCompanyId() { return $this->company_id; }
-    public function setCompanyId($value) { $this->company_id = $value ? intval($value) : NULL; }
+    public function getCompanyId()
+    {
+        return $this->company_id;
+    }
+    public function setCompanyId($value)
+    {
+        $this->company_id = $value ? intval($value) : NULL;
+    }
 
-    public function getIsSystem() { return $this->is_system; }
-    public function setIsSystem($value) { $this->is_system = $value ? 1 : 0; }
+    public function getIsSystem()
+    {
+        return $this->is_system;
+    }
+    public function setIsSystem($value)
+    {
+        $this->is_system = $value ? 1 : 0;
+    }
 
-    public function getCreatedTs() { return $this->created_ts; }
-    public function getUpdatedTs() { return $this->updated_ts; }
+    public function getCreatedTs()
+    {
+        return $this->created_ts;
+    }
+    public function getUpdatedTs()
+    {
+        return $this->updated_ts;
+    }
 
-    public function getCreatedUid() { return $this->created_uid; }
-    public function setCreatedUid($value) { $this->created_uid = intval($value); }
+    public function getCreatedUid()
+    {
+        return $this->created_uid;
+    }
+    public function setCreatedUid($value)
+    {
+        $this->created_uid = intval($value);
+    }
 
-    public function getUpdatedUid() { return $this->updated_uid; }
-    public function setUpdatedUid($value) { $this->updated_uid = intval($value); }
+    public function getUpdatedUid()
+    {
+        return $this->updated_uid;
+    }
+    public function setUpdatedUid($value)
+    {
+        $this->updated_uid = intval($value);
+    }
 }

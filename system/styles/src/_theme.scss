@@ -1075,7 +1075,7 @@ code {
 
     // Area controls overlay background in dark mode
     .area-controls-overlay {
-      background: var(--dgc-bg-card);
+      background: rgba(30, 30, 30, 0.85);
     }
   }
 }

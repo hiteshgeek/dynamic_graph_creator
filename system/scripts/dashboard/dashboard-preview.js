@@ -297,6 +297,104 @@
     }
 
     /**
+     * Get filter values from dashboard filter bar
+     * Reusable utility for extracting filter values
+     */
+    function getDashboardFilterValues() {
+        var filtersContainer = document.querySelector('#dashboard-filters');
+        if (!filtersContainer) return {};
+
+        var filterValues = {};
+        var filterItems = filtersContainer.querySelectorAll('.filter-input-item');
+
+        filterItems.forEach(function(item) {
+            var filterKey = item.dataset.filterKey;
+            if (!filterKey) return;
+
+            var value = getFilterItemValue(item, filterKey);
+            if (value !== null) {
+                Object.keys(value).forEach(function(key) {
+                    filterValues[key] = value[key];
+                });
+            }
+        });
+
+        return filterValues;
+    }
+
+    /**
+     * Get value from a single filter item
+     */
+    function getFilterItemValue(item, filterKey) {
+        // Single select
+        var select = item.querySelector('select.filter-input');
+        if (select && select.value) {
+            var result = {};
+            result['::' + filterKey] = select.value;
+            return result;
+        }
+
+        // Multi-select dropdown (checkboxes)
+        var multiSelectChecked = item.querySelectorAll('.filter-multiselect-options input[type="checkbox"]:checked');
+        if (multiSelectChecked.length > 0) {
+            var values = Array.prototype.slice.call(multiSelectChecked).map(function(cb) { return cb.value; });
+            var result = {};
+            result['::' + filterKey] = values;
+            return result;
+        }
+
+        // Checkbox group
+        var checkboxChecked = item.querySelectorAll('.filter-checkbox-group input[type="checkbox"]:checked');
+        if (checkboxChecked.length > 0) {
+            var values = Array.prototype.slice.call(checkboxChecked).map(function(cb) { return cb.value; });
+            var result = {};
+            result['::' + filterKey] = values;
+            return result;
+        }
+
+        // Radio group
+        var radioChecked = item.querySelector('.filter-radio-group input[type="radio"]:checked');
+        if (radioChecked) {
+            var result = {};
+            result['::' + filterKey] = radioChecked.value;
+            return result;
+        }
+
+        // Date range picker
+        var dateRangePicker = item.querySelector('.dgc-datepicker[data-picker-type="range"], .dgc-datepicker[data-picker-type="main"]');
+        if (dateRangePicker) {
+            var from = dateRangePicker.dataset.from;
+            var to = dateRangePicker.dataset.to;
+
+            if (from || to) {
+                var result = {};
+                if (from) result['::' + filterKey + '_from'] = from;
+                if (to) result['::' + filterKey + '_to'] = to;
+                return result;
+            }
+            return null;
+        }
+
+        // Single date picker
+        var singleDatePicker = item.querySelector('.dgc-datepicker[data-picker-type="single"]');
+        if (singleDatePicker && singleDatePicker.value) {
+            var result = {};
+            result['::' + filterKey] = singleDatePicker.value;
+            return result;
+        }
+
+        // Text/number input
+        var textInput = item.querySelector('input.filter-input:not(.dgc-datepicker)');
+        if (textInput && textInput.value) {
+            var result = {};
+            result['::' + filterKey] = textInput.value;
+            return result;
+        }
+
+        return null;
+    }
+
+    /**
      * Load all widget graphs on the dashboard preview
      */
     function loadAllWidgetGraphs() {
@@ -309,6 +407,10 @@
             console.log('[dashboard-preview.js] No graph containers found on page');
             return;
         }
+
+        // Get current filter values
+        var filterValues = getDashboardFilterValues();
+        console.log('[dashboard-preview.js] Filter values:', filterValues);
 
         // Convert NodeList to array for forEach compatibility
         var containers = Array.prototype.slice.call(graphContainers);
@@ -327,20 +429,21 @@
             var graphType = (areaContent && areaContent.dataset.graphType) ? areaContent.dataset.graphType : 'bar';
             console.log('[dashboard-preview.js] Graph type:', graphType);
 
-            loadWidgetGraph(container, graphId, graphType);
+            loadWidgetGraph(container, graphId, graphType, filterValues);
         });
     }
 
     /**
      * Load and render a single widget graph using GraphPreview class
      */
-    function loadWidgetGraph(container, graphId, graphType) {
-        console.log('[dashboard-preview.js] Loading widget graph:', graphId, 'type:', graphType);
+    function loadWidgetGraph(container, graphId, graphType, filters) {
+        filters = filters || {};
+        console.log('[dashboard-preview.js] Loading widget graph:', graphId, 'type:', graphType, 'filters:', filters);
         console.log('[dashboard-preview.js] Container dimensions:', container.offsetWidth, 'x', container.offsetHeight);
 
         window.Ajax.post('preview_graph', {
             id: graphId,
-            filters: {}
+            filters: filters
         })
         .then(function(result) {
             console.log('[dashboard-preview.js] Graph API result:', result);

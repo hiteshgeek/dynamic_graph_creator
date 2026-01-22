@@ -297,11 +297,9 @@ function initDashboardFilterBar() {
 
   // Apply filters function
   function applyFilters() {
-    if (typeof FilterRenderer !== "undefined") {
-      const values = FilterRenderer.getValues(filtersContainer);
-      console.log("Dashboard filter values:", values);
-      // TODO: Apply filters to dashboard graphs
-      Toast.success("Filters applied");
+    // Reload all widget graphs with new filter values
+    if (window.dashboardBuilderInstance && window.dashboardBuilderInstance.loadWidgetGraphs) {
+      window.dashboardBuilderInstance.loadWidgetGraphs();
     }
   }
 
@@ -401,9 +399,11 @@ class DashboardBuilder {
     // Update the area content in the structure
     this.updateAreaContentInStructure(context.sectionId, context.areaId, context.rowId, content);
 
-    // Mark as dirty and trigger auto-save
-    this.markDirty();
+    // Render immediately
     this.renderDashboard();
+
+    // Save immediately and refresh filters (don't wait for auto-save delay)
+    await this.saveDashboard(false);
 
     Toast.success("Widget added");
   }
@@ -423,9 +423,11 @@ class DashboardBuilder {
     // Update the area content in the structure
     this.updateAreaContentInStructure(context.sectionId, context.areaId, context.rowId, content);
 
-    // Mark as dirty and trigger auto-save
-    this.markDirty();
+    // Render immediately
     this.renderDashboard();
+
+    // Save immediately and refresh filters (don't wait for auto-save delay)
+    await this.saveDashboard(false);
 
     Toast.success("Widget removed");
   }
@@ -437,23 +439,41 @@ class DashboardBuilder {
   async refreshFilterBar() {
     if (!this.dashboardId) return;
 
+    const filterBar = document.querySelector(".dashboard-filter-bar");
     const filtersContainer = document.querySelector("#dashboard-filters");
     if (!filtersContainer) return;
+
+    console.log("[DashboardBuilder] Refreshing filter bar for dashboard:", this.dashboardId);
 
     try {
       const result = await Ajax.post("get_dashboard_filters", {
         dashboard_id: this.dashboardId,
       });
 
+      console.log("[DashboardBuilder] Filter bar refresh result:", result);
+
       if (result.success && result.data) {
         const filters = result.data.filters || [];
 
+        // Toggle filter bar visibility based on whether there are filters
+        if (filterBar) {
+          if (filters.length > 0) {
+            filterBar.style.display = "";
+          } else {
+            filterBar.style.display = "none";
+          }
+        }
+
         if (typeof FilterRenderer !== "undefined") {
-          // Re-render filters into the container
+          // Re-render filters into the container (match PHP layout)
           FilterRenderer.render(filtersContainer, filters, {
             showLabels: true,
             compact: false,
+            noWrapper: true,
+            showPlaceholderKey: false,
+            useControlWrapper: false,
           });
+          console.log("[DashboardBuilder] Filter bar rendered with", filters.length, "filters");
         }
       }
     } catch (error) {
@@ -1265,11 +1285,108 @@ class DashboardBuilder {
   }
 
   /**
+   * Get filter values from dashboard filter bar
+   * @returns {Object} Filter values keyed by placeholder
+   */
+  getDashboardFilterValues() {
+    const filtersContainer = document.querySelector("#dashboard-filters");
+    if (!filtersContainer) return {};
+
+    // Use DataFilterUtils if available (ES6 module context)
+    if (typeof DataFilterUtils !== "undefined") {
+      return DataFilterUtils.getValues(filtersContainer, { visibleOnly: false });
+    }
+
+    // Fallback: manual extraction for vanilla JS context
+    const filterValues = {};
+    const filterItems = filtersContainer.querySelectorAll(".filter-input-item");
+
+    filterItems.forEach((item) => {
+      const filterKey = item.dataset.filterKey;
+      if (!filterKey) return;
+
+      const value = this.getFilterItemValue(item, filterKey);
+      if (value !== null) {
+        Object.assign(filterValues, value);
+      }
+    });
+
+    return filterValues;
+  }
+
+  /**
+   * Get value from a single filter item
+   * @param {HTMLElement} item - The filter item element
+   * @param {string} filterKey - The filter key
+   * @returns {Object|null} Filter value object or null
+   */
+  getFilterItemValue(item, filterKey) {
+    // Single select
+    const select = item.querySelector("select.filter-input");
+    if (select && select.value) {
+      return { ["::" + filterKey]: select.value };
+    }
+
+    // Multi-select dropdown (checkboxes)
+    const multiSelectChecked = item.querySelectorAll(".filter-multiselect-options input[type='checkbox']:checked");
+    if (multiSelectChecked.length > 0) {
+      const values = Array.from(multiSelectChecked).map((cb) => cb.value);
+      return { ["::" + filterKey]: values };
+    }
+
+    // Checkbox group
+    const checkboxChecked = item.querySelectorAll(".filter-checkbox-group input[type='checkbox']:checked");
+    if (checkboxChecked.length > 0) {
+      const values = Array.from(checkboxChecked).map((cb) => cb.value);
+      return { ["::" + filterKey]: values };
+    }
+
+    // Radio group
+    const radioChecked = item.querySelector(".filter-radio-group input[type='radio']:checked");
+    if (radioChecked) {
+      return { ["::" + filterKey]: radioChecked.value };
+    }
+
+    // Date range picker
+    const dateRangePicker = item.querySelector(".dgc-datepicker[data-picker-type='range'], .dgc-datepicker[data-picker-type='main']");
+    if (dateRangePicker) {
+      const from = dateRangePicker.dataset.from;
+      const to = dateRangePicker.dataset.to;
+
+      if (from || to) {
+        const result = {};
+        if (from) result["::" + filterKey + "_from"] = from;
+        if (to) result["::" + filterKey + "_to"] = to;
+        return result;
+      }
+      return null;
+    }
+
+    // Single date picker
+    const singleDatePicker = item.querySelector(".dgc-datepicker[data-picker-type='single']");
+    if (singleDatePicker && singleDatePicker.value) {
+      return { ["::" + filterKey]: singleDatePicker.value };
+    }
+
+    // Text/number input
+    const textInput = item.querySelector("input.filter-input:not(.dgc-datepicker)");
+    if (textInput && textInput.value) {
+      return { ["::" + filterKey]: textInput.value };
+    }
+
+    return null;
+  }
+
+  /**
    * Load and render all widget graphs in the dashboard
    */
   async loadWidgetGraphs() {
     // Dispose existing chart instances
     this.disposeWidgetCharts();
+
+    // Get current filter values
+    const filterValues = this.getDashboardFilterValues();
+    console.log("[DashboardBuilder] Loading widgets with filters:", filterValues);
 
     // Find all widget graph containers
     const graphContainers = this.container.querySelectorAll(".widget-graph-container[data-graph-id]");
@@ -1282,8 +1399,8 @@ class DashboardBuilder {
       const areaContent = container.closest(".area-content");
       const graphType = areaContent?.dataset.graphType || "bar";
 
-      // Load and render the graph
-      this.loadWidgetGraph(container, graphId, graphType);
+      // Load and render the graph with filters
+      this.loadWidgetGraph(container, graphId, graphType, filterValues);
     }
   }
 
@@ -1292,13 +1409,14 @@ class DashboardBuilder {
    * @param {HTMLElement} container - The container element
    * @param {number} graphId - The graph ID
    * @param {string} graphType - The graph type
+   * @param {Object} filters - Filter values to apply
    */
-  async loadWidgetGraph(container, graphId, graphType) {
+  async loadWidgetGraph(container, graphId, graphType, filters = {}) {
     try {
-      // Fetch graph data
+      // Fetch graph data with filters
       const result = await Ajax.post("preview_graph", {
         id: graphId,
-        filters: {},
+        filters: filters,
       });
 
       if (result.success && result.data) {
@@ -2168,6 +2286,12 @@ class DashboardBuilder {
       return;
     }
 
+    // Clear any pending auto-save timeout
+    if (this.autoSaveTimeout) {
+      clearTimeout(this.autoSaveTimeout);
+      this.autoSaveTimeout = null;
+    }
+
     this.isSaving = true;
     this.updateSaveIndicator("saving");
 
@@ -2200,7 +2324,7 @@ class DashboardBuilder {
           );
         }
         // Refresh filter bar after dashboard save (not for templates)
-        if (this.mode === "dashboard") {
+        if (this.mode !== "template") {
           this.refreshFilterBar();
         }
       } else {
