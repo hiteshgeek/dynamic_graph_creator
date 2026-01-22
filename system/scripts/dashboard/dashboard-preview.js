@@ -22,9 +22,10 @@
             var graphPreviewReady = typeof window.GraphPreview !== 'undefined';
             var widgetLoaderReady = typeof window.WidgetLoader !== 'undefined';
 
-            console.log('[dashboard-preview.js] Check #' + attempts + ' - Ajax:', ajaxReady, 'ECharts:', echartsReady, 'GraphPreview:', graphPreviewReady, 'WidgetLoader:', widgetLoaderReady);
+            var datePickerReady = typeof window.DatePickerInit !== 'undefined';
+            console.log('[dashboard-preview.js] Check #' + attempts + ' - Ajax:', ajaxReady, 'ECharts:', echartsReady, 'GraphPreview:', graphPreviewReady, 'WidgetLoader:', widgetLoaderReady, 'DatePickerInit:', datePickerReady);
 
-            if (ajaxReady && echartsReady && graphPreviewReady && widgetLoaderReady) {
+            if (ajaxReady && echartsReady && graphPreviewReady && widgetLoaderReady && datePickerReady) {
                 console.log('[dashboard-preview.js] Dependencies ready');
                 callback();
             } else if (attempts < maxAttempts) {
@@ -51,12 +52,12 @@
         // Add page-specific body class for CSS targeting
         document.body.classList.add('dashboard-preview-page');
 
-        // Initialize filter bar immediately (doesn't need GraphPreview)
-        initDashboardFilterBar();
-
-        // Wait for dependencies then initialize widgets
+        // Wait for dependencies then initialize everything
         waitForDependencies(function() {
-            console.log('[dashboard-preview.js] Starting widget loading...');
+            console.log('[dashboard-preview.js] Starting initialization...');
+
+            // Initialize filter bar (needs DatePickerInit)
+            initDashboardFilterBar();
 
             // Initialize shared WidgetLoader
             widgetLoader = new window.WidgetLoader({
@@ -88,8 +89,10 @@
 
         console.log('[dashboard-preview.js] Initializing filter bar');
 
-        // Initialize datepickers using daterangepicker directly
-        initDatepickers(filtersContainer);
+        // Initialize datepickers using centralized DatePickerInit class
+        if (window.DatePickerInit) {
+            window.DatePickerInit.init(filtersContainer);
+        }
 
         // Get UI elements
         var applyBtn = filterBar.querySelector('.filter-apply-btn');
@@ -154,82 +157,6 @@
                 }
             });
         }
-    }
-
-    /**
-     * Initialize datepickers in the filter container
-     */
-    function initDatepickers(container) {
-        if (typeof jQuery === 'undefined' || typeof jQuery.fn.daterangepicker === 'undefined') {
-            console.warn('[dashboard-preview.js] daterangepicker not available');
-            return;
-        }
-
-        var datepickers = container.querySelectorAll('.dgc-datepicker');
-        datepickers.forEach(function(input) {
-            var pickerType = input.dataset.pickerType || 'single';
-            var isRange = pickerType === 'range' || pickerType === 'main';
-
-            // Get company start date if available
-            var companyStartDate = window.dgcCompanyStartDate || null;
-            var minDate = companyStartDate ? moment(companyStartDate) : moment().subtract(10, 'years');
-
-            var config = {
-                autoUpdateInput: false,
-                locale: {
-                    cancelLabel: 'Clear',
-                    format: 'YYYY-MM-DD'
-                },
-                minDate: minDate,
-                maxDate: moment()
-            };
-
-            if (isRange) {
-                config.singleDatePicker = false;
-                config.showDropdowns = true;
-                config.linkedCalendars = false;
-                config.alwaysShowCalendars = true;
-
-                // Add preset ranges for main datepicker
-                if (pickerType === 'main') {
-                    config.ranges = {
-                        'Today': [moment(), moment()],
-                        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                        'This Month': [moment().startOf('month'), moment().endOf('month')],
-                        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-                        'This Year': [moment().startOf('year'), moment()],
-                        'Last Year': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
-                    };
-
-                    // Add 'All Time' if company start date is set
-                    if (companyStartDate) {
-                        config.ranges['All Time'] = [moment(companyStartDate), moment()];
-                    }
-                }
-            } else {
-                config.singleDatePicker = true;
-            }
-
-            jQuery(input).daterangepicker(config);
-
-            // Handle apply event
-            jQuery(input).on('apply.daterangepicker', function(ev, picker) {
-                if (isRange) {
-                    this.value = picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD');
-                } else {
-                    this.value = picker.startDate.format('YYYY-MM-DD');
-                }
-            });
-
-            // Handle cancel event (clear)
-            jQuery(input).on('cancel.daterangepicker', function() {
-                this.value = '';
-            });
-        });
-
-        console.log('[dashboard-preview.js] Initialized ' + datepickers.length + ' datepicker(s)');
     }
 
     /**
