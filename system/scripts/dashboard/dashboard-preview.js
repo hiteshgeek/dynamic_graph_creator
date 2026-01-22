@@ -47,13 +47,169 @@
         // Add page-specific body class for CSS targeting
         document.body.classList.add('dashboard-preview-page');
 
-        // Wait for dependencies then initialize
+        // Initialize filter bar immediately (doesn't need GraphPreview)
+        initDashboardFilterBar();
+
+        // Wait for dependencies then initialize widgets
         waitForDependencies(function() {
             console.log('[dashboard-preview.js] Starting widget loading...');
             loadAllWidgetGraphs();
             initDeleteButton();
             initDescriptionTruncation();
         });
+    }
+
+    /**
+     * Initialize dashboard filter bar
+     * Handles datepickers, collapse state, auto-apply toggle
+     */
+    function initDashboardFilterBar() {
+        var filterBar = document.querySelector('.dashboard-filter-bar');
+        if (!filterBar) return;
+
+        var filtersContainer = filterBar.querySelector('#dashboard-filters');
+        if (!filtersContainer) return;
+
+        console.log('[dashboard-preview.js] Initializing filter bar');
+
+        // Initialize datepickers using daterangepicker directly
+        initDatepickers(filtersContainer);
+
+        // Get UI elements
+        var applyBtn = filterBar.querySelector('.filter-apply-btn');
+        var autoApplySwitch = filterBar.querySelector('#dashboard-auto-apply-switch');
+        var collapseBtn = filterBar.querySelector('.filter-collapse-btn');
+
+        // Track auto-apply state
+        var autoApplyEnabled = false;
+
+        // Collapse/Expand functionality
+        var COLLAPSE_KEY = 'dgc_dashboard_filters_collapsed';
+
+        function updateCollapseState(collapsed) {
+            if (collapsed) {
+                filterBar.classList.add('collapsed');
+                if (collapseBtn) collapseBtn.title = 'Expand Filters';
+            } else {
+                filterBar.classList.remove('collapsed');
+                if (collapseBtn) collapseBtn.title = 'Collapse Filters';
+            }
+        }
+
+        // Restore collapse state from localStorage
+        var savedCollapsed = localStorage.getItem(COLLAPSE_KEY) === '1';
+        updateCollapseState(savedCollapsed);
+
+        // Enable transitions after initial state is applied
+        requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+                filterBar.classList.add('transitions-enabled');
+            });
+        });
+
+        // Collapse button click handler
+        if (collapseBtn) {
+            collapseBtn.addEventListener('click', function() {
+                var isCollapsed = filterBar.classList.contains('collapsed');
+                var newState = !isCollapsed;
+                updateCollapseState(newState);
+                localStorage.setItem(COLLAPSE_KEY, newState ? '1' : '0');
+            });
+        }
+
+        // Auto-apply switch handler
+        if (autoApplySwitch) {
+            autoApplySwitch.addEventListener('change', function() {
+                autoApplyEnabled = this.checked;
+                if (applyBtn) {
+                    applyBtn.style.display = autoApplyEnabled ? 'none' : '';
+                }
+            });
+        }
+
+        // Apply button click - reload charts with new filters
+        if (applyBtn) {
+            applyBtn.addEventListener('click', function() {
+                console.log('[dashboard-preview.js] Applying filters...');
+                loadAllWidgetGraphs();
+            });
+        }
+    }
+
+    /**
+     * Initialize datepickers in the filter container
+     */
+    function initDatepickers(container) {
+        if (typeof jQuery === 'undefined' || typeof jQuery.fn.daterangepicker === 'undefined') {
+            console.warn('[dashboard-preview.js] daterangepicker not available');
+            return;
+        }
+
+        var datepickers = container.querySelectorAll('.dgc-datepicker');
+        datepickers.forEach(function(input) {
+            var pickerType = input.dataset.pickerType || 'single';
+            var isRange = pickerType === 'range' || pickerType === 'main';
+
+            // Get company start date if available
+            var companyStartDate = window.dgcCompanyStartDate || null;
+            var minDate = companyStartDate ? moment(companyStartDate) : moment().subtract(10, 'years');
+
+            var config = {
+                autoUpdateInput: false,
+                locale: {
+                    cancelLabel: 'Clear',
+                    format: 'YYYY-MM-DD'
+                },
+                minDate: minDate,
+                maxDate: moment()
+            };
+
+            if (isRange) {
+                config.singleDatePicker = false;
+                config.showDropdowns = true;
+                config.linkedCalendars = false;
+                config.alwaysShowCalendars = true;
+
+                // Add preset ranges for main datepicker
+                if (pickerType === 'main') {
+                    config.ranges = {
+                        'Today': [moment(), moment()],
+                        'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                        'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                        'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                        'This Month': [moment().startOf('month'), moment().endOf('month')],
+                        'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+                        'This Year': [moment().startOf('year'), moment()],
+                        'Last Year': [moment().subtract(1, 'year').startOf('year'), moment().subtract(1, 'year').endOf('year')]
+                    };
+
+                    // Add 'All Time' if company start date is set
+                    if (companyStartDate) {
+                        config.ranges['All Time'] = [moment(companyStartDate), moment()];
+                    }
+                }
+            } else {
+                config.singleDatePicker = true;
+            }
+
+            jQuery(input).daterangepicker(config);
+
+            // Handle apply event
+            jQuery(input).on('apply.daterangepicker', function(ev, picker) {
+                if (isRange) {
+                    this.value = picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD');
+                } else {
+                    this.value = picker.startDate.format('YYYY-MM-DD');
+                }
+            });
+
+            // Handle cancel event (clear)
+            jQuery(input).on('cancel.daterangepicker', function() {
+                this.value = '';
+            });
+        });
+
+        console.log('[dashboard-preview.js] Initialized ' + datepickers.length + ' datepicker(s)');
     }
 
     /**

@@ -30,7 +30,7 @@ echo DGCHelper::renderPageHeader([
 ]);
 
 // Dashboard filter bar - filters shown in array order
-$dashboardFilters = array('company_list', 'outlet_list', 'main_datepicker');
+$dashboardFilters = array('company_list', 'outlet_list', 'global_datepicker');
 echo DGCHelper::renderDashboardFilterBar($dashboardFilters);
 ?>
 

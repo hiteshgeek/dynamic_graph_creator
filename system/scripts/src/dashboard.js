@@ -1402,6 +1402,12 @@ class DashboardBuilder {
         widths[areaIndex] < GRID_CONFIG.MAX_COL_FR_UNITS && hasRoomToGrowResize;
       const hasResizeOptions = canShrinkCol || canExpandCol;
 
+      // Calculate row height resize options for non-nested areas
+      // Non-nested areas can have a rowHeight property (defaults to 1fr)
+      const areaRowHeight = parseInt(area.rowHeight) || 1;
+      const canExpandAreaRow = areaRowHeight < GRID_CONFIG.MAX_ROW_FR_UNITS;
+      const canShrinkAreaRow = areaRowHeight > GRID_CONFIG.MIN_FR_UNITS;
+
       // Calculate add column options
       // Can add if: under max columns AND (there's room to grow OR ANY column can give 1fr)
       // Max total is always MAX_COLUMNS (4fr) regardless of column count
@@ -1442,6 +1448,9 @@ class DashboardBuilder {
                 </button>
                 <!-- Center: Resize buttons + Delete -->
                 <div class="center-controls">
+                    <button class="center-btn row-resize resize-area-row-up-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Expand height" ${!canExpandAreaRow ? "disabled" : ""}>
+                        <i class="fas fa-caret-up"></i>
+                    </button>
                     <div class="center-row">
                         <button class="center-btn col-resize resize-col-left-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Shrink column" ${!canShrinkCol ? "disabled" : ""}>
                             <i class="fas fa-caret-left"></i>
@@ -1453,6 +1462,9 @@ class DashboardBuilder {
                             <i class="fas fa-caret-right"></i>
                         </button>
                     </div>
+                    <button class="center-btn row-resize resize-area-row-down-btn" data-section-id="${section.sid}" data-area-index="${areaIndex}" data-bs-toggle="tooltip" data-bs-title="Shrink height" ${!canShrinkAreaRow ? "disabled" : ""}>
+                        <i class="fas fa-caret-down"></i>
+                    </button>
                 </div>
             </div>`;
 
@@ -1471,7 +1483,11 @@ class DashboardBuilder {
         );
       } else {
         // Regular single area with controls inside
-        areasHtml += `<div class="dashboard-area" data-area-id="${area.aid}" data-area-index="${areaIndex}">
+        // Apply row height as min-height (default 150px per fr unit)
+        const rowHeightFr = parseInt(area.rowHeight) || 1;
+        const minHeightStyle = rowHeightFr > 1 ? `style="min-height: ${rowHeightFr * 150}px;"` : "";
+
+        areasHtml += `<div class="dashboard-area" data-area-id="${area.aid}" data-area-index="${areaIndex}" ${minHeightStyle}>
                     ${areaControls}
                     ${
                       area.content && area.content.type === "empty"
@@ -2317,6 +2333,12 @@ class DashboardBuilder {
 
     // Remove section handlers - use event delegation on container instead of document
     this.container.addEventListener("click", (e) => {
+      // Prevent clicks on area-controls-overlay from triggering empty cell action (widget selector)
+      // This overlay is only visible in tweak mode, so clicks on it should not open the modal
+      if (e.target.closest(".area-controls-overlay")) {
+        e.stopPropagation();
+      }
+
       if (e.target.closest(".remove-btn")) {
         const btn = e.target.closest(".remove-btn");
         const sectionId = btn.dataset.sectionId;
@@ -2423,6 +2445,24 @@ class DashboardBuilder {
         const areaIndex = parseInt(btn.dataset.areaIndex);
         const rowIndex = parseInt(btn.dataset.rowIndex);
         this.resizeRow(sectionId, areaIndex, rowIndex, "decrease");
+      }
+
+      // Resize area row height - increase (for non-nested areas)
+      if (e.target.closest(".resize-area-row-up-btn")) {
+        const btn = e.target.closest(".resize-area-row-up-btn");
+        if (btn.hasAttribute("disabled")) return;
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        this.resizeAreaRow(sectionId, areaIndex, "increase");
+      }
+
+      // Resize area row height - decrease (for non-nested areas)
+      if (e.target.closest(".resize-area-row-down-btn")) {
+        const btn = e.target.closest(".resize-area-row-down-btn");
+        if (btn.hasAttribute("disabled")) return;
+        const sectionId = btn.dataset.sectionId;
+        const areaIndex = parseInt(btn.dataset.areaIndex);
+        this.resizeAreaRow(sectionId, areaIndex, "decrease");
       }
 
       // Widget edit button - open widget selector to change the widget
@@ -2638,6 +2678,54 @@ class DashboardBuilder {
     area.subRows.forEach((row, i) => {
       row.height = `${heights[i]}fr`;
     });
+
+    this.currentDashboard.structure = JSON.stringify(structure);
+    this.renderDashboard();
+    await this.saveDashboard(false);
+  }
+
+  /**
+   * Resize a non-nested area's row height
+   * @param {string} sectionId - Section ID
+   * @param {number} areaIndex - Area index within section
+   * @param {string} direction - 'increase' or 'decrease'
+   */
+  async resizeAreaRow(sectionId, areaIndex, direction) {
+    if (this.isReadOnly) return;
+
+    const structure = JSON.parse(this.currentDashboard.structure);
+    const section = structure.sections.find((s) => s.sid === sectionId);
+
+    if (!section) return;
+
+    const area = section.areas[areaIndex];
+
+    // Only for non-nested areas
+    if (area.hasSubRows && area.subRows && area.subRows.length > 0) return;
+
+    // Get current row height (default to 1fr)
+    let currentHeight = parseInt(area.rowHeight) || 1;
+
+    let changed = false;
+    if (direction === "increase") {
+      if (currentHeight < GRID_CONFIG.MAX_ROW_FR_UNITS) {
+        currentHeight++;
+        changed = true;
+      }
+    } else {
+      if (currentHeight > GRID_CONFIG.MIN_FR_UNITS) {
+        currentHeight--;
+        changed = true;
+      }
+    }
+
+    if (!changed) {
+      Toast.warning("Height at minimum/maximum size");
+      return;
+    }
+
+    // Update area's row height
+    area.rowHeight = `${currentHeight}fr`;
 
     this.currentDashboard.structure = JSON.stringify(structure);
     this.renderDashboard();
