@@ -24,7 +24,7 @@ echo DGCHelper::renderPageHeader([
 ?>
 
 <div class="container container-full">
-    <div id="graph-creator" class="graph-creator graph-creator-single-sidebar" data-graph-id="<?php echo $graph ? $graph->getId() : ''; ?>" data-graph-config="<?php echo $graph ? htmlspecialchars($graph->getConfig()) : ''; ?>">
+    <div id="graph-creator" class="graph-creator graph-creator-single-sidebar" data-graph-id="<?php echo $graph ? $graph->getId() : ''; ?>" data-graph-config="<?php echo $graph ? htmlspecialchars($graph->getConfig()) : ''; ?>" data-mandatory-filters="<?php echo htmlspecialchars(json_encode(isset($mandatoryFilterKeys) ? $mandatoryFilterKeys : array())); ?>" data-widget-type="graph">
 
         <!-- Left Sidebar - Graph Info, Chart Type, Config & Filters -->
         <div class="graph-sidebar graph-sidebar-left" id="graph-sidebar-left">
@@ -149,14 +149,24 @@ echo DGCHelper::renderPageHeader([
                                             $filterKeyDisplay = '::' . $filterKeyClean;
                                             $filterType = $filter['filter_type'];
                                             $isDateRangeSelector = in_array($filterType, array('date_range', 'main_datepicker'));
+                                            $isMandatory = isset($mandatoryFilterKeys) && in_array($filterKeyClean, $mandatoryFilterKeys);
                                             ?>
-                                            <div class="filter-selector-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>">
-                                                <div class="form-check">
-                                                    <input class="form-check-input filter-selector-checkbox" type="checkbox" value="<?php echo htmlspecialchars($filterKeyClean); ?>" id="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
-                                                    <label class="form-check-label" for="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                            <div class="filter-selector-item<?php echo $isMandatory ? ' mandatory' : ''; ?>" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" data-mandatory="<?php echo $isMandatory ? '1' : '0'; ?>">
+                                                <?php if ($isMandatory): ?>
+                                                    <input type="hidden" class="filter-selector-checkbox" value="<?php echo htmlspecialchars($filterKeyClean); ?>" data-checked="true">
+                                                    <div class="mandatory-filter-display">
+                                                        <i class="fas fa-lock mandatory-icon"></i>
                                                         <span class="filter-selector-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
-                                                    </label>
-                                                </div>
+                                                        <span class="mandatory-badge">Mandatory</span>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input filter-selector-checkbox" type="checkbox" value="<?php echo htmlspecialchars($filterKeyClean); ?>" id="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                        <label class="form-check-label" for="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                            <span class="filter-selector-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
+                                                        </label>
+                                                    </div>
+                                                <?php endif; ?>
                                                 <div class="filter-selector-keys">
                                                     <?php if ($isDateRangeSelector): ?>
                                                         <code class="placeholder-key">::<?php echo htmlspecialchars($filterKeyClean); ?>_from</code>
@@ -195,20 +205,24 @@ echo DGCHelper::renderPageHeader([
                                             $filterConfig = isset($filter['filter_config']) ? $filter['filter_config'] : '';
                                             $filterConfigArr = $filterConfig ? json_decode($filterConfig, true) : array();
                                             $isInline = isset($filterConfigArr['inline']) && $filterConfigArr['inline'];
+                                            $isMandatoryFilter = isset($mandatoryFilterKeys) && in_array($filterKeyClean, $mandatoryFilterKeys);
                                             ?>
                                             <?php
                                             $isDateRange = in_array($filterType, array('date_range', 'main_datepicker'));
                                             ?>
-                                            <div class="filter-input-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" data-filter-type="<?php echo htmlspecialchars($filterType); ?>" style="display: none;">
+                                            <div class="filter-input-item<?php echo $isMandatoryFilter ? ' mandatory' : ''; ?>" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" data-filter-type="<?php echo htmlspecialchars($filterType); ?>" data-mandatory="<?php echo $isMandatoryFilter ? '1' : '0'; ?>" style="display: none;">
                                                 <div class="filter-input-header">
                                                     <label class="filter-input-label"><?php echo htmlspecialchars($filter['filter_label']); ?></label>
+                                                    <?php if ($isMandatoryFilter): ?>
+                                                        <span class="mandatory-badge">Mandatory</span>
+                                                    <?php endif; ?>
                                                 </div>
                                                 <div class="filter-placeholders">
                                                     <?php if ($isDateRange): ?>
-                                                        <code class="placeholder-key" title="Start date - Use in query">::<?php echo htmlspecialchars($filterKeyClean); ?>_from</code>
-                                                        <code class="placeholder-key" title="End date - Use in query">::<?php echo htmlspecialchars($filterKeyClean); ?>_to</code>
+                                                        <code class="placeholder-key">::<?php echo htmlspecialchars($filterKeyClean); ?>_from</code>
+                                                        <code class="placeholder-key">::<?php echo htmlspecialchars($filterKeyClean); ?>_to</code>
                                                     <?php else: ?>
-                                                        <code class="placeholder-key" title="Use in query"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
+                                                        <code class="placeholder-key"><?php echo htmlspecialchars($filterKeyDisplay); ?></code>
                                                     <?php endif; ?>
                                                 </div>
 
@@ -366,7 +380,7 @@ echo DGCHelper::renderPageHeader([
                     <div class="tab-content dgc-tab-content">
                         <!-- SQL Query Tab -->
                         <div class="tab-pane fade show active" id="sql-query-pane" role="tabpanel">
-                            <div class="query-builder">
+                            <div class="query-builder" data-mandatory-filters="<?php echo htmlspecialchars(json_encode(isset($mandatoryFilters) ? $mandatoryFilters : array())); ?>">
                                 <textarea class="query-editor" placeholder="SELECT category, SUM(amount) as total FROM sales WHERE date >= :date_from GROUP BY category"><?php echo $graph ? htmlspecialchars($graph->getQuery()) : ''; ?></textarea>
                                 <!-- Copy, Format, Test buttons are generated by CodeMirrorEditor -->
                                 <div class="query-test-result" style="display: none;"></div>

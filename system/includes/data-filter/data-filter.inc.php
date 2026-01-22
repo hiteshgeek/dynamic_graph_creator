@@ -106,6 +106,7 @@ function showDataFilterForm($filterId = null)
     $tpl->allFilters = $allFilters;
     $tpl->totalFilters = $totalFilters;
     $tpl->systemPlaceholders = SystemPlaceholderManager::getAllAsArray();
+    $tpl->widgetTypes = WidgetTypeManager::getAllAsArray();
     $theme->setContent('full_main', $tpl->parse());
 }
 
@@ -158,6 +159,7 @@ function saveDataFilter($data)
     $filter->setFilterConfig(isset($data['filter_config']) ? $data['filter_config'] : '');
     $filter->setDefaultValue(isset($data['default_value']) ? $data['default_value'] : '');
     $filter->setIsRequired(isset($data['is_required']) ? intval($data['is_required']) : 0);
+    $filter->setIsSystem(isset($data['is_system']) ? intval($data['is_system']) : 0);
 
     if ($filterId) {
         if (!$filter->update()) {
@@ -168,6 +170,16 @@ function saveDataFilter($data)
             Utility::ajaxResponseFalse('Failed to create data filter');
         }
     }
+
+    // Save mandatory widget types
+    $mandatoryWidgetTypes = isset($data['mandatory_widget_types']) ? $data['mandatory_widget_types'] : array();
+    if (is_string($mandatoryWidgetTypes)) {
+        $mandatoryWidgetTypes = json_decode($mandatoryWidgetTypes, true);
+        if (!is_array($mandatoryWidgetTypes)) {
+            $mandatoryWidgetTypes = array();
+        }
+    }
+    FilterWidgetTypeMandatoryManager::setMandatoryForFilter($filter->getId(), $mandatoryWidgetTypes);
 
     Utility::ajaxResponseTrue('Data filter saved successfully', array('id' => $filter->getId()));
 }

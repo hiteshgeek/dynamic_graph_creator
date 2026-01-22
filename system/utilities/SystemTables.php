@@ -194,4 +194,10 @@ class SystemTables
 
       // Graph-Widget category mapping table
       const DB_TBL_GRAPH_WIDGET_CATEGORY_MAPPING = "graph_widget_category_mapping";
+
+      // Widget type table (graph, link, table, list, counter)
+      const DB_TBL_WIDGET_TYPE = "widget_type";
+
+      // Filter-Widget type mandatory mapping table
+      const DB_TBL_FILTER_WIDGET_TYPE_MANDATORY = "filter_widget_type_mandatory";
 }

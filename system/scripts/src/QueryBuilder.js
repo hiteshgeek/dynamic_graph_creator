@@ -75,6 +75,59 @@ export default class QueryBuilder {
                 'Cmd-Enter': () => this.testQuery()
             });
         }
+
+        // Render mandatory filters info after the hint
+        this.renderMandatoryFiltersInfo();
+    }
+
+    /**
+     * Render mandatory filters info section after the hint
+     */
+    renderMandatoryFiltersInfo() {
+        // Get mandatory filters from data attribute
+        const mandatoryFiltersData = this.container.dataset.mandatoryFilters;
+        if (!mandatoryFiltersData) return;
+
+        let mandatoryFilters;
+        try {
+            mandatoryFilters = JSON.parse(mandatoryFiltersData);
+        } catch (e) {
+            return;
+        }
+
+        if (!mandatoryFilters || mandatoryFilters.length === 0) return;
+
+        // Find the wrapper where hint was appended
+        const wrapper = this.codeEditor?.wrapper;
+        if (!wrapper) return;
+
+        // Build the mandatory filters HTML (inline style matching query-hint)
+        const filtersHtml = mandatoryFilters.map(filter => {
+            const key = filter.filter_key.replace(/^:+/, '');
+            return `<span class="mandatory-filter-item"><span class="mandatory-filter-label">${filter.filter_label}</span> <code class="mandatory-placeholder copyable" data-copy="::${key}">::${key}</code></span>`;
+        }).join('');
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'mandatory-filters-info';
+        infoDiv.innerHTML = `<span class="mandatory-filters-header"><i class="fas fa-lock"></i>Mandatory:</span> <span class="mandatory-filters-desc">Following filters must be included in query:</span> <span class="mandatory-filters-list">${filtersHtml}</span>`;
+
+        wrapper.appendChild(infoDiv);
+
+        // Add click-to-copy for mandatory placeholders
+        infoDiv.querySelectorAll('.mandatory-placeholder.copyable').forEach(el => {
+            el.addEventListener('click', () => {
+                const text = el.dataset.copy || el.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalText = el.textContent;
+                    el.textContent = 'Copied!';
+                    el.classList.add('copied');
+                    setTimeout(() => {
+                        el.textContent = originalText;
+                        el.classList.remove('copied');
+                    }, 1000);
+                });
+            });
+        });
     }
 
     /**
@@ -191,50 +244,34 @@ export default class QueryBuilder {
             // Show the Test Query tab
             this.testQueryTabItem.style.display = '';
 
-            // Build test query content with CodeMirror
-            const queryHtml = `
-                <div class="debug-query-wrapper">
-                    <button type="button" class="btn btn-sm btn-outline-secondary copy-debug-query-btn" title="Copy SQL">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                    <textarea class="query-debug-textarea" style="display:none;">${this.escapeHtml(debugQuery)}</textarea>
-                </div>
-            `;
+            // Clear previous content and create textarea for CodeMirrorEditor
+            this.testQueryContent.innerHTML = `<textarea class="query-debug-textarea">${this.escapeHtml(debugQuery)}</textarea>`;
 
-            this.testQueryContent.innerHTML = queryHtml;
+            // Destroy previous debug editor if exists
+            if (this.debugCodeEditor) {
+                this.debugCodeEditor.destroy();
+            }
 
-            // Initialize CodeMirror for debug query display
-            if (typeof CodeMirror !== 'undefined') {
-                const debugTextarea = this.testQueryContent.querySelector('.query-debug-textarea');
-                if (debugTextarea) {
-                    this.debugEditor = CodeMirror.fromTextArea(debugTextarea, {
-                        mode: 'text/x-sql',
-                        theme: 'default',
-                        lineNumbers: true,
-                        lineWrapping: true,
-                        readOnly: true
-                    });
-                    this.debugEditor.setSize(null, 'auto');
+            // Use shared CodeMirrorEditor for consistent styling (same as SQL Query)
+            const debugTextarea = this.testQueryContent.querySelector('.query-debug-textarea');
+            if (debugTextarea) {
+                this.debugCodeEditor = new CodeMirrorEditor(debugTextarea, {
+                    copyBtn: true,
+                    formatBtn: false,
+                    testBtn: false,
+                    readOnly: true,
+                    minHeight: 100
+                });
 
-                    // Refresh CodeMirror when tab becomes visible
-                    if (this.testQueryTab) {
-                        this.testQueryTab.addEventListener('shown.bs.tab', () => {
-                            if (this.debugEditor) {
-                                this.debugEditor.refresh();
-                            }
-                        });
-                    }
-                }
+                // Keep reference to CodeMirror instance
+                this.debugEditor = this.debugCodeEditor.editor;
 
-                // Bind copy button for debug query
-                const copyDebugBtn = this.testQueryContent.querySelector('.copy-debug-query-btn');
-                if (copyDebugBtn) {
-                    copyDebugBtn.addEventListener('click', () => {
-                        navigator.clipboard.writeText(debugQuery).then(() => {
-                            this.showDebugCopyFeedback(copyDebugBtn, 'Copied!', true);
-                        }).catch(() => {
-                            this.showDebugCopyFeedback(copyDebugBtn, 'Copied!', false);
-                        });
+                // Refresh CodeMirror when tab becomes visible
+                if (this.testQueryTab) {
+                    this.testQueryTab.addEventListener('shown.bs.tab', () => {
+                        if (this.debugCodeEditor) {
+                            this.debugCodeEditor.refresh();
+                        }
                     });
                 }
             }
@@ -270,31 +307,6 @@ export default class QueryBuilder {
         } else if (this.sampleDataCol) {
             this.sampleDataCol.style.display = 'none';
         }
-    }
-
-    /**
-     * Show animated copy feedback for debug query button
-     */
-    showDebugCopyFeedback(button, message, success) {
-        if (!button) return;
-
-        // Remove existing feedback
-        const existing = button.querySelector('.copy-feedback');
-        if (existing) existing.remove();
-
-        // Create feedback element
-        const feedback = document.createElement('span');
-        feedback.className = `copy-feedback ${success ? 'success' : 'error'}`;
-        feedback.textContent = message;
-        button.style.position = 'relative';
-        button.appendChild(feedback);
-
-        // Animate and remove
-        setTimeout(() => feedback.classList.add('show'), 10);
-        setTimeout(() => {
-            feedback.classList.remove('show');
-            setTimeout(() => feedback.remove(), 200);
-        }, 1500);
     }
 
     /**

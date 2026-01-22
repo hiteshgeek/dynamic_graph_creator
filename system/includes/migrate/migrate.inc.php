@@ -34,6 +34,8 @@ function getDgcTableConstants()
         'DB_TBL_SYSTEM_PLACEHOLDER' => 'system_placeholder',
         'DB_TBL_WIDGET_CATEGORY' => 'widget_category',
         'DB_TBL_GRAPH_WIDGET_CATEGORY_MAPPING' => 'graph_widget_category_mapping',
+        'DB_TBL_WIDGET_TYPE' => 'widget_type',
+        'DB_TBL_FILTER_WIDGET_TYPE_MANDATORY' => 'filter_widget_type_mandatory',
     ];
 }
 
@@ -674,7 +676,7 @@ function getMigrationSteps()
     return [
         1 => [
             'title' => 'Copy PHP Classes',
-            'description' => 'Copies 16 PHP class files to handle graphs, data filters, dashboards, templates, system placeholders, widget categories, and UI components.',
+            'description' => 'Copies PHP class files to handle graphs, data filters, dashboards, templates, system placeholders, widget categories/types, and UI components.',
             'files' => [
                 'system/classes/DGCHelper.php',
                 'system/classes/Graph.php',
@@ -692,6 +694,9 @@ function getMigrationSteps()
                 'system/classes/WidgetCategoryManager.php',
                 'system/classes/GraphWidgetCategoryMapping.php',
                 'system/classes/GraphWidgetCategoryMappingManager.php',
+                'system/classes/WidgetType.php',
+                'system/classes/WidgetTypeManager.php',
+                'system/classes/FilterWidgetTypeMandatoryManager.php',
             ],
             'type' => 'copy'
         ],

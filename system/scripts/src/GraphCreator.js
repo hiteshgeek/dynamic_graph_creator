@@ -11,6 +11,7 @@ import DataFilterManager from "./DataFilterManager.js";
 import ConfigPanel from "./ConfigPanel.js";
 import PlaceholderSettings from "./PlaceholderSettings.js";
 import DataFilterUtils from "./DataFilterUtils.js";
+import MandatoryFilterValidator from "./MandatoryFilterValidator.js";
 
 // Use autosize from CDN (global)
 const autosize = window.autosize;
@@ -33,6 +34,7 @@ export default class GraphCreator {
     this.filterManager = null;
     this.configPanel = null;
     this.placeholderSettings = null;
+    this.mandatoryFilterValidator = null;
 
     // State
     this.columns = [];
@@ -52,6 +54,7 @@ export default class GraphCreator {
    * Initialize all components
    */
   init() {
+    this.initMandatoryFilterValidator();
     this.initPreview();
     this.initExporter();
     this.initQueryBuilder();
@@ -92,6 +95,13 @@ export default class GraphCreator {
 
     // Initialize mini chart preview (shows when main chart scrolls out of view)
     this.initMiniPreview();
+  }
+
+  /**
+   * Initialize mandatory filter validator
+   */
+  initMandatoryFilterValidator() {
+    this.mandatoryFilterValidator = new MandatoryFilterValidator(this.container);
   }
 
   /**
@@ -1087,18 +1097,36 @@ export default class GraphCreator {
     // Track selected filters
     this.selectedFilters = [];
 
+    // Get mandatory filter keys from validator
+    const mandatoryKeys = this.mandatoryFilterValidator
+      ? this.mandatoryFilterValidator.getMandatoryKeys()
+      : [];
+
     // Storage key for this graph's selected filters
     const storageKey = this.graphId ? `graphFilters_${this.graphId}` : null;
+
+    // Auto-select mandatory filters first (they're already checked and disabled in HTML)
+    mandatoryKeys.forEach((key) => {
+      if (!this.selectedFilters.includes(key)) {
+        this.selectedFilters.push(key);
+      }
+    });
 
     // Load saved filters from localStorage
     if (storageKey) {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         try {
-          this.selectedFilters = JSON.parse(saved);
-          // Check the saved checkboxes
+          const savedFilters = JSON.parse(saved);
+          // Add saved filters (but don't remove mandatory ones)
+          savedFilters.forEach((key) => {
+            if (!this.selectedFilters.includes(key)) {
+              this.selectedFilters.push(key);
+            }
+          });
+          // Check the saved checkboxes (non-mandatory ones)
           checkboxes.forEach((cb) => {
-            if (this.selectedFilters.includes(cb.value)) {
+            if (this.selectedFilters.includes(cb.value) && !cb.disabled) {
               cb.checked = true;
             }
           });
@@ -1113,20 +1141,45 @@ export default class GraphCreator {
         } catch (e) {
           // Invalid JSON, ignore
         }
+      } else if (mandatoryKeys.length > 0) {
+        // No saved filters but we have mandatory ones - show them
+        if (countDisplay) {
+          countDisplay.textContent = `${this.selectedFilters.length} selected`;
+        }
+        this.applySelectedFilters(selectorView, activeView);
       }
+    } else if (mandatoryKeys.length > 0) {
+      // New graph with mandatory filters - auto-apply them
+      if (countDisplay) {
+        countDisplay.textContent = `${this.selectedFilters.length} selected`;
+      }
+      this.applySelectedFilters(selectorView, activeView);
     }
 
     // Helper function to update selection state
     const updateSelectionState = () => {
-      const selected = Array.from(checkboxes).filter((cb) => cb.checked);
-      this.selectedFilters = selected.map((cb) => cb.value);
+      // Get checked checkboxes (non-mandatory filters)
+      const checkedBoxes = Array.from(checkboxes).filter(
+        (cb) => cb.type === "checkbox" && cb.checked,
+      );
+      this.selectedFilters = checkedBoxes.map((cb) => cb.value);
+
+      // Add mandatory filters (they use hidden inputs with data-checked)
+      const mandatoryInputs = this.container.querySelectorAll(
+        '.filter-selector-checkbox[data-checked="true"]',
+      );
+      mandatoryInputs.forEach((input) => {
+        if (!this.selectedFilters.includes(input.value)) {
+          this.selectedFilters.push(input.value);
+        }
+      });
 
       // Update count display
       if (countDisplay) {
         countDisplay.textContent = `${this.selectedFilters.length} selected`;
       }
 
-      // Enable/disable use button
+      // Enable/disable use button (always enabled if mandatory filters exist)
       useBtn.disabled = this.selectedFilters.length === 0;
     };
 
@@ -1144,8 +1197,15 @@ export default class GraphCreator {
         ) {
           return;
         }
+
+        // Don't toggle mandatory filters
+        if (item.dataset.mandatory === "1") {
+          Toast.info("This filter is mandatory and cannot be removed");
+          return;
+        }
+
         const checkbox = item.querySelector(".filter-selector-checkbox");
-        if (checkbox) {
+        if (checkbox && !checkbox.disabled) {
           checkbox.checked = !checkbox.checked;
           updateSelectionState();
         }
@@ -1163,9 +1223,12 @@ export default class GraphCreator {
     useBtn.addEventListener("click", () => {
       if (this.selectedFilters.length === 0) return;
 
-      // Save to localStorage
+      // Save to localStorage (exclude mandatory filters from storage as they're auto-selected)
       if (storageKey) {
-        localStorage.setItem(storageKey, JSON.stringify(this.selectedFilters));
+        const nonMandatoryFilters = this.selectedFilters.filter(
+          (key) => !mandatoryKeys.includes(key),
+        );
+        localStorage.setItem(storageKey, JSON.stringify(nonMandatoryFilters));
       }
 
       this.applySelectedFilters(selectorView, activeView);
@@ -1183,6 +1246,41 @@ export default class GraphCreator {
         useBtn.disabled = selected.length === 0;
       });
     }
+
+    // Copy filter placeholder to clipboard on click (selector view)
+    const selectorPlaceholders = selectorView.querySelectorAll(
+      ".filter-selector-keys .placeholder-key",
+    );
+    selectorPlaceholders.forEach((placeholder) => {
+      placeholder.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const text = placeholder.textContent;
+        const originalText = text;
+
+        const showCopiedFeedback = () => {
+          placeholder.textContent = "Copied!";
+          placeholder.classList.add("copied");
+          setTimeout(() => {
+            placeholder.textContent = originalText;
+            placeholder.classList.remove("copied");
+          }, 1000);
+        };
+
+        try {
+          await navigator.clipboard.writeText(text);
+          showCopiedFeedback();
+        } catch (err) {
+          // Fallback for older browsers
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          document.body.appendChild(textarea);
+          textarea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textarea);
+          showCopiedFeedback();
+        }
+      });
+    });
   }
 
   /**
@@ -1237,9 +1335,20 @@ export default class GraphCreator {
       placeholder.addEventListener("click", async (e) => {
         e.stopPropagation();
         const text = placeholder.textContent;
+        const originalText = text;
+
+        const showCopiedFeedback = () => {
+          placeholder.textContent = "Copied!";
+          placeholder.classList.add("copied");
+          setTimeout(() => {
+            placeholder.textContent = originalText;
+            placeholder.classList.remove("copied");
+          }, 1000);
+        };
+
         try {
           await navigator.clipboard.writeText(text);
-          Toast.success(`Copied "${text}" to clipboard`);
+          showCopiedFeedback();
         } catch (err) {
           // Fallback for older browsers
           const textarea = document.createElement("textarea");
@@ -1248,7 +1357,7 @@ export default class GraphCreator {
           textarea.select();
           document.execCommand("copy");
           document.body.removeChild(textarea);
-          Toast.success(`Copied "${text}" to clipboard`);
+          showCopiedFeedback();
         }
       });
     });
@@ -1535,6 +1644,18 @@ export default class GraphCreator {
     const query = this.queryBuilder ? this.queryBuilder.getQuery() : "";
     if (!query.trim()) {
       errors.push("SQL query is required");
+    }
+
+    // Validate mandatory filters are in query
+    if (this.mandatoryFilterValidator && query.trim()) {
+      const mandatoryValidation =
+        this.mandatoryFilterValidator.validateQuery(query);
+      if (!mandatoryValidation.valid) {
+        const errorMsg = this.mandatoryFilterValidator.getErrorMessage(
+          mandatoryValidation.missing,
+        );
+        errors.push(errorMsg);
+      }
     }
 
     const mapping = this.dataMapper ? this.dataMapper.getMapping() : {};

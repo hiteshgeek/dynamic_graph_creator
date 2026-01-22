@@ -129,6 +129,12 @@ function showCreator($graphId = null)
     // Get all available filters for selection
     $allFilters = DataFilterManager::getAllAsArray();
 
+    // Get mandatory filters for widget type "graph"
+    $mandatoryFilters = DataFilterManager::getMandatoryFiltersForWidgetTypeAsArray('graph');
+    $mandatoryFilterKeys = array_map(function($f) {
+        return ltrim($f['filter_key'], ':');
+    }, $mandatoryFilters);
+
     // Permission to create filters (replace with actual framework permission check)
     $canCreateFilter = true;
 
@@ -144,6 +150,8 @@ function showCreator($graphId = null)
     $tpl = new Template(SystemConfig::templatesPath() . 'graph/forms/graph-creator');
     $tpl->graph = $graph;
     $tpl->allFilters = $allFilters;
+    $tpl->mandatoryFilters = $mandatoryFilters;
+    $tpl->mandatoryFilterKeys = $mandatoryFilterKeys;
     $tpl->canCreateFilter = $canCreateFilter;
     $tpl->categories = $categories;
     $tpl->selectedCategoryIds = $selectedCategoryIds;
@@ -229,12 +237,26 @@ function saveGraph($data)
     $isUpdate = $graphId > 0;
     $userId = Session::loggedInUid();
 
+    $query = isset($data['query']) ? $data['query'] : '';
+
+    // Validate mandatory filters are in query
+    $mandatoryValidation = DataFilterManager::validateMandatoryFiltersInQuery($query, 'graph');
+    if (!$mandatoryValidation['valid']) {
+        $missingPlaceholders = array_map(function($key) {
+            return '::' . ltrim($key, ':');
+        }, $mandatoryValidation['missing']);
+        $message = count($missingPlaceholders) === 1
+            ? 'Query must include mandatory filter: ' . implode(', ', $missingPlaceholders)
+            : 'Query must include mandatory filters: ' . implode(', ', $missingPlaceholders);
+        Utility::ajaxResponseFalse($message);
+    }
+
     $graph = $isUpdate ? new Graph($graphId) : new Graph();
 
     $graph->setName(isset($data['name']) ? $data['name'] : '');
     $graph->setDescription(isset($data['description']) ? $data['description'] : '');
     $graph->setGraphType(isset($data['graph_type']) ? $data['graph_type'] : 'bar');
-    $graph->setQuery(isset($data['query']) ? $data['query'] : '');
+    $graph->setQuery($query);
 
     $config = isset($data['config']) ? $data['config'] : '{}';
     if (is_string($config)) {
@@ -358,6 +380,18 @@ function testQuery($data)
 
     if (empty($query)) {
         Utility::ajaxResponseFalse('Please enter a SQL query');
+    }
+
+    // Validate mandatory filters are in query
+    $mandatoryValidation = DataFilterManager::validateMandatoryFiltersInQuery($query, 'graph');
+    if (!$mandatoryValidation['valid']) {
+        $missingPlaceholders = array_map(function($key) {
+            return '::' . ltrim($key, ':');
+        }, $mandatoryValidation['missing']);
+        $message = count($missingPlaceholders) === 1
+            ? 'Query must include mandatory filter: ' . implode(', ', $missingPlaceholders)
+            : 'Query must include mandatory filters: ' . implode(', ', $missingPlaceholders);
+        Utility::ajaxResponseFalse($message);
     }
 
     // Validate required placeholders have values

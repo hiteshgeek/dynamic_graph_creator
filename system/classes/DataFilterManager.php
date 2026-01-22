@@ -528,4 +528,78 @@ class DataFilterManager
 
         return $missing;
     }
+
+    /**
+     * Get all mandatory filters for a widget type
+     *
+     * @param string $widgetTypeSlug Widget type slug (e.g., 'graph')
+     * @return array Array of DataFilter objects
+     */
+    public static function getMandatoryFiltersForWidgetType($widgetTypeSlug)
+    {
+        return FilterWidgetTypeMandatoryManager::getMandatoryFiltersForWidgetTypeSlug($widgetTypeSlug);
+    }
+
+    /**
+     * Get all mandatory filters for a widget type as array data
+     *
+     * @param string $widgetTypeSlug Widget type slug (e.g., 'graph')
+     * @return array Array of filter data arrays
+     */
+    public static function getMandatoryFiltersForWidgetTypeAsArray($widgetTypeSlug)
+    {
+        $filters = self::getMandatoryFiltersForWidgetType($widgetTypeSlug);
+        $result = array();
+        foreach ($filters as $filter) {
+            $result[] = $filter->toArray();
+        }
+        return $result;
+    }
+
+    /**
+     * Validate that a query contains all mandatory filter placeholders for a widget type
+     *
+     * @param string $query SQL query to validate
+     * @param string $widgetTypeSlug Widget type slug (e.g., 'graph')
+     * @return array Array with 'valid' => bool and 'missing' => array of missing filter keys
+     */
+    public static function validateMandatoryFiltersInQuery($query, $widgetTypeSlug)
+    {
+        return FilterWidgetTypeMandatoryManager::validateMandatoryFiltersInQuery($query, $widgetTypeSlug);
+    }
+
+    /**
+     * Get system filters (only editable by admin)
+     *
+     * @return array Array of DataFilter objects
+     */
+    public static function getSystemFilters()
+    {
+        $db = Rapidkart::getInstance()->getDB();
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_DATA_FILTER . " WHERE is_system = 1 AND dfsid != 3 ORDER BY filter_label";
+        $res = $db->query($sql);
+
+        $filters = array();
+        while ($row = $db->fetchAssocArray($res)) {
+            $filter = new DataFilter();
+            $filter->parse((object)$row);
+            $filters[$row['filter_key']] = $filter;
+        }
+        return $filters;
+    }
+
+    /**
+     * Check if a filter is a system filter
+     *
+     * @param int $filterId Filter ID
+     * @return bool True if system filter
+     */
+    public static function isSystemFilter($filterId)
+    {
+        $filter = self::getById($filterId);
+        if (!$filter) {
+            return false;
+        }
+        return $filter->getIsSystem() ? true : false;
+    }
 }

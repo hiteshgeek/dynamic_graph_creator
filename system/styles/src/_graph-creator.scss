@@ -1093,6 +1093,67 @@
   color: var(--dgc-text-primary);
 }
 
+// Mandatory filter badge
+.mandatory-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: white;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 10px;
+  margin-left: $spacing-sm;
+  white-space: nowrap;
+}
+
+// Mandatory filter item styling
+.filter-selector-item.mandatory {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.05);
+  cursor: default;
+
+  &:hover {
+    border-color: rgba(16, 185, 129, 0.5);
+    background: rgba(16, 185, 129, 0.08);
+  }
+}
+
+// Mandatory filter display (replaces checkbox)
+.mandatory-filter-display {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+
+  .mandatory-icon {
+    font-size: 12px;
+    color: #10b981;
+    width: 16px;
+    text-align: center;
+  }
+
+  .filter-selector-label {
+    flex: 1;
+  }
+}
+
+.filter-input-item.mandatory {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.05);
+
+  &:hover {
+    border-color: rgba(16, 185, 129, 0.5);
+  }
+
+  .filter-input-header {
+    .mandatory-badge {
+      margin-left: auto;
+    }
+  }
+}
+
 .filter-selector-keys {
   display: flex;
   flex-direction: column;
@@ -1100,6 +1161,20 @@
   gap: $spacing-xs;
   margin-top: $spacing-xs;
   padding-left: 24px; // Align with label (checkbox width + gap)
+
+  .placeholder-key {
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &.copied {
+      background: var(--dgc-success);
+      color: white;
+    }
+  }
 }
 
 // filter-selector-key now uses code.placeholder-key class in HTML
@@ -1195,6 +1270,20 @@
   align-items: flex-start;
   gap: $spacing-xs;
   margin-bottom: $spacing-sm;
+
+  .placeholder-key {
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &.copied {
+      background: var(--dgc-success);
+      color: white;
+    }
+  }
 }
 
 .filter-input {
@@ -1901,6 +1990,69 @@
   .test-query-content {
     .debug-query-wrapper {
       position: relative;
+    }
+  }
+}
+
+// Mandatory Filters Info Panel (shown below query hint, matches query-hint style)
+.mandatory-filters-info {
+  font-size: $font-size-sm;
+  color: var(--dgc-text-secondary);
+  padding: $spacing-sm $spacing-md;
+  border-top: 1px solid var(--dgc-border-color);
+  line-height: 1.6;
+
+  .mandatory-filters-header {
+    display: inline;
+    color: #10b981;
+    font-weight: $font-weight-medium;
+
+    i {
+      margin-right: $spacing-xs;
+    }
+  }
+
+  .mandatory-filters-desc {
+    display: inline;
+  }
+
+  .mandatory-filters-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    margin-top: $spacing-sm;
+    padding-left: $spacing-md;
+  }
+
+  .mandatory-filter-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    .mandatory-placeholder {
+      font-family: $font-family-mono;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 1px 5px;
+      border-radius: 3px;
+
+      &.copyable {
+        cursor: pointer;
+        transition: all 0.15s ease;
+
+        &:hover {
+          background: rgba(16, 185, 129, 0.2);
+        }
+
+        &.copied {
+          background: #10b981;
+          color: white;
+        }
+      }
+    }
+
+    .mandatory-filter-label {
+      color: var(--dgc-text-secondary);
     }
   }
 }

@@ -122,6 +122,31 @@
   gap: $spacing-xs;
 }
 
+// Generic floating button style (used by copy button and others)
+.code-editor-btn {
+  padding: 0.25rem 0.5rem;
+  background: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
+  border-radius: $border-radius;
+  color: var(--dgc-text-secondary);
+  cursor: pointer;
+  opacity: 0.7;
+  transition:
+    opacity $transition-fast,
+    background $transition-fast,
+    color $transition-fast;
+
+  &:hover {
+    opacity: 1;
+    background: var(--dgc-bg-card);
+    color: var(--dgc-text-primary);
+  }
+
+  i {
+    font-size: 12px;
+  }
+}
+
 .code-editor-copy-btn {
   padding: 0.25rem 0.5rem;
   background: var(--dgc-bg-card);

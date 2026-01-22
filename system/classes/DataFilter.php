@@ -19,6 +19,7 @@ class DataFilter implements DatabaseObject
     private $filter_config;
     private $default_value;
     private $is_required;
+    private $is_system;
     private $dfsid;
     private $created_ts;
     private $updated_ts;
@@ -89,7 +90,8 @@ class DataFilter implements DatabaseObject
             static_options,
             filter_config,
             default_value,
-            is_required
+            is_required,
+            is_system
         ) VALUES (
             '::filter_key',
             '::filter_label',
@@ -99,7 +101,8 @@ class DataFilter implements DatabaseObject
             '::static_options',
             '::filter_config',
             '::default_value',
-            '::is_required'
+            '::is_required',
+            '::is_system'
         )";
 
         $args = array(
@@ -111,7 +114,8 @@ class DataFilter implements DatabaseObject
             '::static_options' => $this->static_options ? $this->static_options : '',
             '::filter_config' => $this->filter_config ? $this->filter_config : '',
             '::default_value' => $this->default_value ? $this->default_value : '',
-            '::is_required' => $this->is_required ? 1 : 0
+            '::is_required' => $this->is_required ? 1 : 0,
+            '::is_system' => $this->is_system ? 1 : 0
         );
 
         $res = $db->query($sql, $args);
@@ -143,7 +147,8 @@ class DataFilter implements DatabaseObject
             static_options = '::static_options',
             filter_config = '::filter_config',
             default_value = '::default_value',
-            is_required = '::is_required'
+            is_required = '::is_required',
+            is_system = '::is_system'
         WHERE dfid = '::dfid'";
 
         $args = array(
@@ -156,6 +161,7 @@ class DataFilter implements DatabaseObject
             '::filter_config' => $this->filter_config ? $this->filter_config : '',
             '::default_value' => $this->default_value ? $this->default_value : '',
             '::is_required' => $this->is_required ? 1 : 0,
+            '::is_system' => $this->is_system ? 1 : 0,
             '::dfid' => $this->dfid
         );
 
@@ -287,8 +293,50 @@ class DataFilter implements DatabaseObject
             'filter_config' => $this->filter_config,
             'default_value' => $this->default_value,
             'is_required' => $this->is_required,
-            'options' => $this->getOptions()
+            'is_system' => $this->is_system,
+            'options' => $this->getOptions(),
+            'mandatory_widget_types' => $this->getMandatoryWidgetTypeIds()
         );
+    }
+
+    /**
+     * Get widget type IDs where this filter is mandatory
+     * @return array Array of widget type IDs
+     */
+    public function getMandatoryWidgetTypeIds()
+    {
+        if (!$this->dfid) {
+            return array();
+        }
+        return FilterWidgetTypeMandatoryManager::getMandatoryWidgetTypeIdsForFilter($this->dfid);
+    }
+
+    /**
+     * Get widget types where this filter is mandatory
+     * @return array Array of WidgetType objects
+     */
+    public function getMandatoryWidgetTypes()
+    {
+        if (!$this->dfid) {
+            return array();
+        }
+        return FilterWidgetTypeMandatoryManager::getMandatoryWidgetTypesForFilter($this->dfid);
+    }
+
+    /**
+     * Check if this filter is mandatory for a specific widget type
+     * @param int|string $widgetType Widget type ID or slug
+     * @return bool
+     */
+    public function isMandatoryFor($widgetType)
+    {
+        if (!$this->dfid) {
+            return false;
+        }
+        if (is_numeric($widgetType)) {
+            return FilterWidgetTypeMandatoryManager::isMandatory($this->dfid, $widgetType);
+        }
+        return FilterWidgetTypeMandatoryManager::isMandatoryForSlug($this->dfid, $widgetType);
     }
 
     // Getters and Setters
@@ -319,6 +367,9 @@ class DataFilter implements DatabaseObject
 
     public function getIsRequired() { return $this->is_required; }
     public function setIsRequired($value) { $this->is_required = $value ? 1 : 0; }
+
+    public function getIsSystem() { return $this->is_system; }
+    public function setIsSystem($value) { $this->is_system = $value ? 1 : 0; }
 
     public function getCreatedTs() { return $this->created_ts; }
     public function getUpdatedTs() { return $this->updated_ts; }

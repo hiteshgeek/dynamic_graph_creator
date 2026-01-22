@@ -643,8 +643,11 @@ export default class DataFilterFormPage {
                     // Bind pagination events
                     this.bindQueryPagination();
 
-                    // Mark query test as passed
+                    // Mark query test as passed and show toast (only on first page)
                     this.setQueryTestPassed();
+                    if (page === 1) {
+                        Toast.success(`Query is valid - ${totalCount} row${totalCount !== 1 ? 's' : ''} returned`);
+                    }
                 } else {
                     resultDiv.className = 'query-test-result error';
                     resultDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${result.message || 'Query failed'}`;
@@ -786,6 +789,12 @@ export default class DataFilterFormPage {
             filterConfig.inline = true;
         }
 
+        // Collect mandatory widget types
+        const mandatoryWidgetTypes = [];
+        document.querySelectorAll('.mandatory-widget-type:checked').forEach(checkbox => {
+            mandatoryWidgetTypes.push(parseInt(checkbox.value));
+        });
+
         const data = {
             filter_id: document.getElementById('filter-id').value,
             filter_key: filterKey,
@@ -796,7 +805,9 @@ export default class DataFilterFormPage {
             static_options: '',
             filter_config: JSON.stringify(filterConfig),
             default_value: document.getElementById('filter-default').value,
-            is_required: document.getElementById('filter-required').checked ? 1 : 0
+            is_required: document.getElementById('filter-required').checked ? 1 : 0,
+            is_system: document.getElementById('filter-is-system')?.checked ? 1 : 0,
+            mandatory_widget_types: JSON.stringify(mandatoryWidgetTypes)
         };
 
         // Get options based on data source
@@ -817,6 +828,11 @@ export default class DataFilterFormPage {
         }
 
         Loading.show('Saving filter...');
+
+        // Debug: log what's being sent
+        console.log('Saving filter data:', data);
+        console.log('is_system checkbox:', document.getElementById('filter-is-system'));
+        console.log('mandatory checkboxes:', document.querySelectorAll('.mandatory-widget-type:checked'));
 
         Ajax.post('save_data_filter', data)
             .then(result => {
@@ -1166,6 +1182,12 @@ export default class DataFilterFormPage {
      * Get current form state for comparison
      */
     getCurrentState() {
+        // Get mandatory widget types
+        const mandatoryWidgetTypes = [];
+        document.querySelectorAll('.mandatory-widget-type:checked').forEach(checkbox => {
+            mandatoryWidgetTypes.push(parseInt(checkbox.value));
+        });
+
         return {
             filterKey: document.getElementById('filter-key')?.value || '',
             filterLabel: document.getElementById('filter-label')?.value || '',
@@ -1173,6 +1195,8 @@ export default class DataFilterFormPage {
             dataSource: document.getElementById('data-source')?.value || '',
             defaultValue: document.getElementById('filter-default')?.value || '',
             isRequired: document.getElementById('filter-required')?.checked || false,
+            isSystem: document.getElementById('filter-is-system')?.checked || false,
+            mandatoryWidgetTypes: mandatoryWidgetTypes.sort().join(','),
             isMultiple: document.getElementById('filter-multiple')?.checked || false,
             isInline: document.getElementById('filter-inline')?.checked || false,
             query: this.queryEditor ? this.queryEditor.getValue() : (document.getElementById('data-query')?.value || ''),
