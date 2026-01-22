@@ -230,6 +230,57 @@ class DGCHelper
     }
 
     /**
+     * Render the Widget Selector Modal
+     * Used in dashboard builder and template builder for selecting graphs
+     *
+     * @return string HTML for the modal
+     */
+    public static function renderWidgetSelectorModal()
+    {
+        $html = '<div id="widget-selector-modal" class="modal fade" tabindex="-1">';
+        $html .= '<div class="modal-dialog modal-lg modal-dialog-scrollable">';
+        $html .= '<div class="modal-content">';
+        $html .= '<div class="modal-header">';
+        $html .= '<div class="modal-title-wrapper">';
+        $html .= '<h5 class="modal-title">Select Widget</h5>';
+        $html .= '<span class="modal-subtitle text-muted" id="widget-count-subtitle">Loading...</span>';
+        $html .= '</div>';
+        $html .= '<button type="button" class="btn-close" data-bs-dismiss="modal"></button>';
+        $html .= '</div>';
+        $html .= '<div class="modal-body">';
+        // Category Sidebar
+        $html .= '<div class="widget-sidebar">';
+        $html .= '<div class="sidebar-header">';
+        $html .= '<span class="sidebar-title">Categories</span>';
+        $html .= '<div class="sidebar-actions">';
+        $html .= '<button type="button" class="btn btn-link btn-sm" id="select-all-categories">All</button>';
+        $html .= '<span class="text-muted">|</span>';
+        $html .= '<button type="button" class="btn btn-link btn-sm" id="clear-all-categories">None</button>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '<div class="sidebar-categories" id="widget-category-list"></div>';
+        $html .= '</div>';
+        // Main Content
+        $html .= '<div class="widget-main">';
+        $html .= '<div class="widget-search">';
+        $html .= '<div class="search-input-wrapper">';
+        $html .= '<i class="fas fa-search search-icon"></i>';
+        $html .= '<input type="text" class="form-control" id="widget-search-input" placeholder="Search widgets...">';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '<div class="widget-grid-container" id="widget-grid-container">';
+        $html .= '<div class="widget-grid" id="widget-grid"></div>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
      * Generate a UUID v4
      * Format: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
      * PHP 5.6 compatible

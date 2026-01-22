@@ -61,18 +61,45 @@
                                     <?php foreach ($area['subRows'] as $subRow): ?>
                                         <?php $rowFr = isset($subRow['height']) ? intval($subRow['height']) : 1; ?>
                                         <div class="dashboard-sub-row" data-row-id="<?php echo htmlspecialchars($subRow['rowId']); ?>" data-rows="<?php echo $rowFr ?: 1; ?>">
-                                            <?php echo DGCHelper::renderDashboardCellEmpty('', '', true); ?>
+                                            <?php
+                                            // Check if subRow has widget content
+                                            $hasSubRowWidget = isset($subRow['content']) &&
+                                                               isset($subRow['content']['type']) &&
+                                                               $subRow['content']['type'] !== 'empty' &&
+                                                               !empty($subRow['content']['widgetId']);
+                                            ?>
+                                            <?php if ($hasSubRowWidget): ?>
+                                                <?php echo DGCHelper::renderDashboardWidgetContent($subRow['content']); ?>
+                                            <?php else: ?>
+                                                <?php echo DGCHelper::renderDashboardCellEmpty('', '', true); ?>
+                                            <?php endif; ?>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
 
                             <?php else: ?>
                                 <!-- Regular single area -->
+                                <?php
+                                // Get row height for non-nested areas (default 1fr = 150px)
+                                $areaRowHeight = isset($area['rowHeight']) ? intval($area['rowHeight']) : 1;
+                                $minHeightStyle = $areaRowHeight > 1 ? "min-height: " . ($areaRowHeight * 150) . "px;" : "";
+                                ?>
                                 <div class="dashboard-area"
                                     data-area-id="<?php echo htmlspecialchars($area['aid']); ?>"
-                                    style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>;">
+                                    style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>; <?php echo $minHeightStyle; ?>">
 
-                                    <?php echo DGCHelper::renderDashboardCellEmpty('', '', true); ?>
+                                    <?php
+                                    // Check if area has widget content (non-empty with widgetId)
+                                    $hasWidget = isset($area['content']) &&
+                                                 isset($area['content']['type']) &&
+                                                 $area['content']['type'] !== 'empty' &&
+                                                 !empty($area['content']['widgetId']);
+                                    ?>
+                                    <?php if ($hasWidget): ?>
+                                        <?php echo DGCHelper::renderDashboardWidgetContent($area['content']); ?>
+                                    <?php else: ?>
+                                        <?php echo DGCHelper::renderDashboardCellEmpty('', '', true); ?>
+                                    <?php endif; ?>
                                 </div>
                             <?php endif; ?>
                         <?php endforeach; ?>

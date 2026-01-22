@@ -88,6 +88,8 @@
         </div>
     </div>
 
+    <?php echo DGCHelper::renderWidgetSelectorModal(); ?>
+
     <!-- Edit Template Details Modal -->
     <div id="edit-template-details-modal" class="modal fade" tabindex="-1">
         <div class="modal-dialog">

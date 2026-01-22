@@ -12,12 +12,14 @@ import templateModalNavigation from "./dashboard/TemplateModalNavigation.js";
 import FilterRenderer from "./FilterRenderer.js";
 import DatePickerInit from "./DatePickerInit.js";
 import { WidgetSelectorModal } from "./dashboard/WidgetSelectorModal.js";
+import { WidgetLoader } from "./dashboard/WidgetLoader.js";
 import GraphPreview from "./GraphPreview.js";
 
 // Export to window for other scripts to use
 window.DatePickerInit = DatePickerInit;
 window.FilterRenderer = FilterRenderer;
 window.GraphPreview = GraphPreview;
+window.WidgetLoader = WidgetLoader;
 
 // Use globals from common.js (Toast, Loading, Ajax, ConfirmDialog)
 const Toast = window.Toast;

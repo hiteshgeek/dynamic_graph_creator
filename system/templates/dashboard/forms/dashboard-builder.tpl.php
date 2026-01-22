@@ -139,50 +139,7 @@ if ($dashboard && $dashboard->getId() && !$tweakEnabled) {
     </div>
 </div>
 
-<!-- Widget Selector Modal -->
-<div id="widget-selector-modal" class="modal fade" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title-wrapper">
-                    <h5 class="modal-title">Select Widget</h5>
-                    <span class="modal-subtitle text-muted" id="widget-count-subtitle">Loading...</span>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Category Sidebar -->
-                <div class="widget-sidebar">
-                    <div class="sidebar-header">
-                        <span class="sidebar-title">Categories</span>
-                        <div class="sidebar-actions">
-                            <button type="button" class="btn btn-link btn-sm" id="select-all-categories">All</button>
-                            <span class="text-muted">|</span>
-                            <button type="button" class="btn btn-link btn-sm" id="clear-all-categories">None</button>
-                        </div>
-                    </div>
-                    <div class="sidebar-categories" id="widget-category-list">
-                        <!-- Categories rendered by JS -->
-                    </div>
-                </div>
-                <!-- Main Content -->
-                <div class="widget-main">
-                    <div class="widget-search">
-                        <div class="search-input-wrapper">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" class="form-control" id="widget-search-input" placeholder="Search widgets...">
-                        </div>
-                    </div>
-                    <div class="widget-grid-container" id="widget-grid-container">
-                        <div class="widget-grid" id="widget-grid">
-                            <!-- Graph cards rendered by JS -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<?php echo DGCHelper::renderWidgetSelectorModal(); ?>
 
 <?php if ($dashboard && $dashboard->getId()): ?>
     <!-- Edit Dashboard Details Modal -->

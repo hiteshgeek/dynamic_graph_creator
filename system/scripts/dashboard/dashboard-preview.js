@@ -7,6 +7,9 @@
 
     console.log('[dashboard-preview.js] Script loaded');
 
+    // Shared widget loader instance
+    var widgetLoader = null;
+
     // Wait for dependencies to be available
     function waitForDependencies(callback, maxAttempts) {
         maxAttempts = maxAttempts || 100;
@@ -17,10 +20,11 @@
             var ajaxReady = typeof window.Ajax !== 'undefined';
             var echartsReady = typeof window.echarts !== 'undefined';
             var graphPreviewReady = typeof window.GraphPreview !== 'undefined';
+            var widgetLoaderReady = typeof window.WidgetLoader !== 'undefined';
 
-            console.log('[dashboard-preview.js] Check #' + attempts + ' - Ajax:', ajaxReady, 'ECharts:', echartsReady, 'GraphPreview:', graphPreviewReady);
+            console.log('[dashboard-preview.js] Check #' + attempts + ' - Ajax:', ajaxReady, 'ECharts:', echartsReady, 'GraphPreview:', graphPreviewReady, 'WidgetLoader:', widgetLoaderReady);
 
-            if (ajaxReady && echartsReady && graphPreviewReady) {
+            if (ajaxReady && echartsReady && graphPreviewReady && widgetLoaderReady) {
                 console.log('[dashboard-preview.js] Dependencies ready');
                 callback();
             } else if (attempts < maxAttempts) {
@@ -53,7 +57,19 @@
         // Wait for dependencies then initialize widgets
         waitForDependencies(function() {
             console.log('[dashboard-preview.js] Starting widget loading...');
-            loadAllWidgetGraphs();
+
+            // Initialize shared WidgetLoader
+            widgetLoader = new window.WidgetLoader({
+                logPrefix: '[dashboard-preview.js]'
+            });
+
+            // Load widgets with current filter values
+            var previewContainer = document.getElementById('dashboard-preview');
+            if (previewContainer) {
+                var filterValues = getDashboardFilterValues();
+                widgetLoader.loadAll(previewContainer, filterValues);
+            }
+
             initDeleteButton();
             initDescriptionTruncation();
         });
@@ -131,7 +147,11 @@
         if (applyBtn) {
             applyBtn.addEventListener('click', function() {
                 console.log('[dashboard-preview.js] Applying filters...');
-                loadAllWidgetGraphs();
+                var previewContainer = document.getElementById('dashboard-preview');
+                if (previewContainer && widgetLoader) {
+                    var filterValues = getDashboardFilterValues();
+                    widgetLoader.loadAll(previewContainer, filterValues);
+                }
             });
         }
     }
@@ -392,111 +412,6 @@
         }
 
         return null;
-    }
-
-    /**
-     * Load all widget graphs on the dashboard preview
-     */
-    function loadAllWidgetGraphs() {
-        console.log('[dashboard-preview.js] loadAllWidgetGraphs called');
-
-        var graphContainers = document.querySelectorAll('.widget-graph-container[data-graph-id]');
-        console.log('[dashboard-preview.js] Found ' + graphContainers.length + ' graph containers');
-
-        if (graphContainers.length === 0) {
-            console.log('[dashboard-preview.js] No graph containers found on page');
-            return;
-        }
-
-        // Get current filter values
-        var filterValues = getDashboardFilterValues();
-        console.log('[dashboard-preview.js] Filter values:', filterValues);
-
-        // Convert NodeList to array for forEach compatibility
-        var containers = Array.prototype.slice.call(graphContainers);
-
-        containers.forEach(function(container) {
-            var graphId = parseInt(container.dataset.graphId, 10);
-            console.log('[dashboard-preview.js] Processing container with graphId:', graphId);
-
-            if (!graphId) {
-                console.log('[dashboard-preview.js] Skipping container - no valid graphId');
-                return;
-            }
-
-            // Get graph type from parent element
-            var areaContent = container.closest('.area-content');
-            var graphType = (areaContent && areaContent.dataset.graphType) ? areaContent.dataset.graphType : 'bar';
-            console.log('[dashboard-preview.js] Graph type:', graphType);
-
-            loadWidgetGraph(container, graphId, graphType, filterValues);
-        });
-    }
-
-    /**
-     * Load and render a single widget graph using GraphPreview class
-     */
-    function loadWidgetGraph(container, graphId, graphType, filters) {
-        filters = filters || {};
-        console.log('[dashboard-preview.js] Loading widget graph:', graphId, 'type:', graphType, 'filters:', filters);
-        console.log('[dashboard-preview.js] Container dimensions:', container.offsetWidth, 'x', container.offsetHeight);
-
-        window.Ajax.post('preview_graph', {
-            id: graphId,
-            filters: filters
-        })
-        .then(function(result) {
-            console.log('[dashboard-preview.js] Graph API result:', result);
-
-            if (!result.success || !result.data) {
-                console.error('[dashboard-preview.js] API returned error:', result.message);
-                container.innerHTML = '<div class="widget-graph-error"><i class="fas fa-exclamation-triangle"></i><span>' + (result.message || 'Failed to load chart') + '</span></div>';
-                return;
-            }
-
-            // Check if chartData has error
-            var chartData = result.data.chartData;
-            if (chartData && chartData.error) {
-                container.innerHTML = '<div class="widget-graph-error"><i class="fas fa-exclamation-triangle"></i><span>' + chartData.error + '</span></div>';
-                return;
-            }
-
-            // Clear loading state
-            container.innerHTML = '';
-
-            // Ensure container has dimensions before initializing chart
-            if (container.offsetWidth === 0 || container.offsetHeight === 0) {
-                container.style.minHeight = '300px';
-                container.style.minWidth = '100%';
-            }
-
-            // Use GraphPreview class for consistent rendering with builder
-            var preview = new window.GraphPreview(container);
-
-            // Set graph type from API response
-            var actualGraphType = result.data.graphType || graphType;
-            preview.setType(actualGraphType);
-
-            // Set config from graph data
-            if (result.data.config) {
-                preview.setConfig(result.data.config);
-            }
-
-            // Set mapping if available (for axis titles)
-            if (chartData && chartData.mapping) {
-                preview.setMapping(chartData.mapping);
-            }
-
-            // Set data and render
-            preview.setData(chartData);
-            preview.render();
-
-            console.log('[dashboard-preview.js] Chart rendered successfully for graph', graphId);
-        })
-        .catch(function(error) {
-            console.error('[dashboard-preview.js] Error loading widget graph:', error);
-            container.innerHTML = '<div class="widget-graph-error"><i class="fas fa-exclamation-triangle"></i><span>Failed to load chart</span></div>';
-        });
     }
 
 })();
