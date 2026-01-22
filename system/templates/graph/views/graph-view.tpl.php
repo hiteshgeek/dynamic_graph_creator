@@ -8,7 +8,7 @@
     // Navigation links to Filter and Dashboard pages (admin only)
     if (DGCHelper::hasAdminAccess()) {
         $rightContent .= '<a href="?urlq=filter" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
-        $rightContent .= '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Dashboards"><i class="fas fa-th-large"></i></a>';
+        $rightContent .= '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home"><i class="fas fa-home"></i></a>';
     }
 
     echo DGCHelper::renderPageHeader([

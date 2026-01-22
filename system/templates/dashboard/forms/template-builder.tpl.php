@@ -1,5 +1,8 @@
 
 <?php
+    // Check tweak mode from cookie (set by JS, persists across sessions)
+    $tweakEnabled = isset($_COOKIE['templateTweakEnabled']) && $_COOKIE['templateTweakEnabled'] === 'true';
+
     $templateName = $template->getName();
     $templateName = $templateName ? $templateName : 'Template';
 
@@ -15,7 +18,8 @@
     }
     $rightContent .= '<a href="?urlq=dashboard/template/preview/' . $template->getId() . '" class="btn btn-icon btn-outline-primary btn-view-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Mode"><i class="fas fa-eye"></i></a>';
     if (!$template->getIsSystem()) {
-        $rightContent .= '<div class="form-check form-switch text-switch text-switch-purple"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"><div class="text-switch-track"><span class="text-switch-knob"></span><span class="text-switch-label label-text">Tweak</span></div></div>';
+        $checkedAttr = $tweakEnabled ? ' checked' : '';
+        $rightContent .= '<div class="form-check form-switch text-switch text-switch-purple"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"' . $checkedAttr . '><div class="text-switch-track"><span class="text-switch-knob"></span><span class="text-switch-label label-text">Tweak</span></div></div>';
     }
 
     echo DGCHelper::renderPageHeader([
@@ -25,10 +29,16 @@
         'badges' => $badges,
         'rightContent' => $rightContent
     ]);
+
+    // Determine container class based on tweak state (only for non-system templates)
+    $containerClass = 'dashboard-builder';
+    if (!$template->getIsSystem() && !$tweakEnabled) {
+        $containerClass .= ' layout-edit-disabled';
+    }
     ?>
 
     <div id="dashboard-builder"
-        class="dashboard-builder"
+        class="<?php echo $containerClass; ?>"
         data-mode="template"
         data-template-id="<?php echo $template->getId(); ?>"
         data-is-system="<?php echo $template->getIsSystem() ? '1' : '0'; ?>">
@@ -37,7 +47,7 @@
             <div class="builder-main">
                 <div class="grid-editor">
                     <div class="dashboard-sections">
-                        <!-- Loader will be added dynamically by JavaScript -->
+                        <?php echo DGCHelper::renderDashboardSkeleton(2); ?>
                     </div>
                 </div>
             </div>

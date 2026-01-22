@@ -692,7 +692,13 @@ class DashboardBuilder {
       return;
     }
 
-    Loading.show("Loading dashboard...");
+    // Check if skeleton loader is present (skip overlay if so for smoother UX)
+    const skeleton = this.container.querySelector(".dashboard-skeleton");
+    const useSkeleton = skeleton !== null;
+
+    if (!useSkeleton) {
+      Loading.show("Loading dashboard...");
+    }
 
     try {
       const result = await Ajax.post("get_dashboard", { id: this.dashboardId });
@@ -706,7 +712,9 @@ class DashboardBuilder {
     } catch (error) {
       Toast.error("Failed to load dashboard");
     } finally {
-      Loading.hide();
+      if (!useSkeleton) {
+        Loading.hide();
+      }
     }
   }
 

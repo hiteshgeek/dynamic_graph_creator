@@ -3,6 +3,9 @@
 // Set company start date for datepicker presets
 echo DGCHelper::renderCompanyStartDateScript();
 
+// Check tweak mode from cookie (set by JS, persists across sessions)
+$tweakEnabled = isset($_COOKIE['dashboardTweakEnabled']) && $_COOKIE['dashboardTweakEnabled'] === 'true';
+
 $rightContent = '';
 
 // Add admin links (Graphs, Filters) if user has permission
@@ -14,7 +17,8 @@ if (DGCHelper::hasAdminAccess()) {
 if ($dashboard && $dashboard->getId()) {
     $rightContent .= '<div class="save-indicator saved" style="display: flex;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
     $rightContent .= '<a href="?urlq=dashboard/preview/' . $dashboard->getId() . '" class="btn btn-icon btn-outline-primary btn-view-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Mode"><i class="fas fa-eye"></i></a>';
-    $rightContent .= '<div class="form-check form-switch text-switch text-switch-purple"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"><div class="text-switch-track"><span class="text-switch-knob"></span><span class="text-switch-label label-text">Tweak</span></div></div>';
+    $checkedAttr = $tweakEnabled ? ' checked' : '';
+    $rightContent .= '<div class="form-check form-switch text-switch text-switch-purple"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"' . $checkedAttr . '><div class="text-switch-track"><span class="text-switch-knob"></span><span class="text-switch-label label-text">Tweak</span></div></div>';
 } else {
     $rightContent .= '<div class="save-indicator" style="display: none;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
 }
@@ -32,10 +36,16 @@ echo DGCHelper::renderPageHeader([
 // Dashboard filter bar - dynamically get filters from all widgets in this dashboard
 $dashboardFilters = $dashboard ? $dashboard->getAllFilterKeys() : array();
 echo DGCHelper::renderDashboardFilterBar($dashboardFilters);
+
+// Determine container class based on tweak state
+$containerClass = 'dashboard-builder';
+if ($dashboard && $dashboard->getId() && !$tweakEnabled) {
+    $containerClass .= ' layout-edit-disabled';
+}
 ?>
 
 <div id="dashboard-builder"
-    class="dashboard-builder"
+    class="<?php echo $containerClass; ?>"
     data-dashboard-id="<?php echo $dashboard ? $dashboard->getId() : ''; ?>"
     data-breakpoint="desktop">
 
@@ -43,7 +53,9 @@ echo DGCHelper::renderDashboardFilterBar($dashboardFilters);
         <div class="builder-main">
             <div class="grid-editor">
                 <?php if ($dashboard && $dashboard->getId()): ?>
-                    <div class="dashboard-sections"></div>
+                    <div class="dashboard-sections">
+                        <?php echo DGCHelper::renderDashboardSkeleton(2); ?>
+                    </div>
                 <?php else: ?>
                     <?php echo DGCHelper::renderEmptyState(
                         'fa-th-large',

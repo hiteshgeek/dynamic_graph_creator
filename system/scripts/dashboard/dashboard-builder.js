@@ -146,26 +146,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Layout Edit Mode Toggle (Tweak Switch)
+    // Initial state is set by inline script in template to prevent flash
     const tweakSwitch = document.getElementById('toggle-layout-edit-switch');
     if (tweakSwitch) {
-        // Check localStorage for saved state (default: tweak mode off)
-        const tweakEnabled = localStorage.getItem('dashboardTweakEnabled') === 'true';
-
-        // Apply initial state
-        tweakSwitch.checked = tweakEnabled;
-        if (!tweakEnabled) {
-            container.classList.add('layout-edit-disabled');
-        }
-
         tweakSwitch.addEventListener('change', function() {
             if (this.checked) {
                 // Enable tweak mode (show layout controls)
                 container.classList.remove('layout-edit-disabled');
                 localStorage.setItem('dashboardTweakEnabled', 'true');
+                document.cookie = 'dashboardTweakEnabled=true;path=/;max-age=31536000';
             } else {
                 // Disable tweak mode (hide layout controls)
                 container.classList.add('layout-edit-disabled');
                 localStorage.setItem('dashboardTweakEnabled', 'false');
+                document.cookie = 'dashboardTweakEnabled=false;path=/;max-age=31536000';
             }
         });
     }

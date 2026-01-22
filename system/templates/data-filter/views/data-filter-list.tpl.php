@@ -1,6 +1,6 @@
 
 <?php
-    $rightContent = '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Dashboards"><i class="fas fa-th-large"></i></a>';
+    $rightContent = '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home"><i class="fas fa-home"></i></a>';
     $rightContent .= '<a href="?urlq=graph" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-bar"></i></a>';
     if (!empty($filters)) {
         $rightContent .= '<a href="?urlq=data-filter/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Data Filter"><i class="fas fa-plus"></i></a>';

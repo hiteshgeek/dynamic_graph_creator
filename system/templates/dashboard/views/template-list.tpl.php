@@ -12,7 +12,7 @@ window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'f
         $leftContent = '<button type="button" class="btn btn-icon btn-outline-secondary" id="toggle-all-categories" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Collapse All"><i class="fas fa-compress-alt"></i></button>';
     }
 
-    $rightContent = '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Dashboards"><i class="fas fa-th-large"></i></a>';
+    $rightContent = '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home"><i class="fas fa-home"></i></a>';
     $rightContent .= '<a href="?urlq=graph" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-line"></i></a>';
     if (!empty($templates)) {
         $rightContent .= '<a href="?urlq=dashboard/template/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Template"><i class="fas fa-plus"></i></a>';

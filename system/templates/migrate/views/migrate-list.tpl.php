@@ -1100,15 +1100,39 @@
                                             <i class="fas fa-copy me-1"></i> Copy
                                         </button>
                                     </div>
-                                    <div class="code-block mb-3" id="systemtables-code"><pre><code class="language-php">// Dynamic Graph Creator Tables
+                                    <div class="code-block mb-3" id="systemtables-code"><pre><code class="language-php">// =========================================================================
+// DGC SPECIFIC - Tables for Dynamic Graph Creator
+// =========================================================================
+
+// Graph table (status in gsid column: 1=active, 3=deleted)
 const DB_TBL_GRAPH = "graph";
+
+// Data filter table (status in dfsid column: 1=active, 3=deleted)
 const DB_TBL_DATA_FILTER = "data_filter";
+
+// Dashboard template category table (status in dtcsid column)
 const DB_TBL_DASHBOARD_TEMPLATE_CATEGORY = "dashboard_template_category";
+
+// Dashboard template table (status in dtsid column)
 const DB_TBL_DASHBOARD_TEMPLATE = "dashboard_template";
+
+// Dashboard instance table (status in disid column)
 const DB_TBL_DASHBOARD_INSTANCE = "dashboard_instance";
+
+// System placeholder table (status in spsid column: 1=active, 3=deleted)
 const DB_TBL_SYSTEM_PLACEHOLDER = "system_placeholder";
+
+// Widget category table (status in wcsid column: 1=active, 3=deleted)
 const DB_TBL_WIDGET_CATEGORY = "widget_category";
-const DB_TBL_GRAPH_WIDGET_CATEGORY_MAPPING = "graph_widget_category_mapping";</code></pre></div>
+
+// Graph-Widget category mapping table
+const DB_TBL_GRAPH_WIDGET_CATEGORY_MAPPING = "graph_widget_category_mapping";
+
+// Widget type table (graph, link, table, list, counter)
+const DB_TBL_WIDGET_TYPE = "widget_type";
+
+// Filter-Widget type mandatory mapping table
+const DB_TBL_FILTER_WIDGET_TYPE_MANDATORY = "filter_widget_type_mandatory";</code></pre></div>
 
                                     <a href="sql/install.sql" target="_blank" class="btn btn-outline-secondary btn-sm">
                                         <i class="fas fa-eye me-1"></i> View SQL File

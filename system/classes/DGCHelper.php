@@ -127,12 +127,103 @@ class DGCHelper
         $html .= '</div>'; // end title-section
         $html .= '</div>'; // end header
         $html .= '<div class="widget-graph-container" data-graph-id="' . $widgetId . '">';
-        $html .= '<div class="widget-graph-loading">';
-        $html .= '<div class="spinner"></div>';
-        $html .= '<span>Loading chart...</span>';
+        $html .= self::renderChartSkeleton($graphType);
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * Render a chart skeleton loader
+     * Used as loading placeholder while charts load
+     *
+     * @param string $chartType The chart type (bar, line, pie)
+     * @return string HTML for the skeleton
+     */
+    public static function renderChartSkeleton($chartType = 'bar')
+    {
+        $html = '<div class="widget-graph-loading chart-skeleton">';
+
+        if ($chartType === 'pie') {
+            $html .= '<div class="skeleton-chart-pie">';
+            $html .= '<div class="skeleton-pie"></div>';
+            $html .= '</div>';
+        } else {
+            // Bar/Line chart skeleton
+            $html .= '<div class="skeleton-chart-bar">';
+            $html .= '<div class="skeleton-bar"></div>';
+            $html .= '<div class="skeleton-bar"></div>';
+            $html .= '<div class="skeleton-bar"></div>';
+            $html .= '<div class="skeleton-bar"></div>';
+            $html .= '<div class="skeleton-bar"></div>';
+            $html .= '<div class="skeleton-bar"></div>';
+            $html .= '</div>';
+        }
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * Render a full dashboard skeleton loader
+     * Used as loading placeholder while dashboard structure loads
+     *
+     * @param int $sections Number of sections to show (default 2)
+     * @return string HTML for the skeleton
+     */
+    public static function renderDashboardSkeleton($sections = 2)
+    {
+        $html = '<div class="dashboard-skeleton" id="dashboard-skeleton">';
+
+        for ($i = 0; $i < $sections; $i++) {
+            $colClass = $i === 0 ? '' : ' skeleton-two-col';
+            $cols = $i === 0 ? 3 : 2;
+
+            $html .= '<div class="skeleton-section' . $colClass . '">';
+            $html .= '<div class="skeleton-section-header">';
+            $html .= '<div class="skeleton-title"></div>';
+            if ($i === 0) {
+                $html .= '<div class="skeleton-badge"></div>';
+            }
+            $html .= '</div>';
+            $html .= '<div class="skeleton-grid">';
+
+            for ($j = 0; $j < $cols; $j++) {
+                $chartType = ($i === 0 && $j === 1) ? 'pie' : 'bar';
+                $html .= '<div class="skeleton-widget">';
+                $html .= '<div class="skeleton-widget-header">';
+                $html .= '<div class="skeleton-widget-title">';
+                $html .= '<div class="skeleton-line"></div>';
+                $html .= '<div class="skeleton-line"></div>';
+                $html .= '</div>';
+                $html .= '<div class="skeleton-widget-icon"></div>';
+                $html .= '</div>';
+
+                if ($chartType === 'pie') {
+                    $html .= '<div class="skeleton-widget-chart skeleton-chart-pie">';
+                    $html .= '<div class="skeleton-pie"></div>';
+                    $html .= '</div>';
+                } else {
+                    $html .= '<div class="skeleton-widget-chart skeleton-chart-bar">';
+                    $html .= '<div class="skeleton-bar"></div>';
+                    $html .= '<div class="skeleton-bar"></div>';
+                    $html .= '<div class="skeleton-bar"></div>';
+                    $html .= '<div class="skeleton-bar"></div>';
+                    $html .= '<div class="skeleton-bar"></div>';
+                    $html .= '<div class="skeleton-bar"></div>';
+                    $html .= '</div>';
+                }
+
+                $html .= '</div>';
+            }
+
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+
         $html .= '</div>';
 
         return $html;
