@@ -54,7 +54,81 @@ if ($dashboard && $dashboard->getId() && !$tweakEnabled) {
             <div class="grid-editor">
                 <?php if ($dashboard && $dashboard->getId()): ?>
                     <div class="dashboard-sections">
-                        <?php echo DGCHelper::renderDashboardSkeleton(2); ?>
+                        <?php
+                        $structure = $dashboard->getStructureArray();
+                        if (isset($structure['sections']) && count($structure['sections']) > 0):
+                            foreach ($structure['sections'] as $section):
+                        ?>
+                                <div class="dashboard-section"
+                                    data-section-id="<?php echo htmlspecialchars($section['sid']); ?>"
+                                    style="grid-template-columns: <?php echo htmlspecialchars($section['gridTemplate']); ?>;">
+
+                                    <?php foreach ($section['areas'] as $area): ?>
+                                        <?php
+                                        $hasSubRows = isset($area['hasSubRows']) && $area['hasSubRows'] && isset($area['subRows']) && count($area['subRows']) > 0;
+                                        ?>
+
+                                        <?php if ($hasSubRows): ?>
+                                            <?php
+                                            $rowHeights = array_map(function ($row) {
+                                                return isset($row['height']) ? $row['height'] : '1fr';
+                                            }, $area['subRows']);
+                                            $rowHeightsStr = implode(' ', $rowHeights);
+                                            $totalFr = array_reduce($area['subRows'], function ($sum, $row) {
+                                                return $sum + (isset($row['height']) ? intval($row['height']) : 1);
+                                            }, 0);
+                                            ?>
+                                            <div class="dashboard-area dashboard-area-nested"
+                                                data-area-id="<?php echo htmlspecialchars($area['aid']); ?>"
+                                                data-rows="<?php echo $totalFr; ?>"
+                                                style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>; grid-template-rows: <?php echo $rowHeightsStr; ?>;">
+
+                                                <?php foreach ($area['subRows'] as $subRow): ?>
+                                                    <?php $rowFr = isset($subRow['height']) ? intval($subRow['height']) : 1; ?>
+                                                    <div class="dashboard-sub-row" data-row-id="<?php echo htmlspecialchars($subRow['rowId']); ?>" data-rows="<?php echo $rowFr ?: 1; ?>">
+                                                        <?php
+                                                        $hasSubRowWidget = isset($subRow['content']) &&
+                                                                           isset($subRow['content']['type']) &&
+                                                                           $subRow['content']['type'] !== 'empty' &&
+                                                                           !empty($subRow['content']['widgetId']);
+                                                        ?>
+                                                        <?php if ($hasSubRowWidget): ?>
+                                                            <?php echo DGCHelper::renderDashboardWidgetContent($subRow['content']); ?>
+                                                        <?php else: ?>
+                                                            <?php echo DGCHelper::renderDashboardCellEmpty('', '', true); ?>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+
+                                        <?php else: ?>
+                                            <?php
+                                            $areaRowHeight = isset($area['rowHeight']) ? intval($area['rowHeight']) : 1;
+                                            $minHeightStyle = $areaRowHeight > 1 ? "min-height: " . ($areaRowHeight * 150) . "px;" : "";
+                                            ?>
+                                            <div class="dashboard-area"
+                                                data-area-id="<?php echo htmlspecialchars($area['aid']); ?>"
+                                                style="grid-column: span <?php echo isset($area['colSpan']) ? intval($area['colSpan']) : 1; ?>; <?php echo $minHeightStyle; ?>">
+
+                                                <?php
+                                                $hasWidget = isset($area['content']) &&
+                                                             isset($area['content']['type']) &&
+                                                             $area['content']['type'] !== 'empty' &&
+                                                             !empty($area['content']['widgetId']);
+                                                ?>
+                                                <?php if ($hasWidget): ?>
+                                                    <?php echo DGCHelper::renderDashboardWidgetContent($area['content']); ?>
+                                                <?php else: ?>
+                                                    <?php echo DGCHelper::renderDashboardCellEmpty('', '', true); ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                </div>
+                        <?php
+                            endforeach;
+                        endif;
+                        ?>
                     </div>
                 <?php else: ?>
                     <?php echo DGCHelper::renderEmptyState(

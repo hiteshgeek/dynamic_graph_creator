@@ -14,6 +14,7 @@ import DatePickerInit from "./DatePickerInit.js";
 import { WidgetSelectorModal } from "./dashboard/WidgetSelectorModal.js";
 import { WidgetLoader } from "./dashboard/WidgetLoader.js";
 import GraphPreview from "./GraphPreview.js";
+import ChartSkeleton from "./ChartSkeleton.js";
 
 // Export to window for other scripts to use
 window.DatePickerInit = DatePickerInit;
@@ -445,14 +446,10 @@ class DashboardBuilder {
     const filtersContainer = document.querySelector("#dashboard-filters");
     if (!filtersContainer) return;
 
-    console.log("[DashboardBuilder] Refreshing filter bar for dashboard:", this.dashboardId);
-
     try {
       const result = await Ajax.post("get_dashboard_filters", {
         dashboard_id: this.dashboardId,
       });
-
-      console.log("[DashboardBuilder] Filter bar refresh result:", result);
 
       if (result.success && result.data) {
         const filters = result.data.filters || [];
@@ -475,7 +472,6 @@ class DashboardBuilder {
             showPlaceholderKey: false,
             useControlWrapper: false,
           });
-          console.log("[DashboardBuilder] Filter bar rendered with", filters.length, "filters");
         }
       }
     } catch (error) {
@@ -694,11 +690,11 @@ class DashboardBuilder {
       return;
     }
 
-    // Check if skeleton loader is present (skip overlay if so for smoother UX)
-    const skeleton = this.container.querySelector(".dashboard-skeleton");
-    const useSkeleton = skeleton !== null;
+    // Check if structure is already rendered from PHP (has dashboard-section elements)
+    const sectionsContainer = this.container.querySelector(".dashboard-sections");
+    const hasPreRenderedStructure = sectionsContainer && sectionsContainer.querySelector(".dashboard-section");
 
-    if (!useSkeleton) {
+    if (!hasPreRenderedStructure) {
       Loading.show("Loading dashboard...");
     }
 
@@ -707,14 +703,27 @@ class DashboardBuilder {
 
       if (result.success) {
         this.currentDashboard = result.data;
-        this.renderDashboard();
+
+        if (hasPreRenderedStructure) {
+          // Structure already rendered from PHP, just load widgets
+          this.loadWidgetGraphs();
+          this.initDragDrop();
+          this.initAddSectionBorderButtons();
+
+          if (window.Tooltips) {
+            window.Tooltips.init();
+          }
+        } else {
+          // Render structure from JS
+          this.renderDashboard();
+        }
       } else {
         Toast.error(result.message);
       }
     } catch (error) {
       Toast.error("Failed to load dashboard");
     } finally {
-      if (!useSkeleton) {
+      if (!hasPreRenderedStructure) {
         Loading.hide();
       }
     }
@@ -1396,7 +1405,6 @@ class DashboardBuilder {
 
     // Get current filter values
     const filterValues = this.getDashboardFilterValues();
-    console.log("[DashboardBuilder] Loading widgets with filters:", filterValues);
 
     // Find all widget graph containers
     const graphContainers = this.container.querySelectorAll(".widget-graph-container[data-graph-id]");
@@ -1433,8 +1441,8 @@ class DashboardBuilder {
         // Clear loading state
         container.innerHTML = "";
 
-        // Create GraphPreview instance and render
-        const preview = new GraphPreview(container);
+        // Create GraphPreview instance (don't show skeleton - data is already loaded)
+        const preview = new GraphPreview(container, { showSkeleton: false });
 
         // Use graph type from API response if available, fallback to provided type
         const actualGraphType = result.data.graphType || graphType;
@@ -1917,10 +1925,7 @@ class DashboardBuilder {
                 </div>
               </div>
               <div class="widget-graph-container" data-graph-id="${widgetId}">
-                <div class="widget-graph-loading">
-                  <div class="spinner"></div>
-                  <span>Loading chart...</span>
-                </div>
+                ${ChartSkeleton.getHTML(graphType)}
               </div>
             </div>
             ${editOverlay}
