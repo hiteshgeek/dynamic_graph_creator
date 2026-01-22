@@ -317,7 +317,7 @@ class DGCHelper
      * @param string $redirectUrl URL to redirect to if access denied (default: dashboard list)
      * @return void
      */
-    public static function requireAdminAccess($redirectUrl = '?urlq=dashboard')
+    public static function requireAdminAccess($redirectUrl = '?urlq=home')
     {
         if (!self::hasAdminAccess()) {
             header('Location: ' . $redirectUrl);

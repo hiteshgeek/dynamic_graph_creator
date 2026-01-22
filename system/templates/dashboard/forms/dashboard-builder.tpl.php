@@ -21,7 +21,7 @@ if ($dashboard && $dashboard->getId()) {
 
 echo DGCHelper::renderPageHeader([
     'title' => ($dashboard && $dashboard->getId()) ? $dashboard->getName() : 'Create Dashboard',
-    'backUrl' => '?urlq=dashboard',
+    'backUrl' => '?urlq=home',
     'backLabel' => 'Dashboards',
     'titleEditable' => ($dashboard && $dashboard->getId()) ? true : false,
     'titleId' => 'dashboard-name-display',

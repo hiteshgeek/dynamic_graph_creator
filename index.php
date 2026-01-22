@@ -124,6 +124,9 @@ $theme->addScript(SiteConfig::themeLibrariessUrl() . 'bootstrap5/js/bootstrap.bu
 
 // Route to controller
 switch ($page) {
+    case 'home':
+        require_once SystemConfig::includesPath() . 'home/home.inc.php';
+        break;
     case 'data-filter':
         require_once SystemConfig::includesPath() . 'data-filter/data-filter.inc.php';
         break;

@@ -21,7 +21,7 @@
 
     echo DGCHelper::renderPageHeader([
         'title' => $dashboard->getName(),
-        'backUrl' => '?urlq=dashboard',
+        'backUrl' => '?urlq=home',
         'backLabel' => 'Dashboards',
         'badges' => $badges,
         'rightContent' => $rightContent
