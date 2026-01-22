@@ -5,8 +5,6 @@
 (function() {
     'use strict';
 
-    console.log('[template-preview.js] Script loaded');
-
     // Wait for dependencies to be available
     function waitForDependencies(callback, maxAttempts) {
         maxAttempts = maxAttempts || 100;
@@ -19,15 +17,10 @@
             var graphPreviewReady = typeof window.GraphPreview !== 'undefined';
             var widgetLoaderReady = typeof window.WidgetLoader !== 'undefined';
 
-            console.log('[template-preview.js] Check #' + attempts + ' - Ajax:', ajaxReady, 'ECharts:', echartsReady, 'GraphPreview:', graphPreviewReady, 'WidgetLoader:', widgetLoaderReady);
-
             if (ajaxReady && echartsReady && graphPreviewReady && widgetLoaderReady) {
-                console.log('[template-preview.js] Dependencies ready');
                 callback();
             } else if (attempts < maxAttempts) {
                 setTimeout(check, 100);
-            } else {
-                console.error('[template-preview.js] Dependencies not available after ' + maxAttempts + ' attempts');
             }
         }
 
@@ -42,15 +35,11 @@
     }
 
     function init() {
-        console.log('[template-preview.js] DOM ready, initializing...');
-
         // Add page-specific body class for CSS targeting
         document.body.classList.add('template-preview-page');
 
         // Wait for dependencies then initialize widgets
         waitForDependencies(function() {
-            console.log('[template-preview.js] Starting widget loading...');
-
             // Use shared WidgetLoader
             var previewContainer = document.getElementById('template-preview');
             if (previewContainer) {
@@ -70,10 +59,7 @@
      */
     function initDeleteButton() {
         var deleteBtn = document.querySelector('.delete-template-btn');
-        if (!deleteBtn) {
-            console.log('[template-preview.js] No delete button found');
-            return;
-        }
+        if (!deleteBtn) return;
 
         deleteBtn.addEventListener('click', function() {
             var btn = this;
@@ -102,8 +88,7 @@
                         btn.innerHTML = '<i class="fas fa-trash"></i>';
                     }
                 })
-                .catch(function(error) {
-                    console.error('[template-preview.js] Delete error:', error);
+                .catch(function() {
                     window.Toast.error('Failed to delete template');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-trash"></i>';
@@ -116,10 +101,7 @@
      */
     function initDuplicateButton() {
         var duplicateBtn = document.querySelector('.duplicate-template-btn');
-        if (!duplicateBtn) {
-            console.log('[template-preview.js] No duplicate button found');
-            return;
-        }
+        if (!duplicateBtn) return;
 
         duplicateBtn.addEventListener('click', function() {
             var btn = this;
@@ -142,8 +124,7 @@
                         btn.innerHTML = originalHtml;
                     }
                 })
-                .catch(function(error) {
-                    console.error('[template-preview.js] Duplicate error:', error);
+                .catch(function() {
                     window.Toast.error('Failed to duplicate template');
                     btn.disabled = false;
                     btn.innerHTML = originalHtml;

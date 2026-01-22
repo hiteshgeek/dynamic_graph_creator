@@ -5,8 +5,6 @@
 (function() {
     'use strict';
 
-    console.log('[dashboard-preview.js] Script loaded');
-
     // Shared widget loader instance
     var widgetLoader = null;
 
@@ -23,10 +21,8 @@
             var widgetLoaderReady = typeof window.WidgetLoader !== 'undefined';
 
             var datePickerReady = typeof window.DatePickerInit !== 'undefined';
-            console.log('[dashboard-preview.js] Check #' + attempts + ' - Ajax:', ajaxReady, 'ECharts:', echartsReady, 'GraphPreview:', graphPreviewReady, 'WidgetLoader:', widgetLoaderReady, 'DatePickerInit:', datePickerReady);
 
             if (ajaxReady && echartsReady && graphPreviewReady && widgetLoaderReady && datePickerReady) {
-                console.log('[dashboard-preview.js] Dependencies ready');
                 callback();
             } else if (attempts < maxAttempts) {
                 setTimeout(check, 100);
@@ -47,15 +43,11 @@
     }
 
     function init() {
-        console.log('[dashboard-preview.js] DOM ready, initializing...');
-
         // Add page-specific body class for CSS targeting
         document.body.classList.add('dashboard-preview-page');
 
         // Wait for dependencies then initialize everything
         waitForDependencies(function() {
-            console.log('[dashboard-preview.js] Starting initialization...');
-
             // Initialize filter bar (needs DatePickerInit)
             initDashboardFilterBar();
 
@@ -86,8 +78,6 @@
 
         var filtersContainer = filterBar.querySelector('#dashboard-filters');
         if (!filtersContainer) return;
-
-        console.log('[dashboard-preview.js] Initializing filter bar');
 
         // Initialize datepickers using centralized DatePickerInit class
         if (window.DatePickerInit) {
@@ -152,11 +142,9 @@
 
         // Function to apply filters and reload charts
         function applyFilters() {
-            console.log('[dashboard-preview.js] Applying filters...');
             var previewContainer = document.getElementById('dashboard-preview');
             if (previewContainer && widgetLoader) {
                 var filterValues = getDashboardFilterValues();
-                console.log('[dashboard-preview.js] Filter values:', filterValues);
                 widgetLoader.loadAll(previewContainer, filterValues);
             }
         }
@@ -193,10 +181,8 @@
         });
 
         // Datepickers - listen for change event (dispatched by DatePickerInit after apply/cancel)
-        // DatePickerInit updates data attributes before dispatching the change event
         filtersContainer.querySelectorAll('.dgc-datepicker').forEach(function(input) {
             input.addEventListener('change', function() {
-                console.log('[dashboard-preview.js] Datepicker changed:', this.dataset.from, '-', this.dataset.to);
                 if (autoApplyEnabled) applyFilters();
             });
         });
@@ -244,10 +230,7 @@
      */
     function initDeleteButton() {
         var deleteBtn = document.querySelector('.delete-dashboard-btn');
-        if (!deleteBtn) {
-            console.log('[dashboard-preview.js] No delete button found');
-            return;
-        }
+        if (!deleteBtn) return;
 
         deleteBtn.addEventListener('click', function() {
             var btn = this;
@@ -277,8 +260,7 @@
                         btn.innerHTML = '<i class="fas fa-trash"></i>';
                     }
                 })
-                .catch(function(error) {
-                    console.error('[dashboard-preview.js] Delete error:', error);
+                .catch(function() {
                     window.Toast.error('Failed to delete dashboard');
                     btn.disabled = false;
                     btn.innerHTML = '<i class="fas fa-trash"></i>';
