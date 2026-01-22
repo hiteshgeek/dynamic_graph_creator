@@ -239,8 +239,13 @@ function saveGraph($data)
 
     $query = isset($data['query']) ? $data['query'] : '';
 
+    // Validate query security (SELECT only)
+    if (!QueryHelper::validateOrFail($query)) {
+        return; // Error response already sent
+    }
+
     // Validate mandatory filters are in query
-    $mandatoryValidation = DataFilterManager::validateMandatoryFiltersInQuery($query, 'graph');
+    $mandatoryValidation = QueryHelper::validateMandatoryFiltersInQuery($query, 'graph');
     if (!$mandatoryValidation['valid']) {
         $missingPlaceholders = array_map(function($key) {
             return '::' . ltrim($key, ':');
@@ -382,8 +387,13 @@ function testQuery($data)
         Utility::ajaxResponseFalse('Please enter a SQL query');
     }
 
+    // Validate query security (SELECT only)
+    if (!QueryHelper::validateOrFail($query)) {
+        return; // Error response already sent
+    }
+
     // Validate mandatory filters are in query
-    $mandatoryValidation = DataFilterManager::validateMandatoryFiltersInQuery($query, 'graph');
+    $mandatoryValidation = QueryHelper::validateMandatoryFiltersInQuery($query, 'graph');
     if (!$mandatoryValidation['valid']) {
         $missingPlaceholders = array_map(function($key) {
             return '::' . ltrim($key, ':');

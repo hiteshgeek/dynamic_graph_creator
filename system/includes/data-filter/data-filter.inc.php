@@ -150,11 +150,19 @@ function saveDataFilter($data)
 
     $filter = $filterId ? new DataFilter($filterId) : new DataFilter();
 
+    // Validate data_query if provided (for query-based filters)
+    $dataQuery = isset($data['data_query']) ? trim($data['data_query']) : '';
+    if (!empty($dataQuery)) {
+        if (!QueryHelper::validateOrFail($dataQuery)) {
+            return; // Error response already sent
+        }
+    }
+
     $filter->setFilterKey($filterKey);
     $filter->setFilterLabel($filterLabel);
     $filter->setFilterType($filterType);
     $filter->setDataSource($dataSource);
-    $filter->setDataQuery(isset($data['data_query']) ? $data['data_query'] : '');
+    $filter->setDataQuery($dataQuery);
     $filter->setStaticOptions(isset($data['static_options']) ? $data['static_options'] : '');
     $filter->setFilterConfig(isset($data['filter_config']) ? $data['filter_config'] : '');
     $filter->setDefaultValue(isset($data['default_value']) ? $data['default_value'] : '');
@@ -232,6 +240,11 @@ function testDataFilterQuery($data)
 
     if (empty($query)) {
         Utility::ajaxResponseFalse('Please enter a SQL query');
+    }
+
+    // Validate query security (SELECT only)
+    if (!QueryHelper::validateOrFail($query)) {
+        return; // Error response already sent
     }
 
     // Find all placeholders in the query (::placeholder_name pattern)

@@ -35,6 +35,7 @@ require_once __DIR__ . '/system/classes/DGCHelper.php';
 require_once __DIR__ . '/system/classes/Template.php';
 require_once __DIR__ . '/system/classes/Utility.php';
 require_once __DIR__ . '/system/classes/LocalUtility.php';
+require_once __DIR__ . '/system/classes/QueryHelper.php';
 require_once __DIR__ . '/system/classes/WidgetType.php';
 require_once __DIR__ . '/system/classes/WidgetTypeManager.php';
 require_once __DIR__ . '/system/classes/FilterWidgetTypeMandatoryManager.php';
