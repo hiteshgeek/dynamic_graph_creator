@@ -42,6 +42,7 @@ export default class ConfigPanel {
             legendPosition: 'top',
             legendIcon: 'circle',
             showTooltip: true,
+            showDataViewToggle: false,
             colors: [],
 
             // Bar specific
@@ -162,6 +163,11 @@ export default class ConfigPanel {
                 <div class="config-row">
                     <span class="config-row-label">Show Tooltip</span>
                     ${this.renderSwitch('showTooltip', this.config.showTooltip)}
+                </div>
+
+                <div class="config-row">
+                    <span class="config-row-label">Data View Toggle</span>
+                    ${this.renderSwitch('showDataViewToggle', this.config.showDataViewToggle)}
                 </div>
             </div>
         `;

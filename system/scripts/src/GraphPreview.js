@@ -12,6 +12,11 @@ export default class GraphPreview {
         this.mapping = {};
         this.data = null;
 
+        // Data view toggle state
+        this.dataViewActive = false;
+        this.toggleButton = null;
+        this.tableContainer = null;
+
         this.init();
     }
 
@@ -132,6 +137,9 @@ export default class GraphPreview {
 
         // Force resize to fit container
         this.chart.resize();
+
+        // Add data view toggle if enabled
+        this.createDataViewToggle();
 
         // Notify listeners that chart was rendered
         if (this.renderCallback) {
@@ -501,6 +509,204 @@ export default class GraphPreview {
     }
 
     /**
+     * Create data view toggle button if enabled in config
+     */
+    createDataViewToggle() {
+        // Remove existing toggle if any
+        if (this.toggleButton) {
+            this.toggleButton.remove();
+            this.toggleButton = null;
+        }
+
+        // Only create if enabled in config
+        if (!this.config.showDataViewToggle) {
+            // Also hide table if toggle is disabled
+            if (this.tableContainer) {
+                this.tableContainer.style.display = 'none';
+            }
+            // Show chart canvas (first child div of container)
+            const chartCanvas = this.container.querySelector(':scope > div:first-child');
+            if (chartCanvas) {
+                chartCanvas.style.display = 'block';
+            }
+            this.dataViewActive = false;
+            return;
+        }
+
+        // Ensure container has position for absolute positioning
+        const containerStyle = window.getComputedStyle(this.container);
+        if (containerStyle.position === 'static') {
+            this.container.style.position = 'relative';
+        }
+
+        // Create toggle button
+        this.toggleButton = document.createElement('button');
+        this.toggleButton.className = 'chart-data-toggle-btn';
+        this.toggleButton.innerHTML = this.dataViewActive
+            ? '<i class="fas fa-chart-bar"></i>'
+            : '<i class="fas fa-table"></i>';
+        this.toggleButton.title = this.dataViewActive ? 'Show chart' : 'Show data table';
+
+        // Insert button into container
+        this.container.appendChild(this.toggleButton);
+
+        // Click handler
+        this.toggleButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.toggleDataView(!this.dataViewActive);
+        });
+    }
+
+    /**
+     * Toggle between chart and data table view
+     */
+    toggleDataView(showTable) {
+        this.dataViewActive = showTable;
+
+        // Get the ECharts canvas wrapper (first child div of container)
+        // this.chart.getDom() returns the container itself, not just the canvas
+        const chartCanvas = this.container.querySelector(':scope > div:first-child');
+
+        if (showTable) {
+            // Hide chart canvas, show table
+            if (chartCanvas) {
+                chartCanvas.style.display = 'none';
+            }
+            this.renderDataTable();
+            if (this.tableContainer) {
+                this.tableContainer.style.display = 'block';
+            }
+            if (this.toggleButton) {
+                this.toggleButton.innerHTML = '<i class="fas fa-chart-bar"></i>';
+                this.toggleButton.title = 'Show chart';
+            }
+        } else {
+            // Show chart canvas, hide table
+            if (chartCanvas) {
+                chartCanvas.style.display = 'block';
+            }
+            if (this.chart) {
+                this.chart.resize();
+            }
+            if (this.tableContainer) {
+                this.tableContainer.style.display = 'none';
+            }
+            if (this.toggleButton) {
+                this.toggleButton.innerHTML = '<i class="fas fa-table"></i>';
+                this.toggleButton.title = 'Show data table';
+            }
+        }
+    }
+
+    /**
+     * Render data table from chart data
+     */
+    renderDataTable() {
+        // Create container if not exists
+        if (!this.tableContainer) {
+            this.tableContainer = document.createElement('div');
+            this.tableContainer.className = 'chart-data-table-container';
+            this.container.appendChild(this.tableContainer);
+        }
+
+        // Check if we have data
+        if (!this.data) {
+            this.tableContainer.innerHTML = '<div class="chart-data-table-empty"><i class="fas fa-info-circle"></i> No data available</div>';
+            return;
+        }
+
+        // Build table based on chart type
+        let html = '<div class="chart-data-table-wrapper"><table class="chart-data-table">';
+
+        if (this.type === 'pie') {
+            // Pie chart: name, value columns
+            const nameTitle = this.mapping.name_column || this.mapping.nameTitle || 'Name';
+            const valueTitle = this.mapping.value_column || this.mapping.valueTitle || 'Value';
+
+            html += '<thead><tr>';
+            html += '<th>' + this.escapeHtml(nameTitle) + '</th>';
+            html += '<th>' + this.escapeHtml(valueTitle) + '</th>';
+            html += '</tr></thead><tbody>';
+
+            const items = this.data.items || this.data.values || [];
+            if (items.length === 0) {
+                html += '<tr><td colspan="2" style="text-align: center; color: var(--dgc-text-hint);">No data</td></tr>';
+            } else {
+                items.forEach(item => {
+                    html += '<tr>';
+                    html += '<td>' + this.escapeHtml(item.name) + '</td>';
+                    html += '<td>' + this.escapeHtml(item.value) + '</td>';
+                    html += '</tr>';
+                });
+            }
+            html += '</tbody>';
+        } else {
+            // Bar/Line: category + series columns
+            const categories = this.data.categories || [];
+            const series = this.data.series || [];
+            const values = this.data.values || [];
+
+            // Determine column headers
+            const xTitle = this.mapping.x_axis_title || this.mapping.x_column || 'Category';
+
+            html += '<thead><tr>';
+            html += '<th>' + this.escapeHtml(xTitle) + '</th>';
+
+            if (series.length > 0) {
+                // Multiple series
+                series.forEach(s => {
+                    html += '<th>' + this.escapeHtml(s.name || 'Value') + '</th>';
+                });
+            } else {
+                // Single value column
+                const yTitle = this.mapping.y_axis_title || this.mapping.y_column || 'Value';
+                html += '<th>' + this.escapeHtml(yTitle) + '</th>';
+            }
+            html += '</tr></thead><tbody>';
+
+            if (categories.length === 0) {
+                const colCount = series.length > 0 ? series.length + 1 : 2;
+                html += '<tr><td colspan="' + colCount + '" style="text-align: center; color: var(--dgc-text-hint);">No data</td></tr>';
+            } else {
+                categories.forEach((cat, i) => {
+                    html += '<tr>';
+                    html += '<td>' + this.escapeHtml(cat) + '</td>';
+
+                    if (series.length > 0) {
+                        // Multiple series
+                        series.forEach(s => {
+                            const val = s.data && s.data[i] !== undefined ? s.data[i] : '-';
+                            html += '<td>' + this.escapeHtml(val) + '</td>';
+                        });
+                    } else {
+                        // Single values array
+                        const val = values[i] !== undefined ? values[i] : '-';
+                        html += '<td>' + this.escapeHtml(val) + '</td>';
+                    }
+                    html += '</tr>';
+                });
+            }
+            html += '</tbody>';
+        }
+
+        html += '</table></div>';
+        this.tableContainer.innerHTML = html;
+    }
+
+    /**
+     * Escape HTML special characters
+     */
+    escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    /**
      * Resize chart
      */
     resize() {
@@ -513,9 +719,24 @@ export default class GraphPreview {
      * Destroy chart instance
      */
     destroy() {
+        // Clean up toggle button
+        if (this.toggleButton) {
+            this.toggleButton.remove();
+            this.toggleButton = null;
+        }
+
+        // Clean up table container
+        if (this.tableContainer) {
+            this.tableContainer.remove();
+            this.tableContainer = null;
+        }
+
+        // Destroy chart
         if (this.chart) {
             this.chart.dispose();
             this.chart = null;
         }
+
+        this.dataViewActive = false;
     }
 }
