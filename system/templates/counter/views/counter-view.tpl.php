@@ -31,13 +31,13 @@
     ]);
     ?>
 
-    <div class="counter-view-layout">
+    <div class="graph-view-layout">
         <!-- Sidebar with counter list -->
-        <aside class="counter-view-sidebar" id="counter-view-sidebar">
+        <aside class="graph-view-sidebar" id="graph-view-sidebar">
             <script>
                 // Apply collapsed state immediately to prevent flash
-                if (localStorage.getItem('counterViewSidebarCollapsed') === 'true') {
-                    document.getElementById('counter-view-sidebar').classList.add('collapsed');
+                if (localStorage.getItem('graphViewSidebarCollapsed') === 'true') {
+                    document.getElementById('graph-view-sidebar').classList.add('collapsed');
                 }
             </script>
             <div class="sidebar-header">
@@ -59,7 +59,7 @@
                     <i class="fas fa-chevron-left"></i>
                 </button>
             </div>
-            <div class="counter-list-nav">
+            <div class="graph-list-nav">
                 <?php foreach ($allCounters as $index => $c): ?>
                     <?php
                     $cConfig = $c->getConfigArray();
@@ -67,13 +67,13 @@
                     $cColor = isset($cConfig['color']) && $cConfig['color'] ? $cConfig['color'] : $defaultConfig['color'];
                     ?>
                     <a href="?urlq=widget-counter/view/<?php echo $c->getId(); ?>"
-                       class="counter-nav-item <?php echo ($c->getId() == $counter->getId()) ? 'active' : ''; ?>">
-                        <span class="counter-type-icon" style="background-color: <?php echo htmlspecialchars($cColor); ?>;">
+                       class="graph-nav-item <?php echo ($c->getId() == $counter->getId()) ? 'active' : ''; ?>">
+                        <span class="graph-type-icon counter-icon-colored" style="--counter-color: <?php echo htmlspecialchars($cColor); ?>;">
                             <span class="material-icons"><?php echo htmlspecialchars($cIcon); ?></span>
                         </span>
-                        <span class="counter-nav-info">
-                            <span class="counter-nav-name"><?php echo htmlspecialchars($c->getName()); ?></span>
-                            <span class="counter-nav-type">Counter</span>
+                        <span class="graph-nav-info">
+                            <span class="graph-nav-name"><?php echo htmlspecialchars($c->getName()); ?></span>
+                            <span class="graph-nav-type">Counter</span>
                         </span>
                     </a>
                 <?php endforeach; ?>
@@ -81,7 +81,7 @@
         </aside>
 
         <!-- Main content -->
-        <main class="counter-view-main">
+        <main class="graph-view-main">
             <div id="counter-view"
                  data-counter-id="<?php echo $counter->getId(); ?>"
                  data-counter-name="<?php echo htmlspecialchars($counter->getName()); ?>"
@@ -90,7 +90,7 @@
 
                 <!-- Filters -->
                 <?php if (!empty($filters)): ?>
-                    <div class="card counter-view-filters">
+                    <div class="card graph-view-filters">
                         <div class="filters-list" id="counter-filters">
                             <?php foreach ($filters as $filter):
                                 $filterKey = $filter['filter_key'];
@@ -186,7 +186,7 @@
                 <div class="card counter-display-card">
                     <div class="card-header">
                         <div class="card-header-left">
-                            <span class="counter-type-icon" style="background-color: <?php echo htmlspecialchars($color); ?>;">
+                            <span class="graph-type-icon counter-icon-colored" style="--counter-color: <?php echo htmlspecialchars($color); ?>;">
                                 <span class="material-icons"><?php echo htmlspecialchars($icon); ?></span>
                             </span>
                             <span class="text-muted"><?php echo htmlspecialchars($counter->getName()); ?></span>

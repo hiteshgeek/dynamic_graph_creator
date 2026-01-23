@@ -49,14 +49,14 @@ export default class CounterView {
      * Initialize sidebar collapse
      */
     initSidebar() {
-        const sidebar = document.getElementById('counter-view-sidebar');
+        const sidebar = document.getElementById('graph-view-sidebar');
         const collapseBtn = sidebar?.querySelector('.collapse-btn');
 
         if (!sidebar || !collapseBtn) return;
 
         collapseBtn.addEventListener('click', () => {
             sidebar.classList.toggle('collapsed');
-            localStorage.setItem('counterViewSidebarCollapsed', sidebar.classList.contains('collapsed'));
+            localStorage.setItem('graphViewSidebarCollapsed', sidebar.classList.contains('collapsed'));
         });
     }
 
