@@ -23,6 +23,9 @@
     <!-- Outfit Font -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Material Icons (for Counter widget icon picker) -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <!-- Core Libraries -->
     <link href="<?php echo SiteConfig::themeLibrariessUrl(); ?>bootstrap5/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?php echo SiteConfig::themeLibrariessUrl(); ?>fontawesome6/css/all.min.css" rel="stylesheet">

@@ -195,6 +195,12 @@ class SystemTables
       // Graph-Widget category mapping table
       const DB_TBL_GRAPH_WIDGET_CATEGORY_MAPPING = "graph_widget_category_mapping";
 
+      // Counter table (status in csid column: 1=active, 3=deleted)
+      const DB_TBL_COUNTER = "counter";
+
+      // Counter-Widget category mapping table
+      const DB_TBL_COUNTER_WIDGET_CATEGORY_MAPPING = "counter_widget_category_mapping";
+
       // Widget type table (graph, link, table, list, counter)
       const DB_TBL_WIDGET_TYPE = "widget_type";
 

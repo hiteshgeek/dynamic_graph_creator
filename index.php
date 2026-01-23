@@ -56,6 +56,10 @@ require_once __DIR__ . '/system/classes/WidgetCategory.php';
 require_once __DIR__ . '/system/classes/WidgetCategoryManager.php';
 require_once __DIR__ . '/system/classes/GraphWidgetCategoryMapping.php';
 require_once __DIR__ . '/system/classes/GraphWidgetCategoryMappingManager.php';
+require_once __DIR__ . '/system/classes/Counter.php';
+require_once __DIR__ . '/system/classes/CounterManager.php';
+require_once __DIR__ . '/system/classes/CounterWidgetCategoryMapping.php';
+require_once __DIR__ . '/system/classes/CounterWidgetCategoryMappingManager.php';
 
 // Load session and authentication classes
 require_once __DIR__ . '/system/classes/AdminUser.php';
@@ -166,8 +170,7 @@ switch ($page) {
         require_once SystemConfig::includesPath() . 'widget-list/widget-list.inc.php';
         break;
     case 'widget-counter':
-        // TODO: Add counter widget controller
-        require_once SystemConfig::includesPath() . 'widget-counter/widget-counter.inc.php';
+        require_once SystemConfig::includesPath() . 'counter/counter.inc.php';
         break;
 
     // Backward compatibility - redirect old graph route to widget-graph

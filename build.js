@@ -15,10 +15,11 @@ const isProd = !isWatch && !isDev; // Default build is production
 const srcDir = path.join(__dirname, "system");
 const distDir = path.join(__dirname, "dist");
 
-// Modules: common (shared) + graph + data-filter + dashboard (specific)
+// Modules: common (shared) + graph + counter + data-filter + dashboard (specific)
 const modules = [
   { name: "common", scss: "shared.scss", js: "common.js" },
   { name: "graph", scss: "graph.scss", js: "graph.js" },
+  { name: "counter", scss: "counter.scss", js: "counter.js" },
   { name: "data-filter", scss: "data-filter.scss", js: "data-filter.js" },
   { name: "dashboard", scss: "dashboard.scss", js: "dashboard.js" },
 ];
@@ -26,6 +27,7 @@ const modules = [
 // Per-page scripts (not bundled, just minified with cache-busting hash)
 const pageScripts = [
   { module: "graph", scripts: ["graph-list", "graph-creator"] },
+  { module: "counter", scripts: ["counter-list", "counter-creator"] },
   {
     module: "dashboard",
     scripts: [

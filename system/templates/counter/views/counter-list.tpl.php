@@ -1,0 +1,99 @@
+
+<?php
+// Operations
+$rightContent = '';
+if (!empty($counters)) {
+    $rightContent .= '<a href="?urlq=widget-counter/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Counter"><i class="fas fa-plus"></i></a>';
+}
+// Navigation links
+$rightContent .= '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home"><i class="fas fa-home"></i></a>';
+if (DGCHelper::hasAdminAccess()) {
+    $rightContent .= '<a href="?urlq=dashboard/templates" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Templates"><i class="fas fa-clone"></i></a>';
+    $rightContent .= '<a href="?urlq=data-filter" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
+}
+// Widget dropdown
+$leftContent = DGCHelper::renderWidgetDropdown('counter');
+echo DGCHelper::renderPageHeader([
+    'title' => 'Counters',
+    'leftContent' => $leftContent,
+    'rightContent' => $rightContent
+]);
+?>
+
+<div class="container">
+    <div id="counter-list" class="counter-list-page">
+        <?php if (empty($counters)): ?>
+        <?php echo DGCHelper::renderEmptyState(
+            'fa-tachometer-alt',
+            'No Counters Yet',
+            'Create your first counter to display key metrics',
+            'Create Counter',
+            '?urlq=widget-counter/create',
+            'teal'
+        ); ?>
+        <?php else: ?>
+        <div class="item-card-grid">
+            <?php foreach ($counters as $c): ?>
+            <?php
+            $config = $c->getConfigArray();
+            $defaultConfig = Counter::getDefaultConfig();
+            $icon = isset($config['icon']) && $config['icon'] ? $config['icon'] : $defaultConfig['icon'];
+            $color = isset($config['color']) && $config['color'] ? $config['color'] : $defaultConfig['color'];
+            ?>
+            <div class="item-card counter-card" data-counter-id="<?php echo $c->getId(); ?>">
+                <div class="item-card-content">
+                    <div class="item-card-header">
+                        <span class="counter-type-badge" style="background-color: <?php echo htmlspecialchars($color); ?>;">
+                            <span class="material-icons"><?php echo htmlspecialchars($icon); ?></span>
+                            Counter
+                        </span>
+                        <?php if (!empty($counterCategories[$c->getId()])): ?>
+                            <?php echo DGCHelper::renderWidgetCategoryBadges($counterCategories[$c->getId()], 'md', true); ?>
+                        <?php endif; ?>
+                    </div>
+                    <h3><?php echo htmlspecialchars($c->getName()); ?></h3>
+                    <?php if ($c->getDescription()): ?>
+                    <p class="item-card-description"><?php echo htmlspecialchars($c->getDescription()); ?></p>
+                    <?php endif; ?>
+                </div>
+                <div class="item-card-actions">
+                    <a href="?urlq=widget-counter/view/<?php echo $c->getId(); ?>" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" title="View Mode">
+                        <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="?urlq=widget-counter/edit/<?php echo $c->getId(); ?>" class="btn btn-icon btn-outline-design" data-bs-toggle="tooltip" title="Design Mode">
+                        <i class="fas fa-paint-brush"></i>
+                    </a>
+                    <button type="button" class="btn btn-icon btn-outline-danger delete-counter-btn"
+                            data-id="<?php echo $c->getId(); ?>"
+                            data-name="<?php echo htmlspecialchars($c->getName()); ?>"
+                            data-bs-toggle="tooltip"
+                            title="Delete">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="delete-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Counter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the counter "<span class="counter-name"></span>"?</p>
+                <p class="text-muted"><small>This action cannot be undone.</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-sm btn-danger confirm-delete-btn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>

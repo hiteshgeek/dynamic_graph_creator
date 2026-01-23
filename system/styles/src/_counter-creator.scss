@@ -1,0 +1,232 @@
+// Counter Creator page styles - Counter-specific styles only
+// Layout styles inherited from graph-creator via shared classes
+@use "variables" as *;
+
+// Counter preview container - specific styling for counter widget
+.counter-preview-container {
+  padding: $spacing-xl;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+}
+
+// Counter card preview (the actual counter widget)
+.counter-card-preview {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 32px 40px;
+  border-radius: $border-radius-lg;
+  color: #fff;
+  min-width: 300px;
+  max-width: 500px;
+  box-shadow: $shadow-2;
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-3;
+  }
+
+  .counter-icon {
+    flex-shrink: 0;
+
+    .material-icons {
+      font-size: 48px;
+      opacity: 0.9;
+    }
+  }
+
+  .counter-content {
+    flex: 1;
+    text-align: left;
+
+    .counter-value {
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .counter-name {
+      font-size: 16px;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+  }
+}
+
+// Counter skeleton loading animation
+@keyframes counter-skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+// Counter skeleton loading state
+.counter-card-preview.is-loading,
+.counter-card-display.is-loading {
+  .counter-name {
+    opacity: 0.5;
+  }
+}
+
+.counter-skeleton-value {
+  display: inline-block;
+  width: 120px;
+  height: 42px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    rgba(255, 255, 255, 0.35) 20%,
+    rgba(255, 255, 255, 0.35) 40%,
+    rgba(255, 255, 255, 0.15) 60%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  background-size: 200% 100%;
+  animation: counter-skeleton-shimmer 1.5s ease-in-out infinite;
+  border-radius: $border-radius;
+}
+
+.counter-skeleton-icon {
+  opacity: 0.5 !important;
+  animation: counter-skeleton-shimmer 1.5s ease-in-out infinite;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+// Counter-specific config sections
+.config-section {
+  margin-bottom: $spacing-md;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .config-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--dgc-text-secondary);
+    margin-bottom: 6px;
+  }
+}
+
+// Icon selector
+.icon-selector {
+  .icon-selector-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    text-align: left;
+
+    .selected-icon {
+      font-size: 24px;
+      color: var(--dgc-primary);
+    }
+
+    .icon-selector-text {
+      font-size: 13px;
+      color: var(--dgc-text-secondary);
+    }
+  }
+}
+
+// Color picker
+.color-picker-wrapper {
+  display: flex;
+  gap: 8px;
+
+  .form-control-color {
+    width: 48px;
+    height: 38px;
+    padding: 4px;
+    border-radius: $border-radius;
+    cursor: pointer;
+  }
+
+  .color-hex-input {
+    flex: 1;
+    font-family: monospace;
+    font-size: 13px;
+  }
+}
+
+// Icon picker modal
+#icon-picker-modal {
+  .icon-search-wrapper {
+    padding: 0 0 $spacing-md 0;
+  }
+
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .icon-grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    background: var(--dgc-gray-50);
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    .material-icons {
+      font-size: 28px;
+      color: var(--dgc-text-primary);
+    }
+
+    .icon-name {
+      font-size: 10px;
+      color: var(--dgc-text-secondary);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    &:hover {
+      background: rgba(0, 123, 255, 0.1);
+      border-color: var(--dgc-primary);
+    }
+
+    &.active {
+      background: var(--dgc-primary);
+      border-color: var(--dgc-primary);
+
+      .material-icons,
+      .icon-name {
+        color: #fff;
+      }
+    }
+  }
+}
+
+// Dark mode support for counter preview container
+:root.theme-dark {
+  .counter-preview-container {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  }
+}

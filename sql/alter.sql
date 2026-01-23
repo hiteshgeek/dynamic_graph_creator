@@ -50,3 +50,41 @@ CREATE TABLE IF NOT EXISTS filter_widget_type_mandatory (
     FOREIGN KEY (dfid) REFERENCES data_filter(dfid) ON DELETE CASCADE,
     FOREIGN KEY (wtid) REFERENCES widget_type(wtid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Maps filters to widget types where they are mandatory';
+
+-- =============================================================================
+-- Counter Tables (2026-01-23)
+-- =============================================================================
+
+-- Add data_mapping column if counter table already exists (for Element base class compatibility)
+-- ALTER TABLE counter ADD COLUMN data_mapping TEXT COMMENT 'JSON data mapping (not used for counter)' AFTER query;
+
+-- Counter table (KPI/metric counters)
+CREATE TABLE IF NOT EXISTS counter (
+    cid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    config TEXT NOT NULL COMMENT 'JSON config: icon, color, format, prefix, suffix, decimals',
+    query TEXT NOT NULL COMMENT 'SQL query that returns single record with "counter" key',
+    data_mapping TEXT COMMENT 'JSON data mapping (not used for counter, kept for Element base class compatibility)',
+    placeholder_settings TEXT COMMENT 'JSON settings for placeholder behavior (allowEmpty per placeholder)',
+    snapshot TEXT COMMENT 'Base64 encoded preview image',
+    csid TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=active, 3=deleted',
+    created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_ts TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    created_uid INT(11) DEFAULT NULL,
+    updated_uid INT(11) DEFAULT NULL,
+    INDEX idx_csid (csid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores counter/KPI definitions';
+
+-- Counter-Widget Category Mapping table
+CREATE TABLE IF NOT EXISTS counter_widget_category_mapping (
+    cwcmid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    cid INT(11) NOT NULL COMMENT 'Counter ID (foreign key to counter)',
+    wcid INT(11) NOT NULL COMMENT 'Category ID (foreign key to widget_category)',
+    created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_cid (cid),
+    INDEX idx_wcid (wcid),
+    UNIQUE KEY unique_counter_widget_category (cid, wcid),
+    FOREIGN KEY (cid) REFERENCES counter(cid) ON DELETE CASCADE,
+    FOREIGN KEY (wcid) REFERENCES widget_category(wcid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Maps counters to widget categories';
