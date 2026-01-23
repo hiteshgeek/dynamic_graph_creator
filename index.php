@@ -33,6 +33,8 @@ require_once __DIR__ . '/system/classes/SystemPreferencesGroup.php';
 require_once __DIR__ . '/system/classes/SystemPreferencesMapping.php';
 require_once __DIR__ . '/system/classes/DGCHelper.php';
 require_once __DIR__ . '/system/classes/Template.php';
+require_once __DIR__ . '/system/classes/System.php';
+require_once __DIR__ . '/system/classes/JPath.php';
 require_once __DIR__ . '/system/classes/Utility.php';
 require_once __DIR__ . '/system/classes/LocalUtility.php';
 require_once __DIR__ . '/system/classes/QueryHelper.php';

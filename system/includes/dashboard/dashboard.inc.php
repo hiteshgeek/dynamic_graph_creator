@@ -163,7 +163,7 @@ switch ($action) {
         break;
     case 'list':
     default:
-        showList();
+        System::redirectInternal('home');
         break;
 }
 
