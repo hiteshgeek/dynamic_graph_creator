@@ -187,12 +187,6 @@ class DGCHelper
             $cols = $i === 0 ? 3 : 2;
 
             $html .= '<div class="skeleton-section' . $colClass . '">';
-            $html .= '<div class="skeleton-section-header">';
-            $html .= '<div class="skeleton-title"></div>';
-            if ($i === 0) {
-                $html .= '<div class="skeleton-badge"></div>';
-            }
-            $html .= '</div>';
             $html .= '<div class="skeleton-grid">';
 
             for ($j = 0; $j < $cols; $j++) {
@@ -203,7 +197,6 @@ class DGCHelper
                 $html .= '<div class="skeleton-line"></div>';
                 $html .= '<div class="skeleton-line"></div>';
                 $html .= '</div>';
-                $html .= '<div class="skeleton-widget-icon"></div>';
                 $html .= '</div>';
 
                 if ($chartType === 'pie') {

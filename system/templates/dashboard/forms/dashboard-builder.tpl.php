@@ -55,7 +55,7 @@ if ($dashboard && $dashboard->getId() && !$tweakEnabled) {
             <div class="grid-editor">
                 <?php if ($dashboard && $dashboard->getId()): ?>
                     <div class="dashboard-sections">
-                        <!-- Dashboard structure will be rendered by JavaScript -->
+                        <?php echo DGCHelper::renderDashboardSkeleton(); ?>
                     </div>
                 <?php else: ?>
                     <?php echo DGCHelper::renderEmptyState(
