@@ -241,6 +241,11 @@ export class FilterView {
      * @returns {Object} Filter values keyed by placeholder (e.g., {'::company': '1', '::date_from': '2024-01-01'})
      */
     getFilterValues() {
+        // Return empty object if no filters container (dashboard has no filters)
+        if (!this.filtersContainer) {
+            return {};
+        }
+
         const filterValues = {};
         const filterItems = this.filtersContainer.querySelectorAll('.filter-input-item');
 

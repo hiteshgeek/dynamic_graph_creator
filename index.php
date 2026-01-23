@@ -123,6 +123,18 @@ LocalUtility::addModuleCss('common');
 LocalUtility::addModuleJs('common');
 $theme->addScript(SiteConfig::themeLibrariessUrl() . 'bootstrap5/js/bootstrap.bundle.min.js', 5);
 
+function load_404()
+{
+    $tpl = new Template(SystemConfig::templatesPath() . "404");
+    return $tpl->parse();
+}
+
+function load_403()
+{
+    $tpl = new Template(SystemConfig::templatesPath() . "403");
+    return $tpl->parse();
+}
+
 // Route to controller
 switch ($page) {
     case 'home':

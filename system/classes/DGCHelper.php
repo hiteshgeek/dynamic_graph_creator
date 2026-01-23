@@ -451,15 +451,15 @@ class DGCHelper
 
     /**
      * Require admin access for protected pages
-     * Redirects to dashboard list if user doesn't have access
+     * Throws 403 Forbidden error if user doesn't have access
      *
-     * @param string $redirectUrl URL to redirect to if access denied (default: dashboard list)
      * @return void
      */
-    public static function requireAdminAccess($redirectUrl = '?urlq=home')
+    public static function requireAdminAccess()
     {
         if (!self::hasAdminAccess()) {
-            header('Location: ' . $redirectUrl);
+            header('HTTP/1.1 403 Forbidden');
+            echo load_403();
             exit;
         }
     }

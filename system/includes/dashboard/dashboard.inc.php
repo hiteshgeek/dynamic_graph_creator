@@ -192,6 +192,9 @@ function showList()
  */
 function showBuilder($dashboardId = 0)
 {
+    // Require admin access for dashboard builder
+    DGCHelper::requireAdminAccess();
+
     $theme = Rapidkart::getInstance()->getThemeRegistry();
 
     // Add libraries
