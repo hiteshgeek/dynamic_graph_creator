@@ -403,6 +403,11 @@ echo DGCHelper::renderPageHeader([
                 </div>
             </div>
 
+            <!-- Query Results Section (shown after testing query) -->
+            <div class="graph-section sample-data-col" style="display: none;">
+                <div class="sample-data-container"></div>
+            </div>
+
             <!-- SQL Query & Placeholder Settings Row -->
             <div class="split-row">
                 <!-- SQL Query Section with Bootstrap Tabs -->

@@ -411,6 +411,7 @@ function testCounterQuery($data)
     Utility::ajaxResponseTrue('Query is valid', array(
         'columns' => $columns,
         'row' => $row,
+        'row_count' => 1, // Counter queries always return 1 row
         'has_counter_column' => $hasCounterColumn,
         'warning' => $warning,
         'debug_query' => $debugQuery
