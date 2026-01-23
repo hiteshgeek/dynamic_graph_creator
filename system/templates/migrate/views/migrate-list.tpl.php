@@ -90,6 +90,14 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            position: relative;
+        }
+
+        .copy-single-file-btn {
+            padding: 0.15rem 0.4rem;
+            font-size: 0.75rem;
+            line-height: 1;
+            order: -1;
         }
 
         .file-number {
@@ -537,6 +545,13 @@
                                                 <?php echo $fileStatuses[$file]; ?>
                                             </span>
                                             <?php echo htmlspecialchars($file); ?>
+                                            <button type="button" class="btn btn-outline-primary btn-sm copy-single-file-btn"
+                                                data-file="<?php echo htmlspecialchars($file); ?>"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                title="Copy this file">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -813,6 +828,13 @@
                                                     <?php echo $status; ?>
                                                 </span>
                                                 <?php echo htmlspecialchars($file); ?>
+                                                <button type="button" class="btn btn-outline-primary btn-sm copy-single-file-btn"
+                                                    data-file="<?php echo htmlspecialchars($file); ?>"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="Copy this file">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
                                             </div>
                                         <?php endforeach; ?>
                                     </div>
@@ -880,6 +902,13 @@
                                                         <i class="fas fa-magic"></i> <?php echo count($fileTransforms['transforms']); ?> transforms
                                                     </span>
                                                 <?php endif; ?>
+                                                <button type="button" class="btn btn-outline-primary btn-sm copy-single-file-btn"
+                                                    data-file="<?php echo htmlspecialchars($file); ?>"
+                                                    data-bs-toggle="tooltip"
+                                                    data-bs-placement="top"
+                                                    title="Copy this file">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
                                             </div>
                                             <?php if ($fileTransforms && !empty($fileTransforms['transforms'])): ?>
                                                 <div class="transform-details ms-4 mb-2 small" style="border-left: 2px solid #17a2b8; padding-left: 10px;">
@@ -1772,6 +1801,96 @@ LocalUtility::addModuleJs('dashboard') → $theme->addScript(SystemConfig::scrip
             });
         });
 
+        // Copy single file button functionality
+        document.querySelectorAll('.copy-single-file-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const file = this.getAttribute('data-file');
+                const originalHtml = this.innerHTML;
+                const fileItem = this.closest('.file-item-simple');
+                const statusBadge = fileItem.querySelector('.status-badge');
+
+                // Show loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                this.disabled = true;
+
+                // Send AJAX request to copy the file
+                const formData = new FormData();
+                formData.append('submit', 'copy_single_file');
+                formData.append('file', file);
+
+                fetch('.?urlq=migrate', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(response => {
+                        if (response.success) {
+                            // Show success state
+                            this.innerHTML = '<i class="fas fa-check"></i>';
+                            this.classList.remove('btn-outline-primary');
+                            this.classList.add('btn-success');
+
+                            // Update status badge
+                            const result = response.data.result;
+                            if (result === 'success') {
+                                statusBadge.className = 'status-badge status-same';
+                                statusBadge.textContent = 'same';
+                            }
+
+                            // Show toast notification
+                            if (typeof Toast !== 'undefined') {
+                                Toast.success('File copied successfully');
+                            }
+
+                            // Reset button after 2 seconds
+                            setTimeout(() => {
+                                this.innerHTML = originalHtml;
+                                this.classList.remove('btn-success');
+                                this.classList.add('btn-outline-primary');
+                                this.disabled = false;
+                            }, 2000);
+                        } else {
+                            // Show error state
+                            this.innerHTML = '<i class="fas fa-times"></i>';
+                            this.classList.remove('btn-outline-primary');
+                            this.classList.add('btn-danger');
+
+                            if (typeof Toast !== 'undefined') {
+                                Toast.error(response.message || 'Failed to copy file');
+                            }
+
+                            // Reset button after 2 seconds
+                            setTimeout(() => {
+                                this.innerHTML = originalHtml;
+                                this.classList.remove('btn-danger');
+                                this.classList.add('btn-outline-primary');
+                                this.disabled = false;
+                            }, 2000);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        this.innerHTML = '<i class="fas fa-times"></i>';
+                        this.classList.remove('btn-outline-primary');
+                        this.classList.add('btn-danger');
+
+                        if (typeof Toast !== 'undefined') {
+                            Toast.error('Failed to copy file');
+                        }
+
+                        setTimeout(() => {
+                            this.innerHTML = originalHtml;
+                            this.classList.remove('btn-danger');
+                            this.classList.add('btn-outline-primary');
+                            this.disabled = false;
+                        }, 2000);
+                    });
+            });
+        });
+
         // Count target files button functionality
         document.querySelectorAll('.count-target-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1835,6 +1954,11 @@ LocalUtility::addModuleJs('dashboard') → $theme->addScript(SystemConfig::scrip
                         }, 3000);
                     });
             });
+        });
+
+        // Initialize Bootstrap tooltips
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(element => {
+            new bootstrap.Tooltip(element);
         });
 
         // Initialize execution badges on page load

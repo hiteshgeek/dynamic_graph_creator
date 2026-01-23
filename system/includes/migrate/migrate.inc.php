@@ -277,6 +277,9 @@ if ($isAjax && isset($_POST['submit'])) {
         case 'execute_step':
             executeStep($_POST);
             break;
+        case 'copy_single_file':
+            copySingleFile($_POST);
+            break;
     }
     exit; // AJAX handlers call exit after response
 }
@@ -660,6 +663,32 @@ function executeStep($data)
             'step' => $step,
             'title' => $stepData['title'],
             'result' => $result,
+            'timestamp' => time()
+        ]);
+    } catch (Exception $e) {
+        Utility::ajaxResponseFalse('Error: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Copy a single file (AJAX)
+ */
+function copySingleFile($data)
+{
+    global $sourceDir, $targetDir;
+
+    $file = isset($data['file']) ? trim($data['file']) : '';
+
+    if (empty($file)) {
+        Utility::ajaxResponseFalse('File path is required');
+    }
+
+    try {
+        $result = copyFiles($sourceDir, $targetDir, [$file]);
+
+        Utility::ajaxResponseSuccess('File copied successfully', [
+            'file' => $file,
+            'result' => $result[$file],
             'timestamp' => time()
         ]);
     } catch (Exception $e) {
