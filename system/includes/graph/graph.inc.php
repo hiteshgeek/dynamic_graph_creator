@@ -420,9 +420,20 @@ function testQuery($data)
     // Store the debug query (with placeholders replaced, but without forced LIMIT)
     $debugQuery = $testQuery;
 
-    // Remove existing LIMIT and add our own for sample rows (for execution only)
-    $testQuery = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $testQuery);
-    $testQuery .= ' LIMIT 10';
+    // Check if query already has a LIMIT clause - respect user's limit if provided
+    $defaultLimit = 10;
+    $maxLimit = 100; // Safety limit to prevent huge result sets
+
+    if (preg_match('/\s+LIMIT\s+(\d+)(?:\s*,\s*(\d+))?/i', $testQuery, $matches)) {
+        // User provided LIMIT - use it but cap at max for safety
+        $userLimit = isset($matches[2]) ? intval($matches[2]) : intval($matches[1]);
+        $effectiveLimit = min($userLimit, $maxLimit);
+        // Replace user's LIMIT with capped version
+        $testQuery = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', ' LIMIT ' . $effectiveLimit, $testQuery);
+    } else {
+        // No LIMIT provided - add default
+        $testQuery .= ' LIMIT ' . $defaultLimit;
+    }
 
     $res = $db->query($testQuery);
 

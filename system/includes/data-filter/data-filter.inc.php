@@ -270,7 +270,15 @@ function testDataFilterQuery($data)
     // Resolve system placeholders before testing
     $resolvedQuery = SystemPlaceholderManager::resolveInQuery($query);
 
-    // Remove existing LIMIT clause
+    // Check if user provided a LIMIT clause - respect it as maximum results
+    $userLimit = null;
+    $maxLimit = 1000; // Safety limit
+    if (preg_match('/\s+LIMIT\s+(\d+)(?:\s*,\s*(\d+))?/i', $resolvedQuery, $limitMatches)) {
+        $userLimit = isset($limitMatches[2]) ? intval($limitMatches[2]) : intval($limitMatches[1]);
+        $userLimit = min($userLimit, $maxLimit); // Cap at safety limit
+    }
+
+    // Remove existing LIMIT clause for base query
     $baseQuery = preg_replace('/\s+LIMIT\s+\d+(\s*,\s*\d+)?/i', '', $resolvedQuery);
 
     $db = Rapidkart::getInstance()->getDB();
@@ -285,9 +293,22 @@ function testDataFilterQuery($data)
             $totalCount = intval($countRow['total']);
         }
 
-        // Add pagination LIMIT
+        // If user provided LIMIT, cap the total count to that limit
+        if ($userLimit !== null) {
+            $totalCount = min($totalCount, $userLimit);
+        }
+
+        // Add pagination LIMIT (respecting user's limit if provided)
         $offset = ($page - 1) * $pageSize;
-        $testQuery = $baseQuery . " LIMIT " . $offset . ", " . $pageSize;
+        $effectivePageSize = $pageSize;
+
+        // If user provided LIMIT, ensure we don't exceed it
+        if ($userLimit !== null) {
+            $remainingRows = max(0, $userLimit - $offset);
+            $effectivePageSize = min($pageSize, $remainingRows);
+        }
+
+        $testQuery = $baseQuery . " LIMIT " . $offset . ", " . $effectivePageSize;
 
         $res = $db->query($testQuery);
 

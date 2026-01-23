@@ -1,56 +1,64 @@
 <?php
 
+require_once __DIR__ . '/element/ElementManager.php';
+
 /**
- * GraphManager - Centralized graph retrieval and management
- * Provides methods to get graphs by various criteria
+ * GraphManager - Graph-specific manager
+ * Extends ElementManager with graph-specific functionality
  *
  * @author Dynamic Graph Creator
  */
-class GraphManager
+class GraphManager extends ElementManager
 {
     /**
-     * Get all active graphs
-     * @return array Array of Graph objects
+     * Get the Element class name
+     * @return string
      */
-    public static function getAll()
+    protected static function getElementClass()
     {
-        $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_GRAPH . " WHERE gsid != 3 ORDER BY updated_ts DESC";
-        $res = $db->query($sql);
-
-        $graphs = array();
-        while ($row = $db->fetchObject($res)) {
-            $graph = new Graph();
-            $graph->parse($row);
-            $graphs[] = $graph;
-        }
-        return $graphs;
+        return 'Graph';
     }
 
     /**
-     * Get a single graph by ID
-     * @param int $id Graph ID
-     * @return Graph|null
+     * Get all graphs with their category mappings
+     * @return array Array of graph data with categories
      */
-    public static function getById($id)
+    public static function getAllWithCategories()
     {
-        if (!Graph::isExistent($id)) {
-            return null;
-        }
-        return new Graph($id);
-    }
-
-    /**
-     * Get all active graphs as array data
-     * @return array Array of graph arrays
-     */
-    public static function getAllAsArray()
-    {
-        $graphs = self::getAll();
+        $graphs = static::getAll();
         $result = array();
+
         foreach ($graphs as $graph) {
-            $result[] = $graph->toArray();
+            $data = $graph->toArray();
+
+            // Get category IDs for this graph
+            $categoryIds = GraphWidgetCategoryMappingManager::getCategoryIdsForGraph($graph->getId());
+            $data['category_ids'] = $categoryIds;
+
+            // Get full category data
+            $categories = array();
+            if (!empty($categoryIds)) {
+                $allCategories = WidgetCategoryManager::getAll();
+                foreach ($allCategories as $cat) {
+                    if (in_array($cat->getId(), $categoryIds)) {
+                        $categories[] = $cat->toArray();
+                    }
+                }
+            }
+            $data['categories'] = $categories;
+
+            $result[] = $data;
         }
+
         return $result;
+    }
+
+    /**
+     * Get graphs for widget selector (with categories)
+     * @return array
+     */
+    public static function getForWidgetSelector()
+    {
+        return static::getAllWithCategories();
     }
 }

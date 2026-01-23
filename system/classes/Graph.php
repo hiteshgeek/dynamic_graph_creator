@@ -1,235 +1,120 @@
 <?php
 
+require_once __DIR__ . '/element/Element.php';
+
 /**
- * Graph model - Stores graph definitions
+ * Graph model - Chart element type
+ * Extends Element with graph-specific functionality
  *
  * @author Dynamic Graph Creator
  */
-class Graph implements DatabaseObject
+class Graph extends Element
 {
-    private $gid;
-    private $name;
-    private $description;
-    private $graph_type;
-    private $config;
-    private $query;
-    private $data_mapping;
-    private $placeholder_settings;
-    private $snapshot;
-    private $gsid;
-    private $created_ts;
-    private $updated_ts;
-    private $created_uid;
-    private $updated_uid;
+    // Graph-specific property
+    protected $graph_type;
 
-    public function __construct($id = null)
+    // Alias for backward compatibility (gid → id)
+    protected $gid;
+
+    /**
+     * Get database table name
+     * @return string
+     */
+    public static function getTableName()
     {
-        if ($id !== null) {
-            $this->gid = intval($id);
-            $this->load();
-        }
+        return SystemTables::DB_TBL_GRAPH;
     }
 
-    public static function isExistent($id)
+    /**
+     * Get primary key column name
+     * @return string
+     */
+    public static function getPrimaryKeyName()
     {
-        $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT gid FROM " . SystemTables::DB_TBL_GRAPH . " WHERE gid = '::gid' AND gsid != 3 LIMIT 1";
-        $res = $db->query($sql, array('::gid' => intval($id)));
-        return $db->resultNumRows($res) > 0;
+        return 'gid';
     }
 
-    public function getId() { return $this->gid; }
+    /**
+     * Get status column name
+     * @return string
+     */
+    public static function getStatusColumnName()
+    {
+        return 'gsid';
+    }
 
+    /**
+     * Get element type identifier
+     * @return string
+     */
+    public static function getElementType()
+    {
+        return 'graph';
+    }
+
+    /**
+     * Check mandatory data - includes graph_type
+     * @return bool
+     */
     public function hasMandatoryData()
     {
-        return !empty($this->name) && !empty($this->query) && !empty($this->graph_type);
-    }
-
-    public function insert()
-    {
-        if (!$this->hasMandatoryData()) return false;
-
-        $db = Rapidkart::getInstance()->getDB();
-        $sql = "INSERT INTO " . SystemTables::DB_TBL_GRAPH . " (
-            name, description, graph_type, config, query, data_mapping, placeholder_settings, created_uid
-        ) VALUES (
-            '::name', '::description', '::graph_type', '::config', '::query', '::data_mapping', '::placeholder_settings', '::created_uid'
-        )";
-
-        $args = array(
-            '::name' => $this->name,
-            '::description' => $this->description ? $this->description : '',
-            '::graph_type' => $this->graph_type,
-            '::config' => $this->config ? $this->config : '{}',
-            '::query' => $this->query,
-            '::data_mapping' => $this->data_mapping ? $this->data_mapping : '{}',
-            '::placeholder_settings' => $this->placeholder_settings ? $this->placeholder_settings : '{}',
-            '::created_uid' => $this->created_uid ? $this->created_uid : 0
-        );
-
-        if ($db->query($sql, $args)) {
-            $this->gid = $db->lastInsertId();
-            return true;
-        }
-        return false;
-    }
-
-    public function update()
-    {
-        if (!$this->gid) return false;
-
-        $db = Rapidkart::getInstance()->getDB();
-        $sql = "UPDATE " . SystemTables::DB_TBL_GRAPH . " SET
-            name = '::name',
-            description = '::description',
-            graph_type = '::graph_type',
-            config = '::config',
-            query = '::query',
-            data_mapping = '::data_mapping',
-            placeholder_settings = '::placeholder_settings',
-            updated_uid = '::updated_uid'
-        WHERE gid = '::gid'";
-
-        $args = array(
-            '::name' => $this->name,
-            '::description' => $this->description ? $this->description : '',
-            '::graph_type' => $this->graph_type,
-            '::config' => $this->config ? $this->config : '{}',
-            '::query' => $this->query,
-            '::data_mapping' => $this->data_mapping ? $this->data_mapping : '{}',
-            '::placeholder_settings' => $this->placeholder_settings ? $this->placeholder_settings : '{}',
-            '::updated_uid' => $this->updated_uid ? $this->updated_uid : 0,
-            '::gid' => $this->gid
-        );
-
-        return $db->query($sql, $args) ? true : false;
-    }
-
-    public static function delete($id)
-    {
-        $db = Rapidkart::getInstance()->getDB();
-        $sql = "UPDATE " . SystemTables::DB_TBL_GRAPH . " SET gsid = 3 WHERE gid = '::gid'";
-        $result = $db->query($sql, array('::gid' => intval($id)));
-
-        if ($result) {
-            FilterSet::deleteAllForEntity('graph', $id);
-        }
-        return $result ? true : false;
+        return parent::hasMandatoryData() && !empty($this->graph_type);
     }
 
     /**
-     * Update only the snapshot field
+     * Get graph-specific insert data
+     * @return array
      */
-    public function updateSnapshot()
-    {
-        if (!$this->gid) return false;
-
-        $db = Rapidkart::getInstance()->getDB();
-        $sql = "UPDATE " . SystemTables::DB_TBL_GRAPH . " SET
-            snapshot = '::snapshot',
-            updated_uid = '::updated_uid'
-        WHERE gid = '::gid'";
-
-        $args = array(
-            '::snapshot' => $this->snapshot ? $this->snapshot : '',
-            '::updated_uid' => $this->updated_uid ? $this->updated_uid : 0,
-            '::gid' => $this->gid
-        );
-
-        return $db->query($sql, $args) ? true : false;
-    }
-
-    public function load()
-    {
-        if (!$this->gid) return false;
-
-        $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_GRAPH . " WHERE gid = '::gid' AND gsid != 3 LIMIT 1";
-        $res = $db->query($sql, array('::gid' => $this->gid));
-
-        if (!$res || $db->resultNumRows($res) < 1) {
-            $this->gid = null;
-            return false;
-        }
-
-        return $this->parse($db->fetchObject($res));
-    }
-
-    public function parse($obj)
-    {
-        if (!$obj) return false;
-        foreach ($obj as $key => $value) {
-            if (property_exists($this, $key)) {
-                $this->$key = $value;
-            }
-        }
-        return true;
-    }
-
-    public function __toString() { return $this->name ? $this->name : ''; }
-
-    public function toArray()
+    protected function getTypeSpecificInsertData()
     {
         return array(
-            'gid' => $this->gid,
-            'name' => $this->name,
-            'description' => $this->description,
-            'graph_type' => $this->graph_type,
-            'config' => $this->config,
-            'query' => $this->query,
-            'data_mapping' => $this->data_mapping,
-            'placeholder_settings' => $this->placeholder_settings,
-            'snapshot' => $this->snapshot,
-            'created_ts' => $this->created_ts,
-            'updated_ts' => $this->updated_ts
+            'columns' => array('graph_type'),
+            'values' => array("'::graph_type'"),
+            'args' => array('::graph_type' => $this->graph_type)
         );
     }
 
     /**
-     * Execute query and return chart data
+     * Get graph-specific update data
+     * @return array
      */
-    public function execute($filter_values = array())
+    protected function getTypeSpecificUpdateData()
     {
-        $db = Rapidkart::getInstance()->getDB();
-
-        $filterSet = new DataFilterSet('graph', $this->gid);
-        $filterSet->loadFilters();
-
-        // Get placeholder settings saved with the graph
-        $placeholderSettings = $this->placeholder_settings ? json_decode($this->placeholder_settings, true) : array();
-        if (!is_array($placeholderSettings)) {
-            $placeholderSettings = array();
-        }
-
-        // Validate required placeholders before executing query
-        $missingRequired = DataFilterManager::validateRequiredPlaceholders($this->query, $filter_values, $placeholderSettings);
-        if (!empty($missingRequired)) {
-            // Format placeholder names for display (remove :: prefix)
-            $filterNames = array_map(function($p) { return ltrim($p, ':'); }, $missingRequired);
-            // Return empty data with error message
-            return $this->getEmptyChartData('Required filter(s) missing value: ' . implode(', ', $filterNames));
-        }
-
-        $query = $filterSet->applyToQuery($this->query, $filter_values, $placeholderSettings);
-        $res = $db->query($query);
-
-        if (!$res) {
-            return array('error' => $db->getMysqlError());
-        }
-
-        $mapping = json_decode($this->data_mapping, true);
-        $rows = array();
-        while ($row = $db->fetchAssocArray($res)) {
-            $rows[] = $row;
-        }
-
-        return $this->formatChartData($rows, $mapping);
+        return array(
+            'set' => "graph_type = '::graph_type'",
+            'args' => array('::graph_type' => $this->graph_type)
+        );
     }
 
     /**
-     * Format query results into chart data
+     * Parse database row - handle gid alias
+     * @param object $obj Database row
+     * @return bool
      */
-    private function formatChartData($rows, $mapping)
+    public function parse($obj)
+    {
+        $result = parent::parse($obj);
+
+        // Sync gid alias with id for backward compatibility
+        if ($this->id) {
+            $this->gid = $this->id;
+        }
+
+        // Parse graph_type if present
+        if (isset($obj->graph_type)) {
+            $this->graph_type = $obj->graph_type;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Format query results for chart rendering
+     * @param array $rows Query result rows
+     * @param array $mapping Data mapping configuration
+     * @return array Chart data
+     */
+    protected function formatData($rows, $mapping)
     {
         if ($this->graph_type === 'pie') {
             $nameCol = isset($mapping['name_column']) ? $mapping['name_column'] : '';
@@ -244,6 +129,7 @@ class Graph implements DatabaseObject
             }
             return array('items' => $items);
         } else {
+            // Bar/Line chart
             $xCol = isset($mapping['x_column']) ? $mapping['x_column'] : '';
             $yCol = isset($mapping['y_column']) ? $mapping['y_column'] : '';
 
@@ -260,12 +146,11 @@ class Graph implements DatabaseObject
     }
 
     /**
-     * Get empty chart data structure with optional error message
-     *
-     * @param string|null $error Error message to include
-     * @return array Empty chart data with error
+     * Get empty chart data structure
+     * @param string|null $error Error message
+     * @return array Empty chart data
      */
-    private function getEmptyChartData($error = null)
+    protected function getEmptyData($error = null)
     {
         $result = array();
 
@@ -283,34 +168,29 @@ class Graph implements DatabaseObject
         return $result;
     }
 
-    // Getters and Setters
-    public function getName() { return $this->name; }
-    public function setName($value) { $this->name = $value; }
+    /**
+     * Convert to array - includes graph-specific data
+     * @return array
+     */
+    public function toArray()
+    {
+        $data = parent::toArray();
+        $data['gid'] = $this->id; // Backward compatibility
+        $data['graph_type'] = $this->graph_type;
+        return $data;
+    }
 
-    public function getDescription() { return $this->description; }
-    public function setDescription($value) { $this->description = $value; }
+    /**
+     * Get ID (backward compatibility - returns gid)
+     * @return int|null
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    // Graph-specific getters and setters
 
     public function getGraphType() { return $this->graph_type; }
     public function setGraphType($value) { $this->graph_type = $value; }
-
-    public function getConfig() { return $this->config; }
-    public function setConfig($value) { $this->config = is_string($value) ? $value : json_encode($value); }
-
-    public function getQuery() { return $this->query; }
-    public function setQuery($value) { $this->query = $value; }
-
-    public function getDataMapping() { return $this->data_mapping; }
-    public function setDataMapping($value) { $this->data_mapping = is_string($value) ? $value : json_encode($value); }
-
-    public function getPlaceholderSettings() { return $this->placeholder_settings; }
-    public function setPlaceholderSettings($value) { $this->placeholder_settings = is_string($value) ? $value : json_encode($value); }
-
-    public function getSnapshot() { return $this->snapshot; }
-    public function setSnapshot($value) { $this->snapshot = $value; }
-
-    public function getCreatedTs() { return $this->created_ts; }
-    public function getUpdatedTs() { return $this->updated_ts; }
-
-    public function setCreatedUid($value) { $this->created_uid = intval($value); }
-    public function setUpdatedUid($value) { $this->updated_uid = intval($value); }
 }

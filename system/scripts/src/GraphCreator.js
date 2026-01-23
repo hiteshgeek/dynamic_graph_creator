@@ -1,824 +1,583 @@
 /**
- * GraphCreator - Main orchestrator class
- * Coordinates all components of the graph creator
+ * GraphCreator - Graph-specific creator class
+ * Extends ElementCreator with chart-specific functionality
  */
 
-import GraphPreview from "./GraphPreview.js";
-import GraphExporter from "./GraphExporter.js";
-import QueryBuilder from "./QueryBuilder.js";
-import DataMapper from "./DataMapper.js";
-import DataFilterManager from "./DataFilterManager.js";
-import ConfigPanel from "./ConfigPanel.js";
-import PlaceholderSettings from "./PlaceholderSettings.js";
-import DataFilterUtils from "./DataFilterUtils.js";
-import MandatoryFilterValidator from "./MandatoryFilterValidator.js";
+import ElementCreator from './element/ElementCreator.js';
+import GraphPreview from './GraphPreview.js';
+import GraphExporter from './GraphExporter.js';
+import ConfigPanel from './ConfigPanel.js';
 
-// Use autosize from CDN (global)
-const autosize = window.autosize;
-const FormValidator = window.FormValidator;
 const Toast = window.Toast;
-
-export default class GraphCreator {
-  constructor(container, options = {}) {
-    this.container = container;
-    this.graphId = options.graphId || null;
-    this.graphType = "bar";
-    this.graphName = "";
-    this.graphDescription = "";
-
-    // Component instances
-    this.preview = null;
-    this.exporter = null;
-    this.queryBuilder = null;
-    this.dataMapper = null;
-    this.filterManager = null;
-    this.configPanel = null;
-    this.placeholderSettings = null;
-    this.mandatoryFilterValidator = null;
-
-    // State
-    this.columns = [];
-    this.isLoading = false;
-    this.initialLoad = !!options.graphId; // True when editing - PHP rendered skeleton
-    this.activeSidebarTab = "config"; // Default to config tab
-
-    // Unsaved changes tracking
-    this.hasUnsavedChanges = false;
-
-    // Status tracking for errors/warnings
-    this.queryError = null;
-    this.placeholderWarnings = [];
-    this.savedState = null;
-  }
-
-  /**
-   * Initialize all components
-   */
-  init() {
-    this.initMandatoryFilterValidator();
-    this.initPreview();
-    this.initExporter();
-    this.initQueryBuilder();
-    this.initDataMapper();
-    this.initFilterManager();
-    this.initConfigPanel();
-    this.initPlaceholderSettings();
-    this.initGraphTypeSelector();
-    this.initSaveHandler();
-    this.initFormValidation();
-    this.initTabs();
-    this.initSidebarTabs();
-    this.initCollapsiblePanels();
-    this.initFilterSelector();
-    this.initSidebarFilters();
-
-    // Load existing graph if editing
-    if (this.graphId) {
-      this.loadGraph(this.graphId);
-    } else {
-      // Show dummy data for new graph
-      this.preview.showDummyData(this.graphType);
-      // Capture initial state for new graph
-      this.captureState();
-    }
-
-    // Initialize category chips
-    this.initCategoryChips();
-
-    // Initialize change tracking
-    this.initChangeTracking();
-
-    // Initialize keyboard shortcuts
-    this.initKeyboardShortcuts();
-
-    // Show initial status indicators
-    this.updateStatusIndicators();
-
-    // Initialize mini chart preview (shows when main chart scrolls out of view)
-    this.initMiniPreview();
-  }
-
-  /**
-   * Initialize mandatory filter validator
-   */
-  initMandatoryFilterValidator() {
-    this.mandatoryFilterValidator = new MandatoryFilterValidator(this.container);
-  }
-
-  /**
-   * Initialize graph preview component
-   */
-  initPreview() {
-    const previewContainer = this.container.querySelector(
-      ".graph-preview-container",
-    );
-    if (previewContainer) {
-      // Don't show skeleton on init - loadGraph or showDummyData will handle it
-      this.preview = new GraphPreview(previewContainer, { showSkeleton: false });
-    }
-  }
-
-  /**
-   * Initialize graph exporter component
-   */
-  initExporter() {
-    const exportContainer = this.container.querySelector("#export-chart-container");
-    if (!exportContainer) return;
-
-    this.exporter = new GraphExporter({
-      filename: this.graphName || "chart-preview",
-      container: exportContainer,
-      graphId: this.graphId,
-      onSaveSuccess: (data) => {
-        console.log('Snapshot saved:', data);
-      }
-    });
-
-    // Update chart reference when preview renders
-    if (this.preview) {
-      this.preview.onRender(() => {
-        if (this.preview.chart) {
-          this.exporter.setChart(this.preview.chart);
-          this.exporter.setFilename(this.graphName || "chart-preview");
-        }
-      });
-    }
-  }
-
-  /**
-   * Initialize query builder component
-   */
-  initQueryBuilder() {
-    const queryContainer = this.container.querySelector(".query-builder");
-    if (queryContainer) {
-      this.queryBuilder = new QueryBuilder(queryContainer, {
-        onTest: (columns) => this.onQueryTest(columns),
-        onError: (error) => this.onQueryError(error),
-        onChange: () => {
-          this.checkForChanges();
-          this.updatePlaceholderSettings();
-        },
-        getFilterValues: () => this.getSidebarFilterValues(),
-        getPlaceholderSettings: () => this.getPlaceholderSettingsForQuery(),
-      });
-    }
-  }
-
-  /**
-   * Get placeholder settings for query execution
-   */
-  getPlaceholderSettingsForQuery() {
-    if (!this.placeholderSettings) return {};
-    return this.placeholderSettings.getSettings();
-  }
-
-  /**
-   * Initialize data mapper component
-   */
-  initDataMapper() {
-    const mapperContainer = this.container.querySelector(".data-mapper");
-    if (mapperContainer) {
-      this.dataMapper = new DataMapper(mapperContainer, {
-        onChange: () => {
-          this.updatePreview();
-          this.checkForChanges();
-        },
-      });
-      this.dataMapper.setGraphType(this.graphType);
-    }
-  }
-
-  /**
-   * Initialize filter manager component
-   */
-  initFilterManager() {
-    const filterContainer = this.container.querySelector(".filter-manager");
-    if (filterContainer) {
-      this.filterManager = new DataFilterManager(filterContainer, {
-        entityType: "graph",
-        entityId: this.graphId,
-        onChange: () => {
-          this.onFiltersChanged();
-          this.checkForChanges();
-        },
-      });
-      this.filterManager.init();
-    }
-  }
-
-  /**
-   * Initialize config panel component
-   */
-  initConfigPanel() {
-    const configContainer = this.container.querySelector(".graph-config-panel");
-    if (configContainer) {
-      this.configPanel = new ConfigPanel(configContainer, {
-        onChange: () => {
-          this.updatePreview();
-          this.checkForChanges();
-        },
-      });
-      this.configPanel.setGraphType(this.graphType);
-    }
-  }
-
-  /**
-   * Initialize placeholder settings component
-   */
-  initPlaceholderSettings() {
-    const settingsContainer = this.container.querySelector(".graph-main");
-    if (settingsContainer) {
-      this.placeholderSettings = new PlaceholderSettings(settingsContainer, {
-        onChange: () => this.checkForChanges(),
-        getMatchedFilters: () => this.getMatchedFilters(),
-      });
-    }
-  }
-
-  /**
-   * Get matched filters for placeholders in query
-   * Returns object mapping placeholder keys to filter info
-   * Checks both selected filters AND all available filters (for derived placeholders)
-   * For date range filters, also creates _from and _to entries
-   */
-  getMatchedFilters() {
-    const matchedFilters = {};
-    const filtersContainer = this.container.querySelector("#graph-filters");
-    if (!filtersContainer) return matchedFilters;
-
-    // Date range filter types that create _from and _to placeholders
-    const dateRangeTypes = ["date_range", "main_datepicker"];
-
-    // First, add all selected filters
-    const filterItems = filtersContainer.querySelectorAll(".filter-input-item");
-    filterItems.forEach((item) => {
-      const filterKey = item.dataset.filterKey;
-      const filterType = item.dataset.filterType;
-      const filterLabel =
-        item.querySelector(".filter-input-label")?.textContent || filterKey;
-
-      // Only include filter if it's in the selectedFilters list (active for this graph)
-      if (
-        filterKey &&
-        this.selectedFilters &&
-        this.selectedFilters.includes(filterKey)
-      ) {
-        // Add the main placeholder
-        matchedFilters["::" + filterKey] = {
-          filter_key: filterKey,
-          filter_label: filterLabel,
-          filter_type: filterType,
-        };
-
-        // For date range filters, also add _from and _to entries
-        if (dateRangeTypes.includes(filterType)) {
-          matchedFilters["::" + filterKey + "_from"] = {
-            filter_key: filterKey,
-            filter_label: filterLabel + " (From)",
-            filter_type: filterType,
-            is_derived: true,
-            parent_key: filterKey,
-          };
-          matchedFilters["::" + filterKey + "_to"] = {
-            filter_key: filterKey,
-            filter_label: filterLabel + " (To)",
-            filter_type: filterType,
-            is_derived: true,
-            parent_key: filterKey,
-          };
-        }
-      }
-    });
-
-    // Second pass: also check ALL available filters for derived placeholders (_from/_to)
-    // This helps when user types a date range placeholder but hasn't selected the filter yet
-    filterItems.forEach((item) => {
-      const filterKey = item.dataset.filterKey;
-      const filterType = item.dataset.filterType;
-      const filterLabel =
-        item.querySelector(".filter-input-label")?.textContent || filterKey;
-
-      if (filterKey && dateRangeTypes.includes(filterType)) {
-        // Add _from and _to entries if not already added (from selected filters)
-        if (!matchedFilters["::" + filterKey + "_from"]) {
-          matchedFilters["::" + filterKey + "_from"] = {
-            filter_key: filterKey,
-            filter_label: filterLabel + " (From)",
-            filter_type: filterType,
-            is_derived: true,
-            parent_key: filterKey,
-            not_selected: true, // Mark as available but not selected
-          };
-        }
-        if (!matchedFilters["::" + filterKey + "_to"]) {
-          matchedFilters["::" + filterKey + "_to"] = {
-            filter_key: filterKey,
-            filter_label: filterLabel + " (To)",
-            filter_type: filterType,
-            is_derived: true,
-            parent_key: filterKey,
-            not_selected: true, // Mark as available but not selected
-          };
-        }
-      }
-    });
-
-    return matchedFilters;
-  }
-
-  /**
-   * Update placeholder settings when query changes
-   */
-  updatePlaceholderSettings() {
-    if (!this.placeholderSettings || !this.queryBuilder) return;
-
-    const placeholders = this.queryBuilder.getPlaceholders();
-    const matchedFilters = this.getMatchedFilters();
-    this.placeholderSettings.setPlaceholders(placeholders, matchedFilters);
-
-    // Update warnings for missing filters
-    this.updatePlaceholderWarnings(placeholders, matchedFilters);
-  }
-
-  /**
-   * Update placeholder warnings list
-   */
-  updatePlaceholderWarnings(placeholders, matchedFilters) {
-    this.placeholderWarnings = [];
-    placeholders.forEach((placeholder) => {
-      if (!matchedFilters[placeholder]) {
-        this.placeholderWarnings.push(placeholder);
-      }
-    });
-    this.updateStatusIndicators();
-  }
-
-  /**
-   * Set query error message
-   */
-  setQueryError(error) {
-    this.queryError = error;
-    this.updateStatusIndicators();
-  }
-
-  /**
-   * Clear query error
-   */
-  clearQueryError() {
-    this.queryError = null;
-    this.updateStatusIndicators();
-  }
-
-  /**
-   * Update status indicators in page header (errors, warnings, and save status)
-   */
-  updateStatusIndicators() {
-    // Status indicators are now in page header
-    const statusContainer = document.querySelector(
-      ".page-header-right .status-indicators",
-    );
-    if (!statusContainer) return;
-
-    let html = "";
-
-    // Save indicator (always shown)
-    if (this.hasUnsavedChanges) {
-      html += `<span class="save-indicator unsaved"><i class="fas fa-circle"></i> Unsaved</span>`;
-    } else {
-      html += `<span class="save-indicator saved"><i class="fas fa-check"></i> Saved</span>`;
-    }
-
-    // Error indicator
-    if (this.queryError) {
-      html += `<span class="status-box status-error" title="${this.escapeHtml(this.queryError)}">
-                <i class="fas fa-times-circle"></i>
-            </span>`;
-    }
-
-    // Warning indicator for missing filters
-    if (this.placeholderWarnings.length > 0) {
-      const warningText = `Filter not found: ${this.placeholderWarnings.join(", ")}`;
-      html += `<span class="status-box status-warning" title="${this.escapeHtml(warningText)}">
-                <i class="fas fa-exclamation-triangle"></i>
-            </span>`;
-    }
-
-    statusContainer.innerHTML = html;
-
-    // Initialize tooltips (Bootstrap)
-    const tooltipElements = statusContainer.querySelectorAll("[title]");
-    tooltipElements.forEach((el) => {
-      if (typeof bootstrap !== "undefined" && bootstrap.Tooltip) {
-        new bootstrap.Tooltip(el, { placement: "bottom" });
-      }
-    });
-  }
-
-  /**
-   * Escape HTML for tooltip
-   */
-  escapeHtml(text) {
-    if (!text) return "";
-    const div = document.createElement("div");
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  /**
-   * Initialize graph type selector (supports both old and new class names)
-   */
-  initGraphTypeSelector() {
-    // Support both .graph-type-item (old) and .chart-type-item (new single sidebar)
-    const typeItems = this.container.querySelectorAll(
-      ".graph-type-item, .chart-type-item",
-    );
-
-    const selectType = (item) => {
-      const type = item.dataset.type;
-      this.setGraphType(type);
-
-      // Update active state and aria-checked
-      typeItems.forEach((i) => {
-        i.classList.remove("active");
-        i.setAttribute("aria-checked", "false");
-      });
-      item.classList.add("active");
-      item.setAttribute("aria-checked", "true");
-    };
-
-    typeItems.forEach((item) => {
-      // Click handler
-      item.addEventListener("click", () => selectType(item));
-
-      // Keyboard handler (Enter/Space)
-      item.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          selectType(item);
-        }
-      });
-    });
-  }
-
-  /**
-   * Initialize save handler
-   */
-  initSaveHandler() {
-    // Save button is now in page header
-    const saveBtn = document.querySelector(
-      ".page-header-right .save-graph-btn",
-    );
-    const nameInput = this.container.querySelector(".graph-name-input");
-    const descriptionInput = this.container.querySelector(
-      ".graph-description-input",
-    );
-
-    if (saveBtn) {
-      saveBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        this.save();
-      });
-    }
-
-    if (nameInput) {
-      // Read initial value from input (for edit mode where value is pre-filled)
-      this.graphName = nameInput.value || "";
-
-      nameInput.addEventListener("input", (e) => {
-        this.graphName = e.target.value;
-        this.checkForChanges();
-      });
-    }
-
-    if (descriptionInput) {
-      // Read initial value from input (for edit mode where value is pre-filled)
-      this.graphDescription = descriptionInput.value || "";
-
-      // Initialize autosize for description textarea
-      autosize(descriptionInput);
-
-      descriptionInput.addEventListener("input", (e) => {
-        this.graphDescription = e.target.value;
-        this.checkForChanges();
-      });
-    }
-  }
-
-  /**
-   * Initialize form validation using FormValidator
-   */
-  initFormValidation() {
-    const form = document.getElementById("graph-form");
-    if (!form) return;
-
-    this.formValidator = new FormValidator(form, {
-      rules: {
-        "graph-name-input": {
-          required: true,
-        },
-      },
-      messages: {
-        "graph-name-input": {
-          required: "Graph name is required",
-        },
-      },
-      validateOnBlur: true,
-      validateOnInput: true,
-    });
-  }
-
-  /**
-   * Initialize category chips for multi-select
-   */
-  initCategoryChips() {
-    const chipsContainer = this.container.querySelector("#category-chips");
-    const hiddenInput = this.container.querySelector("#selected-categories");
-    const wrapper = this.container.querySelector("#graph-categories-wrapper");
-
-    if (!chipsContainer || !hiddenInput) return;
-
-    // Parse initial selected categories from hidden input
-    let selectedCategories = [];
-    try {
-      selectedCategories = JSON.parse(hiddenInput.value) || [];
-    } catch (e) {
-      selectedCategories = [];
-    }
-
-    // Store reference for validation
-    this.selectedCategories = selectedCategories;
-
-    // Handle chip click
-    const chips = chipsContainer.querySelectorAll(".category-chip");
-    chips.forEach((chip) => {
-      chip.addEventListener("click", () => {
-        const categoryId = parseInt(chip.dataset.categoryId, 10);
-        const color = chip.dataset.color || "#6c757d";
-        const isActive = chip.classList.contains("active");
-
-        if (isActive) {
-          // Deselect
-          chip.classList.remove("active");
-          chip.style.backgroundColor = "";
-          chip.style.borderColor = "";
-          chip.style.color = "";
-          this.selectedCategories = this.selectedCategories.filter(
-            (id) => id !== categoryId,
-          );
-        } else {
-          // Select
-          chip.classList.add("active");
-          chip.style.backgroundColor = color;
-          chip.style.borderColor = color;
-          chip.style.color = "#fff";
-          if (!this.selectedCategories.includes(categoryId)) {
-            this.selectedCategories.push(categoryId);
-          }
-        }
-
-        // Update hidden input
-        hiddenInput.value = JSON.stringify(this.selectedCategories);
-
-        // Remove validation error if at least one is selected
-        if (wrapper && this.selectedCategories.length > 0) {
-          wrapper.classList.remove("is-invalid");
-        }
-
-        // Track changes
-        this.checkForChanges();
-      });
-    });
-  }
-
-  /**
-   * Validate category selection (at least one required)
-   * @returns {boolean}
-   */
-  validateCategories() {
-    const wrapper = this.container.querySelector("#graph-categories-wrapper");
-    const isValid =
-      this.selectedCategories && this.selectedCategories.length > 0;
-
-    if (wrapper) {
-      if (isValid) {
-        wrapper.classList.remove("is-invalid");
-      } else {
-        wrapper.classList.add("is-invalid");
-      }
-    }
-
-    return isValid;
-  }
-
-  /**
-   * Initialize query/mapping tabs
-   */
-  initTabs() {
-    const tabs = this.container.querySelectorAll(".query-tab");
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
-        // Remove active from all tabs
-        tabs.forEach((t) => t.classList.remove("active"));
-
-        // Remove active from all tab contents
-        this.container.querySelectorAll(".query-tab-content").forEach((c) => {
-          c.classList.remove("active");
+const Ajax = window.Ajax;
+const autosize = window.autosize;
+
+export default class GraphCreator extends ElementCreator {
+    constructor(container, options = {}) {
+        super(container, {
+            ...options,
+            elementId: options.graphId || options.elementId || null
         });
 
-        // Set active on clicked tab
-        tab.classList.add("active");
+        // Graph-specific properties
+        this.graphId = this.elementId;
+        this.graphType = 'bar';
+        this.graphName = '';
+        this.graphDescription = '';
 
-        // Show corresponding content
-        const targetId = "tab-" + tab.dataset.tab;
-        const targetContent = document.getElementById(targetId);
-        if (targetContent) {
-          targetContent.classList.add("active");
+        // Graph-specific components
+        this.exporter = null;
+        this.configPanel = null;
+
+        // Mini preview state
+        this.miniPreviewEl = null;
+        this.miniToggleBtn = null;
+        this.miniChart = null;
+        this.miniPreviewVisible = false;
+        this.miniPreviewDismissed = false;
+        this.miniToggleVisible = false;
+        this.miniPreviewSize = 'compact';
+        this.miniPreviewOpacity = 1.0;
+        this.previewCard = null;
+        this.previewObserver = null;
+    }
+
+    /**
+     * Element type identifiers
+     */
+    getElementTypeSlug() {
+        return 'graph';
+    }
+
+    getElementTypeName() {
+        return 'Graph';
+    }
+
+    /**
+     * Initialize all components
+     */
+    init() {
+        super.init();
+
+        // Show dummy data for new graph
+        if (!this.graphId && this.preview) {
+            this.preview.showDummyData(this.graphType);
         }
-      });
-    });
-  }
-
-  /**
-   * Initialize sidebar tabs (Chart/Filters)
-   */
-  initSidebarTabs() {
-    const tabs = this.container.querySelectorAll(".sidebar-tab");
-    tabs.forEach((tab) => {
-      tab.addEventListener("click", () => {
-        this.setActiveSidebarTab(tab.dataset.tab);
-      });
-    });
-
-    // Restore saved tab from localStorage
-    const savedTab = localStorage.getItem("graphCreatorSidebarTab");
-    if (savedTab && (savedTab === "config" || savedTab === "filters")) {
-      this.setActiveSidebarTab(savedTab);
-    }
-  }
-
-  /**
-   * Set active sidebar tab
-   */
-  setActiveSidebarTab(tabName) {
-    this.activeSidebarTab = tabName;
-
-    // Save to localStorage for persistence across page refreshes
-    localStorage.setItem("graphCreatorSidebarTab", tabName);
-
-    const tabs = this.container.querySelectorAll(".sidebar-tab");
-
-    // Remove active from all sidebar tabs
-    tabs.forEach((t) => t.classList.remove("active"));
-
-    // Remove active from all sidebar tab contents
-    this.container.querySelectorAll(".sidebar-tab-content").forEach((c) => {
-      c.classList.remove("active");
-    });
-
-    // Set active on target tab
-    const targetTab = this.container.querySelector(
-      `.sidebar-tab[data-tab="${tabName}"]`,
-    );
-    if (targetTab) {
-      targetTab.classList.add("active");
     }
 
-    // Show corresponding content
-    const targetId = "sidebar-tab-" + tabName;
-    const targetContent = document.getElementById(targetId);
-    if (targetContent) {
-      targetContent.classList.add("active");
+    /**
+     * Initialize graph preview component
+     */
+    initPreview() {
+        const previewContainer = this.container.querySelector('.graph-preview-container');
+        if (previewContainer) {
+            this.preview = new GraphPreview(previewContainer, { showSkeleton: false });
+        }
     }
-  }
 
-  /**
-   * Initialize collapsible panels
-   */
-  initCollapsiblePanels() {
-    // New sidebar-card header (with title and collapse button)
-    const collapseHeader = this.container.querySelector(".sidebar-card-header");
+    /**
+     * Initialize graph-specific components
+     */
+    initTypeSpecificComponents() {
+        this.initExporter();
+        this.initConfigPanel();
+        this.initGraphTypeSelector();
+        this.initMiniPreview();
+    }
 
-    // Check if sidebar is already collapsed (by inline script) and resize chart accordingly
-    const sidebar = this.container.querySelector(".graph-sidebar");
-    if (sidebar && sidebar.classList.contains("collapsed")) {
-      setTimeout(() => {
+    /**
+     * Initialize graph exporter component
+     */
+    initExporter() {
+        const exportContainer = this.container.querySelector('#export-chart-container');
+        if (!exportContainer) return;
+
+        this.exporter = new GraphExporter({
+            filename: this.graphName || 'chart-preview',
+            container: exportContainer,
+            graphId: this.graphId,
+            onSaveSuccess: (data) => {
+                console.log('Snapshot saved:', data);
+            }
+        });
+
         if (this.preview) {
-          this.preview.resize();
+            this.preview.onRender(() => {
+                if (this.preview.chart) {
+                    this.exporter.setChart(this.preview.chart);
+                    this.exporter.setFilename(this.graphName || 'chart-preview');
+                }
+            });
         }
-      }, 100);
     }
 
-    // Handle new sidebar-card collapse
-    if (collapseHeader) {
-      collapseHeader.addEventListener("click", () => {
-        const card = this.container.querySelector(".sidebar-card");
-        const sidebar = this.container.querySelector(".graph-sidebar-left");
-
-        if (card) {
-          card.classList.toggle("collapsed");
+    /**
+     * Initialize config panel component
+     */
+    initConfigPanel() {
+        const configContainer = this.container.querySelector('.graph-config-panel');
+        if (configContainer) {
+            this.configPanel = new ConfigPanel(configContainer, {
+                onChange: () => {
+                    this.updatePreview();
+                    this.checkForChanges();
+                }
+            });
+            this.configPanel.setGraphType(this.graphType);
         }
-        if (sidebar) {
-          sidebar.classList.toggle("collapsed");
-          // Save collapse state to localStorage
-          const isCollapsed = sidebar.classList.contains("collapsed");
-          localStorage.setItem(
-            "graphCreatorSidebarCollapsed",
-            isCollapsed ? "true" : "false",
-          );
-        }
-
-        // Trigger chart resize after animation
-        setTimeout(() => {
-          if (this.preview) {
-            this.preview.resize();
-          }
-        }, 350);
-      });
     }
 
-    // Legacy: Handle old collapsible-header (for backward compatibility)
-    const headers = this.container.querySelectorAll(".collapsible-header");
-    headers.forEach((header) => {
-      header.addEventListener("click", () => {
-        const panel = header.closest(".collapsible-panel");
-        const sidebar = header.closest(".graph-sidebar");
-
-        if (panel) {
-          panel.classList.toggle("collapsed");
+    /**
+     * Initialize data mapper with graph type
+     */
+    initDataMapper() {
+        super.initDataMapper();
+        if (this.dataMapper) {
+            this.dataMapper.setGraphType(this.graphType);
         }
-        if (sidebar) {
-          sidebar.classList.toggle("collapsed");
-          const isCollapsed = sidebar.classList.contains("collapsed");
-          localStorage.setItem(
-            "graphCreatorSidebarCollapsed",
-            isCollapsed ? "true" : "false",
-          );
+    }
+
+    /**
+     * Initialize graph type selector
+     */
+    initGraphTypeSelector() {
+        const typeItems = this.container.querySelectorAll('.graph-type-item, .chart-type-item');
+
+        const selectType = (item) => {
+            const type = item.dataset.type;
+            this.setGraphType(type);
+
+            typeItems.forEach(i => {
+                i.classList.remove('active');
+                i.setAttribute('aria-checked', 'false');
+            });
+            item.classList.add('active');
+            item.setAttribute('aria-checked', 'true');
+        };
+
+        typeItems.forEach(item => {
+            item.addEventListener('click', () => selectType(item));
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    selectType(item);
+                }
+            });
+        });
+    }
+
+    /**
+     * Set graph type and update components
+     */
+    setGraphType(type) {
+        this.graphType = type;
+
+        if (this.dataMapper) {
+            this.dataMapper.setGraphType(type);
         }
 
-        setTimeout(() => {
-          if (this.preview) {
-            this.preview.resize();
-          }
-        }, 350);
-      });
-    });
-  }
+        if (this.configPanel) {
+            this.configPanel.setGraphType(type);
+        }
 
-  /**
-   * Expand sidebar if it's collapsed
-   */
-  expandSidebar() {
-    const sidebar = this.container.querySelector(".graph-sidebar-left");
-    const card = this.container.querySelector(".sidebar-card");
-
-    if (sidebar && sidebar.classList.contains("collapsed")) {
-      sidebar.classList.remove("collapsed");
-      if (card) {
-        card.classList.remove("collapsed");
-      }
-      // Update localStorage
-      localStorage.setItem("graphCreatorSidebarCollapsed", "false");
-
-      // Trigger chart resize after animation
-      setTimeout(() => {
         if (this.preview) {
-          this.preview.resize();
+            this.preview.setType(type);
+            if (!this.isLoading) {
+                if (this.columns.length === 0) {
+                    this.preview.showDummyData(type);
+                } else {
+                    this.updatePreview();
+                }
+            }
         }
-      }, 350);
+
+        this.updateMiniToggleIcon();
+        this.checkForChanges();
     }
-  }
 
-  /**
-   * Initialize keyboard shortcuts
-   * Note: Graph creator shortcuts are registered globally in common.js
-   * to ensure they appear in the shortcuts modal on all pages (grayed out when unavailable)
-   */
-  initKeyboardShortcuts() {
-    // Shortcuts are now registered in common.js registerGlobalShortcuts()
-  }
+    /**
+     * Handle query test success
+     */
+    onQueryTest(columns) {
+        this.columns = columns;
 
-  /**
-   * Initialize mini chart preview that shows when main chart is scrolled out of view
-   */
-  initMiniPreview() {
-    const previewCard = this.container.querySelector(".graph-preview-card");
-    if (!previewCard || !this.preview) return;
+        if (this.dataMapper) {
+            this.dataMapper.setColumns(columns);
+        }
 
-    // Store reference to preview card for scrolling
-    this.previewCard = previewCard;
+        this.clearQueryError();
+        Toast.success(`Query valid. Found ${columns.length} columns.`);
+        this.updatePreview();
+    }
 
-    // Mini preview size state: 'compact', 'expanded'
-    this.miniPreviewSize = "compact";
+    /**
+     * Update preview with current data
+     */
+    async updatePreview() {
+        if (!this.preview) return;
 
-    // Mini preview opacity (0.5 to 1.0, default 1.0) - load from localStorage
-    var savedOpacity = localStorage.getItem("miniPreviewOpacity");
-    this.miniPreviewOpacity = savedOpacity ? parseFloat(savedOpacity) : 1.0;
+        if (this.isLoading || this.initialLoad) return;
 
-    // Create mini preview container
-    this.miniPreviewEl = document.createElement("div");
-    this.miniPreviewEl.className = "mini-chart-preview size-compact";
-    this.miniPreviewEl.style.opacity = this.miniPreviewOpacity;
-    this.miniPreviewEl.innerHTML = `
+        const config = this.configPanel ? this.configPanel.getConfig() : {};
+        const mapping = this.dataMapper ? this.dataMapper.getMapping() : {};
+
+        if (this.columns.length === 0) {
+            this.preview.setConfig(config);
+            this.preview.setMapping(mapping);
+            this.preview.showDummyData(this.graphType);
+            return;
+        }
+
+        if (!this.validateMapping(mapping)) {
+            this.preview.setConfig(config);
+            this.preview.setMapping(mapping);
+            this.preview.showDummyData(this.graphType);
+            return;
+        }
+
+        const query = this.queryBuilder ? this.queryBuilder.getQuery() : '';
+        const filterValues = this.getSidebarFilterValues();
+        const placeholderSettings = this.getPlaceholderSettingsForQuery();
+
+        this.preview.showSkeleton(this.graphType);
+
+        try {
+            const result = await Ajax.post('preview_graph', {
+                query: query,
+                mapping: mapping,
+                config: config,
+                graph_type: this.graphType,
+                filters: filterValues,
+                placeholder_settings: placeholderSettings
+            });
+
+            if (result.success && result.data) {
+                this.preview.setData(result.data.chartData);
+                this.preview.setConfig(config);
+                this.preview.setMapping(mapping);
+                this.preview.render();
+            } else {
+                this.preview.hideSkeleton();
+            }
+            this.initialLoad = false;
+        } catch (error) {
+            this.preview.hideSkeleton();
+            this.initialLoad = false;
+            console.error('Preview update failed:', error);
+        }
+    }
+
+    /**
+     * Validate mapping based on graph type
+     */
+    validateMapping(mapping) {
+        if (this.graphType === 'pie') {
+            return mapping.name_column && mapping.value_column;
+        } else {
+            return mapping.x_column && mapping.y_column;
+        }
+    }
+
+    /**
+     * Load graph-specific data when editing
+     */
+    async loadElement(graphId) {
+        this.isLoading = true;
+
+        try {
+            const result = await Ajax.post('load_graph', { id: graphId });
+
+            if (result.success && result.data) {
+                const graph = result.data;
+
+                this.graphName = graph.name;
+                this.graphDescription = graph.description || '';
+                this.graphType = graph.graph_type;
+
+                // Sync with parent class
+                this.elementName = this.graphName;
+                this.elementDescription = this.graphDescription;
+
+                const nameInput = this.container.querySelector('.graph-name-input');
+                if (nameInput) nameInput.value = graph.name;
+
+                const descriptionInput = this.container.querySelector('.graph-description-input');
+                if (descriptionInput) {
+                    descriptionInput.value = this.graphDescription;
+                    autosize.update(descriptionInput);
+                }
+
+                const typeItems = this.container.querySelectorAll('.graph-type-item, .chart-type-item');
+                typeItems.forEach(item => {
+                    item.classList.toggle('active', item.dataset.type === graph.graph_type);
+                });
+
+                this.setGraphType(graph.graph_type);
+
+                if (this.queryBuilder && graph.query) {
+                    this.queryBuilder.setQuery(graph.query);
+                }
+
+                if (graph.config) {
+                    const config = JSON.parse(graph.config);
+
+                    if (config.activeSidebarTab) {
+                        this.setActiveSidebarTab(config.activeSidebarTab);
+                    }
+
+                    if (this.configPanel) {
+                        this.configPanel.setConfig(config);
+                    }
+                }
+
+                if (this.placeholderSettings) {
+                    let placeholderSettings = {};
+                    if (graph.placeholder_settings) {
+                        placeholderSettings = typeof graph.placeholder_settings === 'string'
+                            ? JSON.parse(graph.placeholder_settings)
+                            : graph.placeholder_settings;
+                    } else if (graph.config) {
+                        const config = typeof graph.config === 'string'
+                            ? JSON.parse(graph.config)
+                            : graph.config;
+                        if (config.placeholderSettings) {
+                            placeholderSettings = config.placeholderSettings;
+                        }
+                    }
+                    this.placeholderSettings.setSettings(placeholderSettings);
+                }
+
+                if (this.filterManager && graph.filters) {
+                    this.filterManager.setFilters(graph.filters);
+                }
+
+                if (this.dataMapper && graph.data_mapping) {
+                    const mapping = JSON.parse(graph.data_mapping);
+                    this.dataMapper.setMapping(mapping, false);
+
+                    this.isLoading = false;
+                    this.initialLoad = false;
+
+                    if (graph.query) {
+                        await this.queryBuilder.testQuery();
+                    }
+                }
+
+                this.updatePlaceholderSettings();
+                this.captureState();
+                this.setUnsavedChanges(false);
+            } else {
+                if (this.preview) {
+                    this.preview.hideSkeleton();
+                }
+                Toast.error(result.message || 'Failed to load graph');
+            }
+        } catch (error) {
+            if (this.preview) {
+                this.preview.hideSkeleton();
+            }
+            Toast.error('Failed to load graph');
+            console.error(error);
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    /**
+     * Get config from config panel
+     */
+    getConfig() {
+        return this.configPanel ? this.configPanel.getConfig() : {};
+    }
+
+    /**
+     * Get graph-specific save data
+     */
+    getTypeSpecificSaveData() {
+        return {
+            graph_type: this.graphType
+        };
+    }
+
+    /**
+     * Get current state including graph-specific data
+     */
+    getCurrentState() {
+        const state = super.getCurrentState();
+        state.graphType = this.graphType;
+        return state;
+    }
+
+    /**
+     * Check for changes including graph-specific data
+     */
+    checkForChanges() {
+        if (!this.savedState) {
+            this.setUnsavedChanges(false);
+            return;
+        }
+
+        const currentState = this.getCurrentState();
+        const hasChanges =
+            currentState.name !== this.savedState.name ||
+            currentState.description !== this.savedState.description ||
+            currentState.graphType !== this.savedState.graphType ||
+            currentState.query !== this.savedState.query ||
+            currentState.mapping !== this.savedState.mapping ||
+            currentState.config !== this.savedState.config ||
+            currentState.filters !== this.savedState.filters ||
+            currentState.placeholderSettings !== this.savedState.placeholderSettings ||
+            currentState.categories !== this.savedState.categories;
+
+        this.setUnsavedChanges(hasChanges);
+    }
+
+    /**
+     * Save graph
+     */
+    async save() {
+        const errors = [];
+
+        if (this.formValidator && !this.formValidator.validate()) {
+            this.expandSidebar();
+            errors.push('Graph name is required');
+        }
+
+        if (!this.validateCategories()) {
+            this.expandSidebar();
+            errors.push('At least one category is required');
+        }
+
+        const query = this.queryBuilder ? this.queryBuilder.getQuery() : '';
+        if (!query.trim()) {
+            errors.push('SQL query is required');
+        }
+
+        if (this.mandatoryFilterValidator && query.trim()) {
+            const mandatoryValidation = this.mandatoryFilterValidator.validateQuery(query);
+            if (!mandatoryValidation.valid) {
+                const errorMsg = this.mandatoryFilterValidator.getErrorMessage(mandatoryValidation.missing);
+                errors.push(errorMsg);
+            }
+        }
+
+        const mapping = this.dataMapper ? this.dataMapper.getMapping() : {};
+        if (!this.validateMapping(mapping)) {
+            errors.push('Data mapping is incomplete (run query first to see columns)');
+        }
+
+        if (errors.length > 0) {
+            Toast.error(errors.map(err => '• ' + err).join('<br>'));
+            return;
+        }
+
+        Loading.show('Saving graph...');
+
+        try {
+            const config = this.configPanel ? this.configPanel.getConfig() : {};
+            config.activeSidebarTab = this.activeSidebarTab;
+
+            const placeholderSettings = this.placeholderSettings
+                ? this.placeholderSettings.getSettings()
+                : {};
+
+            const data = {
+                id: this.graphId,
+                name: this.graphName || this.elementName,
+                description: this.graphDescription || this.elementDescription,
+                graph_type: this.graphType,
+                query: query,
+                data_mapping: mapping,
+                config: config,
+                placeholder_settings: placeholderSettings,
+                filters: this.filterManager ? this.filterManager.getFilters() : [],
+                categories: this.selectedCategories || []
+            };
+
+            const result = await Ajax.post('save_graph', data);
+
+            if (result.success) {
+                const successMsg = result.message || (this.graphId ? 'Graph updated successfully' : 'Graph created successfully');
+                Toast.success(successMsg);
+
+                this.captureState();
+                this.setUnsavedChanges(false);
+
+                if (!this.graphId && result.data && result.data.id) {
+                    window.location.href = `?urlq=graph/edit/${result.data.id}`;
+                }
+            } else {
+                Toast.error(result.message || 'Failed to save graph');
+            }
+        } catch (error) {
+            Toast.error('Failed to save graph');
+            console.error(error);
+        } finally {
+            Loading.hide();
+        }
+    }
+
+    /**
+     * Override save handler to sync graph name
+     */
+    initSaveHandler() {
+        const saveBtn = document.querySelector('.page-header-right .save-graph-btn');
+        const nameInput = this.container.querySelector('.graph-name-input');
+        const descriptionInput = this.container.querySelector('.graph-description-input');
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.save();
+            });
+        }
+
+        if (nameInput) {
+            this.graphName = nameInput.value || '';
+            this.elementName = this.graphName;
+
+            nameInput.addEventListener('input', (e) => {
+                this.graphName = e.target.value;
+                this.elementName = this.graphName;
+                this.checkForChanges();
+            });
+        }
+
+        if (descriptionInput) {
+            this.graphDescription = descriptionInput.value || '';
+            this.elementDescription = this.graphDescription;
+
+            autosize(descriptionInput);
+
+            descriptionInput.addEventListener('input', (e) => {
+                this.graphDescription = e.target.value;
+                this.elementDescription = this.graphDescription;
+                this.checkForChanges();
+            });
+        }
+    }
+
+    // ============================================
+    // Mini Preview Methods (Graph-specific)
+    // ============================================
+
+    /**
+     * Initialize mini chart preview
+     */
+    initMiniPreview() {
+        const previewCard = this.container.querySelector('.graph-preview-card');
+        if (!previewCard || !this.preview) return;
+
+        this.previewCard = previewCard;
+        this.miniPreviewSize = 'compact';
+
+        const savedOpacity = localStorage.getItem('miniPreviewOpacity');
+        this.miniPreviewOpacity = savedOpacity ? parseFloat(savedOpacity) : 1.0;
+
+        this.miniPreviewEl = document.createElement('div');
+        this.miniPreviewEl.className = 'mini-chart-preview size-compact';
+        this.miniPreviewEl.style.opacity = this.miniPreviewOpacity;
+        this.miniPreviewEl.innerHTML = `
             <div class="mini-chart-header">
                 <div class="mini-chart-size-buttons">
                     <button type="button" class="mini-size-btn active" data-size="compact" title="Compact">Compact</button>
@@ -833,1055 +592,210 @@ export default class GraphCreator {
             </div>
             <div class="mini-chart-content"></div>
         `;
-    document.body.appendChild(this.miniPreviewEl);
+        document.body.appendChild(this.miniPreviewEl);
 
-    // Create minimized toggle button (shown when mini preview is dismissed)
-    this.miniToggleBtn = document.createElement("button");
-    this.miniToggleBtn.type = "button";
-    this.miniToggleBtn.className = "mini-chart-toggle";
-    this.miniToggleBtn.innerHTML =
-      '<i class="fas ' + this.getChartTypeIcon() + '"></i>';
-    this.miniToggleBtn.title = "Show mini preview";
-    document.body.appendChild(this.miniToggleBtn);
+        this.miniToggleBtn = document.createElement('button');
+        this.miniToggleBtn.type = 'button';
+        this.miniToggleBtn.className = 'mini-chart-toggle';
+        this.miniToggleBtn.innerHTML = '<i class="fas ' + this.getChartTypeIcon() + '"></i>';
+        this.miniToggleBtn.title = 'Show mini preview';
+        document.body.appendChild(this.miniToggleBtn);
 
-    // Mini chart instance (ECharts)
-    this.miniChart = null;
-    this.miniPreviewVisible = false;
-    this.miniPreviewDismissed = false;
-    this.miniToggleVisible = false;
+        this.miniChart = null;
+        this.miniPreviewVisible = false;
+        this.miniPreviewDismissed = false;
+        this.miniToggleVisible = false;
 
-    // Initialize ECharts on mini chart container
-    const chartContainer = this.miniPreviewEl.querySelector(
-      ".mini-chart-content",
-    );
-    if (typeof echarts !== "undefined") {
-      this.miniChart = echarts.init(chartContainer);
-    }
+        const chartContainer = this.miniPreviewEl.querySelector('.mini-chart-content');
+        if (typeof echarts !== 'undefined') {
+            this.miniChart = echarts.init(chartContainer);
+        }
 
-    // Close/minimize button - hides preview and shows toggle button
-    const closeBtn = this.miniPreviewEl.querySelector(".mini-chart-close");
-    closeBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      this.miniPreviewDismissed = true;
-      this.hideMiniPreview();
-      this.showMiniToggle();
-    });
-
-    // Toggle button click - restore mini preview
-    this.miniToggleBtn.addEventListener("click", () => {
-      this.miniPreviewDismissed = false;
-      this.hideMiniToggle();
-      if (this.preview && this.preview.chart) {
-        this.showMiniPreview();
-      }
-    });
-
-    // Size buttons
-    const sizeButtons = this.miniPreviewEl.querySelectorAll(".mini-size-btn");
-    sizeButtons.forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const size = btn.dataset.size;
-        this.setMiniPreviewSize(size);
-      });
-    });
-
-    // Opacity slider - update live as user drags and save to localStorage
-    const opacitySlider = this.miniPreviewEl.querySelector(
-      ".mini-opacity-input",
-    );
-    if (opacitySlider) {
-      opacitySlider.addEventListener("input", (e) => {
-        this.miniPreviewOpacity = parseInt(e.target.value, 10) / 100;
-        this.miniPreviewEl.style.opacity = this.miniPreviewOpacity;
-        localStorage.setItem("miniPreviewOpacity", this.miniPreviewOpacity);
-      });
-    }
-
-    // Click on mini chart to scroll to main chart
-    chartContainer.addEventListener("click", () => {
-      previewCard.scrollIntoView({ behavior: "smooth", block: "center" });
-    });
-
-    // Set up intersection observer to detect when main chart is out of view
-    this.previewObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            // Main chart is visible, hide mini preview and toggle
+        const closeBtn = this.miniPreviewEl.querySelector('.mini-chart-close');
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.miniPreviewDismissed = true;
             this.hideMiniPreview();
+            this.showMiniToggle();
+        });
+
+        this.miniToggleBtn.addEventListener('click', () => {
+            this.miniPreviewDismissed = false;
             this.hideMiniToggle();
-          } else {
-            // Main chart is out of view
             if (this.preview && this.preview.chart) {
-              if (this.miniPreviewDismissed) {
-                // Show toggle button if dismissed
-                this.showMiniToggle();
-              } else {
-                // Show mini preview if not dismissed
                 this.showMiniPreview();
-              }
             }
-          }
         });
-      },
-      {
-        threshold: 0.5, // Show mini map when 50% or more of main chart is not visible
-        rootMargin: "-60px 0px 0px 0px", // Account for header
-      },
-    );
 
-    this.previewObserver.observe(previewCard);
-
-    // Register callback to update mini chart when main chart renders
-    this.preview.onRender(() => {
-      if (this.miniPreviewVisible) {
-        this.updateMiniChart();
-      }
-    });
-  }
-
-  /**
-   * Set mini preview size
-   */
-  setMiniPreviewSize(size) {
-    if (!this.miniPreviewEl) return;
-
-    this.miniPreviewSize = size;
-
-    // Show loading overlay before resize
-    this.miniPreviewEl.classList.add("resizing");
-
-    // Remove all size classes and add the new one
-    this.miniPreviewEl.classList.remove("size-compact", "size-expanded");
-    this.miniPreviewEl.classList.add("size-" + size);
-
-    // Update active button
-    const sizeButtons = this.miniPreviewEl.querySelectorAll(".mini-size-btn");
-    sizeButtons.forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.size === size);
-    });
-
-    // Resize ECharts after CSS transition completes (transition is 250ms)
-    if (this.miniChart) {
-      var self = this;
-      setTimeout(function () {
-        self.miniChart.resize();
-        // Re-apply the chart option to ensure proper rendering
-        self.updateMiniChart();
-        // Remove loading overlay after chart is updated
-        self.miniPreviewEl.classList.remove("resizing");
-      }, 300);
-    } else {
-      // No chart, just remove loading state
-      this.miniPreviewEl.classList.remove("resizing");
-    }
-  }
-
-  /**
-   * Show mini chart preview
-   */
-  showMiniPreview() {
-    if (
-      this.miniPreviewVisible ||
-      !this.miniPreviewEl ||
-      !this.preview ||
-      !this.preview.chart
-    )
-      return;
-
-    this.miniPreviewVisible = true;
-    this.miniPreviewEl.classList.add("visible");
-
-    // Update mini chart with current data
-    this.updateMiniChart();
-  }
-
-  /**
-   * Hide mini chart preview
-   */
-  hideMiniPreview() {
-    if (!this.miniPreviewVisible || !this.miniPreviewEl) return;
-
-    this.miniPreviewVisible = false;
-    this.miniPreviewEl.classList.remove("visible");
-  }
-
-  /**
-   * Show mini toggle button
-   */
-  showMiniToggle() {
-    if (this.miniToggleVisible || !this.miniToggleBtn) return;
-
-    this.miniToggleVisible = true;
-    this.miniToggleBtn.classList.add("visible");
-  }
-
-  /**
-   * Hide mini toggle button
-   */
-  hideMiniToggle() {
-    if (!this.miniToggleVisible || !this.miniToggleBtn) return;
-
-    this.miniToggleVisible = false;
-    this.miniToggleBtn.classList.remove("visible");
-  }
-
-  /**
-   * Update mini chart with current preview data
-   */
-  updateMiniChart() {
-    if (!this.preview || !this.preview.chart || !this.miniChart) return;
-
-    // Get current option from main chart (deep clone)
-    const mainOption = this.preview.chart.getOption();
-    if (!mainOption) return;
-
-    // Deep clone the entire option - keep everything exactly as main chart
-    const miniOption = JSON.parse(JSON.stringify(mainOption));
-
-    // Only disable animation and tooltip interaction
-    miniOption.animation = false;
-    if (miniOption.tooltip) {
-      if (Array.isArray(miniOption.tooltip)) {
-        miniOption.tooltip.forEach(function (t) {
-          t.show = false;
+        const sizeButtons = this.miniPreviewEl.querySelectorAll('.mini-size-btn');
+        sizeButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.setMiniPreviewSize(btn.dataset.size);
+            });
         });
-      } else {
-        miniOption.tooltip.show = false;
-      }
-    }
 
-    // Set option on mini chart - exact same as main chart
-    this.miniChart.setOption(miniOption, true);
-    this.miniChart.resize();
-  }
+        const opacitySlider = this.miniPreviewEl.querySelector('.mini-opacity-input');
+        if (opacitySlider) {
+            opacitySlider.addEventListener('input', (e) => {
+                this.miniPreviewOpacity = parseInt(e.target.value, 10) / 100;
+                this.miniPreviewEl.style.opacity = this.miniPreviewOpacity;
+                localStorage.setItem('miniPreviewOpacity', this.miniPreviewOpacity);
+            });
+        }
 
-  /**
-   * Get Font Awesome icon class for current chart type
-   */
-  getChartTypeIcon() {
-    var iconMap = {
-      bar: "fa-chart-bar",
-      line: "fa-chart-line",
-      pie: "fa-chart-pie",
-    };
-    return iconMap[this.graphType] || "fa-chart-bar";
-  }
+        chartContainer.addEventListener('click', () => {
+            previewCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
 
-  /**
-   * Update mini toggle button icon to match current chart type
-   */
-  updateMiniToggleIcon() {
-    if (this.miniToggleBtn) {
-      var icon = this.miniToggleBtn.querySelector("i");
-      if (icon) {
-        icon.className = "fas " + this.getChartTypeIcon();
-      }
-    }
-  }
-
-  /**
-   * Initialize filter selector (choose which filters to use)
-   */
-  initFilterSelector() {
-    const selectorView = this.container.querySelector("#filter-selector-view");
-    const activeView = this.container.querySelector("#filter-active-view");
-    const useBtn = this.container.querySelector("#filter-use-btn");
-    const changeBtn = this.container.querySelector("#filter-change-btn");
-    const countDisplay = this.container.querySelector(".filter-selector-count");
-    const checkboxes = this.container.querySelectorAll(
-      ".filter-selector-checkbox",
-    );
-
-    if (!selectorView || !activeView || !useBtn) return;
-
-    // Track selected filters
-    this.selectedFilters = [];
-
-    // Get mandatory filter keys from validator
-    const mandatoryKeys = this.mandatoryFilterValidator
-      ? this.mandatoryFilterValidator.getMandatoryKeys()
-      : [];
-
-    // Storage key for this graph's selected filters
-    const storageKey = this.graphId ? `graphFilters_${this.graphId}` : null;
-
-    // Auto-select mandatory filters first (they're already checked and disabled in HTML)
-    mandatoryKeys.forEach((key) => {
-      if (!this.selectedFilters.includes(key)) {
-        this.selectedFilters.push(key);
-      }
-    });
-
-    // Load saved filters from localStorage
-    if (storageKey) {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        try {
-          const savedFilters = JSON.parse(saved);
-          // Add saved filters (but don't remove mandatory ones)
-          savedFilters.forEach((key) => {
-            if (!this.selectedFilters.includes(key)) {
-              this.selectedFilters.push(key);
+        this.previewObserver = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        this.hideMiniPreview();
+                        this.hideMiniToggle();
+                    } else {
+                        if (this.preview && this.preview.chart) {
+                            if (this.miniPreviewDismissed) {
+                                this.showMiniToggle();
+                            } else {
+                                this.showMiniPreview();
+                            }
+                        }
+                    }
+                });
+            },
+            {
+                threshold: 0.5,
+                rootMargin: '-60px 0px 0px 0px'
             }
-          });
-          // Check the saved checkboxes (non-mandatory ones)
-          checkboxes.forEach((cb) => {
-            if (this.selectedFilters.includes(cb.value) && !cb.disabled) {
-              cb.checked = true;
-            }
-          });
-          // Update count display
-          if (countDisplay) {
-            countDisplay.textContent = `${this.selectedFilters.length} selected`;
-          }
-          // Auto-show active filters if we have saved selections
-          if (this.selectedFilters.length > 0) {
-            this.applySelectedFilters(selectorView, activeView);
-          }
-        } catch (e) {
-          // Invalid JSON, ignore
-        }
-      } else if (mandatoryKeys.length > 0) {
-        // No saved filters but we have mandatory ones - show them
-        if (countDisplay) {
-          countDisplay.textContent = `${this.selectedFilters.length} selected`;
-        }
-        this.applySelectedFilters(selectorView, activeView);
-      }
-    } else if (mandatoryKeys.length > 0) {
-      // New graph with mandatory filters - auto-apply them
-      if (countDisplay) {
-        countDisplay.textContent = `${this.selectedFilters.length} selected`;
-      }
-      this.applySelectedFilters(selectorView, activeView);
-    }
-
-    // Helper function to update selection state
-    const updateSelectionState = () => {
-      // Get checked checkboxes (non-mandatory filters)
-      const checkedBoxes = Array.from(checkboxes).filter(
-        (cb) => cb.type === "checkbox" && cb.checked,
-      );
-      this.selectedFilters = checkedBoxes.map((cb) => cb.value);
-
-      // Add mandatory filters (they use hidden inputs with data-checked)
-      const mandatoryInputs = this.container.querySelectorAll(
-        '.filter-selector-checkbox[data-checked="true"]',
-      );
-      mandatoryInputs.forEach((input) => {
-        if (!this.selectedFilters.includes(input.value)) {
-          this.selectedFilters.push(input.value);
-        }
-      });
-
-      // Update count display
-      if (countDisplay) {
-        countDisplay.textContent = `${this.selectedFilters.length} selected`;
-      }
-
-      // Enable/disable use button (always enabled if mandatory filters exist)
-      useBtn.disabled = this.selectedFilters.length === 0;
-    };
-
-    // Make entire filter-selector-item clickable to toggle checkbox
-    const selectorItems = this.container.querySelectorAll(
-      ".filter-selector-item",
-    );
-    selectorItems.forEach((item) => {
-      item.addEventListener("click", (e) => {
-        // Don't toggle if clicking on checkbox or label (they handle themselves via for attribute)
-        if (
-          e.target.classList.contains("filter-selector-checkbox") ||
-          e.target.closest(".form-check-label") ||
-          e.target.tagName === "LABEL"
-        ) {
-          return;
-        }
-
-        // Don't toggle mandatory filters
-        if (item.dataset.mandatory === "1") {
-          Toast.info("This filter is mandatory and cannot be removed");
-          return;
-        }
-
-        const checkbox = item.querySelector(".filter-selector-checkbox");
-        if (checkbox && !checkbox.disabled) {
-          checkbox.checked = !checkbox.checked;
-          updateSelectionState();
-        }
-      });
-    });
-
-    // Update count and button state when checkboxes change
-    checkboxes.forEach((checkbox) => {
-      checkbox.addEventListener("change", () => {
-        updateSelectionState();
-      });
-    });
-
-    // Handle "Use Selected Filters" button
-    useBtn.addEventListener("click", () => {
-      if (this.selectedFilters.length === 0) return;
-
-      // Save to localStorage (exclude mandatory filters from storage as they're auto-selected)
-      if (storageKey) {
-        const nonMandatoryFilters = this.selectedFilters.filter(
-          (key) => !mandatoryKeys.includes(key),
         );
-        localStorage.setItem(storageKey, JSON.stringify(nonMandatoryFilters));
-      }
 
-      this.applySelectedFilters(selectorView, activeView);
-    });
+        this.previewObserver.observe(previewCard);
 
-    // Handle "Change" button to go back to selector
-    if (changeBtn) {
-      changeBtn.addEventListener("click", () => {
-        // Show selector view
-        selectorView.style.display = "flex";
-        activeView.style.display = "none";
-
-        // Update button state based on currently checked filters
-        const selected = Array.from(checkboxes).filter((cb) => cb.checked);
-        useBtn.disabled = selected.length === 0;
-      });
+        this.preview.onRender(() => {
+            if (this.miniPreviewVisible) {
+                this.updateMiniChart();
+            }
+        });
     }
 
-    // Copy filter placeholder to clipboard on click (selector view)
-    const selectorPlaceholders = selectorView.querySelectorAll(
-      ".filter-selector-keys .placeholder-key",
-    );
-    selectorPlaceholders.forEach((placeholder) => {
-      placeholder.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        const text = placeholder.textContent;
-        const originalText = text;
+    /**
+     * Set mini preview size
+     */
+    setMiniPreviewSize(size) {
+        if (!this.miniPreviewEl) return;
 
-        const showCopiedFeedback = () => {
-          placeholder.textContent = "Copied!";
-          placeholder.classList.add("copied");
-          setTimeout(() => {
-            placeholder.textContent = originalText;
-            placeholder.classList.remove("copied");
-          }, 1000);
-        };
+        this.miniPreviewSize = size;
+        this.miniPreviewEl.classList.add('resizing');
+        this.miniPreviewEl.classList.remove('size-compact', 'size-expanded');
+        this.miniPreviewEl.classList.add('size-' + size);
 
-        try {
-          await navigator.clipboard.writeText(text);
-          showCopiedFeedback();
-        } catch (err) {
-          // Fallback for older browsers
-          const textarea = document.createElement("textarea");
-          textarea.value = text;
-          document.body.appendChild(textarea);
-          textarea.select();
-          document.execCommand("copy");
-          document.body.removeChild(textarea);
-          showCopiedFeedback();
-        }
-      });
-    });
-  }
+        const sizeButtons = this.miniPreviewEl.querySelectorAll('.mini-size-btn');
+        sizeButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.size === size);
+        });
 
-  /**
-   * Apply selected filters - show active view with selected filter inputs
-   */
-  applySelectedFilters(selectorView, activeView) {
-    // Show active filters view
-    selectorView.style.display = "none";
-    activeView.style.display = "flex";
-
-    // Show only selected filter inputs
-    const filterItems = this.container.querySelectorAll(
-      "#graph-filters .filter-input-item",
-    );
-    filterItems.forEach((item) => {
-      const key = item.dataset.filterKey;
-      if (this.selectedFilters.includes(key)) {
-        item.style.display = "flex";
-      } else {
-        item.style.display = "none";
-      }
-    });
-
-    // Initialize pickers for newly visible filters (datepickers, dropdowns need to be visible to init properly)
-    const filtersContainer = this.container.querySelector("#graph-filters");
-    if (filtersContainer && typeof FilterRenderer !== "undefined") {
-      FilterRenderer.init(filtersContainer);
-    }
-
-    // Update placeholder settings to reflect new filter selection
-    this.updatePlaceholderSettings();
-  }
-
-  /**
-   * Initialize sidebar filters (date pickers, multi-select dropdowns, etc.)
-   * Uses FilterRenderer for centralized initialization
-   * NOTE: Pickers are initialized when filters become visible (in applySelectedFilters),
-   * not here, because daterangepicker doesn't work well on hidden elements.
-   */
-  initSidebarFilters() {
-    const filtersContainer = this.container.querySelector("#graph-filters");
-    if (!filtersContainer) return;
-
-    // Don't initialize pickers here - filters are hidden at this point.
-    // Pickers will be initialized in applySelectedFilters() when filters become visible.
-
-    // Copy filter placeholder to clipboard on click
-    const placeholders = filtersContainer.querySelectorAll(
-      ".placeholder-key",
-    );
-    placeholders.forEach((placeholder) => {
-      placeholder.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        const text = placeholder.textContent;
-        const originalText = text;
-
-        const showCopiedFeedback = () => {
-          placeholder.textContent = "Copied!";
-          placeholder.classList.add("copied");
-          setTimeout(() => {
-            placeholder.textContent = originalText;
-            placeholder.classList.remove("copied");
-          }, 1000);
-        };
-
-        try {
-          await navigator.clipboard.writeText(text);
-          showCopiedFeedback();
-        } catch (err) {
-          // Fallback for older browsers
-          const textarea = document.createElement("textarea");
-          textarea.value = text;
-          document.body.appendChild(textarea);
-          textarea.select();
-          document.execCommand("copy");
-          document.body.removeChild(textarea);
-          showCopiedFeedback();
-        }
-      });
-    });
-  }
-
-  /**
-   * Set graph type and update components
-   */
-  setGraphType(type) {
-    this.graphType = type;
-
-    if (this.dataMapper) {
-      this.dataMapper.setGraphType(type);
-    }
-
-    if (this.configPanel) {
-      this.configPanel.setGraphType(type);
-    }
-
-    if (this.preview) {
-      this.preview.setType(type);
-      // Don't show dummy data while loading existing graph - keep skeleton
-      if (!this.isLoading) {
-        if (this.columns.length === 0) {
-          this.preview.showDummyData(type);
+        if (this.miniChart) {
+            const self = this;
+            setTimeout(function() {
+                self.miniChart.resize();
+                self.updateMiniChart();
+                self.miniPreviewEl.classList.remove('resizing');
+            }, 300);
         } else {
-          this.updatePreview();
+            this.miniPreviewEl.classList.remove('resizing');
         }
-      }
     }
 
-    // Update mini toggle button icon
-    this.updateMiniToggleIcon();
+    /**
+     * Show mini chart preview
+     */
+    showMiniPreview() {
+        if (this.miniPreviewVisible || !this.miniPreviewEl || !this.preview || !this.preview.chart) return;
 
-    // Check for unsaved changes
-    this.checkForChanges();
-  }
-
-  /**
-   * Handle query test success
-   */
-  onQueryTest(columns) {
-    this.columns = columns;
-
-    if (this.dataMapper) {
-      this.dataMapper.setColumns(columns);
+        this.miniPreviewVisible = true;
+        this.miniPreviewEl.classList.add('visible');
+        this.updateMiniChart();
     }
 
-    // Clear any previous error
-    this.clearQueryError();
+    /**
+     * Hide mini chart preview
+     */
+    hideMiniPreview() {
+        if (!this.miniPreviewVisible || !this.miniPreviewEl) return;
 
-    Toast.success(`Query valid. Found ${columns.length} columns.`);
-
-    // Automatically update preview after successful query test
-    this.updatePreview();
-  }
-
-  /**
-   * Handle query test error
-   */
-  onQueryError(error) {
-    this.columns = [];
-
-    if (this.dataMapper) {
-      this.dataMapper.setColumns([]);
+        this.miniPreviewVisible = false;
+        this.miniPreviewEl.classList.remove('visible');
     }
 
-    // Set error for status indicator
-    this.setQueryError(error);
+    /**
+     * Show mini toggle button
+     */
+    showMiniToggle() {
+        if (this.miniToggleVisible || !this.miniToggleBtn) return;
 
-    Toast.error(error);
-  }
-
-  /**
-   * Handle filter changes
-   */
-  onFiltersChanged() {
-    // Filters changed, might need to retest query
-  }
-
-  /**
-   * Get current filter values from sidebar inputs (only from selected/visible filters)
-   */
-  getSidebarFilterValues() {
-    // Try to find filters container - check both within container and globally
-    let filtersContainer = this.container.querySelector("#graph-filters");
-    if (!filtersContainer) {
-      filtersContainer = document.getElementById("graph-filters");
+        this.miniToggleVisible = true;
+        this.miniToggleBtn.classList.add('visible');
     }
 
-    return DataFilterUtils.getValues(filtersContainer, { visibleOnly: true });
-  }
+    /**
+     * Hide mini toggle button
+     */
+    hideMiniToggle() {
+        if (!this.miniToggleVisible || !this.miniToggleBtn) return;
 
-  /**
-   * Update preview with current data
-   */
-  async updatePreview() {
-    if (!this.preview) return;
-
-    // Skip during initial load - PHP skeleton is shown, let it stay until final render
-    if (this.isLoading || this.initialLoad) return;
-
-    const config = this.configPanel ? this.configPanel.getConfig() : {};
-    const mapping = this.dataMapper ? this.dataMapper.getMapping() : {};
-
-    // If no columns yet (dummy data mode), just update config and re-render
-    if (this.columns.length === 0) {
-      this.preview.setConfig(config);
-      this.preview.setMapping(mapping);
-      this.preview.showDummyData(this.graphType);
-      return;
+        this.miniToggleVisible = false;
+        this.miniToggleBtn.classList.remove('visible');
     }
 
-    // If mapping is incomplete, show dummy data
-    if (!this.validateMapping(mapping)) {
-      this.preview.setConfig(config);
-      this.preview.setMapping(mapping);
-      this.preview.showDummyData(this.graphType);
-      return;
-    }
+    /**
+     * Update mini chart with current preview data
+     */
+    updateMiniChart() {
+        if (!this.preview || !this.preview.chart || !this.miniChart) return;
 
-    const query = this.queryBuilder ? this.queryBuilder.getQuery() : "";
+        const mainOption = this.preview.chart.getOption();
+        if (!mainOption) return;
 
-    // Use sidebar filter values (includes pre-selected options from is_selected)
-    const filterValues = this.getSidebarFilterValues();
-    const placeholderSettings = this.getPlaceholderSettingsForQuery();
+        const miniOption = JSON.parse(JSON.stringify(mainOption));
+        miniOption.animation = false;
 
-    // Show skeleton while loading
-    this.preview.showSkeleton(this.graphType);
-
-    try {
-      const result = await Ajax.post("preview_graph", {
-        query: query,
-        mapping: mapping,
-        config: config,
-        graph_type: this.graphType,
-        filters: filterValues,
-        placeholder_settings: placeholderSettings,
-      });
-
-      if (result.success && result.data) {
-        this.preview.setData(result.data.chartData);
-        this.preview.setConfig(config);
-        this.preview.setMapping(mapping);
-        this.preview.render(); // This hides skeleton
-      } else {
-        this.preview.hideSkeleton();
-      }
-      // Clear initial load flag - subsequent changes will show skeleton
-      this.initialLoad = false;
-    } catch (error) {
-      this.preview.hideSkeleton();
-      this.initialLoad = false;
-      console.error("Preview update failed:", error);
-    }
-  }
-
-  /**
-   * Load existing graph for editing
-   */
-  async loadGraph(graphId) {
-    this.isLoading = true;
-
-    // PHP already rendered skeleton with correct type - don't override it
-
-    try {
-      const result = await Ajax.post("load_graph", { id: graphId });
-
-      if (result.success && result.data) {
-        const graph = result.data;
-
-        // Set graph properties
-        this.graphName = graph.name;
-        this.graphDescription = graph.description || "";
-        this.graphType = graph.graph_type;
-
-        // Update name input
-        const nameInput = this.container.querySelector(".graph-name-input");
-        if (nameInput) nameInput.value = graph.name;
-
-        // Update description input
-        const descriptionInput = this.container.querySelector(
-          ".graph-description-input",
-        );
-        if (descriptionInput) {
-          descriptionInput.value = this.graphDescription;
-          // Trigger autosize update
-          autosize.update(descriptionInput);
-        }
-
-        // Update type selector (supports both old and new class names)
-        const typeItems = this.container.querySelectorAll(
-          ".graph-type-item, .chart-type-item",
-        );
-        typeItems.forEach((item) => {
-          item.classList.toggle(
-            "active",
-            item.dataset.type === graph.graph_type,
-          );
-        });
-
-        // Set graph type (updates components)
-        this.setGraphType(graph.graph_type);
-
-        // Set query
-        if (this.queryBuilder && graph.query) {
-          this.queryBuilder.setQuery(graph.query);
-        }
-
-        // Set config
-        if (graph.config) {
-          const config = JSON.parse(graph.config);
-
-          // Restore active sidebar tab
-          if (config.activeSidebarTab) {
-            this.setActiveSidebarTab(config.activeSidebarTab);
-          }
-
-          // Set config panel values
-          if (this.configPanel) {
-            this.configPanel.setConfig(config);
-          }
-        }
-
-        // Restore placeholder settings (from separate field, or fallback to config for backwards compatibility)
-        if (this.placeholderSettings) {
-          let placeholderSettings = {};
-          if (graph.placeholder_settings) {
-            placeholderSettings =
-              typeof graph.placeholder_settings === "string"
-                ? JSON.parse(graph.placeholder_settings)
-                : graph.placeholder_settings;
-          } else if (graph.config) {
-            // Fallback for old graphs that stored it in config
-            const config =
-              typeof graph.config === "string"
-                ? JSON.parse(graph.config)
-                : graph.config;
-            if (config.placeholderSettings) {
-              placeholderSettings = config.placeholderSettings;
+        if (miniOption.tooltip) {
+            if (Array.isArray(miniOption.tooltip)) {
+                miniOption.tooltip.forEach(function(t) {
+                    t.show = false;
+                });
+            } else {
+                miniOption.tooltip.show = false;
             }
-          }
-          this.placeholderSettings.setSettings(placeholderSettings);
         }
 
-        // Set filters first (they may be needed for query testing)
-        if (this.filterManager && graph.filters) {
-          this.filterManager.setFilters(graph.filters);
+        this.miniChart.setOption(miniOption, true);
+        this.miniChart.resize();
+    }
+
+    /**
+     * Get chart type icon
+     */
+    getChartTypeIcon() {
+        const iconMap = {
+            bar: 'fa-chart-bar',
+            line: 'fa-chart-line',
+            pie: 'fa-chart-pie'
+        };
+        return iconMap[this.graphType] || 'fa-chart-bar';
+    }
+
+    /**
+     * Update mini toggle button icon
+     */
+    updateMiniToggleIcon() {
+        if (this.miniToggleBtn) {
+            const icon = this.miniToggleBtn.querySelector('i');
+            if (icon) {
+                icon.className = 'fas ' + this.getChartTypeIcon();
+            }
         }
-
-        // Set mapping and test query
-        if (this.dataMapper && graph.data_mapping) {
-          const mapping = JSON.parse(graph.data_mapping);
-          // Set mapping without triggering onChange (we'll update preview after testQuery)
-          this.dataMapper.setMapping(mapping, false);
-
-          // Mark loading complete before testQuery so updatePreview will run
-          this.isLoading = false;
-          this.initialLoad = false;
-
-          // Test query to get columns - this will call onQueryTest which now
-          // calls updatePreview(), and since mapping is already set, it should work
-          if (graph.query) {
-            await this.queryBuilder.testQuery();
-          }
-        }
-
-        // Update placeholder settings table after query is set
-        this.updatePlaceholderSettings();
-
-        // Capture initial state after loading
-        this.captureState();
-        this.setUnsavedChanges(false);
-      } else {
-        if (this.preview) {
-          this.preview.hideSkeleton();
-        }
-        Toast.error(result.message || "Failed to load graph");
-      }
-    } catch (error) {
-      if (this.preview) {
-        this.preview.hideSkeleton();
-      }
-      Toast.error("Failed to load graph");
-      console.error(error);
-    } finally {
-      this.isLoading = false;
     }
-  }
-
-  /**
-   * Save graph
-   */
-  async save() {
-    // Collect all validation errors
-    const errors = [];
-
-    // Validate using FormValidator
-    if (this.formValidator && !this.formValidator.validate()) {
-      this.expandSidebar();
-      errors.push("Graph name is required");
-    }
-
-    // Validate categories (at least one required)
-    if (!this.validateCategories()) {
-      this.expandSidebar();
-      errors.push("At least one category is required");
-    }
-
-    // Additional validations for query and mapping
-    const query = this.queryBuilder ? this.queryBuilder.getQuery() : "";
-    if (!query.trim()) {
-      errors.push("SQL query is required");
-    }
-
-    // Validate mandatory filters are in query
-    if (this.mandatoryFilterValidator && query.trim()) {
-      const mandatoryValidation =
-        this.mandatoryFilterValidator.validateQuery(query);
-      if (!mandatoryValidation.valid) {
-        const errorMsg = this.mandatoryFilterValidator.getErrorMessage(
-          mandatoryValidation.missing,
-        );
-        errors.push(errorMsg);
-      }
-    }
-
-    const mapping = this.dataMapper ? this.dataMapper.getMapping() : {};
-    if (!this.validateMapping(mapping)) {
-      errors.push(
-        "Data mapping is incomplete (run query first to see columns)",
-      );
-    }
-
-    // Show all errors if any
-    if (errors.length > 0) {
-      // console.log('Validation errors:', errors);
-      //add - before each error
-      Toast.error(errors.map((err) => "• " + err).join("<br>"));
-      // Toast.error('Please correct the errors in the form');
-      return;
-    }
-
-    Loading.show("Saving graph...");
-
-    try {
-      // Include activeSidebarTab in config
-      const config = this.configPanel ? this.configPanel.getConfig() : {};
-      config.activeSidebarTab = this.activeSidebarTab;
-
-      // Get placeholder settings separately for saving to database
-      const placeholderSettings = this.placeholderSettings
-        ? this.placeholderSettings.getSettings()
-        : {};
-
-      const data = {
-        id: this.graphId,
-        name: this.graphName,
-        description: this.graphDescription,
-        graph_type: this.graphType,
-        query: query,
-        data_mapping: mapping,
-        config: config,
-        placeholder_settings: placeholderSettings,
-        filters: this.filterManager ? this.filterManager.getFilters() : [],
-        categories: this.selectedCategories || [],
-      };
-
-      const result = await Ajax.post("save_graph", data);
-
-      if (result.success) {
-        // Handle both 'message' (DGC) and fallback for live site which uses 'screen_message'
-        const successMsg = result.message || (this.graphId ? 'Graph updated successfully' : 'Graph created successfully');
-        Toast.success(successMsg);
-
-        // Mark as saved
-        this.captureState();
-        this.setUnsavedChanges(false);
-
-        // Redirect to list or update URL
-        if (!this.graphId && result.data && result.data.id) {
-          window.location.href = `?urlq=graph/edit/${result.data.id}`;
-        }
-      } else {
-        Toast.error(result.message || 'Failed to save graph');
-      }
-    } catch (error) {
-      Toast.error("Failed to save graph");
-      console.error(error);
-    } finally {
-      Loading.hide();
-    }
-  }
-
-  /**
-   * Validate mapping based on graph type
-   */
-  validateMapping(mapping) {
-    if (this.graphType === "pie") {
-      return mapping.name_column && mapping.value_column;
-    } else {
-      return mapping.x_column && mapping.y_column;
-    }
-  }
-
-  /**
-   * Initialize change tracking
-   */
-  initChangeTracking() {
-    // Track changes on name input
-    const nameInput = this.container.querySelector(".graph-name-input");
-    if (nameInput) {
-      nameInput.addEventListener("input", () => this.checkForChanges());
-    }
-
-    // Warn before leaving page with unsaved changes
-    window.addEventListener("beforeunload", (e) => {
-      if (this.hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue =
-          "You have unsaved changes. Are you sure you want to leave?";
-        return e.returnValue;
-      }
-    });
-
-    // Track link clicks for internal navigation
-    document.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", (e) => {
-        if (
-          this.hasUnsavedChanges &&
-          !link.classList.contains("no-unsaved-warning")
-        ) {
-          if (
-            !confirm(
-              "You have unsaved changes. Are you sure you want to leave?",
-            )
-          ) {
-            e.preventDefault();
-          }
-        }
-      });
-    });
-  }
-
-  /**
-   * Capture current state as the saved state
-   */
-  captureState() {
-    this.savedState = this.getCurrentState();
-  }
-
-  /**
-   * Get current form state
-   */
-  getCurrentState() {
-    return {
-      name: this.graphName,
-      description: this.graphDescription,
-      graphType: this.graphType,
-      query: this.queryBuilder ? this.queryBuilder.getQuery() : "",
-      mapping: this.dataMapper
-        ? JSON.stringify(this.dataMapper.getMapping())
-        : "{}",
-      config: this.configPanel
-        ? JSON.stringify(this.configPanel.getConfig())
-        : "{}",
-      filters: this.filterManager
-        ? JSON.stringify(this.filterManager.getFilters())
-        : "[]",
-      placeholderSettings: this.placeholderSettings
-        ? JSON.stringify(this.placeholderSettings.getSettings())
-        : "{}",
-      categories: this.selectedCategories
-        ? JSON.stringify(this.selectedCategories.slice().sort())
-        : "[]",
-    };
-  }
-
-  /**
-   * Check if current state differs from saved state
-   */
-  checkForChanges() {
-    if (!this.savedState) {
-      this.setUnsavedChanges(false);
-      return;
-    }
-
-    const currentState = this.getCurrentState();
-    const hasChanges =
-      currentState.name !== this.savedState.name ||
-      currentState.description !== this.savedState.description ||
-      currentState.graphType !== this.savedState.graphType ||
-      currentState.query !== this.savedState.query ||
-      currentState.mapping !== this.savedState.mapping ||
-      currentState.config !== this.savedState.config ||
-      currentState.filters !== this.savedState.filters ||
-      currentState.placeholderSettings !== this.savedState.placeholderSettings ||
-      currentState.categories !== this.savedState.categories;
-
-    this.setUnsavedChanges(hasChanges);
-  }
-
-  /**
-   * Set unsaved changes state and update UI
-   */
-  setUnsavedChanges(hasChanges) {
-    this.hasUnsavedChanges = hasChanges;
-    this.updateUnsavedIndicator();
-  }
-
-  /**
-   * Update the unsaved changes indicator in the UI
-   */
-  updateUnsavedIndicator() {
-    // Delegate to updateStatusIndicators which handles all status displays
-    this.updateStatusIndicators();
-  }
-
-  /**
-   * Mark state as changed (call from components when they change)
-   */
-  markAsChanged() {
-    this.checkForChanges();
-  }
 }
