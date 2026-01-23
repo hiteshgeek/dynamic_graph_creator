@@ -305,19 +305,45 @@ class DashboardBuilder {
 
   /**
    * Handle widget selection from modal
-   * @param {number} graphId - Selected graph ID
+   * @param {number|Object} widgetInfo - Selected widget ID (number for graph) or object { type, id } for other widget types
    * @param {Object} context - Area context
    */
-  async handleWidgetSelect(graphId, context) {
-    const content = {
-      type: "graph",
-      widgetId: graphId,
-      widgetType: "graph",
-      config: {},
-    };
+  async handleWidgetSelect(widgetInfo, context) {
+    let content;
+
+    // Handle counter and other widget types (passed as object)
+    if (typeof widgetInfo === "object" && widgetInfo !== null) {
+      content = {
+        type: widgetInfo.type,
+        widgetId: widgetInfo.id,
+        widgetType: widgetInfo.type,
+        config: {},
+      };
+    } else {
+      // Legacy: graph ID passed as number
+      content = {
+        type: "graph",
+        widgetId: widgetInfo,
+        widgetType: "graph",
+        config: {},
+      };
+    }
+
+    // Debug: log widget selection
+    console.log("[DashboardBuilder] handleWidgetSelect:", {
+      widgetInfo,
+      content,
+      context,
+    });
 
     // Update the area content in the structure
-    this.updateAreaContentInStructure(context.sectionId, context.areaId, context.rowId, content);
+    const updated = this.updateAreaContentInStructure(context.sectionId, context.areaId, context.rowId, content);
+
+    if (!updated) {
+      console.error("[DashboardBuilder] Failed to update area content");
+      Toast.error("Failed to update widget - area not found");
+      return;
+    }
 
     // Render immediately
     this.renderDashboard();
@@ -404,14 +430,22 @@ class DashboardBuilder {
    * @param {Object} content - New content object
    */
   updateAreaContentInStructure(sectionId, areaId, rowId, content) {
-    if (!this.currentDashboard) return;
+    if (!this.currentDashboard) {
+      console.warn("[DashboardBuilder] updateAreaContentInStructure: No currentDashboard");
+      return false;
+    }
 
     const structure =
       typeof this.currentDashboard.structure === "string"
         ? JSON.parse(this.currentDashboard.structure)
         : this.currentDashboard.structure;
 
-    if (!structure || !structure.sections) return;
+    if (!structure || !structure.sections) {
+      console.warn("[DashboardBuilder] updateAreaContentInStructure: Invalid structure");
+      return false;
+    }
+
+    let updated = false;
 
     for (const section of structure.sections) {
       if (section.sid === sectionId) {
@@ -422,12 +456,14 @@ class DashboardBuilder {
               for (const subRow of area.subRows) {
                 if (subRow.rowId === rowId) {
                   subRow.content = content;
+                  updated = true;
                   break;
                 }
               }
             } else {
               // Update the area directly
               area.content = content;
+              updated = true;
             }
             break;
           }
@@ -436,8 +472,18 @@ class DashboardBuilder {
       }
     }
 
+    if (!updated) {
+      console.warn("[DashboardBuilder] updateAreaContentInStructure: Area not found", {
+        sectionId,
+        areaId,
+        rowId,
+        availableSections: structure.sections.map(s => s.sid),
+      });
+    }
+
     // Update the dashboard structure
     this.currentDashboard.structure = JSON.stringify(structure);
+    return updated;
   }
 
   /**
@@ -461,7 +507,7 @@ class DashboardBuilder {
 
   /**
    * Get all widget IDs currently used in the dashboard
-   * @returns {Set<number>} Set of widget IDs
+   * @returns {Set<number|string>} Set of widget IDs (numbers for graphs, "counter-{id}" for counters)
    */
   getAllUsedWidgetIds() {
     const usedIds = new Set();
@@ -475,21 +521,29 @@ class DashboardBuilder {
 
     if (!structure || !structure.sections) return usedIds;
 
+    const addWidgetId = (content) => {
+      if (!content?.widgetId) return;
+      const widgetType = content.widgetType || content.type || "graph";
+      if (widgetType === "counter") {
+        // Counters use "counter-{id}" format
+        usedIds.add(`counter-${content.widgetId}`);
+      } else {
+        // Graphs use integer ID
+        usedIds.add(parseInt(content.widgetId, 10));
+      }
+    };
+
     for (const section of structure.sections) {
       if (!section.areas) continue;
 
       for (const area of section.areas) {
         // Check area's direct content
-        if (area.content?.widgetId) {
-          usedIds.add(parseInt(area.content.widgetId, 10));
-        }
+        addWidgetId(area.content);
 
         // Check sub-rows
         if (area.subRows) {
           for (const subRow of area.subRows) {
-            if (subRow.content?.widgetId) {
-              usedIds.add(parseInt(subRow.content.widgetId, 10));
-            }
+            addWidgetId(subRow.content);
           }
         }
       }
@@ -503,7 +557,7 @@ class DashboardBuilder {
    * @param {string} sectionId
    * @param {string} areaId
    * @param {string|null} rowId
-   * @returns {number|null}
+   * @returns {number|string|null} Graph ID (number) or counter key ("counter-{id}")
    */
   getAreaWidgetId(sectionId, areaId, rowId) {
     if (!this.currentDashboard) return null;
@@ -515,6 +569,16 @@ class DashboardBuilder {
 
     if (!structure || !structure.sections) return null;
 
+    // Helper to get widget key from content
+    const getWidgetKey = (content) => {
+      if (!content?.widgetId) return null;
+      const widgetType = content.widgetType || content.type || "graph";
+      if (widgetType === "counter") {
+        return `counter-${content.widgetId}`;
+      }
+      return parseInt(content.widgetId, 10);
+    };
+
     for (const section of structure.sections) {
       if (section.sid === sectionId) {
         for (const area of section.areas) {
@@ -522,13 +586,11 @@ class DashboardBuilder {
             if (rowId && area.subRows) {
               for (const subRow of area.subRows) {
                 if (subRow.rowId === rowId) {
-                  const widgetId = subRow.content?.widgetId;
-                  return widgetId ? parseInt(widgetId, 10) : null;
+                  return getWidgetKey(subRow.content);
                 }
               }
             }
-            const widgetId = area.content?.widgetId;
-            return widgetId ? parseInt(widgetId, 10) : null;
+            return getWidgetKey(area.content);
           }
         }
       }
@@ -1314,7 +1376,7 @@ class DashboardBuilder {
   }
 
   /**
-   * Load and render all widget graphs in the dashboard
+   * Load and render all widgets (graphs and counters) in the dashboard
    */
   async loadWidgetGraphs() {
     // Dispose existing chart instances
@@ -1336,6 +1398,90 @@ class DashboardBuilder {
 
       // Load and render the graph with filters
       this.loadWidgetGraph(container, graphId, graphType, filterValues);
+    }
+
+    // Find all widget counter containers
+    const counterContainers = this.container.querySelectorAll(".widget-counter-container[data-counter-id]");
+
+    for (const container of counterContainers) {
+      const counterId = parseInt(container.dataset.counterId, 10);
+      if (!counterId) continue;
+
+      // Load and render the counter with filters
+      this.loadWidgetCounter(container, counterId, filterValues);
+    }
+  }
+
+  /**
+   * Load and render a single widget counter
+   * @param {HTMLElement} container - The container element
+   * @param {number} counterId - The counter ID
+   * @param {Object} filters - Filter values to apply
+   */
+  async loadWidgetCounter(container, counterId, filters = {}) {
+    try {
+      const counterColor = container.dataset.counterColor || "#4361ee";
+      const counterIcon = container.dataset.counterIcon || "analytics";
+
+      // Get counter name from widget selector modal
+      let counterName = "Counter";
+      if (this.widgetSelectorModal && this.widgetSelectorModal.isDataLoaded()) {
+        const counter = this.widgetSelectorModal.getCounterById(counterId);
+        if (counter) {
+          counterName = counter.name;
+        }
+      }
+
+      // Fetch counter data with filters
+      const result = await Ajax.post("preview_counter", {
+        id: counterId,
+        filters: filters,
+      });
+
+      if (result.success && result.data) {
+        const value = result.data.counterData?.value ?? 0;
+        const format = result.data.config?.format || "number";
+
+        // Format the value
+        let displayValue = value;
+        if (format === "currency") {
+          displayValue = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
+        } else if (format === "percentage") {
+          displayValue = value + "%";
+        } else {
+          displayValue = new Intl.NumberFormat().format(value);
+        }
+
+        // Render counter
+        container.innerHTML = `
+          <div class="widget-counter-display">
+            <div class="counter-card-display" style="background-color: ${counterColor};">
+              <div class="counter-icon">
+                <span class="material-icons">${counterIcon}</span>
+              </div>
+              <div class="counter-content">
+                <div class="counter-value">${displayValue}</div>
+                <div class="counter-name">${this.escapeHtml(counterName)}</div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="widget-graph-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>${result.message || "Failed to load counter"}</span>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error("Error loading widget counter:", error);
+      container.innerHTML = `
+        <div class="widget-graph-error">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Failed to load counter</span>
+        </div>
+      `;
     }
   }
 
@@ -1803,9 +1949,37 @@ class DashboardBuilder {
 
   renderContent(content) {
     const widgetId = content?.widgetId || null;
-    const widgetType = content?.widgetType || "Unknown";
+    const widgetType = content?.widgetType || content?.type || "graph";
 
-    // Get graph details from the widget selector modal if available
+    // Edit overlay for design mode (visible on hover) - uses center-controls styling
+    const editOverlay = `
+      <div class="widget-edit-overlay">
+        <div class="center-controls">
+          <div class="center-row">
+            <button class="center-btn edit-btn widget-edit-btn" data-widget-id="${widgetId}" data-widget-type="${widgetType}" data-bs-toggle="tooltip" data-bs-title="Change widget">
+              <i class="fas fa-pencil"></i>
+            </button>
+            <button class="center-btn delete-btn widget-delete-btn" data-widget-id="${widgetId}" data-widget-type="${widgetType}" data-bs-toggle="tooltip" data-bs-title="Remove widget">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Render based on widget type
+    if (widgetType === "counter") {
+      return this.renderCounterContent(widgetId, editOverlay);
+    }
+
+    // Default: render graph
+    return this.renderGraphContent(widgetId, widgetType, editOverlay);
+  }
+
+  /**
+   * Render graph widget content
+   */
+  renderGraphContent(widgetId, widgetType, editOverlay) {
     let graphName = `Graph #${widgetId}`;
     let graphType = "bar";
     let graphDescription = "";
@@ -1819,22 +1993,6 @@ class DashboardBuilder {
       }
     }
 
-    // Edit overlay for design mode (visible on hover) - uses center-controls styling
-    const editOverlay = `
-      <div class="widget-edit-overlay">
-        <div class="center-controls">
-          <div class="center-row">
-            <button class="center-btn edit-btn widget-edit-btn" data-widget-id="${widgetId}" data-bs-toggle="tooltip" data-bs-title="Change widget">
-              <i class="fas fa-pencil"></i>
-            </button>
-            <button class="center-btn delete-btn widget-delete-btn" data-widget-id="${widgetId}" data-bs-toggle="tooltip" data-bs-title="Remove widget">
-              <i class="fas fa-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
     // Build description HTML if available
     let descriptionHtml = "";
     if (graphDescription) {
@@ -1847,7 +2005,6 @@ class DashboardBuilder {
       `;
     }
 
-    // Render actual graph chart container
     return `<div class="area-content has-widget" data-widget-id="${widgetId}" data-widget-type="${widgetType}" data-graph-type="${graphType}">
             <div class="widget-graph-wrapper">
               <div class="widget-graph-header">
@@ -1858,6 +2015,43 @@ class DashboardBuilder {
               </div>
               <div class="widget-graph-container" data-graph-id="${widgetId}">
                 ${ChartSkeleton.getHTML(graphType)}
+              </div>
+            </div>
+            ${editOverlay}
+        </div>`;
+  }
+
+  /**
+   * Render counter widget content
+   */
+  renderCounterContent(widgetId, editOverlay) {
+    let counterName = `Counter #${widgetId}`;
+    let counterIcon = "analytics";
+    let counterColor = "#4361ee";
+
+    if (this.widgetSelectorModal && this.widgetSelectorModal.isDataLoaded()) {
+      const counter = this.widgetSelectorModal.getCounterById(widgetId);
+      if (counter) {
+        counterName = counter.name;
+        counterIcon = counter.icon || "analytics";
+        counterColor = counter.color || "#4361ee";
+      }
+    }
+
+    return `<div class="area-content has-widget" data-widget-id="${widgetId}" data-widget-type="counter">
+            <div class="widget-counter-wrapper">
+              <div class="widget-counter-container" data-counter-id="${widgetId}" data-counter-color="${counterColor}" data-counter-icon="${counterIcon}">
+                <div class="widget-counter-loading">
+                  <div class="counter-skeleton-preview" style="--counter-color: ${counterColor};">
+                    <div class="counter-skeleton-icon">
+                      <span class="material-icons">${counterIcon}</span>
+                    </div>
+                    <div class="counter-skeleton-content">
+                      <div class="counter-skeleton-value"></div>
+                      <div class="counter-skeleton-name">${this.escapeHtml(counterName)}</div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             ${editOverlay}

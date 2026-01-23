@@ -118,6 +118,9 @@ if (isset($_POST['submit'])) {
         case 'preview_graph':
             previewGraphForDashboard($_POST);
             break;
+        case 'preview_counter':
+            previewCounterForDashboard($_POST);
+            break;
     }
 }
 
@@ -1475,8 +1478,14 @@ function getDashboardFilters($data)
  */
 function getWidgetsForSelector($data)
 {
+    // Get all widget types from database
+    $widgetTypes = WidgetTypeManager::getAllAsArray();
+
     // Get all active graphs
     $graphs = GraphManager::getAll();
+
+    // Get all active counters
+    $counters = CounterManager::getAll();
 
     // Get all widget categories
     $categories = WidgetCategoryManager::getAll();
@@ -1499,20 +1508,46 @@ function getWidgetsForSelector($data)
         );
     }
 
-    // Build categories data with graph counts
+    // Build counters data with category mappings
+    $countersData = array();
+    foreach ($counters as $counter) {
+        $categoryIds = CounterWidgetCategoryMappingManager::getCategoryIdsForCounter($counter->getId());
+        $counterCategories = CounterWidgetCategoryMappingManager::getCategoriesForCounter($counter->getId());
+        $config = $counter->getConfigArray();
+
+        $countersData[] = array(
+            'cid' => $counter->getId(),
+            'name' => $counter->getName(),
+            'description' => $counter->getDescription(),
+            'icon' => isset($config['icon']) ? $config['icon'] : 'analytics',
+            'color' => isset($config['color']) ? $config['color'] : '#4361ee',
+            'category_ids' => $categoryIds,
+            'categories' => array_map(function ($cat) {
+                return $cat->toArray();
+            }, $counterCategories)
+        );
+    }
+
+    // Build categories data with widget counts
     $categoriesData = array();
     foreach ($categories as $cat) {
         $catArray = $cat->toArray();
         $catArray['graph_count'] = count(
             GraphWidgetCategoryMappingManager::getGraphsForCategory($cat->getId())
         );
+        $catArray['counter_count'] = count(
+            CounterWidgetCategoryMappingManager::getCountersForCategory($cat->getId())
+        );
+        $catArray['widget_count'] = $catArray['graph_count'] + $catArray['counter_count'];
         $categoriesData[] = $catArray;
     }
 
     Utility::ajaxResponseTrue('Widgets loaded', array(
+        'widget_types' => $widgetTypes,
         'graphs' => $graphsData,
+        'counters' => $countersData,
         'categories' => $categoriesData,
-        'total_count' => count($graphsData)
+        'total_count' => count($graphsData) + count($countersData)
     ));
 }
 
@@ -1550,6 +1585,47 @@ function previewGraphForDashboard($data)
         'config' => $config,
         'graphType' => $graph->getGraphType(),
         'name' => $graph->getName()
+    ));
+}
+
+/**
+ * Preview counter for dashboard (load counter data with filters)
+ */
+function previewCounterForDashboard($data)
+{
+    $counterId = isset($data['id']) ? intval($data['id']) : 0;
+
+    if (!$counterId) {
+        Utility::ajaxResponseFalse('Counter ID required');
+    }
+
+    // Load counter
+    $counter = new Counter($counterId);
+    if (!$counter->getId()) {
+        Utility::ajaxResponseFalse('Counter not found');
+    }
+
+    // Get filter values (for dashboard filters)
+    $filters = isset($data['filters']) ? $data['filters'] : array();
+    if (is_string($filters)) {
+        $filters = json_decode($filters, true);
+    }
+
+    // Execute counter query
+    $counterData = $counter->execute($filters ? $filters : array());
+    $config = $counter->getConfigArray();
+    $defaultConfig = Counter::getDefaultConfig();
+
+    // Get icon and color from config with defaults
+    $icon = isset($config['icon']) && $config['icon'] ? $config['icon'] : $defaultConfig['icon'];
+    $color = isset($config['color']) && $config['color'] ? $config['color'] : $defaultConfig['color'];
+
+    Utility::ajaxResponseTrue('Counter data loaded', array(
+        'counterData' => $counterData,
+        'config' => $config,
+        'name' => $counter->getName(),
+        'icon' => $icon,
+        'color' => $color
     ));
 }
 

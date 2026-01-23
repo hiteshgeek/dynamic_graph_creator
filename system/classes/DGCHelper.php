@@ -95,7 +95,12 @@ class DGCHelper
         $widgetId = isset($content['widgetId']) ? intval($content['widgetId']) : 0;
         $widgetType = isset($content['widgetType']) ? $content['widgetType'] : 'graph';
 
-        // Get graph info for display
+        // Handle counter widgets
+        if ($widgetType === 'counter') {
+            return self::renderDashboardCounterContent($widgetId);
+        }
+
+        // Handle graph widgets (default)
         $graphName = 'Graph #' . $widgetId;
         $graphType = 'bar';
         $graphDescription = '';
@@ -129,6 +134,60 @@ class DGCHelper
         $html .= '<div class="widget-graph-container" data-graph-id="' . $widgetId . '">';
         $html .= self::renderChartSkeleton($graphType);
         $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * Render counter widget content for dashboard preview
+     *
+     * @param int $counterId The counter ID
+     * @return string HTML for the counter widget
+     */
+    public static function renderDashboardCounterContent($counterId)
+    {
+        $counterName = 'Counter #' . $counterId;
+        $counterIcon = 'analytics';
+        $counterColor = '#4361ee';
+
+        if ($counterId) {
+            $counter = new Counter($counterId);
+            if ($counter->getId()) {
+                $counterName = $counter->getName();
+                $config = $counter->getConfigArray();
+                $defaultConfig = Counter::getDefaultConfig();
+                $counterIcon = isset($config['icon']) && $config['icon'] ? $config['icon'] : $defaultConfig['icon'];
+                $counterColor = isset($config['color']) && $config['color'] ? $config['color'] : $defaultConfig['color'];
+            }
+        }
+
+        $html = '<div class="area-content has-widget" data-widget-id="' . $counterId . '" data-widget-type="counter">';
+        $html .= '<div class="widget-counter-wrapper">';
+        $html .= '<div class="widget-counter-container" data-counter-id="' . $counterId . '" data-counter-icon="' . htmlspecialchars($counterIcon) . '" data-counter-color="' . htmlspecialchars($counterColor) . '">';
+        $html .= self::renderCounterSkeleton($counterColor, $counterIcon);
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * Render a counter skeleton loader
+     *
+     * @param string $color The counter background color
+     * @param string $icon The counter icon
+     * @return string HTML for the skeleton
+     */
+    public static function renderCounterSkeleton($color = '#4361ee', $icon = 'analytics')
+    {
+        $html = '<div class="counter-skeleton" style="background: ' . htmlspecialchars($color) . ';">';
+        $html .= '<div class="counter-skeleton-icon"><span class="material-icons">' . htmlspecialchars($icon) . '</span></div>';
+        $html .= '<div class="counter-skeleton-content">';
+        $html .= '<div class="counter-skeleton-value"></div>';
+        $html .= '<div class="counter-skeleton-name"></div>';
         $html .= '</div>';
         $html .= '</div>';
 
@@ -245,8 +304,17 @@ class DGCHelper
         $html .= '<button type="button" class="btn-close" data-bs-dismiss="modal"></button>';
         $html .= '</div>';
         $html .= '<div class="modal-body">';
-        // Category Sidebar
+        // Sidebar with Types and Categories
         $html .= '<div class="widget-sidebar">';
+        // Widget Types Section
+        $html .= '<div class="sidebar-section">';
+        $html .= '<div class="sidebar-header">';
+        $html .= '<span class="sidebar-title">Widget Types</span>';
+        $html .= '</div>';
+        $html .= '<div class="sidebar-types" id="widget-type-list"></div>';
+        $html .= '</div>';
+        // Categories Section
+        $html .= '<div class="sidebar-section">';
         $html .= '<div class="sidebar-header">';
         $html .= '<span class="sidebar-title">Categories</span>';
         $html .= '<div class="sidebar-actions">';
@@ -256,6 +324,7 @@ class DGCHelper
         $html .= '</div>';
         $html .= '</div>';
         $html .= '<div class="sidebar-categories" id="widget-category-list"></div>';
+        $html .= '</div>';
         $html .= '</div>';
         // Main Content
         $html .= '<div class="widget-main">';

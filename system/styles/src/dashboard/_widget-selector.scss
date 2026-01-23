@@ -43,7 +43,7 @@
     min-height: 0;
   }
 
-  // Left sidebar - category filters
+  // Left sidebar - category and type filters
   .widget-sidebar {
     width: 220px;
     flex-shrink: 0;
@@ -51,6 +51,16 @@
     display: flex;
     flex-direction: column;
     background: var(--dgc-gray-50);
+    overflow-y: auto;
+
+    .sidebar-section {
+      display: flex;
+      flex-direction: column;
+
+      &:not(:last-child) {
+        border-bottom: 1px solid var(--dgc-border-color);
+      }
+    }
 
     .sidebar-header {
       padding: $spacing-sm $spacing-md;
@@ -59,6 +69,9 @@
       align-items: center;
       justify-content: space-between;
       background: var(--dgc-bg-card);
+      position: sticky;
+      top: 0;
+      z-index: 1;
 
       .sidebar-title {
         font-size: $font-size-sm;
@@ -82,14 +95,82 @@
       }
     }
 
+    .sidebar-types {
+      padding: $spacing-sm;
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-xs;
+      align-content: flex-start;
+    }
+
     .sidebar-categories {
       flex: 1;
-      overflow-y: auto;
       padding: $spacing-sm;
       display: flex;
       flex-wrap: wrap;
       gap: $spacing-sm;
       align-content: flex-start;
+    }
+
+    // Type chips
+    .type-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding: 4px $spacing-sm;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: $font-weight-medium;
+      border: 1px solid var(--dgc-gray-400);
+      background: transparent;
+      color: var(--dgc-text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+
+      i {
+        font-size: 11px;
+      }
+
+      .chip-check-icon {
+        margin-right: 2px;
+      }
+
+      .type-chip-count {
+        font-size: 10px;
+        opacity: 0.8;
+      }
+
+      &:hover:not(:disabled) {
+        background: var(--dgc-gray-200);
+        border-color: var(--dgc-gray-500);
+        color: var(--dgc-text-primary);
+      }
+
+      &:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba($primary, 0.25);
+      }
+
+      &.active {
+        color: #fff;
+        border-color: transparent;
+
+        &:hover:not(:disabled) {
+          filter: brightness(1.1);
+        }
+      }
+
+      &.disabled,
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+
+        &:hover {
+          background: transparent;
+          filter: none;
+        }
+      }
     }
 
     // Category chips (reusing graph creator chip style)
@@ -182,6 +263,53 @@
   }
 
   .widget-grid {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+  }
+
+  // Widget section (grouped by type)
+  .widget-section {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  .widget-section-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: color-mix(in srgb, var(--section-color, #{$primary}) 10%, var(--dgc-bg-card));
+    border: 1px solid color-mix(in srgb, var(--section-color, #{$primary}) 25%, transparent);
+    border-radius: $border-radius;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+
+    i {
+      font-size: 14px;
+      color: var(--section-color, var(--dgc-primary));
+    }
+
+    .section-title {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: var(--dgc-text-primary);
+    }
+
+    .section-count {
+      font-size: 11px;
+      font-weight: $font-weight-medium;
+      color: #fff;
+      background: var(--section-color, var(--dgc-primary));
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: auto;
+    }
+  }
+
+  .widget-section-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: $spacing-md;
@@ -331,6 +459,13 @@
       &.scatter {
         background: rgba($error, 0.1);
         color: $error;
+      }
+
+      // Counter icon uses inline style for dynamic color
+      &.counter {
+        .material-icons {
+          font-size: 20px;
+        }
       }
     }
 
@@ -633,6 +768,206 @@
     position: relative;
   }
 
+  // Counter widget container
+  .widget-counter-container {
+    flex: 1;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-md;
+  }
+
+  .widget-counter-loading,
+  .widget-counter-display {
+    width: 100%;
+  }
+
+  // Counter skeleton preview (loading state)
+  .counter-skeleton-preview {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+    padding: $spacing-lg $spacing-xl;
+    border-radius: $border-radius-lg;
+    background: var(--counter-color, #4361ee);
+    color: #fff;
+    max-width: 400px;
+    margin: 0 auto;
+
+    .counter-skeleton-icon {
+      .material-icons {
+        font-size: 40px;
+        opacity: 0.9;
+      }
+    }
+
+    .counter-skeleton-content {
+      flex: 1;
+    }
+
+    .counter-skeleton-value {
+      width: 100px;
+      height: 36px;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.35) 50%,
+        rgba(255, 255, 255, 0.15) 100%
+      );
+      background-size: 200% 100%;
+      animation: counter-shimmer 1.5s ease-in-out infinite;
+      border-radius: $border-radius;
+      margin-bottom: $spacing-xs;
+    }
+
+    .counter-skeleton-name {
+      font-size: $font-size-sm;
+      opacity: 0.9;
+    }
+  }
+
+  @keyframes counter-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  // Counter widget wrapper - responsive container
+  .widget-counter-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+    background: var(--dgc-bg-card);
+    border-radius: $border-radius-lg;
+    border: 2px solid transparent;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+    overflow: hidden;
+
+    &:hover {
+      box-shadow: var(--dgc-shadow-2);
+    }
+
+    .widget-counter-container {
+      flex: 1;
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+      padding: 0;
+      min-height: 0;
+    }
+  }
+
+  // Counter skeleton (PHP-generated loading state for preview pages)
+  .counter-skeleton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-lg;
+    padding: $spacing-lg $spacing-xl;
+    border-radius: $border-radius-lg;
+    color: #fff;
+    width: 100%;
+    height: 100%;
+    min-height: 120px;
+
+    .counter-skeleton-icon {
+      flex-shrink: 0;
+
+      .material-icons {
+        font-size: 40px;
+        opacity: 0.9;
+      }
+    }
+
+    .counter-skeleton-content {
+      flex: 1;
+      max-width: 200px;
+    }
+
+    .counter-skeleton-value {
+      width: 100%;
+      max-width: 120px;
+      height: 36px;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.15) 0%,
+        rgba(255, 255, 255, 0.35) 50%,
+        rgba(255, 255, 255, 0.15) 100%
+      );
+      background-size: 200% 100%;
+      animation: counter-shimmer 1.5s ease-in-out infinite;
+      border-radius: $border-radius;
+      margin-bottom: $spacing-xs;
+    }
+
+    .counter-skeleton-name {
+      width: 80%;
+      height: 16px;
+      background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+      );
+      background-size: 200% 100%;
+      animation: counter-shimmer 1.5s ease-in-out infinite;
+      animation-delay: 0.2s;
+      border-radius: $border-radius;
+    }
+  }
+
+  // Counter card display (rendered after loading)
+  .widget-counter-display {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .counter-card-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-lg;
+    padding: $spacing-lg $spacing-xl;
+    border-radius: $border-radius-lg;
+    color: #fff;
+    width: 100%;
+    height: 100%;
+    min-height: 120px;
+    box-shadow: $shadow-2;
+
+    .counter-icon {
+      flex-shrink: 0;
+
+      .material-icons {
+        font-size: 40px;
+        opacity: 0.9;
+      }
+    }
+
+    .counter-content {
+      flex: 1;
+      text-align: left;
+
+      .counter-value {
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 4px;
+      }
+
+      .counter-name {
+        font-size: $font-size-sm;
+        opacity: 0.9;
+        font-weight: 500;
+      }
+    }
+  }
+
   .widget-graph-loading {
     position: absolute;
     inset: 0;
@@ -676,6 +1011,30 @@
     gap: $spacing-sm;
     color: var(--dgc-text-hint);
     background: var(--dgc-bg-card);
+
+    i {
+      font-size: 24px;
+      color: $error;
+      opacity: 0.6;
+    }
+
+    span {
+      font-size: $font-size-sm;
+    }
+  }
+
+  .widget-counter-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+    color: var(--dgc-text-hint);
+    background: var(--dgc-bg-card);
+    width: 100%;
+    height: 100%;
+    min-height: 120px;
+    border-radius: $border-radius-lg;
 
     i {
       font-size: 24px;
@@ -740,13 +1099,54 @@
 
     .widget-sidebar {
       width: 100%;
-      max-height: 120px;
+      max-height: 150px;
       border-right: none;
       border-bottom: 1px solid var(--dgc-border-color);
+      flex-direction: row;
+      overflow-x: auto;
+
+      .sidebar-section {
+        flex: 0 0 auto;
+        flex-direction: row;
+        align-items: flex-start;
+        padding: $spacing-xs;
+        border-bottom: none;
+
+        &:not(:last-child) {
+          border-right: 1px solid var(--dgc-border-color);
+        }
+      }
+
+      .sidebar-header {
+        position: static;
+        padding: $spacing-xs;
+        border-bottom: none;
+        background: transparent;
+        flex-direction: column;
+        gap: 2px;
+
+        .sidebar-title {
+          font-size: 10px;
+          white-space: nowrap;
+        }
+
+        .sidebar-actions {
+          display: none;
+        }
+      }
+
+      .sidebar-types,
+      .sidebar-categories {
+        padding: $spacing-xs;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: $spacing-xs;
+      }
     }
 
-    .sidebar-categories {
-      gap: $spacing-xs;
+    .type-chip {
+      padding: 2px $spacing-sm;
+      font-size: 10px;
     }
 
     .category-chip {
@@ -754,7 +1154,7 @@
       font-size: 11px;
     }
 
-    .widget-grid {
+    .widget-section-grid {
       grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
   }

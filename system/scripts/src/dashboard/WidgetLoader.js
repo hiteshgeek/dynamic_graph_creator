@@ -1,5 +1,5 @@
 /**
- * WidgetLoader - Shared utility for loading and rendering widget graphs
+ * WidgetLoader - Shared utility for loading and rendering widgets (graphs and counters)
  * Used by dashboard-preview.js and template-preview.js
  */
 const Ajax = window.Ajax;
@@ -9,33 +9,35 @@ export class WidgetLoader {
     this.logPrefix = options.logPrefix || '[WidgetLoader]';
     this.onGraphLoaded = options.onGraphLoaded || null;
     this.onGraphError = options.onGraphError || null;
+    this.onCounterLoaded = options.onCounterLoaded || null;
+    this.onCounterError = options.onCounterError || null;
   }
 
   /**
-   * Load all widget graphs in a container
+   * Load all widgets (graphs and counters) in a container
    * @param {HTMLElement} rootContainer - Container to search for widgets
    * @param {Object} filters - Filter values to apply
    */
   loadAll(rootContainer, filters = {}) {
+    // Load graphs
     const graphContainers = rootContainer.querySelectorAll('.widget-graph-container[data-graph-id]');
-
-    if (graphContainers.length === 0) {
-      return;
-    }
-
-    const containers = Array.prototype.slice.call(graphContainers);
-
-    containers.forEach((container) => {
+    Array.prototype.slice.call(graphContainers).forEach((container) => {
       const graphId = parseInt(container.dataset.graphId, 10);
-
-      if (!graphId) {
-        return;
-      }
+      if (!graphId) return;
 
       const areaContent = container.closest('.area-content');
       const graphType = (areaContent && areaContent.dataset.graphType) ? areaContent.dataset.graphType : 'bar';
 
       this.loadWidget(container, graphId, graphType, filters);
+    });
+
+    // Load counters
+    const counterContainers = rootContainer.querySelectorAll('.widget-counter-container[data-counter-id]');
+    Array.prototype.slice.call(counterContainers).forEach((container) => {
+      const counterId = parseInt(container.dataset.counterId, 10);
+      if (!counterId) return;
+
+      this.loadCounter(container, counterId, filters);
     });
   }
 
@@ -112,6 +114,86 @@ export class WidgetLoader {
       this.showError(container, 'Failed to load chart');
       if (this.onGraphError) this.onGraphError(graphId, error.message);
     }
+  }
+
+  /**
+   * Load and render a single widget counter
+   * @param {HTMLElement} container - The container element
+   * @param {number} counterId - The counter ID
+   * @param {Object} filters - Filter values to apply
+   */
+  async loadCounter(container, counterId, filters = {}) {
+    try {
+      const result = await Ajax.post('preview_counter', {
+        id: counterId,
+        filters: filters
+      });
+
+      if (!result.success || !result.data) {
+        const errorMsg = result.message || 'Failed to load counter';
+        console.error(this.logPrefix, 'API returned error:', errorMsg);
+        this.showCounterError(container, errorMsg);
+        if (this.onCounterError) this.onCounterError(counterId, errorMsg);
+        return;
+      }
+
+      const counterData = result.data.counterData;
+      if (counterData && counterData.error) {
+        this.showCounterError(container, counterData.error);
+        if (this.onCounterError) this.onCounterError(counterId, counterData.error);
+        return;
+      }
+
+      const value = counterData?.value ?? 0;
+      const config = result.data.config || {};
+      const format = config.format || 'number';
+
+      // Get icon and color from API response (preferred) or fallback to data attributes
+      const counterColor = result.data.color || container.dataset.counterColor || '#4361ee';
+      const counterIcon = result.data.icon || container.dataset.counterIcon || 'analytics';
+
+      // Format the value
+      let displayValue = value;
+      if (format === 'currency') {
+        displayValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+      } else if (format === 'percentage') {
+        displayValue = value + '%';
+      } else {
+        displayValue = new Intl.NumberFormat('en-US').format(value);
+      }
+
+      // Get counter name from API response
+      const counterName = result.data.name || `Counter #${counterId}`;
+
+      // Render counter display
+      container.innerHTML = `
+        <div class="counter-card-display" style="background: ${counterColor};">
+          <div class="counter-icon">
+            <span class="material-icons">${counterIcon}</span>
+          </div>
+          <div class="counter-content">
+            <div class="counter-value">${displayValue}</div>
+            <div class="counter-name">${counterName}</div>
+          </div>
+        </div>
+      `;
+
+      if (this.onCounterLoaded) this.onCounterLoaded(counterId);
+
+    } catch (error) {
+      console.error(this.logPrefix, 'Error loading widget counter:', error);
+      this.showCounterError(container, 'Failed to load counter');
+      if (this.onCounterError) this.onCounterError(counterId, error.message);
+    }
+  }
+
+  /**
+   * Show error message in counter container
+   * @param {HTMLElement} container - The container element
+   * @param {string} message - Error message
+   */
+  showCounterError(container, message) {
+    container.innerHTML = '<div class="widget-counter-error"><i class="fas fa-exclamation-triangle"></i><span>' + message + '</span></div>';
   }
 
   /**

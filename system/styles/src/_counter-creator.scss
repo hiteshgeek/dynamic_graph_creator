@@ -172,20 +172,23 @@
 
   &.active {
     border-color: #fff;
-    box-shadow: 0 0 0 3px var(--dgc-primary), 0 2px 12px rgba(0, 0, 0, 0.3);
+    box-shadow:
+      0 0 0 1px var(--dgc-primary),
+      0 2px 4px rgba(0, 0, 0, 0.3);
     transform: scale(1.15);
 
-    // Checkmark indicator
+    // Material Icons checkmark
     &::after {
-      content: "✓";
+      content: "check";
+      font-family: "Material Icons";
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 14px;
-      font-weight: bold;
+      font-size: 18px;
+      font-weight: normal;
       color: #fff;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
     }
   }
 
@@ -197,7 +200,9 @@
   :root.theme-dark & {
     &.active {
       border-color: #fff;
-      box-shadow: 0 0 0 3px #60a5fa, 0 0 12px rgba(96, 165, 250, 0.5);
+      box-shadow:
+        0 0 0 3px #60a5fa,
+        0 0 12px rgba(96, 165, 250, 0.5);
     }
 
     &:focus-visible {
@@ -361,7 +366,9 @@
     .material-icons {
       font-size: 26px;
       color: var(--dgc-text-primary);
-      transition: font-size 0.2s ease, transform 0.2s ease;
+      transition:
+        font-size 0.2s ease,
+        transform 0.2s ease;
     }
 
     .icon-name {
@@ -373,7 +380,9 @@
       text-overflow: ellipsis;
       max-width: 100%;
       text-transform: capitalize;
-      transition: opacity 0.2s ease, height 0.2s ease;
+      transition:
+        opacity 0.2s ease,
+        height 0.2s ease;
       height: 14px;
     }
 
