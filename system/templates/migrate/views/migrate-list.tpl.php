@@ -401,7 +401,7 @@
                     <table class="table table-sm table-hover mb-0" style="font-size: 0.875rem;">
                         <thead class="sticky-top" style="background: #fff;">
                             <tr>
-                                <th rowspan="2" class="align-middle" style="border-bottom: 2px solid #dee2e6;">Table Name</th>
+                                <th rowspan="2" class="align-middle" style="border-bottom: 2px solid #dee2e6; padding-left: 1rem;">Table Name</th>
                                 <th rowspan="2" class="align-middle text-center" style="border-bottom: 2px solid #dee2e6;">install.sql</th>
                                 <th rowspan="2" class="align-middle" style="border-bottom: 2px solid #dee2e6;">Constant</th>
                                 <th colspan="2" class="text-center" style="background: #e3f2fd; border-bottom: 1px solid #bbdefb;"><i class="fas fa-laptop me-1"></i>Local DB</th>
@@ -418,7 +418,7 @@
                         <tbody>
                             <?php foreach ($dbValidation['tables'] as $tableData): ?>
                                 <tr>
-                                    <td><code><?php echo htmlspecialchars($tableData['name']); ?></code></td>
+                                    <td style="padding-left: 1rem;"><code><?php echo htmlspecialchars($tableData['name']); ?></code></td>
                                     <td class="text-center">
                                         <?php if ($tableData['in_install_sql']): ?>
                                             <span class="badge bg-success"><i class="fas fa-check"></i></span>
