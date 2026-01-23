@@ -2025,14 +2025,12 @@ class DashboardBuilder {
    * Render counter widget content
    */
   renderCounterContent(widgetId, editOverlay) {
-    let counterName = `Counter #${widgetId}`;
     let counterIcon = "analytics";
     let counterColor = "#4361ee";
 
     if (this.widgetSelectorModal && this.widgetSelectorModal.isDataLoaded()) {
       const counter = this.widgetSelectorModal.getCounterById(widgetId);
       if (counter) {
-        counterName = counter.name;
         counterIcon = counter.icon || "analytics";
         counterColor = counter.color || "#4361ee";
       }
@@ -2041,15 +2039,13 @@ class DashboardBuilder {
     return `<div class="area-content has-widget" data-widget-id="${widgetId}" data-widget-type="counter">
             <div class="widget-counter-wrapper">
               <div class="widget-counter-container" data-counter-id="${widgetId}" data-counter-color="${counterColor}" data-counter-icon="${counterIcon}">
-                <div class="widget-counter-loading">
-                  <div class="counter-skeleton-preview" style="--counter-color: ${counterColor};">
-                    <div class="counter-skeleton-icon">
-                      <span class="material-icons">${counterIcon}</span>
-                    </div>
-                    <div class="counter-skeleton-content">
-                      <div class="counter-skeleton-value"></div>
-                      <div class="counter-skeleton-name">${this.escapeHtml(counterName)}</div>
-                    </div>
+                <div class="counter-skeleton counter-skeleton--compact" style="background: ${counterColor};">
+                  <div class="counter-skeleton-icon">
+                    <span class="material-icons">${counterIcon}</span>
+                  </div>
+                  <div class="counter-skeleton-content">
+                    <div class="counter-skeleton-value"></div>
+                    <div class="counter-skeleton-name"></div>
                   </div>
                 </div>
               </div>

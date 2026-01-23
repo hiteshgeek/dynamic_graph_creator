@@ -1,7 +1,9 @@
 /**
  * CounterPreview - Counter preview rendering
  * Displays counter card with formatted value
+ * Uses shared CounterFormatter for value formatting
  */
+import { CounterFormatter } from './CounterFormatter.js';
 
 export default class CounterPreview {
     constructor(container, options = {}) {
@@ -18,7 +20,7 @@ export default class CounterPreview {
 
         this.valueEl = container.querySelector('.counter-value');
         this.iconEl = container.querySelector('.counter-icon .material-icons');
-        this.cardEl = container.querySelector('.counter-card-display, .counter-card-preview');
+        this.cardEl = container.querySelector('.counter-card-display, .counter-card-preview, .counter-card');
     }
 
     /**
@@ -77,56 +79,10 @@ export default class CounterPreview {
     }
 
     /**
-     * Format value based on config
+     * Format value based on config using shared CounterFormatter
      */
     formatValue(value) {
-        let formatted;
-
-        switch (this.config.format) {
-            case 'currency':
-                formatted = new Intl.NumberFormat('en-IN', {
-                    minimumFractionDigits: this.config.decimals,
-                    maximumFractionDigits: this.config.decimals
-                }).format(value);
-                break;
-
-            case 'percentage':
-                formatted = new Intl.NumberFormat('en-US', {
-                    minimumFractionDigits: this.config.decimals,
-                    maximumFractionDigits: this.config.decimals
-                }).format(value) + '%';
-                break;
-
-            case 'compact':
-                if (value >= 1000000000) {
-                    formatted = (value / 1000000000).toFixed(1) + 'B';
-                } else if (value >= 1000000) {
-                    formatted = (value / 1000000).toFixed(1) + 'M';
-                } else if (value >= 1000) {
-                    formatted = (value / 1000).toFixed(1) + 'K';
-                } else {
-                    formatted = value.toFixed(this.config.decimals);
-                }
-                break;
-
-            case 'number':
-            default:
-                formatted = new Intl.NumberFormat('en-IN', {
-                    minimumFractionDigits: this.config.decimals,
-                    maximumFractionDigits: this.config.decimals
-                }).format(value);
-                break;
-        }
-
-        // Add prefix and suffix
-        if (this.config.prefix) {
-            formatted = this.config.prefix + formatted;
-        }
-        if (this.config.suffix) {
-            formatted = formatted + this.config.suffix;
-        }
-
-        return formatted;
+        return CounterFormatter.format(value, this.config);
     }
 
     /**

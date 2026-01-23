@@ -179,11 +179,13 @@ class DGCHelper
      *
      * @param string $color The counter background color
      * @param string $icon The counter icon
+     * @param string $size Size variant: 'default' or 'compact' (for dashboard)
      * @return string HTML for the skeleton
      */
-    public static function renderCounterSkeleton($color = '#4361ee', $icon = 'analytics')
+    public static function renderCounterSkeleton($color = '#4361ee', $icon = 'analytics', $size = 'compact')
     {
-        $html = '<div class="counter-skeleton" style="background: ' . htmlspecialchars($color) . ';">';
+        $sizeClass = $size === 'default' ? 'counter-skeleton--default' : 'counter-skeleton--compact';
+        $html = '<div class="counter-skeleton ' . $sizeClass . '" style="background: ' . htmlspecialchars($color) . ';">';
         $html .= '<div class="counter-skeleton-icon"><span class="material-icons">' . htmlspecialchars($icon) . '</span></div>';
         $html .= '<div class="counter-skeleton-content">';
         $html .= '<div class="counter-skeleton-value"></div>';

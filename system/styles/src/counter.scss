@@ -5,6 +5,7 @@
 @use "graph-creator"; // Shared layout styles for creator pages
 @use "counter-creator"; // Counter-specific styles
 @use "graph-list"; // Shared view page styles (sidebar, nav)
+@use "counter-card"; // Shared counter card styles
 
 // Counter list page styles
 .counter-list-page {
@@ -52,50 +53,10 @@
   }
 }
 
-// Counter card display (the actual counter card)
+// Counter card display uses shared styles with default size
 .counter-card-display,
 .counter-card-preview {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 32px 40px;
-  border-radius: $border-radius-lg;
-  color: #fff;
-  min-width: 300px;
-  max-width: 500px;
-  box-shadow: $shadow-2;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: $shadow-3;
-  }
-
-  .counter-icon {
-    flex-shrink: 0;
-
-    .material-icons {
-      font-size: 48px;
-      opacity: 0.9;
-    }
-  }
-
-  .counter-content {
-    flex: 1;
-    text-align: left;
-
-    .counter-value {
-      font-size: 42px;
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 4px;
-    }
-
-    .counter-name {
-      font-size: 16px;
-      opacity: 0.9;
-      font-weight: 500;
-    }
-  }
+  @extend .counter-card;
+  @extend .counter-card--default;
 }
 

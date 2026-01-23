@@ -3,6 +3,7 @@
  * Used by dashboard-preview.js and template-preview.js
  */
 const Ajax = window.Ajax;
+import { CounterFormatter } from '../CounterFormatter.js';
 
 export class WidgetLoader {
   constructor(options = {}) {
@@ -146,37 +147,20 @@ export class WidgetLoader {
 
       const value = counterData?.value ?? 0;
       const config = result.data.config || {};
-      const format = config.format || 'number';
 
       // Get icon and color from API response (preferred) or fallback to data attributes
       const counterColor = result.data.color || container.dataset.counterColor || '#4361ee';
       const counterIcon = result.data.icon || container.dataset.counterIcon || 'analytics';
-
-      // Format the value
-      let displayValue = value;
-      if (format === 'currency') {
-        displayValue = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
-      } else if (format === 'percentage') {
-        displayValue = value + '%';
-      } else {
-        displayValue = new Intl.NumberFormat('en-US').format(value);
-      }
-
-      // Get counter name from API response
       const counterName = result.data.name || `Counter #${counterId}`;
 
-      // Render counter display
-      container.innerHTML = `
-        <div class="counter-card-display" style="background: ${counterColor};">
-          <div class="counter-icon">
-            <span class="material-icons">${counterIcon}</span>
-          </div>
-          <div class="counter-content">
-            <div class="counter-value">${displayValue}</div>
-            <div class="counter-name">${counterName}</div>
-          </div>
-        </div>
-      `;
+      // Render counter display using shared CounterFormatter
+      container.innerHTML = CounterFormatter.renderCard({
+        value,
+        name: counterName,
+        icon: counterIcon,
+        color: counterColor,
+        config
+      }, 'compact');
 
       if (this.onCounterLoaded) this.onCounterLoaded(counterId);
 
@@ -193,7 +177,8 @@ export class WidgetLoader {
    * @param {string} message - Error message
    */
   showCounterError(container, message) {
-    container.innerHTML = '<div class="widget-counter-error"><i class="fas fa-exclamation-triangle"></i><span>' + message + '</span></div>';
+    // Use widget-counter-error class for dashboard context (extends shared counter-error styles)
+    container.innerHTML = `<div class="widget-counter-error"><i class="fas fa-exclamation-triangle"></i><span>${CounterFormatter.escapeHtml(message)}</span></div>`;
   }
 
   /**
