@@ -11,6 +11,7 @@
         $badges[] = ['label' => 'System Template (Read-Only)', 'icon' => 'fa-lock', 'class' => 'badge-system'];
     }
 
+    // Operations
     $rightContent = '';
     if (!$template->getIsSystem()) {
         $rightContent .= '<div class="save-indicator saved" style="display: flex;"><i class="fas fa-check-circle"></i><span>Saved</span></div>';
@@ -20,6 +21,13 @@
     if (!$template->getIsSystem()) {
         $checkedAttr = $tweakEnabled ? ' checked' : '';
         $rightContent .= '<div class="form-check form-switch text-switch text-switch-purple"><input class="form-check-input" type="checkbox" role="switch" id="toggle-layout-edit-switch"' . $checkedAttr . '><div class="text-switch-track"><span class="text-switch-knob"></span><span class="text-switch-label label-text">Tweak</span></div></div>';
+    }
+    // Navigation links
+    $rightContent .= '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home"><i class="fas fa-home"></i></a>';
+    if (DGCHelper::hasAdminAccess()) {
+        $rightContent .= '<a href="?urlq=dashboard/templates" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Templates"><i class="fas fa-clone"></i></a>';
+        $rightContent .= '<a href="?urlq=graph" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-line"></i></a>';
+        $rightContent .= '<a href="?urlq=data-filter" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
     }
 
     echo DGCHelper::renderPageHeader([

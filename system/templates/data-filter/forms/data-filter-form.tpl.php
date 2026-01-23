@@ -2,9 +2,16 @@
 // Set company start date for datepicker presets
 echo DGCHelper::renderCompanyStartDateScript();
 
+// Operations
 $saveButtonClass = $filter ? 'btn-outline-warning' : 'btn-primary';
 $rightContent = '<div class="status-indicators"></div>';
 $rightContent .= '<button type="button" class="btn ' . $saveButtonClass . ' btn-sm save-filter-btn" data-save-btn><i class="fas fa-save"></i> ' . ($filter ? 'Save' : 'Create Data Filter') . '</button>';
+// Navigation links
+$rightContent .= '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home"><i class="fas fa-home"></i></a>';
+if (DGCHelper::hasAdminAccess()) {
+    $rightContent .= '<a href="?urlq=dashboard/templates" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Templates"><i class="fas fa-clone"></i></a>';
+    $rightContent .= '<a href="?urlq=graph" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-line"></i></a>';
+}
 echo DGCHelper::renderPageHeader([
     'title' => $filter ? 'Edit Data Filter' : 'Create Data Filter',
     'backUrl' => '?urlq=data-filter',
