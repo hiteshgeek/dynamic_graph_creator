@@ -144,9 +144,35 @@ echo DGCHelper::renderPageHeader([
                         <!-- Color Picker -->
                         <div class="config-section">
                             <label class="config-label">Background Color</label>
-                            <div class="color-picker-wrapper">
-                                <input type="color" class="form-control form-control-color" id="counter-color" value="<?php echo htmlspecialchars($color); ?>">
-                                <input type="text" class="form-control color-hex-input" id="counter-color-hex" value="<?php echo htmlspecialchars($color); ?>" placeholder="#000000">
+                            <div class="color-swatches" id="color-swatches">
+                                <?php
+                                $defaultColors = array(
+                                    '#4CAF50', // Green
+                                    '#2196F3', // Blue
+                                    '#9C27B0', // Purple
+                                    '#F44336', // Red
+                                    '#FF9800', // Orange
+                                    '#00BCD4', // Cyan
+                                    '#E91E63', // Pink
+                                    '#3F51B5', // Indigo
+                                    '#795548', // Brown
+                                    '#607D8B'  // Blue Grey
+                                );
+                                $isCustomColor = !in_array(strtoupper($color), array_map('strtoupper', $defaultColors));
+                                foreach ($defaultColors as $swatchColor):
+                                    $isActive = strtoupper($color) === strtoupper($swatchColor);
+                                ?>
+                                <button type="button" class="color-swatch<?php echo $isActive ? ' active' : ''; ?>"
+                                        data-color="<?php echo $swatchColor; ?>"
+                                        style="background-color: <?php echo $swatchColor; ?>;"
+                                        title="<?php echo $swatchColor; ?>"></button>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="custom-color-wrapper">
+                                <label class="custom-color-label<?php echo $isCustomColor ? ' active' : ''; ?>">
+                                    <input type="color" class="custom-color-input" id="counter-color" value="<?php echo htmlspecialchars($color); ?>">
+                                    <span class="custom-color-text">Custom</span>
+                                </label>
                             </div>
                         </div>
 
@@ -452,7 +478,7 @@ echo DGCHelper::renderPageHeader([
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="icon-search-wrapper mb-3">
+                <div class="icon-search-wrapper">
                     <input type="text" class="form-control" id="icon-search" placeholder="Search icons...">
                 </div>
                 <div class="icon-grid" id="icon-grid">

@@ -11,31 +11,49 @@ const Ajax = window.Ajax;
 const Loading = window.Loading;
 const autosize = window.autosize;
 
-// Material Design Icons for counter
-const MATERIAL_ICONS = [
-    'trending_up', 'trending_down', 'trending_flat',
-    'attach_money', 'monetization_on', 'payments', 'account_balance_wallet',
-    'shopping_cart', 'shopping_basket', 'store', 'storefront',
-    'people', 'person', 'groups', 'person_add', 'supervisor_account',
-    'inventory', 'inventory_2', 'category', 'local_shipping',
-    'bar_chart', 'pie_chart', 'timeline', 'insights', 'analytics',
-    'star', 'favorite', 'thumb_up', 'grade', 'emoji_events',
-    'check_circle', 'task_alt', 'verified', 'done_all',
-    'warning', 'error', 'info', 'help',
-    'schedule', 'event', 'today', 'date_range',
-    'speed', 'timer', 'hourglass_empty', 'update',
-    'notifications', 'email', 'message', 'chat',
-    'public', 'language', 'dns', 'cloud',
-    'security', 'lock', 'vpn_key', 'admin_panel_settings',
-    'settings', 'tune', 'build', 'construction',
-    'visibility', 'search', 'filter_list', 'sort',
-    'download', 'upload', 'sync', 'refresh',
-    'arrow_upward', 'arrow_downward', 'north', 'south',
-    'add_circle', 'remove_circle', 'cancel', 'close',
-    'calculate', 'functions', 'percent', 'numbers',
-    'credit_card', 'receipt', 'request_quote', 'point_of_sale',
-    'assessment', 'leaderboard', 'show_chart', 'ssid_chart'
-];
+// Material Design Icons for counter - organized by category
+const ICON_GROUPS = {
+    'Trends & Analytics': [
+        'trending_up', 'trending_down', 'trending_flat', 'insights', 'analytics',
+        'bar_chart', 'pie_chart', 'timeline', 'show_chart', 'ssid_chart',
+        'assessment', 'leaderboard'
+    ],
+    'Finance & Money': [
+        'attach_money', 'monetization_on', 'payments', 'account_balance_wallet',
+        'credit_card', 'receipt', 'request_quote', 'point_of_sale',
+        'calculate', 'functions', 'percent', 'numbers'
+    ],
+    'Shopping & Commerce': [
+        'shopping_cart', 'shopping_basket', 'store', 'storefront',
+        'inventory', 'inventory_2', 'category', 'local_shipping'
+    ],
+    'People & Users': [
+        'people', 'person', 'groups', 'person_add', 'supervisor_account'
+    ],
+    'Status & Feedback': [
+        'check_circle', 'task_alt', 'verified', 'done_all',
+        'star', 'favorite', 'thumb_up', 'grade', 'emoji_events',
+        'warning', 'error', 'info', 'help'
+    ],
+    'Time & Schedule': [
+        'schedule', 'event', 'today', 'date_range',
+        'speed', 'timer', 'hourglass_empty', 'update'
+    ],
+    'Communication': [
+        'notifications', 'email', 'message', 'chat'
+    ],
+    'System & Settings': [
+        'settings', 'tune', 'build', 'construction',
+        'security', 'lock', 'vpn_key', 'admin_panel_settings',
+        'public', 'language', 'dns', 'cloud'
+    ],
+    'Actions': [
+        'visibility', 'search', 'filter_list', 'sort',
+        'download', 'upload', 'sync', 'refresh',
+        'arrow_upward', 'arrow_downward', 'north', 'south',
+        'add_circle', 'remove_circle', 'cancel', 'close'
+    ]
+};
 
 export default class CounterCreator extends ElementCreator {
     constructor(container, options = {}) {
@@ -137,7 +155,7 @@ export default class CounterCreator extends ElementCreator {
     }
 
     /**
-     * Initialize icon selector
+     * Initialize icon selector with grouped icons
      */
     initIconSelector() {
         const iconGrid = document.getElementById('icon-grid');
@@ -147,20 +165,67 @@ export default class CounterCreator extends ElementCreator {
 
         if (!iconGrid) return;
 
-        // Populate icon grid
+        // Track expanded groups (all expanded by default)
+        this.expandedGroups = new Set(Object.keys(ICON_GROUPS));
+
+        // Render icons grouped by category
         const renderIcons = (filter = '') => {
-            const filteredIcons = MATERIAL_ICONS.filter(icon =>
-                icon.toLowerCase().includes(filter.toLowerCase())
-            );
+            const filterLower = filter.toLowerCase();
+            let html = '';
 
-            iconGrid.innerHTML = filteredIcons.map(icon => `
-                <button type="button" class="icon-grid-item${this.config.icon === icon ? ' active' : ''}" data-icon="${icon}">
-                    <span class="material-icons">${icon}</span>
-                    <span class="icon-name">${icon}</span>
-                </button>
-            `).join('');
+            Object.entries(ICON_GROUPS).forEach(([groupName, icons]) => {
+                // Filter icons within group
+                const filteredIcons = icons.filter(icon =>
+                    icon.toLowerCase().includes(filterLower)
+                );
 
-            // Add click handlers
+                // Skip empty groups when filtering
+                if (filter && filteredIcons.length === 0) return;
+
+                const isExpanded = filter || this.expandedGroups.has(groupName);
+                const groupId = groupName.replace(/\s+/g, '-').toLowerCase();
+
+                html += `
+                    <div class="icon-group" data-group="${groupName}">
+                        <button type="button" class="icon-group-header${isExpanded ? ' expanded' : ''}" data-group="${groupName}">
+                            <span class="icon-group-title">${groupName}</span>
+                            <span class="icon-group-count">${filteredIcons.length}</span>
+                            <i class="fas fa-chevron-down icon-group-arrow"></i>
+                        </button>
+                        <div class="icon-group-content${isExpanded ? ' expanded' : ''}" id="icon-group-${groupId}">
+                            ${filteredIcons.map(icon => `
+                                <button type="button" class="icon-grid-item${this.config.icon === icon ? ' active' : ''}" data-icon="${icon}">
+                                    <span class="material-icons">${icon}</span>
+                                    <span class="icon-name">${icon.replace(/_/g, ' ')}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            iconGrid.innerHTML = html;
+
+            // Add group toggle handlers
+            iconGrid.querySelectorAll('.icon-group-header').forEach(header => {
+                header.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const groupName = header.dataset.group;
+                    const content = header.nextElementSibling;
+
+                    if (this.expandedGroups.has(groupName)) {
+                        this.expandedGroups.delete(groupName);
+                        header.classList.remove('expanded');
+                        content.classList.remove('expanded');
+                    } else {
+                        this.expandedGroups.add(groupName);
+                        header.classList.add('expanded');
+                        content.classList.add('expanded');
+                    }
+                });
+            });
+
+            // Add icon click handlers
             iconGrid.querySelectorAll('.icon-grid-item').forEach(item => {
                 item.addEventListener('click', () => {
                     this.setIcon(item.dataset.icon);
@@ -193,35 +258,39 @@ export default class CounterCreator extends ElementCreator {
     }
 
     /**
-     * Initialize color picker
+     * Initialize color picker with swatches
      */
     initColorPicker() {
-        const colorInput = document.getElementById('counter-color');
-        const hexInput = document.getElementById('counter-color-hex');
+        const swatchesContainer = document.getElementById('color-swatches');
+        const customColorInput = document.getElementById('counter-color');
+        const customColorLabel = this.container.querySelector('.custom-color-label');
 
-        if (colorInput) {
-            colorInput.addEventListener('input', (e) => {
-                this.setColor(e.target.value);
-                if (hexInput) hexInput.value = e.target.value;
+        // Handle swatch clicks
+        if (swatchesContainer) {
+            swatchesContainer.querySelectorAll('.color-swatch').forEach(swatch => {
+                swatch.addEventListener('click', () => {
+                    const color = swatch.dataset.color;
+                    this.setColor(color);
+
+                    // Update active states
+                    swatchesContainer.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+                    swatch.classList.add('active');
+                    if (customColorLabel) customColorLabel.classList.remove('active');
+                    if (customColorInput) customColorInput.value = color;
+                });
             });
         }
 
-        if (hexInput) {
-            hexInput.addEventListener('input', (e) => {
-                let value = e.target.value;
-                if (!value.startsWith('#')) value = '#' + value;
-                if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
-                    this.setColor(value);
-                    if (colorInput) colorInput.value = value;
-                }
-            });
+        // Handle custom color picker
+        if (customColorInput) {
+            customColorInput.addEventListener('input', (e) => {
+                this.setColor(e.target.value);
 
-            hexInput.addEventListener('blur', (e) => {
-                let value = e.target.value;
-                if (!value.startsWith('#')) value = '#' + value;
-                if (!/^#[0-9A-Fa-f]{6}$/.test(value)) {
-                    e.target.value = this.config.color;
+                // Remove active from swatches, add to custom
+                if (swatchesContainer) {
+                    swatchesContainer.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
                 }
+                if (customColorLabel) customColorLabel.classList.add('active');
             });
         }
     }
@@ -472,7 +541,8 @@ export default class CounterCreator extends ElementCreator {
      */
     applyConfigToUI() {
         const colorInput = document.getElementById('counter-color');
-        const hexInput = document.getElementById('counter-color-hex');
+        const swatchesContainer = document.getElementById('color-swatches');
+        const customColorLabel = this.container.querySelector('.custom-color-label');
         const formatSelect = document.getElementById('counter-format');
         const prefixInput = document.getElementById('counter-prefix');
         const suffixInput = document.getElementById('counter-suffix');
@@ -482,8 +552,28 @@ export default class CounterCreator extends ElementCreator {
         const previewCard = document.getElementById('counter-card-preview');
         const previewIcon = document.getElementById('preview-icon');
 
+        // Update color swatches
         if (colorInput) colorInput.value = this.config.color;
-        if (hexInput) hexInput.value = this.config.color;
+        if (swatchesContainer) {
+            let foundSwatch = false;
+            swatchesContainer.querySelectorAll('.color-swatch').forEach(swatch => {
+                if (swatch.dataset.color.toUpperCase() === this.config.color.toUpperCase()) {
+                    swatch.classList.add('active');
+                    foundSwatch = true;
+                } else {
+                    swatch.classList.remove('active');
+                }
+            });
+            // If color not in swatches, mark custom as active
+            if (customColorLabel) {
+                if (foundSwatch) {
+                    customColorLabel.classList.remove('active');
+                } else {
+                    customColorLabel.classList.add('active');
+                }
+            }
+        }
+
         if (formatSelect) formatSelect.value = this.config.format;
         if (prefixInput) prefixInput.value = this.config.prefix || '';
         if (suffixInput) suffixInput.value = this.config.suffix || '';
