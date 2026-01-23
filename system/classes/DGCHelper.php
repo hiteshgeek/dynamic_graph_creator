@@ -579,6 +579,59 @@ class DGCHelper
     }
 
     /**
+     * Render the Widgets dropdown menu for navigation
+     * Contains links to Graphs, Tables, Lists, Counters
+     *
+     * @param string $activeItem Currently active widget type (e.g., 'graph', 'table')
+     * @return string HTML for the dropdown
+     */
+    public static function renderWidgetDropdown($activeItem = '')
+    {
+        $items = array(
+            array('slug' => 'graph', 'label' => 'Graphs', 'icon' => 'fa-chart-bar', 'url' => '?urlq=widget-graph'),
+            array('slug' => 'table', 'label' => 'Tables', 'icon' => 'fa-table', 'url' => '?urlq=widget-table'),
+            array('slug' => 'list', 'label' => 'Lists', 'icon' => 'fa-list', 'url' => '?urlq=widget-list'),
+            array('slug' => 'counter', 'label' => 'Counters', 'icon' => 'fa-hashtag', 'url' => '?urlq=widget-counter'),
+        );
+
+        // Find active item for dropdown button text
+        $activeLabel = 'Widgets';
+        $activeIcon = 'fa-th-large';
+        foreach ($items as $item) {
+            if ($item['slug'] === $activeItem) {
+                $activeLabel = $item['label'];
+                $activeIcon = $item['icon'];
+                break;
+            }
+        }
+
+        $html = '<div class="dropdown widget-nav-dropdown">';
+        $html .= '<button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">';
+        $html .= '<i class="fas ' . $activeIcon . '"></i> ' . htmlspecialchars($activeLabel);
+        $html .= '</button>';
+        $html .= '<ul class="dropdown-menu">';
+
+        foreach ($items as $item) {
+            $isActive = ($item['slug'] === $activeItem);
+            $activeClass = $isActive ? ' active' : '';
+            $html .= '<li>';
+            $html .= '<a class="dropdown-item' . $activeClass . '" href="' . htmlspecialchars($item['url']) . '">';
+            $html .= '<i class="fas ' . htmlspecialchars($item['icon']) . '"></i> ';
+            $html .= htmlspecialchars($item['label']);
+            if ($isActive) {
+                $html .= ' <i class="fas fa-check ms-auto"></i>';
+            }
+            $html .= '</a>';
+            $html .= '</li>';
+        }
+
+        $html .= '</ul>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
      * Render a single filter input
      * Same markup as used in graph-view.tpl.php for consistency
      *

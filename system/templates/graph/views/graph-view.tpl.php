@@ -4,20 +4,22 @@
     echo DGCHelper::renderCompanyStartDateScript();
 
     // Operations
-    $rightContent = '<a href="?urlq=graph/edit/' . $graph->getId() . '" class="btn btn-icon btn-outline-design btn-design-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Design Mode"><i class="fas fa-paint-brush"></i></a>';
-    $rightContent .= '<a href="?urlq=graph/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create New Graph"><i class="fas fa-plus"></i></a>';
+    $rightContent = '<a href="?urlq=widget-graph/edit/' . $graph->getId() . '" class="btn btn-icon btn-outline-design btn-design-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Design Mode"><i class="fas fa-paint-brush"></i></a>';
+    $rightContent .= '<a href="?urlq=widget-graph/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create New Graph"><i class="fas fa-plus"></i></a>';
     // Navigation links
     $rightContent .= '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home"><i class="fas fa-home"></i></a>';
     if (DGCHelper::hasAdminAccess()) {
         $rightContent .= '<a href="?urlq=dashboard/templates" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Templates"><i class="fas fa-clone"></i></a>';
-        $rightContent .= '<a href="?urlq=graph" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-line"></i></a>';
         $rightContent .= '<a href="?urlq=data-filter" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
     }
 
+    // Widget dropdown
+    $leftContent = DGCHelper::renderWidgetDropdown('graph');
     echo DGCHelper::renderPageHeader([
         'title' => $graph->getName(),
-        'backUrl' => '?urlq=graph',
+        'backUrl' => '?urlq=widget-graph',
         'backLabel' => 'Graphs',
+        'leftContent' => $leftContent,
         'rightContent' => $rightContent
     ]);
     ?>
@@ -52,7 +54,7 @@
             </div>
             <div class="graph-list-nav">
                 <?php foreach ($allGraphs as $index => $g): ?>
-                    <a href="?urlq=graph/view/<?php echo $g->getId(); ?>"
+                    <a href="?urlq=widget-graph/view/<?php echo $g->getId(); ?>"
                        class="graph-nav-item <?php echo ($g->getId() == $graph->getId()) ? 'active' : ''; ?>">
                         <span class="graph-type-icon <?php echo $g->getGraphType(); ?>">
                             <i class="fas fa-chart-<?php echo $g->getGraphType(); ?>"></i>

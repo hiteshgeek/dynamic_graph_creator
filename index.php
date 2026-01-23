@@ -79,7 +79,7 @@ Session::init();
 // Auto-login for development (only if not logged in)
 if (!Session::isLoggedIn()) {
     SimulateLogin::loginByEmail('admin@agt.com');
-    header('Location: .?urlq=graph');
+    header('Location: .?urlq=widget-graph');
     exit;
 }
 // Restore BaseConfig values from session (like Rapidkart's system.inc.php)
@@ -95,7 +95,7 @@ if (Session::isLoggedIn()) {
 
 // Parse URL
 $url = LocalUtility::parseUrl();
-$page = isset($url[0]) ? $url[0] : 'graph';
+$page = isset($url[0]) ? $url[0] : 'widget-graph';
 
 // Manual logout for testing (uncomment when needed):
 // SimulateLogin::logout();
@@ -152,7 +152,29 @@ switch ($page) {
         // Migration tool - standalone page with its own HTML
         require_once SystemConfig::includesPath() . 'migrate/migrate.inc.php';
         break; // migrate.inc.php calls exit after rendering
+
+    // Widget routes
+    case 'widget-graph':
+        require_once SystemConfig::includesPath() . 'graph/graph.inc.php';
+        break;
+    case 'widget-table':
+        // TODO: Add table widget controller
+        require_once SystemConfig::includesPath() . 'widget-table/widget-table.inc.php';
+        break;
+    case 'widget-list':
+        // TODO: Add list widget controller
+        require_once SystemConfig::includesPath() . 'widget-list/widget-list.inc.php';
+        break;
+    case 'widget-counter':
+        // TODO: Add counter widget controller
+        require_once SystemConfig::includesPath() . 'widget-counter/widget-counter.inc.php';
+        break;
+
+    // Backward compatibility - redirect old graph route to widget-graph
     case 'graph':
+        header('Location: .?urlq=widget-graph' . (isset($url[1]) ? '/' . implode('/', array_slice($url, 1)) : ''));
+        exit;
+
     default:
         require_once SystemConfig::includesPath() . 'graph/graph.inc.php';
         break;

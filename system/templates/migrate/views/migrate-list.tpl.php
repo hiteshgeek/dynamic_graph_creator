@@ -358,7 +358,7 @@
     <div class="migration-header">
         <div class="container d-flex justify-content-between align-items-center">
             <h3><i class="fas fa-truck-moving me-2"></i>Migration Tool</h3>
-            <a href=".?urlq=graph" class="home-link"><i class="fas fa-home me-1"></i>Back to App</a>
+            <a href=".?urlq=widget-graph" class="home-link"><i class="fas fa-home me-1"></i>Back to App</a>
         </div>
     </div>
 

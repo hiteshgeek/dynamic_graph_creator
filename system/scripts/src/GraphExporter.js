@@ -182,7 +182,7 @@ export default class GraphExporter {
 
             // Send to server
             const response = await $.ajax({
-                url: '?urlq=graph',
+                url: '?urlq=widget-graph',
                 type: 'POST',
                 data: {
                     submit: 'graph-save-snapshot',

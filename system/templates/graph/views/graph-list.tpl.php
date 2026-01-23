@@ -3,7 +3,7 @@
 // Operations
 $rightContent = '';
 if (!empty($graphs)) {
-    $rightContent .= '<a href="?urlq=graph/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Graph"><i class="fas fa-plus"></i></a>';
+    $rightContent .= '<a href="?urlq=widget-graph/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create Graph"><i class="fas fa-plus"></i></a>';
 }
 // Navigation links
 $rightContent .= '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home"><i class="fas fa-home"></i></a>';
@@ -11,8 +11,11 @@ if (DGCHelper::hasAdminAccess()) {
     $rightContent .= '<a href="?urlq=dashboard/templates" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Templates"><i class="fas fa-clone"></i></a>';
     $rightContent .= '<a href="?urlq=data-filter" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
 }
+// Widget dropdown
+$leftContent = DGCHelper::renderWidgetDropdown('graph');
 echo DGCHelper::renderPageHeader([
     'title' => 'Graphs',
+    'leftContent' => $leftContent,
     'rightContent' => $rightContent
 ]);
 ?>
@@ -25,7 +28,7 @@ echo DGCHelper::renderPageHeader([
             'No Graphs Yet',
             'Create your first graph to visualize your data',
             'Create Graph',
-            '?urlq=graph/create',
+            '?urlq=widget-graph/create',
             'orange'
         ); ?>
         <?php else: ?>
@@ -48,10 +51,10 @@ echo DGCHelper::renderPageHeader([
                     <?php endif; ?>
                 </div>
                 <div class="item-card-actions">
-                    <a href="?urlq=graph/view/<?php echo $g->getId(); ?>" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" title="View Mode">
+                    <a href="?urlq=widget-graph/view/<?php echo $g->getId(); ?>" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" title="View Mode">
                         <i class="fas fa-eye"></i>
                     </a>
-                    <a href="?urlq=graph/edit/<?php echo $g->getId(); ?>" class="btn btn-icon btn-outline-design" data-bs-toggle="tooltip" title="Design Mode">
+                    <a href="?urlq=widget-graph/edit/<?php echo $g->getId(); ?>" class="btn btn-icon btn-outline-design" data-bs-toggle="tooltip" title="Design Mode">
                         <i class="fas fa-paint-brush"></i>
                     </a>
                     <button type="button" class="btn btn-icon btn-outline-danger delete-graph-btn"

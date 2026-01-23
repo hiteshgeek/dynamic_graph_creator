@@ -28,7 +28,7 @@ if (isset($_POST['submit']) && $_POST['submit'] === 'login') {
             Session::loginUser($admin_user);
 
             // Redirect to home page
-            header('Location: .?urlq=graph');
+            header('Location: .?urlq=widget-graph');
             exit;
         } else {
             $error_message = "Invalid email or password";

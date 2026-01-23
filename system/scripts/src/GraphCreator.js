@@ -504,7 +504,7 @@ export default class GraphCreator extends ElementCreator {
                 this.setUnsavedChanges(false);
 
                 if (!this.graphId && result.data && result.data.id) {
-                    window.location.href = `?urlq=graph/edit/${result.data.id}`;
+                    window.location.href = `?urlq=widget-graph/edit/${result.data.id}`;
                 }
             } else {
                 Toast.error(result.message || 'Failed to save graph');

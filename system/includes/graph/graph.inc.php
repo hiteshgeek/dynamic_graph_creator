@@ -119,7 +119,7 @@ function showCreator($graphId = null)
     if ($graphId) {
         $graph = new Graph($graphId);
         if (!$graph->getId()) {
-            LocalUtility::redirect('graph');
+            LocalUtility::redirect('widget-graph');
             return;
         }
     }
@@ -174,7 +174,7 @@ function showView($graphId)
 
     $graph = new Graph($graphId);
     if (!$graph->getId()) {
-        LocalUtility::redirect('graph');
+        LocalUtility::redirect('widget-graph');
         return;
     }
 
