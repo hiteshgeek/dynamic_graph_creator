@@ -17,15 +17,17 @@
     // Navigation links (admin only)
     if (DGCHelper::hasAdminAccess()) {
         $rightContent .= '<a href="?urlq=dashboard/templates" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Templates"><i class="fas fa-clone"></i></a>';
-        $rightContent .= '<a href="?urlq=widget-graph" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-line"></i></a>';
         $rightContent .= '<a href="?urlq=data-filter" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
     }
 
+    // Widget dropdown
+    $leftContent = DGCHelper::renderWidgetDropdown();
     echo DGCHelper::renderPageHeader([
         'title' => $dashboard->getName(),
         'backUrl' => '?urlq=home',
         'backLabel' => 'Dashboards',
         'badges' => $badges,
+        'leftContent' => $leftContent,
         'rightContent' => $rightContent
     ]);
 

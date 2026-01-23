@@ -7,9 +7,10 @@ window.__collapsedCategories = JSON.parse(localStorage.getItem('collapsedTemplat
 window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'false'; ?>;
 </script>
 <?php
-    $leftContent = '';
+    // Widget dropdown
+    $leftContent = DGCHelper::renderWidgetDropdown();
     if (!empty($templates)) {
-        $leftContent = '<button type="button" class="btn btn-icon btn-outline-secondary" id="toggle-all-categories" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Collapse All"><i class="fas fa-compress-alt"></i></button>';
+        $leftContent .= '<button type="button" class="btn btn-icon btn-outline-secondary" id="toggle-all-categories" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Collapse All"><i class="fas fa-compress-alt"></i></button>';
     }
 
     // Operations
@@ -20,7 +21,6 @@ window.__allowTemplateOrdering = <?php echo $allowTemplateOrdering ? 'true' : 'f
     // Navigation links
     $rightContent .= '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home"><i class="fas fa-home"></i></a>';
     if (DGCHelper::hasAdminAccess()) {
-        $rightContent .= '<a href="?urlq=widget-graph" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-line"></i></a>';
         $rightContent .= '<a href="?urlq=data-filter" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
     }
 

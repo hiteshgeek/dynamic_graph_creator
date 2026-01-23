@@ -10,12 +10,14 @@ $rightContent .= '<button type="button" class="btn ' . $saveButtonClass . ' btn-
 $rightContent .= '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home"><i class="fas fa-home"></i></a>';
 if (DGCHelper::hasAdminAccess()) {
     $rightContent .= '<a href="?urlq=dashboard/templates" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Templates"><i class="fas fa-clone"></i></a>';
-    $rightContent .= '<a href="?urlq=widget-graph" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Graphs"><i class="fas fa-chart-line"></i></a>';
 }
+// Widget dropdown
+$leftContent = DGCHelper::renderWidgetDropdown();
 echo DGCHelper::renderPageHeader([
     'title' => $filter ? 'Edit Data Filter' : 'Create Data Filter',
     'backUrl' => '?urlq=data-filter',
     'backLabel' => 'Data Filters',
+    'leftContent' => $leftContent,
     'rightContent' => $rightContent
 ]);
 ?>
