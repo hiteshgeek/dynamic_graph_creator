@@ -876,15 +876,23 @@
 // Dark mode adjustments for category chips
 :root.theme-dark {
   .category-chips-container {
-    background: var(--dgc-gray-800);
+    background: var(--dgc-bg-elevated);
+    border-color: var(--dgc-border-color);
   }
 
   .category-chip {
-    border-color: var(--dgc-gray-600);
+    border-color: var(--dgc-gray-400);
+    color: var(--dgc-text-secondary);
 
     &:hover {
-      background: var(--dgc-gray-700);
+      background: var(--dgc-bg-hover);
       border-color: var(--dgc-gray-500);
+      color: var(--dgc-text-primary);
+    }
+
+    &.active {
+      color: #fff;
+      border-color: transparent;
     }
   }
 }
