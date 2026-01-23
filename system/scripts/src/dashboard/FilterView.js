@@ -60,25 +60,23 @@ export class FilterView {
             return this;
         }
 
-        // Find filters container
+        // Find filters container (may be null if no filters)
         this.filtersContainer = this.container.querySelector(this.options.filtersContainerSelector);
-        if (!this.filtersContainer) {
-            console.warn(`${this.options.logPrefix} Filters container not found`);
-            return this;
-        }
 
-        // Get UI elements
+        // Get UI elements (these exist even without filters)
         this.applyBtn = this.container.querySelector('.filter-apply-btn');
         this.autoApplySwitch = this.container.querySelector('#dashboard-auto-apply-switch');
         this.collapseBtn = this.container.querySelector('.filter-collapse-btn');
 
-        // Initialize bar-specific features
+        // Initialize pickers FIRST (before collapse state is applied)
+        // This ensures datepickers are initialized while visible
+        // DatePickerInit skips hidden elements, so we must init before collapsing
+        this.initPickers();
+
+        // Initialize bar-specific features (collapse may hide filters)
         this.initBarCollapse();
         this.initBarAutoApply();
         this.initBarListeners();
-
-        // Initialize pickers first (with defaults)
-        this.initPickers();
 
         // Then load and apply saved filters from session
         // This ensures saved values override the defaults
@@ -92,6 +90,9 @@ export class FilterView {
      * Initialize pickers using FilterRenderer (handles datepickers, single selects, multi-selects, etc.)
      */
     initPickers() {
+        // Skip if no filters container
+        if (!this.filtersContainer) return;
+
         // Use FilterRenderer for comprehensive initialization (datepickers, dropdowns, etc.)
         if (typeof window.FilterRenderer !== 'undefined') {
             window.FilterRenderer.init(this.filtersContainer);
@@ -107,6 +108,7 @@ export class FilterView {
      * Initialize Bar collapse/expand functionality
      */
     initBarCollapse() {
+        console.log('[FilterView] initBarCollapse called, collapseBtn:', this.collapseBtn);
         if (!this.collapseBtn) return;
 
         // Restore collapse state from localStorage
@@ -121,11 +123,16 @@ export class FilterView {
         });
 
         // Collapse button click handler
-        this.collapseBtn.addEventListener('click', () => {
+        this.collapseBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('[FilterView] Collapse button clicked');
             const isCollapsed = this.container.classList.contains('collapsed');
             const newState = !isCollapsed;
+            console.log('[FilterView] Current state:', isCollapsed, '-> New state:', newState);
             this.updateBarCollapseState(newState);
             localStorage.setItem(this.COLLAPSE_KEY, newState ? '1' : '0');
+            console.log('[FilterView] Container classes:', this.container.className);
         });
     }
 
@@ -133,12 +140,26 @@ export class FilterView {
      * Update Bar collapse state
      */
     updateBarCollapseState(collapsed) {
+        const filtersList = this.container.querySelector('.filters-list');
+
         if (collapsed) {
             this.container.classList.add('collapsed');
             if (this.collapseBtn) this.collapseBtn.title = 'Expand Filters';
+            // Apply inline styles as fallback for CSS specificity issues
+            if (filtersList) {
+                filtersList.style.display = 'none';
+            }
+            this.container.style.display = 'inline-flex';
+            this.container.style.width = 'auto';
         } else {
             this.container.classList.remove('collapsed');
             if (this.collapseBtn) this.collapseBtn.title = 'Collapse Filters';
+            // Remove inline styles to restore CSS defaults
+            if (filtersList) {
+                filtersList.style.display = '';
+            }
+            this.container.style.display = '';
+            this.container.style.width = '';
         }
     }
 
@@ -196,6 +217,9 @@ export class FilterView {
                 this.applyFilters();
             });
         }
+
+        // Skip filter listeners if no filters container
+        if (!this.filtersContainer) return;
 
         // Listen for ALL change events on the container (catches bubbled events from all inputs)
         // This includes datepickers, selects, checkboxes, radios, etc.
@@ -415,7 +439,7 @@ export class FilterView {
      */
     applyFilterValues(filterValues, skipPickerUpdate = false) {
         if (!filterValues || typeof filterValues !== 'object') return;
-
+        if (!this.filtersContainer) return;
 
         const filterItems = this.filtersContainer.querySelectorAll('.filter-input-item');
 

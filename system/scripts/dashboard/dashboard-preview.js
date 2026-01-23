@@ -75,12 +75,23 @@
      * @returns {Promise} Resolves when filter bar is initialized and filters are loaded from session
      */
     async function initDashboardFilterBar() {
+        console.log('[dashboard-preview.js] initDashboardFilterBar called');
+
         // Get dashboard ID from page
         var dashboardId = null;
         var deleteBtn = document.querySelector('.delete-dashboard-btn');
         if (deleteBtn && deleteBtn.dataset.dashboardId) {
             dashboardId = parseInt(deleteBtn.dataset.dashboardId, 10);
         }
+
+        console.log('[dashboard-preview.js] dashboardId:', dashboardId);
+        console.log('[dashboard-preview.js] FilterView available:', typeof window.FilterView);
+
+        var container = document.querySelector('.dashboard-filter-bar');
+        console.log('[dashboard-preview.js] Filter bar container:', container);
+
+        var collapseBtn = container ? container.querySelector('.filter-collapse-btn') : null;
+        console.log('[dashboard-preview.js] Collapse button:', collapseBtn);
 
         // Initialize FilterView with Bar layout
         filterView = new window.FilterView({
@@ -95,6 +106,9 @@
             },
             logPrefix: '[dashboard-preview.js]'
         }).Bar();
+
+        console.log('[dashboard-preview.js] FilterView initialized, container:', filterView.container);
+        console.log('[dashboard-preview.js] FilterView collapseBtn:', filterView.collapseBtn);
 
         // Wait for filters to load from session before proceeding
         if (filterView.filtersLoadedPromise) {

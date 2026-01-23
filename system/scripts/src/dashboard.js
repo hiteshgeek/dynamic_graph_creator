@@ -203,19 +203,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 /**
  * Initialize dashboard filter bar using FilterView
- * Centralized filter handling shared with dashboard-preview
+ * Only for builder pages - preview pages have their own initialization in dashboard-preview.js
  */
 function initDashboardFilterBar() {
+  // Only initialize on builder pages (builder pages have .dashboard-builder container)
+  // Preview pages have their own initialization in dashboard-preview.js
+  const builderContainer = document.querySelector('.dashboard-builder[data-dashboard-id]');
+  if (!builderContainer) {
+    return; // Not a builder page, skip - preview page handles its own FilterView
+  }
+
   // Get dashboard ID from URL or container
   let dashboardId = null;
   const urlMatch = window.location.search.match(/urlq=dashboard\/builder\/(\d+)/);
   if (urlMatch) {
     dashboardId = parseInt(urlMatch[1], 10);
   } else {
-    const builderContainer = document.querySelector('.dashboard-builder[data-dashboard-id]');
-    if (builderContainer) {
-      dashboardId = parseInt(builderContainer.dataset.dashboardId, 10);
-    }
+    dashboardId = parseInt(builderContainer.dataset.dashboardId, 10);
   }
 
   // Initialize FilterView with Bar layout

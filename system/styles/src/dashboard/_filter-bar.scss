@@ -346,12 +346,16 @@
 
   // Collapsed state
   &.collapsed {
-    display: inline-flex;
-    width: auto;
-    padding: $spacing-xs $spacing-sm;
+    display: inline-flex !important;
+    width: auto !important;
+    padding: $spacing-xs $spacing-sm !important;
 
+    > .filters-list,
     .filters-list {
-      display: none;
+      display: none !important;
+      visibility: hidden !important;
+      height: 0 !important;
+      overflow: hidden !important;
     }
 
     .filter-actions {
