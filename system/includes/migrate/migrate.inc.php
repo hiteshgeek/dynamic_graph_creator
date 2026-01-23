@@ -686,7 +686,7 @@ function copySingleFile($data)
     try {
         $result = copyFiles($sourceDir, $targetDir, [$file]);
 
-        Utility::ajaxResponseSuccess('File copied successfully', [
+        Utility::ajaxResponseTrue('File copied successfully', [
             'file' => $file,
             'result' => $result[$file],
             'timestamp' => time()
