@@ -85,10 +85,14 @@
                                 $filterConfig = isset($filter['filter_config']) ? $filter['filter_config'] : '';
                                 $filterConfigArr = $filterConfig ? json_decode($filterConfig, true) : array();
                                 $isInline = isset($filterConfigArr['inline']) && $filterConfigArr['inline'];
+                                $isMandatoryFilter = isset($mandatoryFilterKeys) && in_array($filterKeyClean, $mandatoryFilterKeys);
                             ?>
-                                <div class="filter-input-item" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                <div class="filter-input-item<?php echo $isMandatoryFilter ? ' mandatory' : ''; ?>" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" data-mandatory="<?php echo $isMandatoryFilter ? '1' : '0'; ?>">
                                     <div class="filter-input-header">
                                         <label class="filter-input-label"><?php echo htmlspecialchars($filter['filter_label']); ?></label>
+                                        <?php if ($isMandatoryFilter): ?>
+                                            <span class="mandatory-badge">Mandatory</span>
+                                        <?php endif; ?>
                                     </div>
 
                                     <?php if ($filterType === 'select'):

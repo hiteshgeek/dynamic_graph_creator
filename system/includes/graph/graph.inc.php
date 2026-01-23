@@ -214,9 +214,16 @@ function showView($graphId)
     // Get categories for this graph
     $categories = GraphWidgetCategoryMappingManager::getCategoriesForGraph($graphId);
 
+    // Get mandatory filters for widget type "graph"
+    $mandatoryFilters = DataFilterManager::getMandatoryFiltersForWidgetTypeAsArray('graph');
+    $mandatoryFilterKeys = array_map(function($f) {
+        return ltrim($f['filter_key'], ':');
+    }, $mandatoryFilters);
+
     $tpl = new Template(SystemConfig::templatesPath() . 'graph/views/graph-view');
     $tpl->graph = $graph;
     $tpl->filters = $filters;
+    $tpl->mandatoryFilterKeys = $mandatoryFilterKeys;
     $tpl->categories = $categories;
     $tpl->allGraphs = $allGraphs;
     $tpl->totalGraphs = $totalGraphs;

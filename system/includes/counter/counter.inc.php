@@ -216,9 +216,16 @@ function showView($counterId)
     // Get categories for this counter
     $counterCategories = CounterWidgetCategoryMappingManager::getCategoriesForCounter($counterId);
 
+    // Get mandatory filters for widget type "counter"
+    $mandatoryFilters = DataFilterManager::getMandatoryFiltersForWidgetTypeAsArray('counter');
+    $mandatoryFilterKeys = array_map(function($f) {
+        return ltrim($f['filter_key'], ':');
+    }, $mandatoryFilters);
+
     $tpl = new Template(SystemConfig::templatesPath() . 'counter/views/counter-view');
     $tpl->counter = $counter;
     $tpl->filters = $filters;
+    $tpl->mandatoryFilterKeys = $mandatoryFilterKeys;
     $tpl->categories = $counterCategories;
     $tpl->allCounters = $allCounters;
     $tpl->totalCounters = $totalCounters;

@@ -239,7 +239,7 @@ export default class ElementCreator {
      */
     getMatchedFilters() {
         const matchedFilters = {};
-        const filtersContainer = this.container.querySelector('#graph-filters, #element-filters');
+        const filtersContainer = this.container.querySelector('#graph-filters, #element-filters, #counter-filters');
         if (!filtersContainer) return matchedFilters;
 
         const dateRangeTypes = ['date_range', 'main_datepicker'];
@@ -791,9 +791,16 @@ export default class ElementCreator {
                 selectorView.style.display = 'flex';
                 activeView.style.display = 'none';
 
-                const selected = Array.from(checkboxes).filter(cb => cb.checked);
-                useBtn.disabled = selected.length === 0;
+                // Count both checked checkboxes and mandatory filters
+                const selectedCheckboxes = Array.from(checkboxes).filter(cb => cb.type === 'checkbox' && cb.checked);
+                const mandatoryCount = this.container.querySelectorAll('.filter-selector-checkbox[data-checked="true"]').length;
+                useBtn.disabled = (selectedCheckboxes.length + mandatoryCount) === 0;
             });
+        }
+
+        // Enable button initially if there are mandatory filters
+        if (mandatoryKeys.length > 0) {
+            useBtn.disabled = false;
         }
 
         // Clipboard copy for placeholders
@@ -807,13 +814,13 @@ export default class ElementCreator {
         selectorView.style.display = 'none';
         activeView.style.display = 'flex';
 
-        const filterItems = this.container.querySelectorAll('#graph-filters .filter-input-item, #element-filters .filter-input-item');
+        const filterItems = this.container.querySelectorAll('#graph-filters .filter-input-item, #element-filters .filter-input-item, #counter-filters .filter-input-item');
         filterItems.forEach(item => {
             const key = item.dataset.filterKey;
             item.style.display = this.selectedFilters.includes(key) ? 'flex' : 'none';
         });
 
-        const filtersContainer = this.container.querySelector('#graph-filters, #element-filters');
+        const filtersContainer = this.container.querySelector('#graph-filters, #element-filters, #counter-filters');
         if (filtersContainer && typeof FilterRenderer !== 'undefined') {
             FilterRenderer.init(filtersContainer);
         }
@@ -825,7 +832,7 @@ export default class ElementCreator {
      * Initialize sidebar filters
      */
     initSidebarFilters() {
-        const filtersContainer = this.container.querySelector('#graph-filters, #element-filters');
+        const filtersContainer = this.container.querySelector('#graph-filters, #element-filters, #counter-filters');
         if (!filtersContainer) return;
 
         this.initPlaceholderCopy(filtersContainer.querySelectorAll('.placeholder-key'));
@@ -877,7 +884,7 @@ export default class ElementCreator {
      * Get current filter values from sidebar inputs
      */
     getSidebarFilterValues() {
-        let filtersContainer = this.container.querySelector('#graph-filters, #element-filters');
+        let filtersContainer = this.container.querySelector('#graph-filters, #element-filters, #counter-filters');
         if (!filtersContainer) {
             filtersContainer = document.getElementById('graph-filters') || document.getElementById('element-filters');
         }
