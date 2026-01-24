@@ -1,6 +1,7 @@
 // Dashboard Module Styles
 @use 'shared';
 @use 'data-filter-styles';
+@use 'table-preview'; // For table widget rendering in dashboard
 @use 'dashboard/template-preview-shared';
 @use 'dashboard/dashboard-list';
 @use 'dashboard/dashboard-builder';

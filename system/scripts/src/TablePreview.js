@@ -40,10 +40,31 @@ export default class TablePreview {
     }
 
     /**
-     * Set table config
+     * Set table config (deep merge for nested objects)
      */
     setConfig(config) {
-        this.config = { ...this.config, ...config };
+        if (!config) return;
+
+        // Deep merge pagination
+        if (config.pagination) {
+            this.config.pagination = {
+                ...this.config.pagination,
+                ...config.pagination
+            };
+        }
+
+        // Deep merge style
+        if (config.style) {
+            this.config.style = {
+                ...this.config.style,
+                ...config.style
+            };
+        }
+
+        // Merge other top-level properties
+        if (config.columns) {
+            this.config.columns = config.columns;
+        }
     }
 
     /**
@@ -307,7 +328,7 @@ export default class TablePreview {
 
         const { rows, columns } = this.data;
         const emptyEl = this.container.querySelector('.table-preview-empty');
-        const contentEl = this.container.querySelector('.table-preview-content, .table-content');
+        let contentEl = this.container.querySelector('.table-preview-content, .table-content');
 
         if (!rows || rows.length === 0 || !columns || columns.length === 0) {
             this.showEmpty();
@@ -316,12 +337,18 @@ export default class TablePreview {
 
         if (emptyEl) emptyEl.style.display = 'none';
 
-        if (contentEl) {
-            contentEl.style.display = 'block';
+        // If no content element exists, render directly to container (dashboard context)
+        if (!contentEl) {
             const paginatedData = this.getPaginatedData();
-            contentEl.innerHTML = this.buildTableHTML(paginatedData);
+            this.container.innerHTML = this.buildTableHTML(paginatedData);
             this.bindPaginationEvents();
+            return;
         }
+
+        contentEl.style.display = 'block';
+        const paginatedData = this.getPaginatedData();
+        contentEl.innerHTML = this.buildTableHTML(paginatedData);
+        this.bindPaginationEvents();
     }
 }
 

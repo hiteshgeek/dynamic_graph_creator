@@ -271,6 +271,7 @@ class DashboardInstance implements DatabaseObject
     /**
      * Get all widget (graph) IDs from the dashboard structure
      * @return array Array of unique graph IDs
+     * @deprecated Use getAllWidgetsWithTypes() for widget type awareness
      */
     public function getAllWidgetIds()
     {
@@ -307,24 +308,99 @@ class DashboardInstance implements DatabaseObject
     }
 
     /**
+     * Get all widgets with their types from the dashboard structure
+     * @return array Array of ['id' => int, 'type' => string] entries
+     */
+    public function getAllWidgetsWithTypes()
+    {
+        $structure = $this->getStructureArray();
+        $widgets = array();
+        $seen = array(); // Track unique widget id+type combinations
+
+        if (!isset($structure['sections']) || !is_array($structure['sections'])) {
+            return $widgets;
+        }
+
+        foreach ($structure['sections'] as $section) {
+            if (!isset($section['areas']) || !is_array($section['areas'])) {
+                continue;
+            }
+
+            foreach ($section['areas'] as $area) {
+                // Check area's direct content
+                if (isset($area['content']['widgetId']) && !empty($area['content']['widgetId'])) {
+                    $widgetId = intval($area['content']['widgetId']);
+                    $widgetType = isset($area['content']['widgetType']) ? $area['content']['widgetType'] :
+                                 (isset($area['content']['type']) ? $area['content']['type'] : 'graph');
+                    $key = $widgetType . '-' . $widgetId;
+                    if (!isset($seen[$key])) {
+                        $widgets[] = array('id' => $widgetId, 'type' => $widgetType);
+                        $seen[$key] = true;
+                    }
+                }
+
+                // Check sub-rows
+                if (isset($area['subRows']) && is_array($area['subRows'])) {
+                    foreach ($area['subRows'] as $subRow) {
+                        if (isset($subRow['content']['widgetId']) && !empty($subRow['content']['widgetId'])) {
+                            $widgetId = intval($subRow['content']['widgetId']);
+                            $widgetType = isset($subRow['content']['widgetType']) ? $subRow['content']['widgetType'] :
+                                         (isset($subRow['content']['type']) ? $subRow['content']['type'] : 'graph');
+                            $key = $widgetType . '-' . $widgetId;
+                            if (!isset($seen[$key])) {
+                                $widgets[] = array('id' => $widgetId, 'type' => $widgetType);
+                                $seen[$key] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $widgets;
+    }
+
+    /**
      * Get all unique filter keys from all widgets in the dashboard
-     * Extracts placeholders from each graph's SQL query
+     * Extracts placeholders from each widget's SQL query (graphs, counters, tables)
      * @return array Array of unique filter keys (e.g., ['::company_list', '::global_datepicker'])
      */
     public function getAllFilterKeys()
     {
-        $widgetIds = $this->getAllWidgetIds();
+        $widgets = $this->getAllWidgetsWithTypes();
         $filterKeys = array();
 
-        foreach ($widgetIds as $graphId) {
-            $graph = new Graph($graphId);
-            if ($graph->getId()) {
-                $query = $graph->getQuery();
-                if ($query) {
-                    // Extract placeholders from query using DataFilterManager
-                    $placeholders = DataFilterManager::extractPlaceholders($query);
-                    $filterKeys = array_merge($filterKeys, $placeholders);
-                }
+        foreach ($widgets as $widget) {
+            $widgetId = $widget['id'];
+            $widgetType = $widget['type'];
+            $query = null;
+
+            // Load the widget and get its query based on type
+            switch ($widgetType) {
+                case 'graph':
+                    $graph = new Graph($widgetId);
+                    if ($graph->getId()) {
+                        $query = $graph->getQuery();
+                    }
+                    break;
+                case 'counter':
+                    $counter = new Counter($widgetId);
+                    if ($counter->getId()) {
+                        $query = $counter->getQuery();
+                    }
+                    break;
+                case 'table':
+                    $table = new Table($widgetId);
+                    if ($table->getId()) {
+                        $query = $table->getQuery();
+                    }
+                    break;
+            }
+
+            if ($query) {
+                // Extract placeholders from query using DataFilterManager
+                $placeholders = DataFilterManager::extractPlaceholders($query);
+                $filterKeys = array_merge($filterKeys, $placeholders);
             }
         }
 

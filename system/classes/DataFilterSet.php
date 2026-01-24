@@ -83,7 +83,7 @@ class DataFilterSet
     }
 
     /**
-     * Get the SQL query from the entity (graph, counter, or dashboard)
+     * Get the SQL query from the entity (graph, counter, table, or dashboard)
      *
      * @return string
      */
@@ -101,6 +101,14 @@ class DataFilterSet
             }
         } elseif ($this->entity_type === 'counter') {
             $sql = "SELECT query FROM " . SystemTables::DB_TBL_COUNTER . " WHERE cid = '::id' LIMIT 1";
+            $res = $db->query($sql, array('::id' => $this->entity_id));
+
+            if ($res && $db->resultNumRows($res) > 0) {
+                $row = $db->fetchAssocArray($res);
+                return isset($row['query']) ? $row['query'] : '';
+            }
+        } elseif ($this->entity_type === 'table') {
+            $sql = "SELECT query FROM " . SystemTables::DB_TBL_TABLE . " WHERE tid = '::id' LIMIT 1";
             $res = $db->query($sql, array('::id' => $this->entity_id));
 
             if ($res && $db->resultNumRows($res) > 0) {

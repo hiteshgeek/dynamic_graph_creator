@@ -17,7 +17,7 @@ export class WidgetLoader {
   }
 
   /**
-   * Load all widgets (graphs and counters) in a container
+   * Load all widgets (graphs, counters, and tables) in a container
    * @param {HTMLElement} rootContainer - Container to search for widgets
    * @param {Object} filters - Filter values to apply
    */

@@ -9,7 +9,6 @@ $defaultConfig = Table::getDefaultConfig();
 
 // Pagination settings
 $paginationConfig = isset($config['pagination']) ? $config['pagination'] : $defaultConfig['pagination'];
-$paginationEnabled = isset($paginationConfig['enabled']) ? $paginationConfig['enabled'] : true;
 $rowsPerPage = isset($paginationConfig['rowsPerPage']) ? $paginationConfig['rowsPerPage'] : 10;
 
 // Style settings
@@ -135,23 +134,16 @@ echo DGCHelper::renderPageHeader([
 
                     <!-- Design Tab Content -->
                     <div class="sidebar-tab-content active" id="sidebar-tab-config">
-                        <!-- Pagination Settings -->
+                        <!-- Rows Per Page -->
                         <div class="config-section">
-                            <label class="config-label">Pagination</label>
-                            <label class="dgc-switch">
-                                <input type="checkbox" id="pagination-enabled" <?php echo $paginationEnabled ? 'checked' : ''; ?>>
-                                <span>Enable pagination</span>
-                            </label>
-                            <div class="rows-per-page-wrapper" id="rows-per-page-wrapper" style="<?php echo $paginationEnabled ? '' : 'display: none;'; ?>">
-                                <label class="config-label-sm">Rows per page</label>
-                                <select class="form-select form-select-sm" id="rows-per-page">
-                                    <?php foreach ($rowsPerPageOptions as $opt): ?>
-                                        <option value="<?php echo $opt['value']; ?>" <?php echo $rowsPerPage == $opt['value'] ? 'selected' : ''; ?>>
-                                            <?php echo htmlspecialchars($opt['label']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
+                            <label class="config-label">Rows per page</label>
+                            <select class="form-select form-select-sm" id="rows-per-page">
+                                <?php foreach ($rowsPerPageOptions as $opt): ?>
+                                    <option value="<?php echo $opt['value']; ?>" <?php echo $rowsPerPage == $opt['value'] ? 'selected' : ''; ?>>
+                                        <?php echo htmlspecialchars($opt['label']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
 
                         <!-- Style Options -->

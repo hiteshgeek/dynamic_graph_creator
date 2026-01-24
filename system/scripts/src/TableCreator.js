@@ -116,20 +116,7 @@ export default class TableCreator extends ElementCreator {
      * Initialize pagination settings
      */
     initPaginationSettings() {
-        const paginationEnabled = document.getElementById('pagination-enabled');
-        const rowsPerPageWrapper = document.getElementById('rows-per-page-wrapper');
         const rowsPerPageSelect = document.getElementById('rows-per-page');
-
-        if (paginationEnabled) {
-            paginationEnabled.addEventListener('change', (e) => {
-                this.config.pagination.enabled = e.target.checked;
-                if (rowsPerPageWrapper) {
-                    rowsPerPageWrapper.style.display = e.target.checked ? '' : 'none';
-                }
-                this.updatePreview();
-                this.checkForChanges();
-            });
-        }
 
         if (rowsPerPageSelect) {
             rowsPerPageSelect.addEventListener('change', (e) => {
@@ -346,8 +333,6 @@ export default class TableCreator extends ElementCreator {
      * Apply config values to UI elements
      */
     applyConfigToUI() {
-        const paginationEnabled = document.getElementById('pagination-enabled');
-        const rowsPerPageWrapper = document.getElementById('rows-per-page-wrapper');
         const rowsPerPageSelect = document.getElementById('rows-per-page');
         const stripedInput = document.getElementById('style-striped');
         const borderedInput = document.getElementById('style-bordered');
@@ -355,12 +340,6 @@ export default class TableCreator extends ElementCreator {
 
         const { pagination, style } = this.config;
 
-        if (paginationEnabled) {
-            paginationEnabled.checked = pagination.enabled;
-        }
-        if (rowsPerPageWrapper) {
-            rowsPerPageWrapper.style.display = pagination.enabled ? '' : 'none';
-        }
         if (rowsPerPageSelect) {
             rowsPerPageSelect.value = pagination.rowsPerPage || 10;
         }

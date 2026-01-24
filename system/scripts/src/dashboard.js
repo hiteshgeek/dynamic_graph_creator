@@ -16,11 +16,13 @@ import { WidgetLoader } from "./dashboard/WidgetLoader.js";
 import { FilterView } from "./dashboard/FilterView.js";
 import GraphPreview from "./GraphPreview.js";
 import ChartSkeleton from "./ChartSkeleton.js";
+import TablePreview from "./TablePreview.js";
 
 // Export to window for other scripts to use
 window.DatePickerInit = DatePickerInit;
 window.FilterRenderer = FilterRenderer;
 window.GraphPreview = GraphPreview;
+window.TablePreview = TablePreview;
 window.WidgetLoader = WidgetLoader;
 window.FilterView = FilterView;
 
@@ -527,6 +529,9 @@ class DashboardBuilder {
       if (widgetType === "counter") {
         // Counters use "counter-{id}" format
         usedIds.add(`counter-${content.widgetId}`);
+      } else if (widgetType === "table") {
+        // Tables use "table-{id}" format
+        usedIds.add(`table-${content.widgetId}`);
       } else {
         // Graphs use integer ID
         usedIds.add(parseInt(content.widgetId, 10));
@@ -575,6 +580,9 @@ class DashboardBuilder {
       const widgetType = content.widgetType || content.type || "graph";
       if (widgetType === "counter") {
         return `counter-${content.widgetId}`;
+      }
+      if (widgetType === "table") {
+        return `table-${content.widgetId}`;
       }
       return parseInt(content.widgetId, 10);
     };
@@ -1410,6 +1418,17 @@ class DashboardBuilder {
       // Load and render the counter with filters
       this.loadWidgetCounter(container, counterId, filterValues);
     }
+
+    // Find all widget table containers
+    const tableContainers = this.container.querySelectorAll(".widget-table-container[data-table-id]");
+
+    for (const container of tableContainers) {
+      const tableId = parseInt(container.dataset.tableId, 10);
+      if (!tableId) continue;
+
+      // Load and render the table with filters
+      this.loadWidgetTable(container, tableId, filterValues);
+    }
   }
 
   /**
@@ -1483,6 +1502,102 @@ class DashboardBuilder {
         </div>
       `;
     }
+  }
+
+  /**
+   * Load and render a single widget table
+   * @param {HTMLElement} container - The container element
+   * @param {number} tableId - The table ID
+   * @param {Object} filters - Filter values to apply
+   */
+  async loadWidgetTable(container, tableId, filters = {}) {
+    try {
+      // Fetch table data with filters
+      const result = await Ajax.post("preview_table", {
+        id: tableId,
+        filters: filters,
+      });
+
+      if (result.success && result.data) {
+        const tableData = result.data.tableData;
+        const config = result.data.config || {};
+
+        // Clear loading state
+        container.innerHTML = "";
+
+        // Use TablePreview if available
+        if (window.TablePreview) {
+          const preview = new window.TablePreview(container, { showSkeleton: false });
+          preview.setConfig(config);
+          preview.setData(tableData);
+          preview.render();
+        } else {
+          // Fallback: render basic table
+          container.innerHTML = this.renderBasicTable(tableData, config);
+        }
+      } else {
+        container.innerHTML = `
+          <div class="widget-table-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>${result.message || "Failed to load table"}</span>
+          </div>
+        `;
+      }
+    } catch (error) {
+      console.error("Error loading widget table:", error);
+      container.innerHTML = `
+        <div class="widget-table-error">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Failed to load table</span>
+        </div>
+      `;
+    }
+  }
+
+  /**
+   * Render a basic table (fallback when TablePreview is not available)
+   */
+  renderBasicTable(tableData, config) {
+    if (!tableData || !tableData.columns || !tableData.rows) {
+      return '<div class="widget-table-empty"><i class="fas fa-table"></i><span>No data available</span></div>';
+    }
+
+    const columns = tableData.columns;
+    const rows = tableData.rows;
+    const styleConfig = config.style || {};
+
+    const tableClasses = ["dgc-table"];
+    if (styleConfig.striped) tableClasses.push("table-striped");
+    if (styleConfig.bordered) tableClasses.push("table-bordered");
+    if (styleConfig.hover) tableClasses.push("table-hover");
+    if (styleConfig.density) tableClasses.push("table-" + styleConfig.density);
+
+    let html = '<div class="table-responsive"><table class="' + tableClasses.join(" ") + '">';
+
+    // Header
+    html += "<thead><tr>";
+    for (const col of columns) {
+      html += "<th>" + this.escapeHtml(col) + "</th>";
+    }
+    html += "</tr></thead>";
+
+    // Body
+    html += "<tbody>";
+    if (rows.length === 0) {
+      html += '<tr><td colspan="' + columns.length + '" class="text-center text-muted">No data</td></tr>';
+    } else {
+      for (const row of rows) {
+        html += "<tr>";
+        for (const col of columns) {
+          const value = row[col] !== undefined ? row[col] : "";
+          html += "<td>" + this.escapeHtml(String(value)) + "</td>";
+        }
+        html += "</tr>";
+      }
+    }
+    html += "</tbody></table></div>";
+
+    return html;
   }
 
   /**
@@ -1972,6 +2087,10 @@ class DashboardBuilder {
       return this.renderCounterContent(widgetId, editOverlay);
     }
 
+    if (widgetType === "table") {
+      return this.renderTableContent(widgetId, editOverlay);
+    }
+
     // Default: render graph
     return this.renderGraphContent(widgetId, widgetType, editOverlay);
   }
@@ -2046,6 +2165,59 @@ class DashboardBuilder {
                   <div class="counter-skeleton-content">
                     <div class="counter-skeleton-value"></div>
                     <div class="counter-skeleton-name"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            ${editOverlay}
+        </div>`;
+  }
+
+  /**
+   * Render table widget content
+   */
+  renderTableContent(widgetId, editOverlay) {
+    let tableName = `Table #${widgetId}`;
+
+    if (this.widgetSelectorModal && this.widgetSelectorModal.isDataLoaded()) {
+      const table = this.widgetSelectorModal.getTableById(widgetId);
+      if (table) {
+        tableName = table.name;
+      }
+    }
+
+    return `<div class="area-content has-widget" data-widget-id="${widgetId}" data-widget-type="table">
+            <div class="widget-table-wrapper">
+              <div class="widget-table-header">
+                <div class="widget-table-title-section">
+                  <span class="widget-table-name">${this.escapeHtml(tableName)}</span>
+                </div>
+              </div>
+              <div class="widget-table-container" data-table-id="${widgetId}">
+                <div class="table-skeleton">
+                  <div class="skeleton-row skeleton-header">
+                    <div class="skeleton-cell skeleton-narrow"></div>
+                    <div class="skeleton-cell skeleton-wide"></div>
+                    <div class="skeleton-cell"></div>
+                    <div class="skeleton-cell"></div>
+                  </div>
+                  <div class="skeleton-row">
+                    <div class="skeleton-cell skeleton-narrow"></div>
+                    <div class="skeleton-cell skeleton-wide"></div>
+                    <div class="skeleton-cell"></div>
+                    <div class="skeleton-cell"></div>
+                  </div>
+                  <div class="skeleton-row">
+                    <div class="skeleton-cell skeleton-narrow"></div>
+                    <div class="skeleton-cell skeleton-wide"></div>
+                    <div class="skeleton-cell"></div>
+                    <div class="skeleton-cell"></div>
+                  </div>
+                  <div class="skeleton-row">
+                    <div class="skeleton-cell skeleton-narrow"></div>
+                    <div class="skeleton-cell skeleton-wide"></div>
+                    <div class="skeleton-cell"></div>
+                    <div class="skeleton-cell"></div>
                   </div>
                 </div>
               </div>
