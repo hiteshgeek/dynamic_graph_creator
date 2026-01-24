@@ -3,23 +3,29 @@
 // Set company start date for datepicker presets
 echo DGCHelper::renderCompanyStartDateScript();
 
-// Get counter config
-$config = $counter ? $counter->getConfigArray() : array();
-$defaultConfig = Counter::getDefaultConfig();
-$icon = isset($config['icon']) && $config['icon'] ? $config['icon'] : $defaultConfig['icon'];
-$color = isset($config['color']) && $config['color'] ? $config['color'] : $defaultConfig['color'];
-$format = isset($config['format']) && $config['format'] ? $config['format'] : $defaultConfig['format'];
-$prefix = isset($config['prefix']) ? $config['prefix'] : $defaultConfig['prefix'];
-$suffix = isset($config['suffix']) ? $config['suffix'] : $defaultConfig['suffix'];
-$decimals = isset($config['decimals']) ? $config['decimals'] : $defaultConfig['decimals'];
+// Get table config
+$config = $table ? $table->getConfigArray() : array();
+$defaultConfig = Table::getDefaultConfig();
+
+// Pagination settings
+$paginationConfig = isset($config['pagination']) ? $config['pagination'] : $defaultConfig['pagination'];
+$paginationEnabled = isset($paginationConfig['enabled']) ? $paginationConfig['enabled'] : true;
+$rowsPerPage = isset($paginationConfig['rowsPerPage']) ? $paginationConfig['rowsPerPage'] : 10;
+
+// Style settings
+$styleConfig = isset($config['style']) ? $config['style'] : $defaultConfig['style'];
+$striped = isset($styleConfig['striped']) ? $styleConfig['striped'] : true;
+$bordered = isset($styleConfig['bordered']) ? $styleConfig['bordered'] : true;
+$hover = isset($styleConfig['hover']) ? $styleConfig['hover'] : true;
+$density = isset($styleConfig['density']) ? $styleConfig['density'] : 'comfortable';
 
 // Operations
 $rightContent = '<div class="status-indicators"></div>';
-$saveButtonClass = $counter ? 'btn-outline-warning' : 'btn-primary';
-$rightContent .= '<button type="button" class="btn ' . $saveButtonClass . ' btn-sm save-counter-btn" data-save-btn><i class="fas fa-save"></i> ' . ($counter ? 'Save' : 'Create Counter') . '</button>';
-if ($counter) {
-    $rightContent .= '<a href="?urlq=widget-counter/view/' . $counter->getId() . '" class="btn btn-icon btn-outline-primary btn-view-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Mode"><i class="fas fa-eye"></i></a>';
-    $rightContent .= '<a href="?urlq=widget-counter/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create New Counter"><i class="fas fa-plus"></i></a>';
+$saveButtonClass = $table ? 'btn-outline-warning' : 'btn-primary';
+$rightContent .= '<button type="button" class="btn ' . $saveButtonClass . ' btn-sm save-table-btn" data-save-btn><i class="fas fa-save"></i> ' . ($table ? 'Save' : 'Create Table') . '</button>';
+if ($table) {
+    $rightContent .= '<a href="?urlq=widget-table/view/' . $table->getId() . '" class="btn btn-icon btn-outline-primary btn-view-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="View Mode"><i class="fas fa-eye"></i></a>';
+    $rightContent .= '<a href="?urlq=widget-table/create" class="btn btn-icon btn-outline-primary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Create New Table"><i class="fas fa-plus"></i></a>';
 }
 // Navigation links
 $rightContent .= '<a href="?urlq=home" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Home"><i class="fas fa-home"></i></a>';
@@ -28,59 +34,59 @@ if (DGCHelper::hasAdminAccess()) {
     $rightContent .= '<a href="?urlq=data-filter" class="btn btn-icon btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Filters"><i class="fas fa-filter"></i></a>';
 }
 // Widget dropdown
-$leftContent = DGCHelper::renderWidgetDropdown('counter');
+$leftContent = DGCHelper::renderWidgetDropdown('table');
 echo DGCHelper::renderPageHeader([
-    'title' => $counter ? 'Edit Counter' : 'Create Counter',
-    'backUrl' => '?urlq=widget-counter',
-    'backLabel' => 'Counters',
+    'title' => $table ? 'Edit Table' : 'Create Table',
+    'backUrl' => '?urlq=widget-table',
+    'backLabel' => 'Tables',
     'leftContent' => $leftContent,
     'rightContent' => $rightContent
 ]);
 ?>
 
 <div class="container container-full">
-    <div id="counter-creator" class="graph-creator graph-creator-single-sidebar"
-         data-counter-id="<?php echo $counter ? $counter->getId() : ''; ?>"
-         data-counter-config="<?php echo $counter ? htmlspecialchars($counter->getConfig()) : ''; ?>"
+    <div id="table-creator" class="graph-creator graph-creator-single-sidebar"
+         data-table-id="<?php echo $table ? $table->getId() : ''; ?>"
+         data-table-config="<?php echo $table ? htmlspecialchars($table->getConfig()) : ''; ?>"
          data-mandatory-filters="<?php echo htmlspecialchars(json_encode(isset($mandatoryFilterKeys) ? $mandatoryFilterKeys : array())); ?>"
-         data-widget-type="counter">
+         data-widget-type="table">
 
-        <!-- Left Sidebar - Counter Info, Config & Filters -->
-        <div class="graph-sidebar graph-sidebar-left" id="counter-sidebar-left">
-            <div class="sidebar-card" id="counter-sidebar-card">
+        <!-- Left Sidebar - Table Info, Config & Filters -->
+        <div class="graph-sidebar graph-sidebar-left" id="table-sidebar-left">
+            <div class="sidebar-card" id="table-sidebar-card">
                 <!-- Immediately apply saved collapse state to prevent flash -->
                 <script>
                     (function() {
-                        if (localStorage.getItem('counterCreatorSidebarCollapsed') === 'true') {
-                            document.getElementById('counter-sidebar-left').classList.add('collapsed');
-                            document.getElementById('counter-sidebar-card').classList.add('collapsed');
+                        if (localStorage.getItem('tableCreatorSidebarCollapsed') === 'true') {
+                            document.getElementById('table-sidebar-left').classList.add('collapsed');
+                            document.getElementById('table-sidebar-card').classList.add('collapsed');
                         }
                     })();
                 </script>
 
                 <!-- Sidebar Header with Title and Collapse Button -->
                 <div class="sidebar-card-header" data-toggle="collapse">
-                    <h3 class="sidebar-card-title"><i class="fas fa-cog"></i> Counter Settings</h3>
+                    <h3 class="sidebar-card-title"><i class="fas fa-cog"></i> Table Settings</h3>
                     <button type="button" class="collapse-btn">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                 </div>
 
-                <!-- Counter Info Section -->
+                <!-- Table Info Section -->
                 <div class="sidebar-section graph-info-section">
-                    <form id="counter-form">
-                        <input type="hidden" id="counter-id" value="<?php echo $counter ? $counter->getId() : ''; ?>">
+                    <form id="table-form">
+                        <input type="hidden" id="table-id" value="<?php echo $table ? $table->getId() : ''; ?>">
                         <div class="graph-info-wrapper">
                             <div class="graph-name-wrapper">
-                                <label class="graph-name-label" for="counter-name-input">Counter Name <span class="required">*</span></label>
-                                <input type="text" class="form-control graph-name-input" id="counter-name-input" placeholder="Enter counter name" value="<?php echo $counter ? htmlspecialchars($counter->getName()) : ''; ?>" required>
-                                <div class="invalid-feedback">Counter name is required</div>
+                                <label class="graph-name-label" for="table-name-input">Table Name <span class="required">*</span></label>
+                                <input type="text" class="form-control graph-name-input" id="table-name-input" placeholder="Enter table name" value="<?php echo $table ? htmlspecialchars($table->getName()) : ''; ?>" required>
+                                <div class="invalid-feedback">Table name is required</div>
                             </div>
                             <div class="graph-description-wrapper">
-                                <label class="graph-description-label" for="counter-description-input">Description</label>
-                                <textarea class="form-control graph-description-input" id="counter-description-input" placeholder="Enter counter description (optional)" rows="1"><?php echo $counter ? htmlspecialchars($counter->getDescription()) : ''; ?></textarea>
+                                <label class="graph-description-label" for="table-description-input">Description</label>
+                                <textarea class="form-control graph-description-input" id="table-description-input" placeholder="Enter table description (optional)" rows="1"><?php echo $table ? htmlspecialchars($table->getDescription()) : ''; ?></textarea>
                             </div>
-                            <div class="graph-categories-wrapper" id="counter-categories-wrapper">
+                            <div class="graph-categories-wrapper" id="table-categories-wrapper">
                                 <label class="graph-categories-label">Categories <span class="required">*</span></label>
                                 <div class="category-chips-container" id="category-chips">
                                     <?php if (!empty($categories)): ?>
@@ -129,83 +135,55 @@ echo DGCHelper::renderPageHeader([
 
                     <!-- Design Tab Content -->
                     <div class="sidebar-tab-content active" id="sidebar-tab-config">
-                        <!-- Icon Selector -->
+                        <!-- Pagination Settings -->
                         <div class="config-section">
-                            <label class="config-label">Icon</label>
-                            <div class="icon-selector" id="icon-selector">
-                                <button type="button" class="btn btn-outline-secondary icon-selector-btn" data-bs-toggle="modal" data-bs-target="#icon-picker-modal">
-                                    <span class="material-icons selected-icon"><?php echo htmlspecialchars($icon); ?></span>
-                                    <span class="icon-selector-text">Select Icon</span>
-                                </button>
-                                <input type="hidden" id="selected-icon" value="<?php echo htmlspecialchars($icon); ?>">
+                            <label class="config-label">Pagination</label>
+                            <label class="dgc-switch">
+                                <input type="checkbox" id="pagination-enabled" <?php echo $paginationEnabled ? 'checked' : ''; ?>>
+                                <span>Enable pagination</span>
+                            </label>
+                            <div class="rows-per-page-wrapper" id="rows-per-page-wrapper" style="<?php echo $paginationEnabled ? '' : 'display: none;'; ?>">
+                                <label class="config-label-sm">Rows per page</label>
+                                <select class="form-select form-select-sm" id="rows-per-page">
+                                    <?php foreach ($rowsPerPageOptions as $opt): ?>
+                                        <option value="<?php echo $opt['value']; ?>" <?php echo $rowsPerPage == $opt['value'] ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($opt['label']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
                             </div>
                         </div>
 
-                        <!-- Color Picker -->
+                        <!-- Style Options -->
                         <div class="config-section">
-                            <label class="config-label">Background Color</label>
-                            <div class="color-swatches" id="color-swatches">
-                                <?php
-                                $defaultColors = array(
-                                    '#4CAF50', // Green
-                                    '#2196F3', // Blue
-                                    '#9C27B0', // Purple
-                                    '#F44336', // Red
-                                    '#FF9800', // Orange
-                                    '#00BCD4', // Cyan
-                                    '#E91E63', // Pink
-                                    '#3F51B5', // Indigo
-                                    '#795548', // Brown
-                                    '#607D8B'  // Blue Grey
-                                );
-                                $isCustomColor = !in_array(strtoupper($color), array_map('strtoupper', $defaultColors));
-                                foreach ($defaultColors as $swatchColor):
-                                    $isActive = strtoupper($color) === strtoupper($swatchColor);
-                                ?>
-                                <button type="button" class="color-swatch<?php echo $isActive ? ' active' : ''; ?>"
-                                        data-color="<?php echo $swatchColor; ?>"
-                                        style="background-color: <?php echo $swatchColor; ?>;"
-                                        title="<?php echo $swatchColor; ?>"></button>
-                                <?php endforeach; ?>
-                            </div>
-                            <div class="custom-color-wrapper">
-                                <label class="custom-color-label<?php echo $isCustomColor ? ' active' : ''; ?>">
-                                    <input type="color" class="custom-color-input" id="counter-color" value="<?php echo htmlspecialchars($color); ?>">
-                                    <span class="custom-color-text">Custom</span>
+                            <label class="config-label">Table Style</label>
+                            <div class="dgc-checkbox-group">
+                                <label class="dgc-checkbox">
+                                    <input type="checkbox" id="style-striped" <?php echo $striped ? 'checked' : ''; ?>>
+                                    <span>Striped rows</span>
+                                </label>
+                                <label class="dgc-checkbox">
+                                    <input type="checkbox" id="style-bordered" <?php echo $bordered ? 'checked' : ''; ?>>
+                                    <span>Bordered</span>
+                                </label>
+                                <label class="dgc-checkbox">
+                                    <input type="checkbox" id="style-hover" <?php echo $hover ? 'checked' : ''; ?>>
+                                    <span>Row hover effect</span>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Format Options -->
+                        <!-- Density -->
                         <div class="config-section">
-                            <label class="config-label">Number Format</label>
-                            <select class="form-select form-select-sm" id="counter-format">
-                                <?php foreach ($formatOptions as $opt): ?>
-                                    <option value="<?php echo htmlspecialchars($opt['value']); ?>" <?php echo $format === $opt['value'] ? 'selected' : ''; ?>>
-                                        <?php echo htmlspecialchars($opt['label']); ?>
-                                    </option>
+                            <label class="config-label">Density</label>
+                            <div class="dgc-radio-group">
+                                <?php foreach ($densityOptions as $opt): ?>
+                                    <label class="dgc-radio">
+                                        <input type="radio" name="density" id="density-<?php echo $opt['value']; ?>" value="<?php echo $opt['value']; ?>" <?php echo $density === $opt['value'] ? 'checked' : ''; ?>>
+                                        <span><?php echo htmlspecialchars($opt['label']); ?></span>
+                                    </label>
                                 <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <!-- Prefix/Suffix -->
-                        <div class="config-section">
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <label class="config-label">Prefix</label>
-                                    <input type="text" class="form-control form-control-sm" id="counter-prefix" value="<?php echo htmlspecialchars($prefix); ?>" placeholder="e.g., $">
-                                </div>
-                                <div class="col-6">
-                                    <label class="config-label">Suffix</label>
-                                    <input type="text" class="form-control form-control-sm" id="counter-suffix" value="<?php echo htmlspecialchars($suffix); ?>" placeholder="e.g., %">
-                                </div>
                             </div>
-                        </div>
-
-                        <!-- Decimals -->
-                        <div class="config-section">
-                            <label class="config-label">Decimal Places</label>
-                            <input type="number" class="form-control form-control-sm" id="counter-decimals" value="<?php echo intval($decimals); ?>" min="0" max="10">
                         </div>
                     </div>
 
@@ -267,7 +245,7 @@ echo DGCHelper::renderPageHeader([
                                             <i class="fas fa-exchange-alt"></i> Change
                                         </button>
                                     </div>
-                                    <div class="filters-list" id="counter-filters">
+                                    <div class="filters-list" id="table-filters">
                                         <?php foreach ($allFilters as $filter): ?>
                                             <?php
                                             $options = isset($filter['options']) ? $filter['options'] : array();
@@ -381,21 +359,21 @@ echo DGCHelper::renderPageHeader([
             <!-- Preview Card -->
             <div class="graph-preview-card">
                 <div class="graph-preview-header">
-                    <h3><i class="fas fa-tachometer-alt"></i> Preview</h3>
+                    <h3><i class="fas fa-table"></i> Preview</h3>
                     <div class="graph-preview-actions">
                         <button type="button" class="btn btn-sm btn-outline-secondary" id="refresh-preview">
                             <i class="fas fa-sync-alt"></i> Refresh
                         </button>
                     </div>
                 </div>
-                <div class="graph-preview-container counter-preview-container">
-                    <div class="counter-card-preview<?php echo $counter ? ' is-loading' : ''; ?>" id="counter-card-preview" style="background-color: <?php echo htmlspecialchars($color); ?>;">
-                        <div class="counter-icon">
-                            <span class="material-icons<?php echo $counter ? ' counter-skeleton-icon' : ''; ?>" id="preview-icon"><?php echo htmlspecialchars($icon); ?></span>
+                <div class="graph-preview-container table-preview-container">
+                    <div class="table-preview-wrapper<?php echo $table ? ' is-loading' : ''; ?>" id="table-preview-wrapper">
+                        <div class="table-preview-empty" id="table-preview-empty">
+                            <i class="fas fa-table"></i>
+                            <p>Run a query to see table preview</p>
                         </div>
-                        <div class="counter-content">
-                            <div class="counter-value" id="preview-value"><?php echo $counter ? '<span class="counter-skeleton-value"></span>' : '--'; ?></div>
-                            <div class="counter-name" id="preview-name"><?php echo $counter ? htmlspecialchars($counter->getName()) : 'Counter Name'; ?></div>
+                        <div class="table-preview-content" id="table-preview-content" style="display: none;">
+                            <!-- Table will be rendered here by JavaScript -->
                         </div>
                     </div>
                 </div>
@@ -426,10 +404,10 @@ echo DGCHelper::renderPageHeader([
                         <!-- SQL Query Tab -->
                         <div class="tab-pane fade show active" id="sql-query-pane" role="tabpanel">
                             <div class="query-builder" data-mandatory-filters="<?php echo htmlspecialchars(json_encode(isset($mandatoryFilters) ? $mandatoryFilters : array())); ?>">
-                                <textarea class="query-editor" placeholder="SELECT COUNT(*) as counter FROM orders WHERE date >= ::date_from AND date <= ::date_to"><?php echo $counter ? htmlspecialchars($counter->getQuery()) : ''; ?></textarea>
+                                <textarea class="query-editor" placeholder="SELECT id, name, email, created_at FROM users WHERE created_at >= ::date_from AND created_at <= ::date_to"><?php echo $table ? htmlspecialchars($table->getQuery()) : ''; ?></textarea>
                                 <div class="query-hint">
                                     <i class="fas fa-info-circle"></i>
-                                    Query must return a single row. Use <code>counter</code> as the column alias for the value.
+                                    Query should return multiple rows. Use placeholders like <code>::filter_key</code> for dynamic filtering.
                                 </div>
                                 <div class="query-test-result" style="display: none;"></div>
                             </div>
@@ -469,25 +447,5 @@ echo DGCHelper::renderPageHeader([
             </div>
         </div>
 
-    </div>
-</div>
-
-<!-- Icon Picker Modal -->
-<div class="modal fade" id="icon-picker-modal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Select Icon</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="icon-search-wrapper">
-                    <input type="text" class="form-control" id="icon-search" placeholder="Search icons...">
-                </div>
-                <div class="icon-grid" id="icon-grid">
-                    <!-- Icons populated by JavaScript -->
-                </div>
-            </div>
-        </div>
     </div>
 </div>

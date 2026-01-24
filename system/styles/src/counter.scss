@@ -2,6 +2,7 @@
 @use "variables" as *;
 @use "query-builder";
 @use "data-filter-styles";
+@use "form-controls"; // Reusable checkbox/radio styles
 @use "graph-creator"; // Shared layout styles for creator pages
 @use "counter-creator"; // Counter-specific styles
 @use "graph-list"; // Shared view page styles (sidebar, nav)

@@ -165,12 +165,10 @@ echo DGCHelper::renderPageHeader([
                                                         <span class="mandatory-badge">Mandatory</span>
                                                     </div>
                                                 <?php else: ?>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input filter-selector-checkbox" type="checkbox" value="<?php echo htmlspecialchars($filterKeyClean); ?>" id="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
-                                                        <label class="form-check-label" for="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
-                                                            <span class="filter-selector-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
-                                                        </label>
-                                                    </div>
+                                                    <label class="dgc-checkbox filter-selector-checkbox-wrapper">
+                                                        <input type="checkbox" class="filter-selector-checkbox" value="<?php echo htmlspecialchars($filterKeyClean); ?>" id="filter-<?php echo htmlspecialchars($filterKeyClean); ?>">
+                                                        <span class="filter-selector-label"><?php echo htmlspecialchars($filter['filter_label']); ?></span>
+                                                    </label>
                                                 <?php endif; ?>
                                                 <div class="filter-selector-keys">
                                                     <?php if ($isDateRangeSelector): ?>

@@ -2,6 +2,7 @@
 @use "variables" as *;
 @use "query-builder";
 @use "config-panel";
+@use "form-controls"; // Reusable checkbox/radio styles
 @use "graph-creator";
 @use "graph-list";
 @use "data-filter-styles";

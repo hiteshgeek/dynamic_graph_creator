@@ -60,6 +60,10 @@ require_once __DIR__ . '/system/classes/Counter.php';
 require_once __DIR__ . '/system/classes/CounterManager.php';
 require_once __DIR__ . '/system/classes/CounterWidgetCategoryMapping.php';
 require_once __DIR__ . '/system/classes/CounterWidgetCategoryMappingManager.php';
+require_once __DIR__ . '/system/classes/Table.php';
+require_once __DIR__ . '/system/classes/TableManager.php';
+require_once __DIR__ . '/system/classes/TableWidgetCategoryMapping.php';
+require_once __DIR__ . '/system/classes/TableWidgetCategoryMappingManager.php';
 
 // Load session and authentication classes
 require_once __DIR__ . '/system/classes/AdminUser.php';
@@ -162,8 +166,7 @@ switch ($page) {
         require_once SystemConfig::includesPath() . 'graph/graph.inc.php';
         break;
     case 'widget-table':
-        // TODO: Add table widget controller
-        require_once SystemConfig::includesPath() . 'widget-table/widget-table.inc.php';
+        require_once SystemConfig::includesPath() . 'table/table.inc.php';
         break;
     case 'widget-list':
         // TODO: Add list widget controller

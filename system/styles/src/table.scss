@@ -1,0 +1,60 @@
+// Table-specific styles (use with common.css)
+@use "variables" as *;
+@use "query-builder";
+@use "data-filter-styles";
+@use "form-controls"; // Reusable checkbox/radio styles
+@use "graph-creator"; // Shared layout styles for creator pages
+@use "graph-list"; // Shared view page styles (sidebar, nav)
+@use "table-preview"; // Table-specific preview styles
+
+// Table list page styles
+.table-list-page {
+  padding: $spacing-lg 0;
+}
+
+// Table type icon with tinted background
+.table-icon {
+  background: rgba($primary, 0.1) !important;
+  color: $primary !important;
+
+  i {
+    font-size: 18px;
+    color: inherit;
+  }
+}
+
+// Table display card
+.table-display-card {
+  .table-preview-container,
+  .table-view-container {
+    padding: $spacing-md;
+    min-height: 200px;
+  }
+}
+
+// Table preview container in creator
+.table-preview-wrapper {
+  position: relative;
+  background: var(--dgc-bg-elevated);
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+}
+
+// Table creator config section styles
+#table-creator {
+  .config-section {
+    .config-label {
+      margin-bottom: $spacing-sm;
+    }
+
+    .dgc-switch {
+      margin-top: $spacing-xs;
+      margin-bottom: $spacing-sm;
+    }
+
+    .dgc-checkbox-group,
+    .dgc-radio-group {
+      margin-top: $spacing-xs;
+    }
+  }
+}

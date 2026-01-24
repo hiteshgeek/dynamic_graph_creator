@@ -10,6 +10,7 @@ export class WidgetSelectorModal {
     this.modalInstance = null;
     this.graphs = [];
     this.counters = [];
+    this.tables = [];
     this.categories = [];
     this.selectedCategories = new Set();
     this.selectedTypes = new Set(); // Selected widget types
@@ -324,6 +325,7 @@ export class WidgetSelectorModal {
           this.widgetTypes = response.data.widget_types || [];
           this.graphs = response.data.graphs || [];
           this.counters = response.data.counters || [];
+          this.tables = response.data.tables || [];
           this.categories = response.data.categories || [];
 
           // Select all categories by default (convert wcid to int for consistent comparison)
@@ -333,7 +335,8 @@ export class WidgetSelectorModal {
           this.selectedTypes = new Set();
           if (this.graphs.length > 0) this.selectedTypes.add("graph");
           if (this.counters.length > 0) this.selectedTypes.add("counter");
-          // table, list, link will be added when available
+          if (this.tables.length > 0) this.selectedTypes.add("table");
+          // list, link will be added when available
 
           this.dataLoaded = true;
         } else {
@@ -341,6 +344,7 @@ export class WidgetSelectorModal {
           this.widgetTypes = [];
           this.graphs = [];
           this.counters = [];
+          this.tables = [];
           this.categories = [];
         }
       } catch (error) {
@@ -348,6 +352,7 @@ export class WidgetSelectorModal {
         this.widgetTypes = [];
         this.graphs = [];
         this.counters = [];
+        this.tables = [];
         this.categories = [];
       } finally {
         this.isLoading = false;
@@ -390,8 +395,10 @@ export class WidgetSelectorModal {
         return this.graphs.length;
       case "counter":
         return this.counters.length;
+      case "table":
+        return this.tables.length;
       default:
-        return 0; // table, list, link not available yet
+        return 0; // list, link not available yet
     }
   }
 
@@ -515,7 +522,8 @@ export class WidgetSelectorModal {
 
     const filteredGraphs = this.selectedTypes.has("graph") ? this.filterWidgets(this.graphs, "graph") : [];
     const filteredCounters = this.selectedTypes.has("counter") ? this.filterWidgets(this.counters, "counter") : [];
-    const totalCount = filteredGraphs.length + filteredCounters.length;
+    const filteredTables = this.selectedTypes.has("table") ? this.filterWidgets(this.tables, "table") : [];
+    const totalCount = filteredGraphs.length + filteredCounters.length + filteredTables.length;
 
     // Update count subtitle
     if (this.countSubtitleEl) {
@@ -544,6 +552,8 @@ export class WidgetSelectorModal {
         widgets = filteredGraphs;
       } else if (type.slug === "counter") {
         widgets = filteredCounters;
+      } else if (type.slug === "table") {
+        widgets = filteredTables;
       }
 
       if (widgets.length === 0) continue;
@@ -566,6 +576,8 @@ export class WidgetSelectorModal {
           html += this.renderGraphCard(widget);
         } else if (type.slug === "counter") {
           html += this.renderCounterCard(widget);
+        } else if (type.slug === "table") {
+          html += this.renderTableCard(widget);
         }
       }
 
@@ -766,6 +778,95 @@ export class WidgetSelectorModal {
   }
 
   /**
+   * Render a single table card
+   * @param {Object} table - Table data
+   * @returns {string} HTML string
+   */
+  renderTableCard(table) {
+    const widgetKey = `table-${table.tid}`;
+    const isCurrent = this.currentWidgetId === widgetKey;
+    const isUsedElsewhere = this.usedWidgetIds.has(widgetKey) && !isCurrent;
+
+    // Render category badges
+    let categoriesHtml = "";
+    if (table.categories && table.categories.length > 0) {
+      categoriesHtml = '<div class="widget-card-categories widget-category-badges">';
+      for (const cat of table.categories.slice(0, 3)) {
+        categoriesHtml += `
+          <span class="widget-category-badge widget-category-badge-sm"
+                style="background-color: ${cat.color || "#6c757d"};">
+            ${cat.icon ? `<i class="fas ${cat.icon}"></i>` : ""}
+            ${this.escapeHtml(cat.name)}
+          </span>
+        `;
+      }
+      if (table.categories.length > 3) {
+        categoriesHtml += `<span class="widget-category-badge widget-category-badge-sm" style="background-color: #6c757d;">+${table.categories.length - 3}</span>`;
+      }
+      categoriesHtml += "</div>";
+    }
+
+    // Status badge - show check icon for current selection or used elsewhere
+    let statusBadgeHtml = "";
+    if (isCurrent) {
+      statusBadgeHtml = `
+        <div class="widget-card-status current" title="Current selection">
+          <i class="fas fa-check-circle"></i>
+        </div>
+      `;
+    } else if (isUsedElsewhere) {
+      statusBadgeHtml = `
+        <div class="widget-card-status used" title="Already added">
+          <i class="fas fa-check-circle"></i>
+        </div>
+      `;
+    }
+
+    // Card classes
+    const cardClasses = ["widget-card", "table-card"];
+    if (isCurrent) cardClasses.push("selected");
+    if (isUsedElsewhere) cardClasses.push("used-elsewhere", "disabled");
+
+    // Accessibility attributes
+    const ariaDisabled = isUsedElsewhere ? 'aria-disabled="true"' : '';
+    const tabIndex = isUsedElsewhere ? 'tabindex="-1"' : 'tabindex="0"';
+
+    return `
+      <div class="${cardClasses.join(" ")}"
+           data-table-id="${table.tid}"
+           data-widget-type="table"
+           ${tabIndex}
+           role="button"
+           ${ariaDisabled}
+           aria-label="${isCurrent ? 'Current selection: ' : isUsedElsewhere ? 'Already added: ' : 'Select '}${this.escapeHtml(table.name)}">
+        ${statusBadgeHtml}
+        <div class="widget-card-header">
+          <div class="widget-card-icon table" style="background-color: ${this.typeColors.table}15; color: ${this.typeColors.table};">
+            <i class="fas fa-table"></i>
+          </div>
+          <div class="widget-card-info">
+            <h4 class="widget-card-name">${this.escapeHtml(table.name)}</h4>
+            <span class="widget-card-type">Table</span>
+          </div>
+        </div>
+        ${table.description ? `
+          <div class="widget-card-description-wrapper">
+            <p class="widget-card-description">${this.escapeHtml(table.description)}</p>
+            <button type="button" class="widget-card-readmore">Read more</button>
+          </div>
+          <div class="widget-card-description-expanded">
+            <div class="description-expanded-content">
+              <p>${this.escapeHtml(table.description)}</p>
+            </div>
+            <button type="button" class="description-expanded-close"><i class="fas fa-times"></i></button>
+          </div>
+        ` : ""}
+        ${categoriesHtml}
+      </div>
+    `;
+  }
+
+  /**
    * Filter widgets (graphs or counters) based on search query and selected categories
    * @param {Array} widgets - Array of widgets
    * @param {string} widgetType - Type of widget ('graph' or 'counter')
@@ -876,6 +977,9 @@ export class WidgetSelectorModal {
     if (widgetType === "counter") {
       const counterId = parseInt(card.dataset.counterId, 10);
       this.handleCounterSelect(counterId);
+    } else if (widgetType === "table") {
+      const tableId = parseInt(card.dataset.tableId, 10);
+      this.handleTableSelect(tableId);
     } else {
       // Default to graph
       const graphId = parseInt(card.dataset.graphId, 10);
@@ -904,6 +1008,32 @@ export class WidgetSelectorModal {
     // Call the onSelect callback with counter info
     if (this.onSelect && this.currentAreaContext) {
       this.onSelect({ type: "counter", id: counterId }, this.currentAreaContext);
+    }
+
+    this.hide();
+  }
+
+  /**
+   * Handle table card selection
+   * @param {number} tableId
+   */
+  handleTableSelect(tableId) {
+    const widgetKey = `table-${tableId}`;
+
+    // If clicking the currently selected table, deselect it
+    if (this.currentWidgetId === widgetKey) {
+      this.handleGraphDeselect();
+      return;
+    }
+
+    // Prevent selecting tables that are already used elsewhere
+    if (this.usedWidgetIds.has(widgetKey) && this.currentWidgetId !== widgetKey) {
+      return;
+    }
+
+    // Call the onSelect callback with table info
+    if (this.onSelect && this.currentAreaContext) {
+      this.onSelect({ type: "table", id: tableId }, this.currentAreaContext);
     }
 
     this.hide();
@@ -988,6 +1118,16 @@ export class WidgetSelectorModal {
   getCounterById(counterId) {
     const id = parseInt(counterId, 10);
     return this.counters.find((c) => parseInt(c.cid, 10) === id) || null;
+  }
+
+  /**
+   * Get table by ID
+   * @param {number} tableId - Table ID to find
+   * @returns {Object|null} Table object or null if not found
+   */
+  getTableById(tableId) {
+    const id = parseInt(tableId, 10);
+    return this.tables.find((t) => parseInt(t.tid, 10) === id) || null;
   }
 
   /**

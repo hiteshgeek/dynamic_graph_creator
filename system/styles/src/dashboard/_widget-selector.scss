@@ -883,6 +883,108 @@
     @extend .counter-error--compact;
   }
 
+  // Table widget wrapper - responsive container
+  .widget-table-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+    background: var(--dgc-bg-card);
+    border-radius: $border-radius-lg;
+    border: 2px solid transparent;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+    overflow: hidden;
+
+    &:hover {
+      box-shadow: var(--dgc-shadow-2);
+    }
+
+    .widget-table-header {
+      padding: $spacing-sm $spacing-md;
+      border-bottom: 1px solid var(--dgc-border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      .widget-table-name {
+        font-size: $font-size-sm;
+        font-weight: 600;
+        color: var(--dgc-text-primary);
+      }
+    }
+
+    .widget-table-container {
+      flex: 1;
+      overflow: auto;
+      padding: $spacing-sm;
+      min-height: 0;
+    }
+  }
+
+  // Table skeleton - dashboard compact variant
+  .widget-table-container .table-skeleton {
+    .skeleton-row {
+      padding: $spacing-xs $spacing-sm;
+      gap: $spacing-sm;
+
+      &.skeleton-header {
+        background: var(--dgc-bg-elevated);
+      }
+    }
+
+    .skeleton-cell {
+      height: 12px;
+    }
+  }
+
+  // Table error state
+  .widget-table-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-lg;
+    text-align: center;
+    color: var(--dgc-text-hint);
+    min-height: 120px;
+
+    i {
+      font-size: 24px;
+      color: $error;
+      opacity: 0.6;
+      margin-bottom: $spacing-xs;
+    }
+
+    span {
+      font-size: $font-size-sm;
+    }
+  }
+
+  // Table empty state
+  .widget-table-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-lg;
+    text-align: center;
+    color: var(--dgc-text-hint);
+    min-height: 120px;
+
+    i {
+      font-size: 24px;
+      opacity: 0.4;
+      margin-bottom: $spacing-xs;
+    }
+
+    span {
+      font-size: $font-size-sm;
+    }
+  }
+
   .widget-edit-overlay {
     position: absolute;
     inset: 0;

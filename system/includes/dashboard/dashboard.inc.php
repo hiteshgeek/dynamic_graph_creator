@@ -121,6 +121,9 @@ if (isset($_POST['submit'])) {
         case 'preview_counter':
             previewCounterForDashboard($_POST);
             break;
+        case 'preview_table':
+            previewTableForDashboard($_POST);
+            break;
     }
 }
 
@@ -1487,6 +1490,9 @@ function getWidgetsForSelector($data)
     // Get all active counters
     $counters = CounterManager::getAll();
 
+    // Get all active tables
+    $tables = TableManager::getAll();
+
     // Get all widget categories
     $categories = WidgetCategoryManager::getAll();
 
@@ -1528,6 +1534,23 @@ function getWidgetsForSelector($data)
         );
     }
 
+    // Build tables data with category mappings
+    $tablesData = array();
+    foreach ($tables as $table) {
+        $categoryIds = TableWidgetCategoryMappingManager::getCategoryIdsForTable($table->getId());
+        $tableCategories = TableWidgetCategoryMappingManager::getCategoriesForTable($table->getId());
+
+        $tablesData[] = array(
+            'tid' => $table->getId(),
+            'name' => $table->getName(),
+            'description' => $table->getDescription(),
+            'category_ids' => $categoryIds,
+            'categories' => array_map(function ($cat) {
+                return $cat->toArray();
+            }, $tableCategories)
+        );
+    }
+
     // Build categories data with widget counts
     $categoriesData = array();
     foreach ($categories as $cat) {
@@ -1538,7 +1561,10 @@ function getWidgetsForSelector($data)
         $catArray['counter_count'] = count(
             CounterWidgetCategoryMappingManager::getCountersForCategory($cat->getId())
         );
-        $catArray['widget_count'] = $catArray['graph_count'] + $catArray['counter_count'];
+        $catArray['table_count'] = count(
+            TableWidgetCategoryMappingManager::getTablesForCategory($cat->getId())
+        );
+        $catArray['widget_count'] = $catArray['graph_count'] + $catArray['counter_count'] + $catArray['table_count'];
         $categoriesData[] = $catArray;
     }
 
@@ -1546,8 +1572,9 @@ function getWidgetsForSelector($data)
         'widget_types' => $widgetTypes,
         'graphs' => $graphsData,
         'counters' => $countersData,
+        'tables' => $tablesData,
         'categories' => $categoriesData,
-        'total_count' => count($graphsData) + count($countersData)
+        'total_count' => count($graphsData) + count($countersData) + count($tablesData)
     ));
 }
 
@@ -1669,4 +1696,38 @@ function getDashboardFilterValues($data)
     $filters = isset($_SESSION[$sessionKey]) ? $_SESSION[$sessionKey] : array();
 
     Utility::ajaxResponseTrue('Filters loaded', array('filters' => $filters));
+}
+
+/**
+ * Preview table for dashboard (load table data with filters)
+ */
+function previewTableForDashboard($data)
+{
+    $tableId = isset($data['id']) ? intval($data['id']) : 0;
+
+    if (!$tableId) {
+        Utility::ajaxResponseFalse('Table ID required');
+    }
+
+    // Load table
+    $table = new Table($tableId);
+    if (!$table->getId()) {
+        Utility::ajaxResponseFalse('Table not found');
+    }
+
+    // Get filter values (for dashboard filters)
+    $filters = isset($data['filters']) ? $data['filters'] : array();
+    if (is_string($filters)) {
+        $filters = json_decode($filters, true);
+    }
+
+    // Execute table query
+    $tableData = $table->execute($filters ? $filters : array());
+    $config = $table->getConfigArray();
+
+    Utility::ajaxResponseTrue('Table data loaded', array(
+        'tableData' => $tableData,
+        'config' => $config,
+        'name' => $table->getName()
+    ));
 }

@@ -1093,6 +1093,12 @@
       cursor: pointer;
     }
   }
+
+  // Support for dgc-checkbox styling
+  .dgc-checkbox {
+    margin: 0;
+    flex: 1;
+  }
 }
 
 .filter-selector-label {

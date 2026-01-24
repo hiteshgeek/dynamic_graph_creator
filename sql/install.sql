@@ -142,6 +142,41 @@ CREATE TABLE IF NOT EXISTS counter_widget_category_mapping (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Maps counters to widget categories';
 
 -- ============================================================================
+-- TABLE WIDGET TABLES
+-- ============================================================================
+
+-- Table widget (data table widgets)
+CREATE TABLE IF NOT EXISTS dgc_table (
+    tid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    config TEXT NOT NULL COMMENT 'JSON config: columns, pagination, style settings',
+    query TEXT NOT NULL COMMENT 'SQL query that returns multiple rows for table display',
+    data_mapping TEXT COMMENT 'JSON data mapping (kept for Element base class compatibility)',
+    placeholder_settings TEXT COMMENT 'JSON settings for placeholder behavior (allowEmpty per placeholder)',
+    snapshot TEXT COMMENT 'Base64 encoded preview image',
+    tsid TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=active, 3=deleted',
+    created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_ts TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    created_uid INT(11) DEFAULT NULL,
+    updated_uid INT(11) DEFAULT NULL,
+    INDEX idx_tsid (tsid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Stores data table widget definitions';
+
+-- Table-Widget Category Mapping table
+CREATE TABLE IF NOT EXISTS table_widget_category_mapping (
+    twcmid INT(11) AUTO_INCREMENT PRIMARY KEY,
+    tid INT(11) NOT NULL COMMENT 'Table ID (foreign key to dgc_table)',
+    wcid INT(11) NOT NULL COMMENT 'Category ID (foreign key to widget_category)',
+    created_ts TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_tid (tid),
+    INDEX idx_wcid (wcid),
+    UNIQUE KEY unique_table_widget_category (tid, wcid),
+    FOREIGN KEY (tid) REFERENCES dgc_table(tid) ON DELETE CASCADE,
+    FOREIGN KEY (wcid) REFERENCES widget_category(wcid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Maps tables to widget categories';
+
+-- ============================================================================
 -- WIDGET TYPE TABLES
 -- ============================================================================
 

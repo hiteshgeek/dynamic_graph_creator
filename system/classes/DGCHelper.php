@@ -100,6 +100,11 @@ class DGCHelper
             return self::renderDashboardCounterContent($widgetId);
         }
 
+        // Handle table widgets
+        if ($widgetType === 'table') {
+            return self::renderDashboardTableContent($widgetId);
+        }
+
         // Handle graph widgets (default)
         $graphName = 'Graph #' . $widgetId;
         $graphType = 'bar';
@@ -169,6 +174,72 @@ class DGCHelper
         $html .= self::renderCounterSkeleton($counterColor, $counterIcon);
         $html .= '</div>';
         $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * Render table widget content for dashboard preview
+     *
+     * @param int $tableId The table ID
+     * @return string HTML for the table widget
+     */
+    public static function renderDashboardTableContent($tableId)
+    {
+        $tableName = 'Table #' . $tableId;
+
+        if ($tableId) {
+            $table = new Table($tableId);
+            if ($table->getId()) {
+                $tableName = $table->getName();
+            }
+        }
+
+        $html = '<div class="area-content has-widget" data-widget-id="' . $tableId . '" data-widget-type="table">';
+        $html .= '<div class="widget-table-wrapper">';
+        $html .= '<div class="widget-table-header">';
+        $html .= '<div class="widget-table-title-section">';
+        $html .= '<span class="widget-table-name">' . htmlspecialchars($tableName) . '</span>';
+        $html .= '</div>'; // end title-section
+        $html .= '</div>'; // end header
+        $html .= '<div class="widget-table-container" data-table-id="' . $tableId . '">';
+        $html .= self::renderTableSkeleton();
+        $html .= '</div>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * Render a table skeleton loader
+     *
+     * @param int $rows Number of skeleton rows to display (default 5)
+     * @return string HTML for the skeleton
+     */
+    public static function renderTableSkeleton($rows = 5)
+    {
+        $html = '<div class="table-skeleton">';
+
+        // Header row
+        $html .= '<div class="skeleton-row skeleton-header">';
+        $html .= '<div class="skeleton-cell skeleton-narrow"></div>';
+        $html .= '<div class="skeleton-cell skeleton-wide"></div>';
+        $html .= '<div class="skeleton-cell"></div>';
+        $html .= '<div class="skeleton-cell"></div>';
+        $html .= '</div>';
+
+        // Data rows
+        for ($i = 0; $i < $rows; $i++) {
+            $html .= '<div class="skeleton-row">';
+            $html .= '<div class="skeleton-cell skeleton-narrow"></div>';
+            $html .= '<div class="skeleton-cell skeleton-wide"></div>';
+            $html .= '<div class="skeleton-cell"></div>';
+            $html .= '<div class="skeleton-cell"></div>';
+            $html .= '</div>';
+        }
+
         $html .= '</div>';
 
         return $html;

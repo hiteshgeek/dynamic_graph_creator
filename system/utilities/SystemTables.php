@@ -206,4 +206,11 @@ class SystemTables
 
       // Filter-Widget type mandatory mapping table
       const DB_TBL_FILTER_WIDGET_TYPE_MANDATORY = "filter_widget_type_mandatory";
+
+      // Table widget (status in tsid column: 1=active, 3=deleted)
+      // Using dgc_table since "table" is a reserved word in MySQL
+      const DB_TBL_TABLE = "dgc_table";
+
+      // Table-Widget category mapping table
+      const DB_TBL_TABLE_WIDGET_CATEGORY_MAPPING = "table_widget_category_mapping";
 }

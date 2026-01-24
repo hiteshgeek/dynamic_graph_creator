@@ -1,5 +1,5 @@
 /**
- * WidgetLoader - Shared utility for loading and rendering widgets (graphs and counters)
+ * WidgetLoader - Shared utility for loading and rendering widgets (graphs, counters, and tables)
  * Used by dashboard-preview.js and template-preview.js
  */
 const Ajax = window.Ajax;
@@ -12,6 +12,8 @@ export class WidgetLoader {
     this.onGraphError = options.onGraphError || null;
     this.onCounterLoaded = options.onCounterLoaded || null;
     this.onCounterError = options.onCounterError || null;
+    this.onTableLoaded = options.onTableLoaded || null;
+    this.onTableError = options.onTableError || null;
   }
 
   /**
@@ -39,6 +41,15 @@ export class WidgetLoader {
       if (!counterId) return;
 
       this.loadCounter(container, counterId, filters);
+    });
+
+    // Load tables
+    const tableContainers = rootContainer.querySelectorAll('.widget-table-container[data-table-id]');
+    Array.prototype.slice.call(tableContainers).forEach((container) => {
+      const tableId = parseInt(container.dataset.tableId, 10);
+      if (!tableId) return;
+
+      this.loadTable(container, tableId, filters);
     });
   }
 
@@ -169,6 +180,133 @@ export class WidgetLoader {
       this.showCounterError(container, 'Failed to load counter');
       if (this.onCounterError) this.onCounterError(counterId, error.message);
     }
+  }
+
+  /**
+   * Load and render a single widget table
+   * @param {HTMLElement} container - The container element
+   * @param {number} tableId - The table ID
+   * @param {Object} filters - Filter values to apply
+   */
+  async loadTable(container, tableId, filters = {}) {
+    try {
+      const result = await Ajax.post('preview_table', {
+        id: tableId,
+        filters: filters
+      });
+
+      if (!result.success || !result.data) {
+        const errorMsg = result.message || 'Failed to load table';
+        console.error(this.logPrefix, 'API returned error:', errorMsg);
+        this.showTableError(container, errorMsg);
+        if (this.onTableError) this.onTableError(tableId, errorMsg);
+        return;
+      }
+
+      const tableData = result.data.tableData;
+      if (tableData && tableData.error) {
+        this.showTableError(container, tableData.error);
+        if (this.onTableError) this.onTableError(tableId, tableData.error);
+        return;
+      }
+
+      const config = result.data.config || {};
+
+      // Clear loading state
+      container.innerHTML = '';
+
+      // Use TablePreview if available, otherwise render basic table
+      if (window.TablePreview) {
+        const preview = new window.TablePreview(container, { showSkeleton: false });
+        preview.setConfig(config);
+        preview.setData(tableData);
+        preview.render();
+      } else {
+        // Fallback: render basic table
+        this.renderBasicTable(container, tableData, config);
+      }
+
+      if (this.onTableLoaded) this.onTableLoaded(tableId);
+
+    } catch (error) {
+      console.error(this.logPrefix, 'Error loading widget table:', error);
+      this.showTableError(container, 'Failed to load table');
+      if (this.onTableError) this.onTableError(tableId, error.message);
+    }
+  }
+
+  /**
+   * Render a basic table (fallback when TablePreview is not available)
+   * @param {HTMLElement} container - The container element
+   * @param {Object} tableData - The table data
+   * @param {Object} config - The table config
+   */
+  renderBasicTable(container, tableData, config) {
+    if (!tableData || !tableData.columns || !tableData.rows) {
+      container.innerHTML = '<div class="widget-table-empty"><i class="fas fa-table"></i><span>No data available</span></div>';
+      return;
+    }
+
+    const columns = tableData.columns;
+    const rows = tableData.rows;
+    const styleConfig = config.style || {};
+
+    // Build table classes
+    const tableClasses = ['dgc-table'];
+    if (styleConfig.striped) tableClasses.push('table-striped');
+    if (styleConfig.bordered) tableClasses.push('table-bordered');
+    if (styleConfig.hover) tableClasses.push('table-hover');
+    if (styleConfig.density) tableClasses.push('table-' + styleConfig.density);
+
+    let html = '<div class="table-responsive"><table class="' + tableClasses.join(' ') + '">';
+
+    // Header
+    html += '<thead><tr>';
+    for (const col of columns) {
+      const alignClass = col.align ? ' class="text-' + col.align + '"' : '';
+      html += '<th' + alignClass + '>' + this.escapeHtml(col.label || col.key) + '</th>';
+    }
+    html += '</tr></thead>';
+
+    // Body
+    html += '<tbody>';
+    if (rows.length === 0) {
+      html += '<tr class="empty-row"><td colspan="' + columns.length + '">No data available</td></tr>';
+    } else {
+      for (const row of rows) {
+        html += '<tr>';
+        for (const col of columns) {
+          const value = row[col.key] !== undefined ? row[col.key] : '';
+          const alignClass = col.align ? ' class="text-' + col.align + '"' : '';
+          html += '<td' + alignClass + '>' + this.escapeHtml(String(value)) + '</td>';
+        }
+        html += '</tr>';
+      }
+    }
+    html += '</tbody></table></div>';
+
+    container.innerHTML = html;
+  }
+
+  /**
+   * Show error message in table container
+   * @param {HTMLElement} container - The container element
+   * @param {string} message - Error message
+   */
+  showTableError(container, message) {
+    container.innerHTML = '<div class="widget-table-error"><i class="fas fa-exclamation-triangle"></i><span>' + this.escapeHtml(message) + '</span></div>';
+  }
+
+  /**
+   * Escape HTML special characters
+   * @param {string} str - String to escape
+   * @returns {string} Escaped string
+   */
+  escapeHtml(str) {
+    if (!str) return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
   }
 
   /**

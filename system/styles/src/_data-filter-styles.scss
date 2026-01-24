@@ -355,6 +355,8 @@
   font-size: $font-size-sm !important;
 }
 
+// Filter checkbox/radio groups
+// Note: Reusable styles also available in _form-controls.scss (.dgc-checkbox, .dgc-radio)
 .filter-checkbox-group,
 .filter-radio-group {
   display: flex;
