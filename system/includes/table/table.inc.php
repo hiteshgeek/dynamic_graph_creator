@@ -268,7 +268,7 @@ function saveTable($data)
         $message = count($missingPlaceholders) === 1
             ? 'Query must include mandatory filter: ' . implode(', ', $missingPlaceholders)
             : 'Query must include mandatory filters: ' . implode(', ', $missingPlaceholders);
-        Utility::ajaxResponseFalse($message);
+        DGCHelper::ajaxResponseFalse($message);
     }
 
     $table = $isUpdate ? new WidgetTable($tableId) : new WidgetTable();
@@ -294,12 +294,12 @@ function saveTable($data)
     if ($isUpdate) {
         $table->setUpdatedUid($userId);
         if (!$table->update()) {
-            Utility::ajaxResponseFalse('Failed to update table');
+            DGCHelper::ajaxResponseFalse('Failed to update table');
         }
     } else {
         $table->setCreatedUid($userId);
         if (!$table->insert()) {
-            Utility::ajaxResponseFalse('Failed to create table');
+            DGCHelper::ajaxResponseFalse('Failed to create table');
         }
     }
 
@@ -314,7 +314,7 @@ function saveTable($data)
     WidgetTableCategoryMappingManager::setTableCategories($table->getId(), $categoryIds);
 
     $message = $isUpdate ? 'Table updated successfully' : 'Table created successfully';
-    Utility::ajaxResponseTrue($message, array('id' => $table->getId()));
+    DGCHelper::ajaxResponseTrue($message, array('id' => $table->getId()));
 }
 
 /**
@@ -325,10 +325,10 @@ function deleteTable($data)
     $tableId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$tableId || !WidgetTable::delete($tableId)) {
-        Utility::ajaxResponseFalse('Failed to delete table');
+        DGCHelper::ajaxResponseFalse('Failed to delete table');
     }
 
-    Utility::ajaxResponseTrue('Table deleted successfully');
+    DGCHelper::ajaxResponseTrue('Table deleted successfully');
 }
 
 /**
@@ -357,7 +357,7 @@ function testTableQuery($data)
     }
 
     if (empty($query)) {
-        Utility::ajaxResponseFalse('Please enter a SQL query');
+        DGCHelper::ajaxResponseFalse('Please enter a SQL query');
     }
 
     // Validate query security (SELECT only)
@@ -374,14 +374,14 @@ function testTableQuery($data)
         $message = count($missingPlaceholders) === 1
             ? 'Query must include mandatory filter: ' . implode(', ', $missingPlaceholders)
             : 'Query must include mandatory filters: ' . implode(', ', $missingPlaceholders);
-        Utility::ajaxResponseFalse($message);
+        DGCHelper::ajaxResponseFalse($message);
     }
 
     // Validate required placeholders have values
     $missingRequired = DataFilterManager::validateRequiredPlaceholders($query, $filters, $placeholderSettings);
     if (!empty($missingRequired)) {
         $filterNames = array_map(function($p) { return ltrim($p, ':'); }, $missingRequired);
-        Utility::ajaxResponseFalse('Required filter(s) missing value: ' . implode(', ', $filterNames));
+        DGCHelper::ajaxResponseFalse('Required filter(s) missing value: ' . implode(', ', $filterNames));
     }
 
     $db = Rapidkart::getInstance()->getDB();
@@ -398,7 +398,7 @@ function testTableQuery($data)
     $res = $db->query($testQuery);
 
     if (!$res) {
-        Utility::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
+        DGCHelper::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
     }
 
     // Fetch all rows
@@ -412,10 +412,10 @@ function testTableQuery($data)
     $rowCount = count($rows);
 
     if ($rowCount === 0) {
-        Utility::ajaxResponseFalse('Query returned no data. Please check your query.');
+        DGCHelper::ajaxResponseFalse('Query returned no data. Please check your query.');
     }
 
-    Utility::ajaxResponseTrue('Query is valid', array(
+    DGCHelper::ajaxResponseTrue('Query is valid', array(
         'columns' => $columns,
         'rows' => $rows,
         'row_count' => $rowCount,
@@ -436,7 +436,7 @@ function previewTable($data)
         // Load existing table
         $table = new WidgetTable($tableId);
         if (!$table->getId()) {
-            Utility::ajaxResponseFalse('Table not found');
+            DGCHelper::ajaxResponseFalse('Table not found');
         }
 
         $filters = isset($data['filters']) ? $data['filters'] : array();
@@ -453,7 +453,7 @@ function previewTable($data)
             $config = array();
         }
 
-        Utility::ajaxResponseTrue('Table data loaded', array(
+        DGCHelper::ajaxResponseTrue('Table data loaded', array(
             'tableData' => $tableData,
             'config' => $config
         ));
@@ -474,14 +474,14 @@ function previewTable($data)
         }
 
         if (empty($query)) {
-            Utility::ajaxResponseFalse('No query provided');
+            DGCHelper::ajaxResponseFalse('No query provided');
         }
 
         // Validate required placeholders have values
         $missingRequired = DataFilterManager::validateRequiredPlaceholders($query, $filters, $placeholderSettings);
         if (!empty($missingRequired)) {
             $filterNames = array_map(function($p) { return ltrim($p, ':'); }, $missingRequired);
-            Utility::ajaxResponseFalse('Required filter(s) missing value: ' . implode(', ', $filterNames));
+            DGCHelper::ajaxResponseFalse('Required filter(s) missing value: ' . implode(', ', $filterNames));
         }
 
         $db = Rapidkart::getInstance()->getDB();
@@ -497,7 +497,7 @@ function previewTable($data)
         $res = $db->query($query);
 
         if (!$res) {
-            Utility::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
+            DGCHelper::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
         }
 
         // Fetch all rows
@@ -513,7 +513,7 @@ function previewTable($data)
             'total_rows' => count($rows)
         );
 
-        Utility::ajaxResponseTrue('Preview generated', array('tableData' => $tableData));
+        DGCHelper::ajaxResponseTrue('Preview generated', array('tableData' => $tableData));
     }
 }
 
@@ -525,12 +525,12 @@ function loadTable($data)
     $tableId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$tableId) {
-        Utility::ajaxResponseFalse('Invalid table ID');
+        DGCHelper::ajaxResponseFalse('Invalid table ID');
     }
 
     $table = new WidgetTable($tableId);
     if (!$table->getId()) {
-        Utility::ajaxResponseFalse('Table not found');
+        DGCHelper::ajaxResponseFalse('Table not found');
     }
 
     // Extract placeholders and find matching filters
@@ -544,7 +544,7 @@ function loadTable($data)
         $response['matched_filters'][$key] = $filter->toArray();
     }
 
-    Utility::ajaxResponseTrue('Table loaded', $response);
+    DGCHelper::ajaxResponseTrue('Table loaded', $response);
 }
 
 /**
@@ -556,12 +556,12 @@ function tableSaveSnapshot($data)
     $imageData = isset($data['image_data']) ? $data['image_data'] : '';
 
     if (!$tid || !WidgetTable::isExistent($tid)) {
-        Utility::ajaxResponseFalse('Invalid table');
+        DGCHelper::ajaxResponseFalse('Invalid table');
     }
 
     // Validate base64 PNG data
     if (!preg_match('/^data:image\/png;base64,/', $imageData)) {
-        Utility::ajaxResponseFalse('Invalid image data');
+        DGCHelper::ajaxResponseFalse('Invalid image data');
     }
 
     // Decode base64
@@ -569,7 +569,7 @@ function tableSaveSnapshot($data)
     $binary = base64_decode($base64);
 
     if ($binary === false) {
-        Utility::ajaxResponseFalse('Failed to decode image data');
+        DGCHelper::ajaxResponseFalse('Failed to decode image data');
     }
 
     // Generate filename: table_{tid}_{timestamp}.png
@@ -603,7 +603,7 @@ function tableSaveSnapshot($data)
     // Create image from binary data
     $srcImage = imagecreatefromstring($binary);
     if (!$srcImage) {
-        Utility::ajaxResponseFalse('Failed to process image');
+        DGCHelper::ajaxResponseFalse('Failed to process image');
     }
 
     $srcWidth = imagesx($srcImage);
@@ -653,10 +653,10 @@ function tableSaveSnapshot($data)
     $table->setSnapshot($filename);
     $table->setUpdatedUid(Session::loggedInUid());
     if (!$table->updateSnapshot()) {
-        Utility::ajaxResponseFalse('Failed to update table');
+        DGCHelper::ajaxResponseFalse('Failed to update table');
     }
 
-    Utility::ajaxResponseTrue('Image saved successfully', array(
+    DGCHelper::ajaxResponseTrue('Image saved successfully', array(
         'filename' => $filename,
         'large_url' => SiteConfig::filesUrl() . 'table/large/' . $filename,
         'thumb_url' => SiteConfig::filesUrl() . 'table/thumbnail/' . $filename

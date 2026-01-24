@@ -63,47 +63,47 @@ if (isset($_POST['submit'])) {
             break;
         // Template management actions (require admin access)
         case 'create_template':
-            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
+            if (!DGCHelper::hasAdminAccess()) { DGCHelper::ajaxResponseFalse('Access denied'); }
             createTemplate($_POST);
             break;
         case 'update_template':
-            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
+            if (!DGCHelper::hasAdminAccess()) { DGCHelper::ajaxResponseFalse('Access denied'); }
             updateTemplate($_POST);
             break;
         case 'delete_template':
-            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
+            if (!DGCHelper::hasAdminAccess()) { DGCHelper::ajaxResponseFalse('Access denied'); }
             deleteTemplate($_POST);
             break;
         case 'duplicate_template':
-            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
+            if (!DGCHelper::hasAdminAccess()) { DGCHelper::ajaxResponseFalse('Access denied'); }
             duplicateTemplate($_POST);
             break;
         case 'save_template_structure':
-            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
+            if (!DGCHelper::hasAdminAccess()) { DGCHelper::ajaxResponseFalse('Access denied'); }
             saveTemplateStructure($_POST);
             break;
         case 'get_template':
-            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
+            if (!DGCHelper::hasAdminAccess()) { DGCHelper::ajaxResponseFalse('Access denied'); }
             getTemplate($_POST);
             break;
         case 'remove_template_section':
-            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
+            if (!DGCHelper::hasAdminAccess()) { DGCHelper::ajaxResponseFalse('Access denied'); }
             removeTemplateSection($_POST);
             break;
         case 'delete_category':
-            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
+            if (!DGCHelper::hasAdminAccess()) { DGCHelper::ajaxResponseFalse('Access denied'); }
             deleteCategory($_POST);
             break;
         case 'reorder_templates':
-            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
+            if (!DGCHelper::hasAdminAccess()) { DGCHelper::ajaxResponseFalse('Access denied'); }
             reorderTemplates($_POST);
             break;
         case 'reorder_categories':
-            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
+            if (!DGCHelper::hasAdminAccess()) { DGCHelper::ajaxResponseFalse('Access denied'); }
             reorderCategories($_POST);
             break;
         case 'move_template_category':
-            if (!DGCHelper::hasAdminAccess()) { Utility::ajaxResponseFalse('Access denied'); }
+            if (!DGCHelper::hasAdminAccess()) { DGCHelper::ajaxResponseFalse('Access denied'); }
             moveTemplateCategory($_POST);
             break;
         case 'get_filters_by_keys':
@@ -272,7 +272,7 @@ function showPreview($dashboardId)
 function getTemplates($data)
 {
     $templates = DashboardTemplate::getAllGrouped();
-    Utility::ajaxResponseTrue('Templates loaded', $templates);
+    DGCHelper::ajaxResponseTrue('Templates loaded', $templates);
 }
 
 /**
@@ -287,20 +287,20 @@ function createFromTemplate($data)
     $companyId = BaseConfig::$company_id;
 
     if (!$templateId) {
-        Utility::ajaxResponseFalse('Template ID required');
+        DGCHelper::ajaxResponseFalse('Template ID required');
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
-        Utility::ajaxResponseFalse('Template not found');
+        DGCHelper::ajaxResponseFalse('Template not found');
     }
 
     $instance = $template->createInstance($userId, $name, $description, $companyId);
     if (!$instance->insert()) {
-        Utility::ajaxResponseFalse('Failed to create dashboard');
+        DGCHelper::ajaxResponseFalse('Failed to create dashboard');
     }
 
-    Utility::ajaxResponseTrue('Dashboard created', array(
+    DGCHelper::ajaxResponseTrue('Dashboard created', array(
         'id' => $instance->getId(),
         'name' => $instance->getName()
     ));
@@ -319,33 +319,33 @@ function saveDashboard($data)
     $companyId = BaseConfig::$company_id;
 
     if (empty($name)) {
-        Utility::ajaxResponseFalse('Dashboard name is required');
+        DGCHelper::ajaxResponseFalse('Dashboard name is required');
     }
 
     if (empty($structure)) {
-        Utility::ajaxResponseFalse('Dashboard structure is required');
+        DGCHelper::ajaxResponseFalse('Dashboard structure is required');
     }
 
     // Validate structure
     $structureArray = json_decode($structure, true);
     if (!$structureArray) {
-        Utility::ajaxResponseFalse('Invalid JSON structure');
+        DGCHelper::ajaxResponseFalse('Invalid JSON structure');
     }
 
     if (!DashboardBuilder::validateStructure($structureArray)) {
-        Utility::ajaxResponseFalse('Invalid dashboard structure');
+        DGCHelper::ajaxResponseFalse('Invalid dashboard structure');
     }
 
     $dashboard = $dashboardId ? new DashboardInstance($dashboardId) : new DashboardInstance();
 
     // Check if this is a system dashboard (if editing)
     if ($dashboardId && $dashboard->getIsSystem()) {
-        Utility::ajaxResponseFalse('System dashboards cannot be edited');
+        DGCHelper::ajaxResponseFalse('System dashboards cannot be edited');
     }
 
     // Check if user owns this dashboard (if editing)
     if ($dashboardId && $dashboard->getCreatedUid() != $userId) {
-        Utility::ajaxResponseFalse('Unauthorized');
+        DGCHelper::ajaxResponseFalse('Unauthorized');
     }
 
     $dashboard->setName($name);
@@ -363,10 +363,10 @@ function saveDashboard($data)
     }
 
     if (!$success) {
-        Utility::ajaxResponseFalse('Failed to save dashboard');
+        DGCHelper::ajaxResponseFalse('Failed to save dashboard');
     }
 
-    Utility::ajaxResponseTrue('Dashboard saved successfully', array(
+    DGCHelper::ajaxResponseTrue('Dashboard saved successfully', array(
         'id' => $dashboard->getId(),
         'name' => $dashboard->getName()
     ));
@@ -380,15 +380,15 @@ function getDashboard($data)
     $dashboardId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$dashboardId) {
-        Utility::ajaxResponseFalse('Invalid dashboard ID');
+        DGCHelper::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
-        Utility::ajaxResponseFalse('Dashboard not found');
+        DGCHelper::ajaxResponseFalse('Dashboard not found');
     }
 
-    Utility::ajaxResponseTrue('Dashboard loaded', $dashboard->toArray());
+    DGCHelper::ajaxResponseTrue('Dashboard loaded', $dashboard->toArray());
 }
 
 /**
@@ -399,25 +399,25 @@ function deleteDashboard($data)
     $dashboardId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$dashboardId) {
-        Utility::ajaxResponseFalse('Invalid dashboard ID');
+        DGCHelper::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     // Check if this is a system dashboard
     $dashboard = new DashboardInstance($dashboardId);
     if ($dashboard->getIsSystem()) {
-        Utility::ajaxResponseFalse('System dashboards cannot be deleted');
+        DGCHelper::ajaxResponseFalse('System dashboards cannot be deleted');
     }
 
     // Verify user owns this dashboard
     if ($dashboard->getCreatedUid() != Session::loggedInUid()) {
-        Utility::ajaxResponseFalse('Unauthorized');
+        DGCHelper::ajaxResponseFalse('Unauthorized');
     }
 
     if (!DashboardInstance::delete($dashboardId)) {
-        Utility::ajaxResponseFalse('Failed to delete dashboard');
+        DGCHelper::ajaxResponseFalse('Failed to delete dashboard');
     }
 
-    Utility::ajaxResponseTrue('Dashboard deleted successfully');
+    DGCHelper::ajaxResponseTrue('Dashboard deleted successfully');
 }
 
 /**
@@ -430,31 +430,31 @@ function updateDashboardName($data)
     $userId = Session::loggedInUid();
 
     if (!$dashboardId) {
-        Utility::ajaxResponseFalse('Invalid dashboard ID');
+        DGCHelper::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     if (empty($name)) {
-        Utility::ajaxResponseFalse('Dashboard name cannot be empty');
+        DGCHelper::ajaxResponseFalse('Dashboard name cannot be empty');
     }
 
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
-        Utility::ajaxResponseFalse('Dashboard not found');
+        DGCHelper::ajaxResponseFalse('Dashboard not found');
     }
 
     // Check if user owns this dashboard
     if ($dashboard->getCreatedUid() != $userId) {
-        Utility::ajaxResponseFalse('Unauthorized');
+        DGCHelper::ajaxResponseFalse('Unauthorized');
     }
 
     $dashboard->setName($name);
     $dashboard->setUpdatedUid($userId);
 
     if (!$dashboard->update()) {
-        Utility::ajaxResponseFalse('Failed to update dashboard name');
+        DGCHelper::ajaxResponseFalse('Failed to update dashboard name');
     }
 
-    Utility::ajaxResponseTrue('Dashboard name updated', array(
+    DGCHelper::ajaxResponseTrue('Dashboard name updated', array(
         'id' => $dashboard->getId(),
         'name' => $dashboard->getName()
     ));
@@ -471,21 +471,21 @@ function updateDashboardDetails($data)
     $userId = Session::loggedInUid();
 
     if (!$dashboardId) {
-        Utility::ajaxResponseFalse('Invalid dashboard ID');
+        DGCHelper::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     if (empty($name)) {
-        Utility::ajaxResponseFalse('Dashboard name cannot be empty');
+        DGCHelper::ajaxResponseFalse('Dashboard name cannot be empty');
     }
 
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
-        Utility::ajaxResponseFalse('Dashboard not found');
+        DGCHelper::ajaxResponseFalse('Dashboard not found');
     }
 
     // Check if user owns this dashboard
     if ($dashboard->getCreatedUid() != $userId) {
-        Utility::ajaxResponseFalse('Unauthorized');
+        DGCHelper::ajaxResponseFalse('Unauthorized');
     }
 
     $dashboard->setName($name);
@@ -493,10 +493,10 @@ function updateDashboardDetails($data)
     $dashboard->setUpdatedUid($userId);
 
     if (!$dashboard->update()) {
-        Utility::ajaxResponseFalse('Failed to update dashboard details');
+        DGCHelper::ajaxResponseFalse('Failed to update dashboard details');
     }
 
-    Utility::ajaxResponseTrue('Dashboard details updated', array(
+    DGCHelper::ajaxResponseTrue('Dashboard details updated', array(
         'id' => $dashboard->getId(),
         'name' => $dashboard->getName(),
         'description' => $dashboard->getDescription()
@@ -514,21 +514,21 @@ function updateAreaContent($data)
     $content = isset($data['content']) ? $data['content'] : array();
 
     if (!$dashboardId) {
-        Utility::ajaxResponseFalse('Invalid dashboard ID');
+        DGCHelper::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
-        Utility::ajaxResponseFalse('Dashboard not found');
+        DGCHelper::ajaxResponseFalse('Dashboard not found');
     }
 
     // TODO: Verify user owns this dashboard
 
     if (!$dashboard->updateAreaContent($sectionId, $areaId, $content)) {
-        Utility::ajaxResponseFalse('Failed to update content');
+        DGCHelper::ajaxResponseFalse('Failed to update content');
     }
 
-    Utility::ajaxResponseTrue('Content updated successfully');
+    DGCHelper::ajaxResponseTrue('Content updated successfully');
 }
 
 /**
@@ -541,12 +541,12 @@ function addSection($data)
     $columns = isset($data['columns']) ? intval($data['columns']) : 1;
 
     if (!$dashboardId) {
-        Utility::ajaxResponseFalse('Invalid dashboard ID');
+        DGCHelper::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
-        Utility::ajaxResponseFalse('Dashboard not found');
+        DGCHelper::ajaxResponseFalse('Dashboard not found');
     }
 
     // TODO: Verify user owns this dashboard
@@ -555,10 +555,10 @@ function addSection($data)
     $sectionData = DashboardBuilder::createEmptySection($columns);
 
     if (!$dashboard->addSection($sectionData, $position)) {
-        Utility::ajaxResponseFalse('Failed to add section');
+        DGCHelper::ajaxResponseFalse('Failed to add section');
     }
 
-    Utility::ajaxResponseTrue('Section added successfully', array(
+    DGCHelper::ajaxResponseTrue('Section added successfully', array(
         'section' => $sectionData
     ));
 }
@@ -573,28 +573,28 @@ function addSectionFromTemplate($data)
     $position = isset($data['position']) ? $data['position'] : 'bottom';
 
     if (!$dashboardId) {
-        Utility::ajaxResponseFalse('Invalid dashboard ID');
+        DGCHelper::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     if (!$templateId) {
-        Utility::ajaxResponseFalse('Invalid template ID');
+        DGCHelper::ajaxResponseFalse('Invalid template ID');
     }
 
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
-        Utility::ajaxResponseFalse('Dashboard not found');
+        DGCHelper::ajaxResponseFalse('Dashboard not found');
     }
 
     // Get template
     $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
-        Utility::ajaxResponseFalse('Template not found');
+        DGCHelper::ajaxResponseFalse('Template not found');
     }
 
     // Get all sections from template structure
     $templateStructure = $template->getStructureArray();
     if (!isset($templateStructure['sections']) || empty($templateStructure['sections'])) {
-        Utility::ajaxResponseFalse('Template has no sections');
+        DGCHelper::ajaxResponseFalse('Template has no sections');
     }
 
     // Add all sections from the template
@@ -605,7 +605,7 @@ function addSectionFromTemplate($data)
 
         // Add section at the specified position
         if (!$dashboard->addSection($sectionData, $position)) {
-            Utility::ajaxResponseFalse('Failed to add section');
+            DGCHelper::ajaxResponseFalse('Failed to add section');
         }
 
         $addedSections[] = $sectionData;
@@ -616,7 +616,7 @@ function addSectionFromTemplate($data)
         }
     }
 
-    Utility::ajaxResponseTrue('Section(s) added successfully', array(
+    DGCHelper::ajaxResponseTrue('Section(s) added successfully', array(
         'sections' => $addedSections
     ));
 }
@@ -630,25 +630,25 @@ function removeSection($data)
     $sectionId = isset($data['section_id']) ? $data['section_id'] : '';
 
     if (!$dashboardId) {
-        Utility::ajaxResponseFalse('Invalid dashboard ID');
+        DGCHelper::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     if (empty($sectionId)) {
-        Utility::ajaxResponseFalse('Section ID is required');
+        DGCHelper::ajaxResponseFalse('Section ID is required');
     }
 
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
-        Utility::ajaxResponseFalse('Dashboard not found');
+        DGCHelper::ajaxResponseFalse('Dashboard not found');
     }
 
     // TODO: Verify user owns this dashboard
 
     if (!$dashboard->removeSection($sectionId)) {
-        Utility::ajaxResponseFalse('Failed to remove section');
+        DGCHelper::ajaxResponseFalse('Failed to remove section');
     }
 
-    Utility::ajaxResponseTrue('Section removed successfully');
+    DGCHelper::ajaxResponseTrue('Section removed successfully');
 }
 
 /**
@@ -665,25 +665,25 @@ function reorderSections($data)
     }
 
     if (!$dashboardId) {
-        Utility::ajaxResponseFalse('Invalid dashboard ID');
+        DGCHelper::ajaxResponseFalse('Invalid dashboard ID');
     }
 
     if (empty($order) || !is_array($order)) {
-        Utility::ajaxResponseFalse('Order array is required');
+        DGCHelper::ajaxResponseFalse('Order array is required');
     }
 
     $dashboard = new DashboardInstance($dashboardId);
     if (!$dashboard->getId()) {
-        Utility::ajaxResponseFalse('Dashboard not found');
+        DGCHelper::ajaxResponseFalse('Dashboard not found');
     }
 
     // TODO: Verify user owns this dashboard
 
     if (!$dashboard->reorderSections($order)) {
-        Utility::ajaxResponseFalse('Failed to reorder sections');
+        DGCHelper::ajaxResponseFalse('Failed to reorder sections');
     }
 
-    Utility::ajaxResponseTrue('Sections reordered successfully');
+    DGCHelper::ajaxResponseTrue('Sections reordered successfully');
 }
 
 // ============================================================
@@ -845,7 +845,7 @@ function createTemplate($data)
     $userId = Session::loggedInUid();
 
     if (empty($name)) {
-        Utility::ajaxResponseFalse('Template name is required');
+        DGCHelper::ajaxResponseFalse('Template name is required');
     }
 
     // Handle category assignment
@@ -854,7 +854,7 @@ function createTemplate($data)
     if ($dtcidValue === '__new__') {
         // Create new category
         if (empty($newCategoryName)) {
-            Utility::ajaxResponseFalse('Category name is required');
+            DGCHelper::ajaxResponseFalse('Category name is required');
         }
 
         // Generate slug from name
@@ -863,7 +863,7 @@ function createTemplate($data)
 
         // Check for duplicate slug
         if (DashboardTemplateCategory::slugExists($slug)) {
-            Utility::ajaxResponseFalse('A category with this name already exists');
+            DGCHelper::ajaxResponseFalse('A category with this name already exists');
         }
 
         // Create the category
@@ -875,7 +875,7 @@ function createTemplate($data)
         $category->setIsSystem(0); // User category
 
         if (!$category->insert()) {
-            Utility::ajaxResponseFalse('Failed to create category');
+            DGCHelper::ajaxResponseFalse('Failed to create category');
         }
 
         $dtcid = $category->getId();
@@ -913,10 +913,10 @@ function createTemplate($data)
     $template->setCreatedUid($userId);
 
     if (!$template->insert()) {
-        Utility::ajaxResponseFalse('Failed to create template');
+        DGCHelper::ajaxResponseFalse('Failed to create template');
     }
 
-    Utility::ajaxResponseTrue('Template created successfully', array(
+    DGCHelper::ajaxResponseTrue('Template created successfully', array(
         'dtid' => $template->getId(),
         'redirect' => '?urlq=dashboard/template/builder/' . $template->getId()
     ));
@@ -936,21 +936,21 @@ function updateTemplate($data)
     $userId = Session::loggedInUid();
 
     if (!$templateId) {
-        Utility::ajaxResponseFalse('Invalid template ID');
+        DGCHelper::ajaxResponseFalse('Invalid template ID');
     }
 
     if (empty($name)) {
-        Utility::ajaxResponseFalse('Template name is required');
+        DGCHelper::ajaxResponseFalse('Template name is required');
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
-        Utility::ajaxResponseFalse('Template not found');
+        DGCHelper::ajaxResponseFalse('Template not found');
     }
 
     // Protect system templates
     if ($template->getIsSystem()) {
-        Utility::ajaxResponseFalse('Cannot modify system templates');
+        DGCHelper::ajaxResponseFalse('Cannot modify system templates');
     }
 
     // Handle category assignment
@@ -959,7 +959,7 @@ function updateTemplate($data)
     if ($dtcidValue === '__new__') {
         // Create new category
         if (empty($newCategoryName)) {
-            Utility::ajaxResponseFalse('Category name is required');
+            DGCHelper::ajaxResponseFalse('Category name is required');
         }
 
         // Generate slug from name
@@ -968,7 +968,7 @@ function updateTemplate($data)
 
         // Check for duplicate slug
         if (DashboardTemplateCategory::slugExists($slug)) {
-            Utility::ajaxResponseFalse('A category with this name already exists');
+            DGCHelper::ajaxResponseFalse('A category with this name already exists');
         }
 
         // Create the category
@@ -980,7 +980,7 @@ function updateTemplate($data)
         $category->setIsSystem(0); // User category
 
         if (!$category->insert()) {
-            Utility::ajaxResponseFalse('Failed to create category');
+            DGCHelper::ajaxResponseFalse('Failed to create category');
         }
 
         $dtcid = $category->getId();
@@ -994,7 +994,7 @@ function updateTemplate($data)
     $template->setUpdatedUid($userId);
 
     if (!$template->update()) {
-        Utility::ajaxResponseFalse('Failed to update template');
+        DGCHelper::ajaxResponseFalse('Failed to update template');
     }
 
     $responseData = array(
@@ -1007,7 +1007,7 @@ function updateTemplate($data)
         $responseData['new_category_id'] = $dtcid;
     }
 
-    Utility::ajaxResponseTrue('Template updated successfully', $responseData);
+    DGCHelper::ajaxResponseTrue('Template updated successfully', $responseData);
 }
 
 /**
@@ -1018,17 +1018,17 @@ function deleteTemplate($data)
     $templateId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$templateId) {
-        Utility::ajaxResponseFalse('Invalid template ID');
+        DGCHelper::ajaxResponseFalse('Invalid template ID');
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
-        Utility::ajaxResponseFalse('Template not found');
+        DGCHelper::ajaxResponseFalse('Template not found');
     }
 
     // Check if it's a system template
     if ($template->getIsSystem()) {
-        Utility::ajaxResponseFalse('System templates cannot be deleted');
+        DGCHelper::ajaxResponseFalse('System templates cannot be deleted');
     }
 
     // Check if template is in use by any dashboards
@@ -1040,17 +1040,17 @@ function deleteTemplate($data)
     if ($result && $db->resultNumRows($result) > 0) {
         $row = $db->fetchAssocArray($result);
         if ($row && $row['count'] > 0) {
-            Utility::ajaxResponseFalse(
+            DGCHelper::ajaxResponseFalse(
                 'Cannot delete template. It is being used by ' . $row['count'] . ' dashboard(s)'
             );
         }
     }
 
     if (!DashboardTemplate::delete($templateId)) {
-        Utility::ajaxResponseFalse('Failed to delete template');
+        DGCHelper::ajaxResponseFalse('Failed to delete template');
     }
 
-    Utility::ajaxResponseTrue('Template deleted successfully');
+    DGCHelper::ajaxResponseTrue('Template deleted successfully');
 }
 
 /**
@@ -1062,12 +1062,12 @@ function duplicateTemplate($data)
     $userId = Session::loggedInUid();
 
     if (!$templateId) {
-        Utility::ajaxResponseFalse('Invalid template ID');
+        DGCHelper::ajaxResponseFalse('Invalid template ID');
     }
 
     $sourceTemplate = new DashboardTemplate($templateId);
     if (!$sourceTemplate->getId()) {
-        Utility::ajaxResponseFalse('Template not found');
+        DGCHelper::ajaxResponseFalse('Template not found');
     }
 
     // Create duplicate
@@ -1081,10 +1081,10 @@ function duplicateTemplate($data)
     $newTemplate->setCreatedUid($userId);
 
     if (!$newTemplate->insert()) {
-        Utility::ajaxResponseFalse('Failed to duplicate template');
+        DGCHelper::ajaxResponseFalse('Failed to duplicate template');
     }
 
-    Utility::ajaxResponseTrue('Template duplicated successfully', array(
+    DGCHelper::ajaxResponseTrue('Template duplicated successfully', array(
         'dtid' => $newTemplate->getId(),
         'redirect' => '?urlq=dashboard/template/builder/' . $newTemplate->getId()
     ));
@@ -1100,41 +1100,41 @@ function saveTemplateStructure($data)
     $userId = Session::loggedInUid();
 
     if (!$templateId) {
-        Utility::ajaxResponseFalse('Invalid template ID');
+        DGCHelper::ajaxResponseFalse('Invalid template ID');
     }
 
     if (empty($structure)) {
-        Utility::ajaxResponseFalse('Template structure is required');
+        DGCHelper::ajaxResponseFalse('Template structure is required');
     }
 
     // Validate structure
     $structureArray = json_decode($structure, true);
     if (!$structureArray) {
-        Utility::ajaxResponseFalse('Invalid JSON structure');
+        DGCHelper::ajaxResponseFalse('Invalid JSON structure');
     }
 
     if (!DashboardBuilder::validateStructure($structureArray)) {
-        Utility::ajaxResponseFalse('Invalid template structure');
+        DGCHelper::ajaxResponseFalse('Invalid template structure');
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
-        Utility::ajaxResponseFalse('Template not found');
+        DGCHelper::ajaxResponseFalse('Template not found');
     }
 
     // Protect system templates
     if ($template->getIsSystem()) {
-        Utility::ajaxResponseFalse('Cannot modify system templates');
+        DGCHelper::ajaxResponseFalse('Cannot modify system templates');
     }
 
     $template->setStructure($structure);
     $template->setUpdatedUid($userId);
 
     if (!$template->update()) {
-        Utility::ajaxResponseFalse('Failed to save template structure');
+        DGCHelper::ajaxResponseFalse('Failed to save template structure');
     }
 
-    Utility::ajaxResponseTrue('Template saved successfully', array(
+    DGCHelper::ajaxResponseTrue('Template saved successfully', array(
         'dtid' => $template->getId()
     ));
 }
@@ -1149,27 +1149,27 @@ function removeTemplateSection($data)
     $userId = Session::loggedInUid();
 
     if (!$templateId) {
-        Utility::ajaxResponseFalse('Invalid template ID');
+        DGCHelper::ajaxResponseFalse('Invalid template ID');
     }
 
     if (empty($sectionId)) {
-        Utility::ajaxResponseFalse('Section ID is required');
+        DGCHelper::ajaxResponseFalse('Section ID is required');
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
-        Utility::ajaxResponseFalse('Template not found');
+        DGCHelper::ajaxResponseFalse('Template not found');
     }
 
     // Protect system templates
     if ($template->getIsSystem()) {
-        Utility::ajaxResponseFalse('Cannot modify system templates');
+        DGCHelper::ajaxResponseFalse('Cannot modify system templates');
     }
 
     // Get current structure and remove the section
     $structure = $template->getStructureArray();
     if (!isset($structure['sections'])) {
-        Utility::ajaxResponseFalse('Invalid template structure');
+        DGCHelper::ajaxResponseFalse('Invalid template structure');
     }
 
     // Filter out the section to remove
@@ -1182,10 +1182,10 @@ function removeTemplateSection($data)
     $template->setUpdatedUid($userId);
 
     if (!$template->update()) {
-        Utility::ajaxResponseFalse('Failed to remove section');
+        DGCHelper::ajaxResponseFalse('Failed to remove section');
     }
 
-    Utility::ajaxResponseTrue('Section removed successfully');
+    DGCHelper::ajaxResponseTrue('Section removed successfully');
 }
 
 /**
@@ -1196,15 +1196,15 @@ function getTemplate($data)
     $templateId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$templateId) {
-        Utility::ajaxResponseFalse('Invalid template ID');
+        DGCHelper::ajaxResponseFalse('Invalid template ID');
     }
 
     $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
-        Utility::ajaxResponseFalse('Template not found');
+        DGCHelper::ajaxResponseFalse('Template not found');
     }
 
-    Utility::ajaxResponseTrue('Template loaded successfully', array(
+    DGCHelper::ajaxResponseTrue('Template loaded successfully', array(
         'dtid' => $template->getId(),
         'name' => $template->getName(),
         'description' => $template->getDescription(),
@@ -1223,17 +1223,17 @@ function deleteCategory($data)
     $categoryId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$categoryId) {
-        Utility::ajaxResponseFalse('Invalid category ID');
+        DGCHelper::ajaxResponseFalse('Invalid category ID');
     }
 
     $category = new DashboardTemplateCategory($categoryId);
     if (!$category->getId()) {
-        Utility::ajaxResponseFalse('Category not found');
+        DGCHelper::ajaxResponseFalse('Category not found');
     }
 
     // Check if it's a system category
     if ($category->getIsSystem()) {
-        Utility::ajaxResponseFalse('System categories cannot be deleted');
+        DGCHelper::ajaxResponseFalse('System categories cannot be deleted');
     }
 
     // Check if category has any templates
@@ -1245,7 +1245,7 @@ function deleteCategory($data)
     if ($result && $db->resultNumRows($result) > 0) {
         $row = $db->fetchAssocArray($result);
         if ($row && $row['count'] > 0) {
-            Utility::ajaxResponseFalse(
+            DGCHelper::ajaxResponseFalse(
                 'Cannot delete category. It contains ' . $row['count'] . ' template(s). Please move or delete templates first.'
             );
         }
@@ -1253,10 +1253,10 @@ function deleteCategory($data)
 
     // Soft delete the category
     if (!DashboardTemplateCategory::delete($categoryId)) {
-        Utility::ajaxResponseFalse('Failed to delete category');
+        DGCHelper::ajaxResponseFalse('Failed to delete category');
     }
 
-    Utility::ajaxResponseTrue('Category deleted successfully');
+    DGCHelper::ajaxResponseTrue('Category deleted successfully');
 }
 
 /**
@@ -1267,7 +1267,7 @@ function reorderTemplates($data)
     global $allowTemplateOrdering;
 
     if (!$allowTemplateOrdering) {
-        Utility::ajaxResponseFalse('Template reordering is not allowed');
+        DGCHelper::ajaxResponseFalse('Template reordering is not allowed');
     }
 
     $order = isset($data['order']) ? $data['order'] : array();
@@ -1278,7 +1278,7 @@ function reorderTemplates($data)
     }
 
     if (empty($order) || !is_array($order)) {
-        Utility::ajaxResponseFalse('Order array is required');
+        DGCHelper::ajaxResponseFalse('Order array is required');
     }
 
     $db = Rapidkart::getInstance()->getDB();
@@ -1294,7 +1294,7 @@ function reorderTemplates($data)
         ));
     }
 
-    Utility::ajaxResponseTrue('Templates reordered successfully');
+    DGCHelper::ajaxResponseTrue('Templates reordered successfully');
 }
 
 /**
@@ -1305,7 +1305,7 @@ function reorderCategories($data)
     global $allowTemplateOrdering;
 
     if (!$allowTemplateOrdering) {
-        Utility::ajaxResponseFalse('Category reordering is not allowed');
+        DGCHelper::ajaxResponseFalse('Category reordering is not allowed');
     }
 
     $order = isset($data['order']) ? $data['order'] : array();
@@ -1316,7 +1316,7 @@ function reorderCategories($data)
     }
 
     if (empty($order) || !is_array($order)) {
-        Utility::ajaxResponseFalse('Order array is required');
+        DGCHelper::ajaxResponseFalse('Order array is required');
     }
 
     $db = Rapidkart::getInstance()->getDB();
@@ -1332,7 +1332,7 @@ function reorderCategories($data)
         ));
     }
 
-    Utility::ajaxResponseTrue('Categories reordered successfully');
+    DGCHelper::ajaxResponseTrue('Categories reordered successfully');
 }
 
 /**
@@ -1343,25 +1343,25 @@ function moveTemplateCategory($data)
     global $allowTemplateOrdering;
 
     if (!$allowTemplateOrdering) {
-        Utility::ajaxResponseFalse('Moving templates between categories is not allowed');
+        DGCHelper::ajaxResponseFalse('Moving templates between categories is not allowed');
     }
 
     $templateId = isset($data['template_id']) ? intval($data['template_id']) : 0;
     $newCategoryId = isset($data['category_id']) ? $data['category_id'] : null;
 
     if (!$templateId) {
-        Utility::ajaxResponseFalse('Template ID is required');
+        DGCHelper::ajaxResponseFalse('Template ID is required');
     }
 
     // Load the template
     $template = new DashboardTemplate($templateId);
     if (!$template->getId()) {
-        Utility::ajaxResponseFalse('Template not found');
+        DGCHelper::ajaxResponseFalse('Template not found');
     }
 
     // Check if template is system (cannot be moved)
     if ($template->getIsSystem()) {
-        Utility::ajaxResponseFalse('System templates cannot be moved');
+        DGCHelper::ajaxResponseFalse('System templates cannot be moved');
     }
 
     // Handle category ID - null/empty means uncategorized
@@ -1372,7 +1372,7 @@ function moveTemplateCategory($data)
         // Verify category exists
         $category = new DashboardTemplateCategory($categoryId);
         if (!$category->getId()) {
-            Utility::ajaxResponseFalse('Target category not found');
+            DGCHelper::ajaxResponseFalse('Target category not found');
         }
     }
 
@@ -1387,7 +1387,7 @@ function moveTemplateCategory($data)
         $categoryName = $category->getName();
     }
 
-    Utility::ajaxResponseTrue('Template moved to ' . $categoryName, array(
+    DGCHelper::ajaxResponseTrue('Template moved to ' . $categoryName, array(
         'template_id' => $templateId,
         'category_id' => $categoryId,
         'category_name' => $categoryName
@@ -1409,14 +1409,14 @@ function getFiltersByKeys($data)
     }
 
     if (empty($keys) || !is_array($keys)) {
-        Utility::ajaxResponseTrue('No filters', array());
+        DGCHelper::ajaxResponseTrue('No filters', array());
     }
 
     // Get filters from DataFilterManager
     $filters = DataFilterManager::getByKeys($keys);
 
     if (empty($filters)) {
-        Utility::ajaxResponseTrue('No filters found', array());
+        DGCHelper::ajaxResponseTrue('No filters found', array());
     }
 
     // Build filter data with options (ordered by input array)
@@ -1429,7 +1429,7 @@ function getFiltersByKeys($data)
         }
     }
 
-    Utility::ajaxResponseTrue('Filters loaded', $result);
+    DGCHelper::ajaxResponseTrue('Filters loaded', $result);
 }
 
 /**
@@ -1441,7 +1441,7 @@ function getDashboardFilters($data)
     $dashboardId = isset($data['dashboard_id']) ? intval($data['dashboard_id']) : 0;
 
     if (!$dashboardId || !DashboardInstance::isExistent($dashboardId)) {
-        Utility::ajaxResponseTrue('No filters', array(
+        DGCHelper::ajaxResponseTrue('No filters', array(
             'keys' => array(),
             'filters' => array()
         ));
@@ -1451,7 +1451,7 @@ function getDashboardFilters($data)
     $filterKeys = $dashboard->getAllFilterKeys();
 
     if (empty($filterKeys)) {
-        Utility::ajaxResponseTrue('No filters', array(
+        DGCHelper::ajaxResponseTrue('No filters', array(
             'keys' => array(),
             'filters' => array()
         ));
@@ -1469,7 +1469,7 @@ function getDashboardFilters($data)
         }
     }
 
-    Utility::ajaxResponseTrue('Filters loaded', array(
+    DGCHelper::ajaxResponseTrue('Filters loaded', array(
         'keys' => $filterKeys,
         'filters' => $result
     ));
@@ -1568,7 +1568,7 @@ function getWidgetsForSelector($data)
         $categoriesData[] = $catArray;
     }
 
-    Utility::ajaxResponseTrue('Widgets loaded', array(
+    DGCHelper::ajaxResponseTrue('Widgets loaded', array(
         'widget_types' => $widgetTypes,
         'graphs' => $graphsData,
         'counters' => $countersData,
@@ -1588,13 +1588,13 @@ function previewGraphForDashboard($data)
     $graphId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$graphId) {
-        Utility::ajaxResponseFalse('Graph ID required');
+        DGCHelper::ajaxResponseFalse('Graph ID required');
     }
 
     // Load graph
     $graph = new Graph($graphId);
     if (!$graph->getId()) {
-        Utility::ajaxResponseFalse('Graph not found');
+        DGCHelper::ajaxResponseFalse('Graph not found');
     }
 
     // Get filter values (for dashboard filters)
@@ -1607,7 +1607,7 @@ function previewGraphForDashboard($data)
     $chartData = $graph->execute($filters ? $filters : array());
     $config = json_decode($graph->getConfig(), true);
 
-    Utility::ajaxResponseTrue('Graph data loaded', array(
+    DGCHelper::ajaxResponseTrue('Graph data loaded', array(
         'chartData' => $chartData,
         'config' => $config,
         'graphType' => $graph->getGraphType(),
@@ -1623,13 +1623,13 @@ function previewCounterForDashboard($data)
     $counterId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$counterId) {
-        Utility::ajaxResponseFalse('Counter ID required');
+        DGCHelper::ajaxResponseFalse('Counter ID required');
     }
 
     // Load counter
     $counter = new WidgetCounter($counterId);
     if (!$counter->getId()) {
-        Utility::ajaxResponseFalse('Counter not found');
+        DGCHelper::ajaxResponseFalse('Counter not found');
     }
 
     // Get filter values (for dashboard filters)
@@ -1647,7 +1647,7 @@ function previewCounterForDashboard($data)
     $icon = isset($config['icon']) && $config['icon'] ? $config['icon'] : $defaultConfig['icon'];
     $color = isset($config['color']) && $config['color'] ? $config['color'] : $defaultConfig['color'];
 
-    Utility::ajaxResponseTrue('Counter data loaded', array(
+    DGCHelper::ajaxResponseTrue('Counter data loaded', array(
         'counterData' => $counterData,
         'config' => $config,
         'name' => $counter->getName(),
@@ -1665,7 +1665,7 @@ function saveDashboardFilterValues($data)
     $filters = isset($data['filters']) ? $data['filters'] : array();
 
     if (!$dashboardId) {
-        Utility::ajaxResponseFalse('Dashboard ID is required');
+        DGCHelper::ajaxResponseFalse('Dashboard ID is required');
     }
 
     // Decode filters if they're JSON string
@@ -1677,7 +1677,7 @@ function saveDashboardFilterValues($data)
     $sessionKey = 'dashboard_filters_' . $dashboardId;
     $_SESSION[$sessionKey] = $filters;
 
-    Utility::ajaxResponseTrue('Filters saved', array('filters' => $filters));
+    DGCHelper::ajaxResponseTrue('Filters saved', array('filters' => $filters));
 }
 
 /**
@@ -1688,14 +1688,14 @@ function getDashboardFilterValues($data)
     $dashboardId = isset($data['dashboard_id']) ? intval($data['dashboard_id']) : 0;
 
     if (!$dashboardId) {
-        Utility::ajaxResponseFalse('Dashboard ID is required');
+        DGCHelper::ajaxResponseFalse('Dashboard ID is required');
     }
 
     // Get from session with dashboard ID as key
     $sessionKey = 'dashboard_filters_' . $dashboardId;
     $filters = isset($_SESSION[$sessionKey]) ? $_SESSION[$sessionKey] : array();
 
-    Utility::ajaxResponseTrue('Filters loaded', array('filters' => $filters));
+    DGCHelper::ajaxResponseTrue('Filters loaded', array('filters' => $filters));
 }
 
 /**
@@ -1706,13 +1706,13 @@ function previewTableForDashboard($data)
     $tableId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$tableId) {
-        Utility::ajaxResponseFalse('Table ID required');
+        DGCHelper::ajaxResponseFalse('Table ID required');
     }
 
     // Load table
     $table = new WidgetTable($tableId);
     if (!$table->getId()) {
-        Utility::ajaxResponseFalse('Table not found');
+        DGCHelper::ajaxResponseFalse('Table not found');
     }
 
     // Get filter values (for dashboard filters)
@@ -1725,7 +1725,7 @@ function previewTableForDashboard($data)
     $tableData = $table->execute($filters ? $filters : array());
     $config = $table->getConfigArray();
 
-    Utility::ajaxResponseTrue('Table data loaded', array(
+    DGCHelper::ajaxResponseTrue('Table data loaded', array(
         'tableData' => $tableData,
         'config' => $config,
         'name' => $table->getName()

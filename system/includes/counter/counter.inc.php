@@ -260,7 +260,7 @@ function saveCounter($data)
         $message = count($missingPlaceholders) === 1
             ? 'Query must include mandatory filter: ' . implode(', ', $missingPlaceholders)
             : 'Query must include mandatory filters: ' . implode(', ', $missingPlaceholders);
-        Utility::ajaxResponseFalse($message);
+        DGCHelper::ajaxResponseFalse($message);
     }
 
     $counter = $isUpdate ? new WidgetCounter($counterId) : new WidgetCounter();
@@ -286,12 +286,12 @@ function saveCounter($data)
     if ($isUpdate) {
         $counter->setUpdatedUid($userId);
         if (!$counter->update()) {
-            Utility::ajaxResponseFalse('Failed to update counter');
+            DGCHelper::ajaxResponseFalse('Failed to update counter');
         }
     } else {
         $counter->setCreatedUid($userId);
         if (!$counter->insert()) {
-            Utility::ajaxResponseFalse('Failed to create counter');
+            DGCHelper::ajaxResponseFalse('Failed to create counter');
         }
     }
 
@@ -306,7 +306,7 @@ function saveCounter($data)
     WidgetCounterCategoryMappingManager::setCounterCategories($counter->getId(), $categoryIds);
 
     $message = $isUpdate ? 'Counter updated successfully' : 'Counter created successfully';
-    Utility::ajaxResponseTrue($message, array('id' => $counter->getId()));
+    DGCHelper::ajaxResponseTrue($message, array('id' => $counter->getId()));
 }
 
 /**
@@ -317,10 +317,10 @@ function deleteCounter($data)
     $counterId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$counterId || !WidgetCounter::delete($counterId)) {
-        Utility::ajaxResponseFalse('Failed to delete counter');
+        DGCHelper::ajaxResponseFalse('Failed to delete counter');
     }
 
-    Utility::ajaxResponseTrue('Counter deleted successfully');
+    DGCHelper::ajaxResponseTrue('Counter deleted successfully');
 }
 
 /**
@@ -349,7 +349,7 @@ function testCounterQuery($data)
     }
 
     if (empty($query)) {
-        Utility::ajaxResponseFalse('Please enter a SQL query');
+        DGCHelper::ajaxResponseFalse('Please enter a SQL query');
     }
 
     // Validate query security (SELECT only)
@@ -366,14 +366,14 @@ function testCounterQuery($data)
         $message = count($missingPlaceholders) === 1
             ? 'Query must include mandatory filter: ' . implode(', ', $missingPlaceholders)
             : 'Query must include mandatory filters: ' . implode(', ', $missingPlaceholders);
-        Utility::ajaxResponseFalse($message);
+        DGCHelper::ajaxResponseFalse($message);
     }
 
     // Validate required placeholders have values
     $missingRequired = DataFilterManager::validateRequiredPlaceholders($query, $filters, $placeholderSettings);
     if (!empty($missingRequired)) {
         $filterNames = array_map(function($p) { return ltrim($p, ':'); }, $missingRequired);
-        Utility::ajaxResponseFalse('Required filter(s) missing value: ' . implode(', ', $filterNames));
+        DGCHelper::ajaxResponseFalse('Required filter(s) missing value: ' . implode(', ', $filterNames));
     }
 
     $db = Rapidkart::getInstance()->getDB();
@@ -390,7 +390,7 @@ function testCounterQuery($data)
     $res = $db->query($testQuery);
 
     if (!$res) {
-        Utility::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
+        DGCHelper::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
     }
 
     // Fetch the row
@@ -398,7 +398,7 @@ function testCounterQuery($data)
     $columns = $row ? array_keys($row) : array();
 
     if (empty($row)) {
-        Utility::ajaxResponseFalse('Query returned no data. Please check your query.');
+        DGCHelper::ajaxResponseFalse('Query returned no data. Please check your query.');
     }
 
     // Check for 'counter' column
@@ -408,7 +408,7 @@ function testCounterQuery($data)
         $warning = "Query should return a column named 'counter'. Currently returning: " . implode(', ', $columns);
     }
 
-    Utility::ajaxResponseTrue('Query is valid', array(
+    DGCHelper::ajaxResponseTrue('Query is valid', array(
         'columns' => $columns,
         'row' => $row,
         'row_count' => 1, // Counter queries always return 1 row
@@ -429,7 +429,7 @@ function previewCounter($data)
         // Load existing counter
         $counter = new WidgetCounter($counterId);
         if (!$counter->getId()) {
-            Utility::ajaxResponseFalse('Counter not found');
+            DGCHelper::ajaxResponseFalse('Counter not found');
         }
 
         $filters = isset($data['filters']) ? $data['filters'] : array();
@@ -446,7 +446,7 @@ function previewCounter($data)
             $config = array();
         }
 
-        Utility::ajaxResponseTrue('Counter data loaded', array(
+        DGCHelper::ajaxResponseTrue('Counter data loaded', array(
             'counterData' => $counterData,
             'config' => $config
         ));
@@ -467,14 +467,14 @@ function previewCounter($data)
         }
 
         if (empty($query)) {
-            Utility::ajaxResponseFalse('No query provided');
+            DGCHelper::ajaxResponseFalse('No query provided');
         }
 
         // Validate required placeholders have values
         $missingRequired = DataFilterManager::validateRequiredPlaceholders($query, $filters, $placeholderSettings);
         if (!empty($missingRequired)) {
             $filterNames = array_map(function($p) { return ltrim($p, ':'); }, $missingRequired);
-            Utility::ajaxResponseFalse('Required filter(s) missing value: ' . implode(', ', $filterNames));
+            DGCHelper::ajaxResponseFalse('Required filter(s) missing value: ' . implode(', ', $filterNames));
         }
 
         $db = Rapidkart::getInstance()->getDB();
@@ -490,13 +490,13 @@ function previewCounter($data)
         $res = $db->query($query);
 
         if (!$res) {
-            Utility::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
+            DGCHelper::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
         }
 
         $row = $db->fetchAssocArray($res);
         $counterData = formatCounterData($row);
 
-        Utility::ajaxResponseTrue('Preview generated', array('counterData' => $counterData));
+        DGCHelper::ajaxResponseTrue('Preview generated', array('counterData' => $counterData));
     }
 }
 
@@ -534,12 +534,12 @@ function loadCounter($data)
     $counterId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$counterId) {
-        Utility::ajaxResponseFalse('Invalid counter ID');
+        DGCHelper::ajaxResponseFalse('Invalid counter ID');
     }
 
     $counter = new WidgetCounter($counterId);
     if (!$counter->getId()) {
-        Utility::ajaxResponseFalse('Counter not found');
+        DGCHelper::ajaxResponseFalse('Counter not found');
     }
 
     // Extract placeholders and find matching filters
@@ -553,7 +553,7 @@ function loadCounter($data)
         $response['matched_filters'][$key] = $filter->toArray();
     }
 
-    Utility::ajaxResponseTrue('Counter loaded', $response);
+    DGCHelper::ajaxResponseTrue('Counter loaded', $response);
 }
 
 /**
@@ -565,12 +565,12 @@ function counterSaveSnapshot($data)
     $imageData = isset($data['image_data']) ? $data['image_data'] : '';
 
     if (!$cid || !WidgetCounter::isExistent($cid)) {
-        Utility::ajaxResponseFalse('Invalid counter');
+        DGCHelper::ajaxResponseFalse('Invalid counter');
     }
 
     // Validate base64 PNG data
     if (!preg_match('/^data:image\/png;base64,/', $imageData)) {
-        Utility::ajaxResponseFalse('Invalid image data');
+        DGCHelper::ajaxResponseFalse('Invalid image data');
     }
 
     // Decode base64
@@ -578,7 +578,7 @@ function counterSaveSnapshot($data)
     $binary = base64_decode($base64);
 
     if ($binary === false) {
-        Utility::ajaxResponseFalse('Failed to decode image data');
+        DGCHelper::ajaxResponseFalse('Failed to decode image data');
     }
 
     // Generate filename: counter_{cid}_{timestamp}.png
@@ -612,7 +612,7 @@ function counterSaveSnapshot($data)
     // Create image from binary data
     $srcImage = imagecreatefromstring($binary);
     if (!$srcImage) {
-        Utility::ajaxResponseFalse('Failed to process image');
+        DGCHelper::ajaxResponseFalse('Failed to process image');
     }
 
     $srcWidth = imagesx($srcImage);
@@ -662,10 +662,10 @@ function counterSaveSnapshot($data)
     $counter->setSnapshot($filename);
     $counter->setUpdatedUid(Session::loggedInUid());
     if (!$counter->updateSnapshot()) {
-        Utility::ajaxResponseFalse('Failed to update counter');
+        DGCHelper::ajaxResponseFalse('Failed to update counter');
     }
 
-    Utility::ajaxResponseTrue('Image saved successfully', array(
+    DGCHelper::ajaxResponseTrue('Image saved successfully', array(
         'filename' => $filename,
         'large_url' => SiteConfig::filesUrl() . 'counter/large/' . $filename,
         'thumb_url' => SiteConfig::filesUrl() . 'counter/thumbnail/' . $filename

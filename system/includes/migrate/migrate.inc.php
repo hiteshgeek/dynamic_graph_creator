@@ -568,7 +568,7 @@ function countFiles($data)
     $fullPath = $targetDir . '/' . $path;
 
     if (!is_dir($fullPath)) {
-        Utility::ajaxResponseTrue('Count completed', ['count' => 0, 'exists' => false, 'path' => $path, 'type' => $countType]);
+        DGCHelper::ajaxResponseTrue('Count completed', ['count' => 0, 'exists' => false, 'path' => $path, 'type' => $countType]);
     }
 
     $count = 0;
@@ -590,7 +590,7 @@ function countFiles($data)
         }
     }
 
-    Utility::ajaxResponseTrue('Count completed', ['count' => $count, 'exists' => true, 'path' => $path, 'type' => $countType]);
+    DGCHelper::ajaxResponseTrue('Count completed', ['count' => $count, 'exists' => true, 'path' => $path, 'type' => $countType]);
 }
 
 /**
@@ -604,7 +604,7 @@ function executeStep($data)
     $steps = getMigrationSteps();
 
     if ($step <= 0 || !isset($steps[$step])) {
-        Utility::ajaxResponseFalse('Invalid step');
+        DGCHelper::ajaxResponseFalse('Invalid step');
     }
 
     $stepData = $steps[$step];
@@ -663,14 +663,14 @@ function executeStep($data)
             $result = copyDistRenamed($sourceDir . '/' . $stepData['folder'], $targetDir);
         }
 
-        Utility::ajaxResponseTrue('Step completed', [
+        DGCHelper::ajaxResponseTrue('Step completed', [
             'step' => $step,
             'title' => $stepData['title'],
             'result' => $result,
             'timestamp' => time()
         ]);
     } catch (Exception $e) {
-        Utility::ajaxResponseFalse('Error: ' . $e->getMessage());
+        DGCHelper::ajaxResponseFalse('Error: ' . $e->getMessage());
     }
 }
 
@@ -684,19 +684,19 @@ function copySingleFile($data)
     $file = isset($data['file']) ? trim($data['file']) : '';
 
     if (empty($file)) {
-        Utility::ajaxResponseFalse('File path is required');
+        DGCHelper::ajaxResponseFalse('File path is required');
     }
 
     try {
         $result = copyFiles($sourceDir, $targetDir, [$file]);
 
-        Utility::ajaxResponseTrue('File copied successfully', [
+        DGCHelper::ajaxResponseTrue('File copied successfully', [
             'file' => $file,
             'result' => $result[$file],
             'timestamp' => time()
         ]);
     } catch (Exception $e) {
-        Utility::ajaxResponseFalse('Error: ' . $e->getMessage());
+        DGCHelper::ajaxResponseFalse('Error: ' . $e->getMessage());
     }
 }
 

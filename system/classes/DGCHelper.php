@@ -13,6 +13,46 @@ class DGCHelper
     const QUERY_RESULT_PAGE_SIZE = 10;
 
     /**
+     * Send successful AJAX response
+     * DGC-compatible format that works in both dev and live environments
+     *
+     * @param string $message Success message
+     * @param mixed $data Optional response data
+     */
+    public static function ajaxResponseTrue($message, $data = null)
+    {
+        $response = array(
+            'success' => true,
+            'message' => $message,
+            'data' => $data
+        );
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit();
+    }
+
+    /**
+     * Send error AJAX response
+     * DGC-compatible format that works in both dev and live environments
+     *
+     * @param string $message Error message
+     * @param mixed $data Optional response data
+     */
+    public static function ajaxResponseFalse($message, $data = null)
+    {
+        $response = array(
+            'success' => false,
+            'message' => $message,
+            'data' => $data
+        );
+
+        header('Content-Type: application/json');
+        echo json_encode($response);
+        exit();
+    }
+
+    /**
      * Render an empty state component
      *
      * @param string $icon FontAwesome icon class (e.g., 'fa-chart-bar', 'fa-th-large')

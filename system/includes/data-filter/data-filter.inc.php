@@ -124,11 +124,11 @@ function saveDataFilter($data)
     $dataSource = isset($data['data_source']) ? $data['data_source'] : 'static';
 
     if (empty($filterKey)) {
-        Utility::ajaxResponseFalse('Filter key is required');
+        DGCHelper::ajaxResponseFalse('Filter key is required');
     }
 
     if (empty($filterLabel)) {
-        Utility::ajaxResponseFalse('Filter label is required');
+        DGCHelper::ajaxResponseFalse('Filter label is required');
     }
 
     // Ensure filter key starts with ::
@@ -138,14 +138,14 @@ function saveDataFilter($data)
 
     // Check if filter key already exists (excluding current filter for updates)
     if (DataFilterManager::keyExists($filterKey, $filterId ?: null)) {
-        Utility::ajaxResponseFalse('A filter with this placeholder key already exists. Please use a unique key.');
+        DGCHelper::ajaxResponseFalse('A filter with this placeholder key already exists. Please use a unique key.');
     }
 
     // Check for substring conflicts with other filter keys
     // e.g., ::category and ::category_checkbox would conflict
     $conflict = DataFilterManager::checkKeyConflict($filterKey, $filterId ?: null);
     if ($conflict) {
-        Utility::ajaxResponseFalse($conflict['message']);
+        DGCHelper::ajaxResponseFalse($conflict['message']);
     }
 
     $filter = $filterId ? new DataFilter($filterId) : new DataFilter();
@@ -171,11 +171,11 @@ function saveDataFilter($data)
 
     if ($filterId) {
         if (!$filter->update()) {
-            Utility::ajaxResponseFalse('Failed to update data filter');
+            DGCHelper::ajaxResponseFalse('Failed to update data filter');
         }
     } else {
         if (!$filter->insert()) {
-            Utility::ajaxResponseFalse('Failed to create data filter');
+            DGCHelper::ajaxResponseFalse('Failed to create data filter');
         }
     }
 
@@ -189,7 +189,7 @@ function saveDataFilter($data)
     }
     FilterWidgetTypeMandatoryManager::setMandatoryForFilter($filter->getId(), $mandatoryWidgetTypes);
 
-    Utility::ajaxResponseTrue('Data filter saved successfully', array('id' => $filter->getId()));
+    DGCHelper::ajaxResponseTrue('Data filter saved successfully', array('id' => $filter->getId()));
 }
 
 /**
@@ -200,15 +200,15 @@ function getDataFilter($data)
     $filterId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$filterId) {
-        Utility::ajaxResponseFalse('Invalid filter ID');
+        DGCHelper::ajaxResponseFalse('Invalid filter ID');
     }
 
     $filter = new DataFilter($filterId);
     if (!$filter->getId()) {
-        Utility::ajaxResponseFalse('Data filter not found');
+        DGCHelper::ajaxResponseFalse('Data filter not found');
     }
 
-    Utility::ajaxResponseTrue('Data filter loaded', $filter->toArray());
+    DGCHelper::ajaxResponseTrue('Data filter loaded', $filter->toArray());
 }
 
 /**
@@ -219,10 +219,10 @@ function deleteDataFilter($data)
     $filterId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$filterId || !DataFilter::delete($filterId)) {
-        Utility::ajaxResponseFalse('Failed to delete data filter');
+        DGCHelper::ajaxResponseFalse('Failed to delete data filter');
     }
 
-    Utility::ajaxResponseTrue('Data filter deleted successfully');
+    DGCHelper::ajaxResponseTrue('Data filter deleted successfully');
 }
 
 /**
@@ -239,7 +239,7 @@ function testDataFilterQuery($data)
     $pageSize = DGCHelper::QUERY_RESULT_PAGE_SIZE;
 
     if (empty($query)) {
-        Utility::ajaxResponseFalse('Please enter a SQL query');
+        DGCHelper::ajaxResponseFalse('Please enter a SQL query');
     }
 
     // Validate query security (SELECT only)
@@ -264,7 +264,7 @@ function testDataFilterQuery($data)
 
     if (!empty($unknownPlaceholders)) {
         $placeholderList = implode(', ', $unknownPlaceholders);
-        Utility::ajaxResponseFalse('Unknown placeholder(s) found: ' . $placeholderList . '. Please use only valid system placeholders.');
+        DGCHelper::ajaxResponseFalse('Unknown placeholder(s) found: ' . $placeholderList . '. Please use only valid system placeholders.');
     }
 
     // Resolve system placeholders before testing
@@ -314,12 +314,12 @@ function testDataFilterQuery($data)
 
         if (!$res) {
             $error = $db->getMysqlError();
-            Utility::ajaxResponseFalse('Query error: ' . $error);
+            DGCHelper::ajaxResponseFalse('Query error: ' . $error);
         }
     } catch (mysqli_sql_exception $e) {
-        Utility::ajaxResponseFalse('Query error: ' . $e->getMessage());
+        DGCHelper::ajaxResponseFalse('Query error: ' . $e->getMessage());
     } catch (Exception $e) {
-        Utility::ajaxResponseFalse('Query error: ' . $e->getMessage());
+        DGCHelper::ajaxResponseFalse('Query error: ' . $e->getMessage());
     }
 
     $options = array();
@@ -346,7 +346,7 @@ function testDataFilterQuery($data)
     }
 
     if (empty($options) && $page === 1) {
-        Utility::ajaxResponseFalse('Query returned no results');
+        DGCHelper::ajaxResponseFalse('Query returned no results');
     }
 
     // Check if required columns exist
@@ -364,7 +364,7 @@ function testDataFilterQuery($data)
 
     $totalPages = ceil($totalCount / $pageSize);
 
-    Utility::ajaxResponseTrue('Query is valid', array(
+    DGCHelper::ajaxResponseTrue('Query is valid', array(
         'columns' => $columns,
         'rows' => $rows,
         'options' => $options,
@@ -385,5 +385,5 @@ function testDataFilterQuery($data)
 function getSystemPlaceholders()
 {
     $placeholders = SystemPlaceholderManager::getAllAsArray();
-    Utility::ajaxResponseTrue('System placeholders loaded', array('placeholders' => $placeholders));
+    DGCHelper::ajaxResponseTrue('System placeholders loaded', array('placeholders' => $placeholders));
 }

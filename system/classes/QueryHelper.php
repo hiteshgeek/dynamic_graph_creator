@@ -111,7 +111,7 @@ class QueryHelper
         $validation = self::validateQuerySecurity($query);
 
         if (!$validation['valid']) {
-            Utility::ajaxResponseFalse($validation['error']);
+            DGCHelper::ajaxResponseFalse($validation['error']);
             return false;
         }
 

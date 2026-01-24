@@ -260,7 +260,7 @@ function saveGraph($data)
         $message = count($missingPlaceholders) === 1
             ? 'Query must include mandatory filter: ' . implode(', ', $missingPlaceholders)
             : 'Query must include mandatory filters: ' . implode(', ', $missingPlaceholders);
-        Utility::ajaxResponseFalse($message);
+        DGCHelper::ajaxResponseFalse($message);
     }
 
     $graph = $isUpdate ? new Graph($graphId) : new Graph();
@@ -294,12 +294,12 @@ function saveGraph($data)
     if ($isUpdate) {
         $graph->setUpdatedUid($userId);
         if (!$graph->update()) {
-            Utility::ajaxResponseFalse('Failed to update graph');
+            DGCHelper::ajaxResponseFalse('Failed to update graph');
         }
     } else {
         $graph->setCreatedUid($userId);
         if (!$graph->insert()) {
-            Utility::ajaxResponseFalse('Failed to create graph');
+            DGCHelper::ajaxResponseFalse('Failed to create graph');
         }
     }
 
@@ -314,7 +314,7 @@ function saveGraph($data)
     GraphWidgetCategoryMappingManager::setGraphCategories($graph->getId(), $categoryIds);
 
     $message = $isUpdate ? 'Graph updated successfully' : 'Graph created successfully';
-    Utility::ajaxResponseTrue($message, array('id' => $graph->getId()));
+    DGCHelper::ajaxResponseTrue($message, array('id' => $graph->getId()));
 }
 
 /**
@@ -325,10 +325,10 @@ function deleteGraph($data)
     $graphId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$graphId || !Graph::delete($graphId)) {
-        Utility::ajaxResponseFalse('Failed to delete graph');
+        DGCHelper::ajaxResponseFalse('Failed to delete graph');
     }
 
-    Utility::ajaxResponseTrue('Graph deleted successfully');
+    DGCHelper::ajaxResponseTrue('Graph deleted successfully');
 }
 
 /**
@@ -391,7 +391,7 @@ function testQuery($data)
     }
 
     if (empty($query)) {
-        Utility::ajaxResponseFalse('Please enter a SQL query');
+        DGCHelper::ajaxResponseFalse('Please enter a SQL query');
     }
 
     // Validate query security (SELECT only)
@@ -408,14 +408,14 @@ function testQuery($data)
         $message = count($missingPlaceholders) === 1
             ? 'Query must include mandatory filter: ' . implode(', ', $missingPlaceholders)
             : 'Query must include mandatory filters: ' . implode(', ', $missingPlaceholders);
-        Utility::ajaxResponseFalse($message);
+        DGCHelper::ajaxResponseFalse($message);
     }
 
     // Validate required placeholders have values
     $missingRequired = validateRequiredPlaceholders($query, $filters, $placeholderSettings);
     if (!empty($missingRequired)) {
         $filterNames = implode(', ', $missingRequired);
-        Utility::ajaxResponseFalse('Required filter(s) missing value: ' . $filterNames);
+        DGCHelper::ajaxResponseFalse('Required filter(s) missing value: ' . $filterNames);
     }
 
     $db = Rapidkart::getInstance()->getDB();
@@ -445,7 +445,7 @@ function testQuery($data)
     $res = $db->query($testQuery);
 
     if (!$res) {
-        Utility::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
+        DGCHelper::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
     }
 
     // Fetch all sample rows
@@ -473,10 +473,10 @@ function testQuery($data)
     }
 
     if (empty($columns)) {
-        Utility::ajaxResponseFalse('Query returned no columns. Please check your query.');
+        DGCHelper::ajaxResponseFalse('Query returned no columns. Please check your query.');
     }
 
-    Utility::ajaxResponseTrue('Query is valid', array(
+    DGCHelper::ajaxResponseTrue('Query is valid', array(
         'columns' => $columns,
         'rows' => $rows,
         'row_count' => count($rows),
@@ -495,7 +495,7 @@ function previewGraph($data)
         // Load existing graph
         $graph = new Graph($graphId);
         if (!$graph->getId()) {
-            Utility::ajaxResponseFalse('Graph not found');
+            DGCHelper::ajaxResponseFalse('Graph not found');
         }
 
         $filters = isset($data['filters']) ? $data['filters'] : array();
@@ -512,7 +512,7 @@ function previewGraph($data)
             $config = array();
         }
 
-        Utility::ajaxResponseTrue('Graph data loaded', array(
+        DGCHelper::ajaxResponseTrue('Graph data loaded', array(
             'chartData' => $chartData,
             'config' => $config,
             'graphType' => $graph->getGraphType()
@@ -539,14 +539,14 @@ function previewGraph($data)
         }
 
         if (empty($query)) {
-            Utility::ajaxResponseFalse('No query provided');
+            DGCHelper::ajaxResponseFalse('No query provided');
         }
 
         // Validate required placeholders have values
         $missingRequired = validateRequiredPlaceholders($query, $filters, $placeholderSettings);
         if (!empty($missingRequired)) {
             $filterNames = implode(', ', $missingRequired);
-            Utility::ajaxResponseFalse('Required filter(s) missing value: ' . $filterNames);
+            DGCHelper::ajaxResponseFalse('Required filter(s) missing value: ' . $filterNames);
         }
 
         $db = Rapidkart::getInstance()->getDB();
@@ -557,7 +557,7 @@ function previewGraph($data)
         $res = $db->query($query);
 
         if (!$res) {
-            Utility::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
+            DGCHelper::ajaxResponseFalse('Query error: ' . $db->getMysqlError());
         }
 
         $rows = array();
@@ -566,7 +566,7 @@ function previewGraph($data)
         }
         $chartData = formatPreviewData($rows, $mapping, $graphType);
 
-        Utility::ajaxResponseTrue('Preview generated', array('chartData' => $chartData));
+        DGCHelper::ajaxResponseTrue('Preview generated', array('chartData' => $chartData));
     }
 }
 
@@ -611,12 +611,12 @@ function loadGraph($data)
     $graphId = isset($data['id']) ? intval($data['id']) : 0;
 
     if (!$graphId) {
-        Utility::ajaxResponseFalse('Invalid graph ID');
+        DGCHelper::ajaxResponseFalse('Invalid graph ID');
     }
 
     $graph = new Graph($graphId);
     if (!$graph->getId()) {
-        Utility::ajaxResponseFalse('Graph not found');
+        DGCHelper::ajaxResponseFalse('Graph not found');
     }
 
     // Extract placeholders and find matching filters
@@ -630,7 +630,7 @@ function loadGraph($data)
         $response['matched_filters'][$key] = $filter->toArray();
     }
 
-    Utility::ajaxResponseTrue('Graph loaded', $response);
+    DGCHelper::ajaxResponseTrue('Graph loaded', $response);
 }
 
 /**
@@ -642,12 +642,12 @@ function graphSaveSnapshot($data)
     $imageData = isset($data['image_data']) ? $data['image_data'] : '';
 
     if (!$gid || !Graph::isExistent($gid)) {
-        Utility::ajaxResponseFalse('Invalid graph');
+        DGCHelper::ajaxResponseFalse('Invalid graph');
     }
 
     // Validate base64 PNG data
     if (!preg_match('/^data:image\/png;base64,/', $imageData)) {
-        Utility::ajaxResponseFalse('Invalid image data');
+        DGCHelper::ajaxResponseFalse('Invalid image data');
     }
 
     // Decode base64
@@ -655,7 +655,7 @@ function graphSaveSnapshot($data)
     $binary = base64_decode($base64);
 
     if ($binary === false) {
-        Utility::ajaxResponseFalse('Failed to decode image data');
+        DGCHelper::ajaxResponseFalse('Failed to decode image data');
     }
 
     // Generate filename: graph_{gid}_{timestamp}.png
@@ -689,7 +689,7 @@ function graphSaveSnapshot($data)
     // Create image from binary data
     $srcImage = imagecreatefromstring($binary);
     if (!$srcImage) {
-        Utility::ajaxResponseFalse('Failed to process image');
+        DGCHelper::ajaxResponseFalse('Failed to process image');
     }
 
     $srcWidth = imagesx($srcImage);
@@ -739,10 +739,10 @@ function graphSaveSnapshot($data)
     $graph->setSnapshot($filename);
     $graph->setUpdatedUid(Session::loggedInUid());
     if (!$graph->updateSnapshot()) {
-        Utility::ajaxResponseFalse('Failed to update graph');
+        DGCHelper::ajaxResponseFalse('Failed to update graph');
     }
 
-    Utility::ajaxResponseTrue('Image saved successfully', array(
+    DGCHelper::ajaxResponseTrue('Image saved successfully', array(
         'filename' => $filename,
         'large_url' => SiteConfig::filesUrl() . 'graph/large/' . $filename,
         'thumb_url' => SiteConfig::filesUrl() . 'graph/thumbnail/' . $filename
