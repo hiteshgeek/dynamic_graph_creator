@@ -9,6 +9,9 @@
  */
 class DGCHelper
 {
+    /** Query result page size for data filter testing */
+    const QUERY_RESULT_PAGE_SIZE = 10;
+
     /**
      * Render an empty state component
      *

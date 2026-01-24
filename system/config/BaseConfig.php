@@ -9,8 +9,6 @@
  */
 class BaseConfig
 {
-    const QUERY_RESULT_PAGE_SIZE = 10;
-
     /** Is the site in a specific folder within your web directory */
     const SITE_PATH = "/var/www/html/";
     // const SITE_FOLDER = "rapidkartprocessadminv2";

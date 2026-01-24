@@ -236,7 +236,7 @@ function testDataFilterQuery($data)
 {
     $query = isset($data['query']) ? trim($data['query']) : '';
     $page = isset($data['page']) ? max(1, intval($data['page'])) : 1;
-    $pageSize = BaseConfig::QUERY_RESULT_PAGE_SIZE;
+    $pageSize = DGCHelper::QUERY_RESULT_PAGE_SIZE;
 
     if (empty($query)) {
         Utility::ajaxResponseFalse('Please enter a SQL query');
