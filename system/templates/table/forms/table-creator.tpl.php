@@ -5,7 +5,7 @@ echo DGCHelper::renderCompanyStartDateScript();
 
 // Get table config
 $config = $table ? $table->getConfigArray() : array();
-$defaultConfig = Table::getDefaultConfig();
+$defaultConfig = WidgetTable::getDefaultConfig();
 
 // Pagination settings
 $paginationConfig = isset($config['pagination']) ? $config['pagination'] : $defaultConfig['pagination'];

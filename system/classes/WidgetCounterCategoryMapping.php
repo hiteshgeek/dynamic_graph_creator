@@ -1,21 +1,21 @@
 <?php
 
 /**
- * TableWidgetCategoryMapping model - Maps tables to widget categories
+ * WidgetCounterCategoryMapping model - Maps counters to widget categories
  *
  * @author Dynamic Graph Creator
  */
-class TableWidgetCategoryMapping implements DatabaseObject
+class WidgetCounterCategoryMapping implements DatabaseObject
 {
-    private $twcmid;
-    private $tid;
+    private $cwcmid;
+    private $cid;
     private $wcid;
     private $created_ts;
 
     public function __construct($id = null)
     {
         if ($id !== null) {
-            $this->twcmid = intval($id);
+            $this->cwcmid = intval($id);
             $this->load();
         }
     }
@@ -23,16 +23,16 @@ class TableWidgetCategoryMapping implements DatabaseObject
     public static function isExistent($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT twcmid FROM " . SystemTables::DB_TBL_TABLE_WIDGET_CATEGORY_MAPPING . " WHERE twcmid = '::twcmid' LIMIT 1";
-        $res = $db->query($sql, array('::twcmid' => intval($id)));
+        $sql = "SELECT cwcmid FROM " . SystemTables::DB_TBL_COUNTER_WIDGET_CATEGORY_MAPPING . " WHERE cwcmid = '::cwcmid' LIMIT 1";
+        $res = $db->query($sql, array('::cwcmid' => intval($id)));
         return $db->resultNumRows($res) > 0;
     }
 
-    public function getId() { return $this->twcmid; }
+    public function getId() { return $this->cwcmid; }
 
     public function hasMandatoryData()
     {
-        return !empty($this->tid) && !empty($this->wcid);
+        return !empty($this->cid) && !empty($this->wcid);
     }
 
     public function insert()
@@ -40,19 +40,19 @@ class TableWidgetCategoryMapping implements DatabaseObject
         if (!$this->hasMandatoryData()) return false;
 
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "INSERT INTO " . SystemTables::DB_TBL_TABLE_WIDGET_CATEGORY_MAPPING . " (
-            tid, wcid
+        $sql = "INSERT INTO " . SystemTables::DB_TBL_COUNTER_WIDGET_CATEGORY_MAPPING . " (
+            cid, wcid
         ) VALUES (
-            '::tid', '::wcid'
+            '::cid', '::wcid'
         )";
 
         $args = array(
-            '::tid' => intval($this->tid),
+            '::cid' => intval($this->cid),
             '::wcid' => intval($this->wcid)
         );
 
         if ($db->query($sql, $args)) {
-            $this->twcmid = $db->lastInsertId();
+            $this->cwcmid = $db->lastInsertId();
             return true;
         }
         return false;
@@ -60,18 +60,18 @@ class TableWidgetCategoryMapping implements DatabaseObject
 
     public function update()
     {
-        if (!$this->twcmid) return false;
+        if (!$this->cwcmid) return false;
 
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "UPDATE " . SystemTables::DB_TBL_TABLE_WIDGET_CATEGORY_MAPPING . " SET
-            tid = '::tid',
+        $sql = "UPDATE " . SystemTables::DB_TBL_COUNTER_WIDGET_CATEGORY_MAPPING . " SET
+            cid = '::cid',
             wcid = '::wcid'
-        WHERE twcmid = '::twcmid'";
+        WHERE cwcmid = '::cwcmid'";
 
         $args = array(
-            '::tid' => intval($this->tid),
+            '::cid' => intval($this->cid),
             '::wcid' => intval($this->wcid),
-            '::twcmid' => $this->twcmid
+            '::cwcmid' => $this->cwcmid
         );
 
         return $db->query($sql, $args) ? true : false;
@@ -80,21 +80,21 @@ class TableWidgetCategoryMapping implements DatabaseObject
     public static function delete($id)
     {
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "DELETE FROM " . SystemTables::DB_TBL_TABLE_WIDGET_CATEGORY_MAPPING . " WHERE twcmid = '::twcmid'";
-        $result = $db->query($sql, array('::twcmid' => intval($id)));
+        $sql = "DELETE FROM " . SystemTables::DB_TBL_COUNTER_WIDGET_CATEGORY_MAPPING . " WHERE cwcmid = '::cwcmid'";
+        $result = $db->query($sql, array('::cwcmid' => intval($id)));
         return $result ? true : false;
     }
 
     public function load()
     {
-        if (!$this->twcmid) return false;
+        if (!$this->cwcmid) return false;
 
         $db = Rapidkart::getInstance()->getDB();
-        $sql = "SELECT * FROM " . SystemTables::DB_TBL_TABLE_WIDGET_CATEGORY_MAPPING . " WHERE twcmid = '::twcmid' LIMIT 1";
-        $res = $db->query($sql, array('::twcmid' => $this->twcmid));
+        $sql = "SELECT * FROM " . SystemTables::DB_TBL_COUNTER_WIDGET_CATEGORY_MAPPING . " WHERE cwcmid = '::cwcmid' LIMIT 1";
+        $res = $db->query($sql, array('::cwcmid' => $this->cwcmid));
 
         if (!$res || $db->resultNumRows($res) < 1) {
-            $this->twcmid = null;
+            $this->cwcmid = null;
             return false;
         }
 
@@ -112,21 +112,21 @@ class TableWidgetCategoryMapping implements DatabaseObject
         return true;
     }
 
-    public function __toString() { return $this->twcmid ? "Mapping {$this->twcmid}" : ''; }
+    public function __toString() { return $this->cwcmid ? "Mapping {$this->cwcmid}" : ''; }
 
     public function toArray()
     {
         return array(
-            'twcmid' => $this->twcmid,
-            'tid' => $this->tid,
+            'cwcmid' => $this->cwcmid,
+            'cid' => $this->cid,
             'wcid' => $this->wcid,
             'created_ts' => $this->created_ts
         );
     }
 
     // Getters and Setters
-    public function getTid() { return $this->tid; }
-    public function setTid($value) { $this->tid = intval($value); }
+    public function getCid() { return $this->cid; }
+    public function setCid($value) { $this->cid = intval($value); }
 
     public function getWcid() { return $this->wcid; }
     public function setWcid($value) { $this->wcid = intval($value); }

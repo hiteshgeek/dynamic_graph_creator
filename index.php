@@ -56,14 +56,14 @@ require_once __DIR__ . '/system/classes/WidgetCategory.php';
 require_once __DIR__ . '/system/classes/WidgetCategoryManager.php';
 require_once __DIR__ . '/system/classes/GraphWidgetCategoryMapping.php';
 require_once __DIR__ . '/system/classes/GraphWidgetCategoryMappingManager.php';
-require_once __DIR__ . '/system/classes/Counter.php';
-require_once __DIR__ . '/system/classes/CounterManager.php';
-require_once __DIR__ . '/system/classes/CounterWidgetCategoryMapping.php';
-require_once __DIR__ . '/system/classes/CounterWidgetCategoryMappingManager.php';
-require_once __DIR__ . '/system/classes/Table.php';
-require_once __DIR__ . '/system/classes/TableManager.php';
-require_once __DIR__ . '/system/classes/TableWidgetCategoryMapping.php';
-require_once __DIR__ . '/system/classes/TableWidgetCategoryMappingManager.php';
+require_once __DIR__ . '/system/classes/WidgetCounter.php';
+require_once __DIR__ . '/system/classes/WidgetCounterManager.php';
+require_once __DIR__ . '/system/classes/WidgetCounterCategoryMapping.php';
+require_once __DIR__ . '/system/classes/WidgetCounterCategoryMappingManager.php';
+require_once __DIR__ . '/system/classes/WidgetTable.php';
+require_once __DIR__ . '/system/classes/WidgetTableManager.php';
+require_once __DIR__ . '/system/classes/WidgetTableCategoryMapping.php';
+require_once __DIR__ . '/system/classes/WidgetTableCategoryMappingManager.php';
 
 // Load session and authentication classes
 require_once __DIR__ . '/system/classes/AdminUser.php';

@@ -158,11 +158,11 @@ class DGCHelper
         $counterColor = '#4361ee';
 
         if ($counterId) {
-            $counter = new Counter($counterId);
+            $counter = new WidgetCounter($counterId);
             if ($counter->getId()) {
                 $counterName = $counter->getName();
                 $config = $counter->getConfigArray();
-                $defaultConfig = Counter::getDefaultConfig();
+                $defaultConfig = WidgetCounter::getDefaultConfig();
                 $counterIcon = isset($config['icon']) && $config['icon'] ? $config['icon'] : $defaultConfig['icon'];
                 $counterColor = isset($config['color']) && $config['color'] ? $config['color'] : $defaultConfig['color'];
             }
@@ -190,7 +190,7 @@ class DGCHelper
         $tableName = 'Table #' . $tableId;
 
         if ($tableId) {
-            $table = new Table($tableId);
+            $table = new WidgetTable($tableId);
             if ($table->getId()) {
                 $tableName = $table->getName();
             }

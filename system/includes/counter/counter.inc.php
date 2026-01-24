@@ -77,12 +77,12 @@ function showList()
     $theme->setPageTitle('Counters - Dynamic Graph Creator');
 
     // Get all counters
-    $counters = CounterManager::getAll();
+    $counters = WidgetCounterManager::getAll();
 
     // Get categories for each counter
     $counterCategories = array();
     foreach ($counters as $counter) {
-        $counterCategories[$counter->getId()] = CounterWidgetCategoryMappingManager::getCategoriesForCounter($counter->getId());
+        $counterCategories[$counter->getId()] = WidgetCounterCategoryMappingManager::getCategoriesForCounter($counter->getId());
     }
 
     // Get content from template
@@ -116,7 +116,7 @@ function showCreator($counterId = null)
     $counter = null;
 
     if ($counterId) {
-        $counter = new Counter($counterId);
+        $counter = new WidgetCounter($counterId);
         if (!$counter->getId()) {
             LocalUtility::redirect('widget-counter');
             return;
@@ -143,11 +143,11 @@ function showCreator($counterId = null)
     // Get selected category IDs for this counter (if editing)
     $selectedCategoryIds = array();
     if ($counter && $counter->getId()) {
-        $selectedCategoryIds = CounterWidgetCategoryMappingManager::getCategoryIdsForCounter($counter->getId());
+        $selectedCategoryIds = WidgetCounterCategoryMappingManager::getCategoryIdsForCounter($counter->getId());
     }
 
     // Get format options
-    $formatOptions = Counter::getFormatOptions();
+    $formatOptions = WidgetCounter::getFormatOptions();
 
     $tpl = new Template(SystemConfig::templatesPath() . 'counter/forms/counter-creator');
     $tpl->counter = $counter;
@@ -174,7 +174,7 @@ function showView($counterId)
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/css/daterangepicker.css', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 3);
 
-    $counter = new Counter($counterId);
+    $counter = new WidgetCounter($counterId);
     if (!$counter->getId()) {
         LocalUtility::redirect('widget-counter');
         return;
@@ -183,7 +183,7 @@ function showView($counterId)
     $theme->setPageTitle('Counters - ' . htmlspecialchars($counter->getName()) . ' - Dynamic Graph Creator');
 
     // Get all counters for navigation
-    $allCounters = CounterManager::getAll();
+    $allCounters = WidgetCounterManager::getAll();
     $totalCounters = count($allCounters);
     $currentIndex = 0;
     $prevCounterId = null;
@@ -214,7 +214,7 @@ function showView($counterId)
     }
 
     // Get categories for this counter
-    $counterCategories = CounterWidgetCategoryMappingManager::getCategoriesForCounter($counterId);
+    $counterCategories = WidgetCounterCategoryMappingManager::getCategoriesForCounter($counterId);
 
     // Get mandatory filters for widget type "counter"
     $mandatoryFilters = DataFilterManager::getMandatoryFiltersForWidgetTypeAsArray('counter');
@@ -263,7 +263,7 @@ function saveCounter($data)
         Utility::ajaxResponseFalse($message);
     }
 
-    $counter = $isUpdate ? new Counter($counterId) : new Counter();
+    $counter = $isUpdate ? new WidgetCounter($counterId) : new WidgetCounter();
 
     $counter->setName(isset($data['name']) ? $data['name'] : '');
     $counter->setDescription(isset($data['description']) ? $data['description'] : '');
@@ -303,7 +303,7 @@ function saveCounter($data)
     if (!is_array($categoryIds)) {
         $categoryIds = array();
     }
-    CounterWidgetCategoryMappingManager::setCounterCategories($counter->getId(), $categoryIds);
+    WidgetCounterCategoryMappingManager::setCounterCategories($counter->getId(), $categoryIds);
 
     $message = $isUpdate ? 'Counter updated successfully' : 'Counter created successfully';
     Utility::ajaxResponseTrue($message, array('id' => $counter->getId()));
@@ -316,7 +316,7 @@ function deleteCounter($data)
 {
     $counterId = isset($data['id']) ? intval($data['id']) : 0;
 
-    if (!$counterId || !Counter::delete($counterId)) {
+    if (!$counterId || !WidgetCounter::delete($counterId)) {
         Utility::ajaxResponseFalse('Failed to delete counter');
     }
 
@@ -427,7 +427,7 @@ function previewCounter($data)
 
     if ($counterId) {
         // Load existing counter
-        $counter = new Counter($counterId);
+        $counter = new WidgetCounter($counterId);
         if (!$counter->getId()) {
             Utility::ajaxResponseFalse('Counter not found');
         }
@@ -537,7 +537,7 @@ function loadCounter($data)
         Utility::ajaxResponseFalse('Invalid counter ID');
     }
 
-    $counter = new Counter($counterId);
+    $counter = new WidgetCounter($counterId);
     if (!$counter->getId()) {
         Utility::ajaxResponseFalse('Counter not found');
     }
@@ -564,7 +564,7 @@ function counterSaveSnapshot($data)
     $cid = isset($data['cid']) ? intval($data['cid']) : 0;
     $imageData = isset($data['image_data']) ? $data['image_data'] : '';
 
-    if (!$cid || !Counter::isExistent($cid)) {
+    if (!$cid || !WidgetCounter::isExistent($cid)) {
         Utility::ajaxResponseFalse('Invalid counter');
     }
 
@@ -597,7 +597,7 @@ function counterSaveSnapshot($data)
     }
 
     // Delete old snapshots if exist
-    $counter = new Counter($cid);
+    $counter = new WidgetCounter($cid);
     if ($counter->getSnapshot()) {
         $oldLarge = $largeDir . $counter->getSnapshot();
         $oldThumb = $thumbDir . $counter->getSnapshot();

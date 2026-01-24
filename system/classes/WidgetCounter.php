@@ -3,7 +3,7 @@
 require_once __DIR__ . '/element/Element.php';
 
 /**
- * Counter model - Counter element type
+ * WidgetCounter model - Counter element type
  * Extends Element with counter-specific functionality
  *
  * Counter config includes:
@@ -16,7 +16,7 @@ require_once __DIR__ . '/element/Element.php';
  *
  * @author Dynamic Graph Creator
  */
-class Counter extends Element
+class WidgetCounter extends Element
 {
     // Alias for backward compatibility (cid → id)
     protected $cid;

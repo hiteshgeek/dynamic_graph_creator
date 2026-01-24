@@ -9,7 +9,7 @@
 
 // Table list page styles
 .table-list-page {
-  padding: $spacing-lg 0;
+  // Padding handled by body > .container rule in _common.scss
 }
 
 // Table type badge (matches graph-type-badge style)

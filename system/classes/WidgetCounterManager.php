@@ -3,12 +3,12 @@
 require_once __DIR__ . '/element/ElementManager.php';
 
 /**
- * TableManager - Table-specific manager
- * Extends ElementManager with table-specific functionality
+ * WidgetCounterManager - Counter-specific manager
+ * Extends ElementManager with counter-specific functionality
  *
  * @author Dynamic Graph Creator
  */
-class TableManager extends ElementManager
+class WidgetCounterManager extends ElementManager
 {
     /**
      * Get the Element class name
@@ -16,23 +16,23 @@ class TableManager extends ElementManager
      */
     protected static function getElementClass()
     {
-        return 'Table';
+        return 'WidgetCounter';
     }
 
     /**
-     * Get all tables with their category mappings
-     * @return array Array of table data with categories
+     * Get all counters with their category mappings
+     * @return array Array of counter data with categories
      */
     public static function getAllWithCategories()
     {
-        $tables = static::getAll();
+        $counters = static::getAll();
         $result = array();
 
-        foreach ($tables as $table) {
-            $data = $table->toArray();
+        foreach ($counters as $counter) {
+            $data = $counter->toArray();
 
-            // Get category IDs for this table
-            $categoryIds = TableWidgetCategoryMappingManager::getCategoryIdsForTable($table->getId());
+            // Get category IDs for this counter
+            $categoryIds = WidgetCounterCategoryMappingManager::getCategoryIdsForCounter($counter->getId());
             $data['category_ids'] = $categoryIds;
 
             // Get full category data
@@ -54,7 +54,7 @@ class TableManager extends ElementManager
     }
 
     /**
-     * Get tables for widget selector (with categories)
+     * Get counters for widget selector (with categories)
      * @return array
      */
     public static function getForWidgetSelector()

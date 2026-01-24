@@ -10,7 +10,7 @@
 
 // Counter list page styles
 .counter-list-page {
-  padding: $spacing-lg 0;
+  // Padding handled by body > .container rule in _common.scss
 }
 
 // Counter type badge (matches graph-type-badge style)

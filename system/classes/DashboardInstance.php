@@ -384,13 +384,13 @@ class DashboardInstance implements DatabaseObject
                     }
                     break;
                 case 'counter':
-                    $counter = new Counter($widgetId);
+                    $counter = new WidgetCounter($widgetId);
                     if ($counter->getId()) {
                         $query = $counter->getQuery();
                     }
                     break;
                 case 'table':
-                    $table = new Table($widgetId);
+                    $table = new WidgetTable($widgetId);
                     if ($table->getId()) {
                         $query = $table->getQuery();
                     }

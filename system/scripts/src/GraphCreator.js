@@ -206,6 +206,7 @@ export default class GraphCreator extends ElementCreator {
         }
 
         this.clearQueryError();
+        this.queryTested = true; // Mark query as successfully tested
         Toast.success(`Query valid. Found ${columns.length} columns.`);
         this.updatePreview();
     }
@@ -459,6 +460,22 @@ export default class GraphCreator extends ElementCreator {
                 const errorMsg = this.mandatoryFilterValidator.getErrorMessage(mandatoryValidation.missing);
                 errors.push(errorMsg);
             }
+        }
+
+        // Check if query has been tested successfully
+        if (query.trim() && !this.queryTested) {
+            errors.push('Query must be tested before saving');
+        }
+
+        // Check for query errors (syntax errors from test)
+        if (this.queryError) {
+            errors.push('Query has errors - please fix the query before saving');
+        }
+
+        // Check for unmatched placeholders (placeholders without assigned filters)
+        if (this.placeholderWarnings && this.placeholderWarnings.length > 0) {
+            const unmatchedList = this.placeholderWarnings.join(', ');
+            errors.push(`Placeholders without assigned filters: ${unmatchedList}`);
         }
 
         const mapping = this.dataMapper ? this.dataMapper.getMapping() : {};

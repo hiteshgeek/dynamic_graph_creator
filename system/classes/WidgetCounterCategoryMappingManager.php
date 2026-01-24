@@ -1,12 +1,12 @@
 <?php
 
 /**
- * CounterWidgetCategoryMappingManager - Manages counter-category relationships
+ * WidgetCounterCategoryMappingManager - Manages counter-category relationships
  * Provides methods to manage the many-to-many relationship between counters and widget categories
  *
  * @author Dynamic Graph Creator
  */
-class CounterWidgetCategoryMappingManager
+class WidgetCounterCategoryMappingManager
 {
     /**
      * Get all categories for a counter
@@ -34,7 +34,7 @@ class CounterWidgetCategoryMappingManager
     /**
      * Get all counters for a category
      * @param int $categoryId Category ID
-     * @return array Array of Counter objects
+     * @return array Array of WidgetCounter objects
      */
     public static function getCountersForCategory($categoryId)
     {
@@ -47,7 +47,7 @@ class CounterWidgetCategoryMappingManager
 
         $counters = array();
         while ($row = $db->fetchObject($res)) {
-            $counter = new Counter();
+            $counter = new WidgetCounter();
             $counter->parse($row);
             $counters[] = $counter;
         }
@@ -94,7 +94,7 @@ class CounterWidgetCategoryMappingManager
             foreach ($categoryIds as $categoryId) {
                 $categoryId = intval($categoryId);
                 if ($categoryId > 0) {
-                    $mapping = new CounterWidgetCategoryMapping();
+                    $mapping = new WidgetCounterCategoryMapping();
                     $mapping->setCid($counterId);
                     $mapping->setWcid($categoryId);
                     $mapping->insert();
@@ -126,7 +126,7 @@ class CounterWidgetCategoryMappingManager
             return true; // Already exists
         }
 
-        $mapping = new CounterWidgetCategoryMapping();
+        $mapping = new WidgetCounterCategoryMapping();
         $mapping->setCid($counterId);
         $mapping->setWcid($categoryId);
         return $mapping->insert();

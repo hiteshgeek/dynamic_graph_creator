@@ -1488,10 +1488,10 @@ function getWidgetsForSelector($data)
     $graphs = GraphManager::getAll();
 
     // Get all active counters
-    $counters = CounterManager::getAll();
+    $counters = WidgetCounterManager::getAll();
 
     // Get all active tables
-    $tables = TableManager::getAll();
+    $tables = WidgetTableManager::getAll();
 
     // Get all widget categories
     $categories = WidgetCategoryManager::getAll();
@@ -1517,8 +1517,8 @@ function getWidgetsForSelector($data)
     // Build counters data with category mappings
     $countersData = array();
     foreach ($counters as $counter) {
-        $categoryIds = CounterWidgetCategoryMappingManager::getCategoryIdsForCounter($counter->getId());
-        $counterCategories = CounterWidgetCategoryMappingManager::getCategoriesForCounter($counter->getId());
+        $categoryIds = WidgetCounterCategoryMappingManager::getCategoryIdsForCounter($counter->getId());
+        $counterCategories = WidgetCounterCategoryMappingManager::getCategoriesForCounter($counter->getId());
         $config = $counter->getConfigArray();
 
         $countersData[] = array(
@@ -1537,8 +1537,8 @@ function getWidgetsForSelector($data)
     // Build tables data with category mappings
     $tablesData = array();
     foreach ($tables as $table) {
-        $categoryIds = TableWidgetCategoryMappingManager::getCategoryIdsForTable($table->getId());
-        $tableCategories = TableWidgetCategoryMappingManager::getCategoriesForTable($table->getId());
+        $categoryIds = WidgetTableCategoryMappingManager::getCategoryIdsForTable($table->getId());
+        $tableCategories = WidgetTableCategoryMappingManager::getCategoriesForTable($table->getId());
 
         $tablesData[] = array(
             'tid' => $table->getId(),
@@ -1559,10 +1559,10 @@ function getWidgetsForSelector($data)
             GraphWidgetCategoryMappingManager::getGraphsForCategory($cat->getId())
         );
         $catArray['counter_count'] = count(
-            CounterWidgetCategoryMappingManager::getCountersForCategory($cat->getId())
+            WidgetCounterCategoryMappingManager::getCountersForCategory($cat->getId())
         );
         $catArray['table_count'] = count(
-            TableWidgetCategoryMappingManager::getTablesForCategory($cat->getId())
+            WidgetTableCategoryMappingManager::getTablesForCategory($cat->getId())
         );
         $catArray['widget_count'] = $catArray['graph_count'] + $catArray['counter_count'] + $catArray['table_count'];
         $categoriesData[] = $catArray;
@@ -1627,7 +1627,7 @@ function previewCounterForDashboard($data)
     }
 
     // Load counter
-    $counter = new Counter($counterId);
+    $counter = new WidgetCounter($counterId);
     if (!$counter->getId()) {
         Utility::ajaxResponseFalse('Counter not found');
     }
@@ -1641,7 +1641,7 @@ function previewCounterForDashboard($data)
     // Execute counter query
     $counterData = $counter->execute($filters ? $filters : array());
     $config = $counter->getConfigArray();
-    $defaultConfig = Counter::getDefaultConfig();
+    $defaultConfig = WidgetCounter::getDefaultConfig();
 
     // Get icon and color from config with defaults
     $icon = isset($config['icon']) && $config['icon'] ? $config['icon'] : $defaultConfig['icon'];
@@ -1710,7 +1710,7 @@ function previewTableForDashboard($data)
     }
 
     // Load table
-    $table = new Table($tableId);
+    $table = new WidgetTable($tableId);
     if (!$table->getId()) {
         Utility::ajaxResponseFalse('Table not found');
     }

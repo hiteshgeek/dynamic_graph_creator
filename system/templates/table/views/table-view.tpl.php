@@ -5,7 +5,7 @@
 
     // Get table config
     $config = $table->getConfigArray();
-    $defaultConfig = Table::getDefaultConfig();
+    $defaultConfig = WidgetTable::getDefaultConfig();
 
     // Operations
     $rightContent = '<a href="?urlq=widget-table/edit/' . $table->getId() . '" class="btn btn-icon btn-outline-design btn-design-mode" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Design Mode"><i class="fas fa-paint-brush"></i></a>';

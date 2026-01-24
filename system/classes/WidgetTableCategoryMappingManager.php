@@ -1,12 +1,12 @@
 <?php
 
 /**
- * TableWidgetCategoryMappingManager - Manages table-category relationships
+ * WidgetTableCategoryMappingManager - Manages table-category relationships
  * Provides methods to manage the many-to-many relationship between tables and widget categories
  *
  * @author Dynamic Graph Creator
  */
-class TableWidgetCategoryMappingManager
+class WidgetTableCategoryMappingManager
 {
     /**
      * Get all categories for a table
@@ -34,7 +34,7 @@ class TableWidgetCategoryMappingManager
     /**
      * Get all tables for a category
      * @param int $categoryId Category ID
-     * @return array Array of Table objects
+     * @return array Array of WidgetTable objects
      */
     public static function getTablesForCategory($categoryId)
     {
@@ -47,7 +47,7 @@ class TableWidgetCategoryMappingManager
 
         $tables = array();
         while ($row = $db->fetchObject($res)) {
-            $table = new Table();
+            $table = new WidgetTable();
             $table->parse($row);
             $tables[] = $table;
         }
@@ -94,7 +94,7 @@ class TableWidgetCategoryMappingManager
             foreach ($categoryIds as $categoryId) {
                 $categoryId = intval($categoryId);
                 if ($categoryId > 0) {
-                    $mapping = new TableWidgetCategoryMapping();
+                    $mapping = new WidgetTableCategoryMapping();
                     $mapping->setTid($tableId);
                     $mapping->setWcid($categoryId);
                     $mapping->insert();
@@ -126,7 +126,7 @@ class TableWidgetCategoryMappingManager
             return true; // Already exists
         }
 
-        $mapping = new TableWidgetCategoryMapping();
+        $mapping = new WidgetTableCategoryMapping();
         $mapping->setTid($tableId);
         $mapping->setWcid($categoryId);
         return $mapping->insert();

@@ -390,6 +390,7 @@ export default class CounterCreator extends ElementCreator {
     onQueryTest(columns) {
         this.columns = columns;
         this.clearQueryError();
+        this.queryTested = true; // Mark query as successfully tested
 
         // Check for 'counter' column
         const hasCounterColumn = columns.includes('counter');
@@ -641,6 +642,22 @@ export default class CounterCreator extends ElementCreator {
                 const errorMsg = this.mandatoryFilterValidator.getErrorMessage(mandatoryValidation.missing);
                 errors.push(errorMsg);
             }
+        }
+
+        // Check if query has been tested successfully
+        if (query.trim() && !this.queryTested) {
+            errors.push('Query must be tested before saving');
+        }
+
+        // Check for query errors (syntax errors from test)
+        if (this.queryError) {
+            errors.push('Query has errors - please fix the query before saving');
+        }
+
+        // Check for unmatched placeholders (placeholders without assigned filters)
+        if (this.placeholderWarnings && this.placeholderWarnings.length > 0) {
+            const unmatchedList = this.placeholderWarnings.join(', ');
+            errors.push(`Placeholders without assigned filters: ${unmatchedList}`);
         }
 
         if (errors.length > 0) {

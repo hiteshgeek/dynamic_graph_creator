@@ -3,7 +3,7 @@
 require_once __DIR__ . '/element/Element.php';
 
 /**
- * Table model - Table element type
+ * WidgetTable model - Table element type
  * Extends Element with table-specific functionality
  *
  * Table config includes:
@@ -13,7 +13,7 @@ require_once __DIR__ . '/element/Element.php';
  *
  * @author Dynamic Graph Creator
  */
-class Table extends Element
+class WidgetTable extends Element
 {
     // Alias for backward compatibility (tid → id)
     protected $tid;

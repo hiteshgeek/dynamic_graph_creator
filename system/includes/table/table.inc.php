@@ -81,12 +81,12 @@ function showList()
     $theme->setPageTitle('Tables - Dynamic Graph Creator');
 
     // Get all tables
-    $tables = TableManager::getAll();
+    $tables = WidgetTableManager::getAll();
 
     // Get categories for each table
     $tableCategories = array();
     foreach ($tables as $table) {
-        $tableCategories[$table->getId()] = TableWidgetCategoryMappingManager::getCategoriesForTable($table->getId());
+        $tableCategories[$table->getId()] = WidgetTableCategoryMappingManager::getCategoriesForTable($table->getId());
     }
 
     // Get content from template
@@ -120,7 +120,7 @@ function showCreator($tableId = null)
     $table = null;
 
     if ($tableId) {
-        $table = new Table($tableId);
+        $table = new WidgetTable($tableId);
         if (!$table->getId()) {
             LocalUtility::redirect('widget-table');
             return;
@@ -147,14 +147,14 @@ function showCreator($tableId = null)
     // Get selected category IDs for this table (if editing)
     $selectedCategoryIds = array();
     if ($table && $table->getId()) {
-        $selectedCategoryIds = TableWidgetCategoryMappingManager::getCategoryIdsForTable($table->getId());
+        $selectedCategoryIds = WidgetTableCategoryMappingManager::getCategoryIdsForTable($table->getId());
     }
 
     // Get density options
-    $densityOptions = Table::getDensityOptions();
+    $densityOptions = WidgetTable::getDensityOptions();
 
     // Get rows per page options
-    $rowsPerPageOptions = Table::getRowsPerPageOptions();
+    $rowsPerPageOptions = WidgetTable::getRowsPerPageOptions();
 
     $tpl = new Template(SystemConfig::templatesPath() . 'table/forms/table-creator');
     $tpl->table = $table;
@@ -182,7 +182,7 @@ function showView($tableId)
     $theme->addCss(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/css/daterangepicker.css', 5);
     $theme->addScript(SiteConfig::themeLibrariessUrl() . 'daterangepicker-dgc/js/daterangepicker.min.js', 3);
 
-    $table = new Table($tableId);
+    $table = new WidgetTable($tableId);
     if (!$table->getId()) {
         LocalUtility::redirect('widget-table');
         return;
@@ -191,7 +191,7 @@ function showView($tableId)
     $theme->setPageTitle('Tables - ' . htmlspecialchars($table->getName()) . ' - Dynamic Graph Creator');
 
     // Get all tables for navigation
-    $allTables = TableManager::getAll();
+    $allTables = WidgetTableManager::getAll();
     $totalTables = count($allTables);
     $currentIndex = 0;
     $prevTableId = null;
@@ -222,7 +222,7 @@ function showView($tableId)
     }
 
     // Get categories for this table
-    $tableCategories = TableWidgetCategoryMappingManager::getCategoriesForTable($tableId);
+    $tableCategories = WidgetTableCategoryMappingManager::getCategoriesForTable($tableId);
 
     // Get mandatory filters for widget type "table"
     $mandatoryFilters = DataFilterManager::getMandatoryFiltersForWidgetTypeAsArray('table');
@@ -271,7 +271,7 @@ function saveTable($data)
         Utility::ajaxResponseFalse($message);
     }
 
-    $table = $isUpdate ? new Table($tableId) : new Table();
+    $table = $isUpdate ? new WidgetTable($tableId) : new WidgetTable();
 
     $table->setName(isset($data['name']) ? $data['name'] : '');
     $table->setDescription(isset($data['description']) ? $data['description'] : '');
@@ -311,7 +311,7 @@ function saveTable($data)
     if (!is_array($categoryIds)) {
         $categoryIds = array();
     }
-    TableWidgetCategoryMappingManager::setTableCategories($table->getId(), $categoryIds);
+    WidgetTableCategoryMappingManager::setTableCategories($table->getId(), $categoryIds);
 
     $message = $isUpdate ? 'Table updated successfully' : 'Table created successfully';
     Utility::ajaxResponseTrue($message, array('id' => $table->getId()));
@@ -324,7 +324,7 @@ function deleteTable($data)
 {
     $tableId = isset($data['id']) ? intval($data['id']) : 0;
 
-    if (!$tableId || !Table::delete($tableId)) {
+    if (!$tableId || !WidgetTable::delete($tableId)) {
         Utility::ajaxResponseFalse('Failed to delete table');
     }
 
@@ -434,7 +434,7 @@ function previewTable($data)
 
     if ($tableId) {
         // Load existing table
-        $table = new Table($tableId);
+        $table = new WidgetTable($tableId);
         if (!$table->getId()) {
             Utility::ajaxResponseFalse('Table not found');
         }
@@ -528,7 +528,7 @@ function loadTable($data)
         Utility::ajaxResponseFalse('Invalid table ID');
     }
 
-    $table = new Table($tableId);
+    $table = new WidgetTable($tableId);
     if (!$table->getId()) {
         Utility::ajaxResponseFalse('Table not found');
     }
@@ -555,7 +555,7 @@ function tableSaveSnapshot($data)
     $tid = isset($data['tid']) ? intval($data['tid']) : 0;
     $imageData = isset($data['image_data']) ? $data['image_data'] : '';
 
-    if (!$tid || !Table::isExistent($tid)) {
+    if (!$tid || !WidgetTable::isExistent($tid)) {
         Utility::ajaxResponseFalse('Invalid table');
     }
 
@@ -588,7 +588,7 @@ function tableSaveSnapshot($data)
     }
 
     // Delete old snapshots if exist
-    $table = new Table($tid);
+    $table = new WidgetTable($tid);
     if ($table->getSnapshot()) {
         $oldLarge = $largeDir . $table->getSnapshot();
         $oldThumb = $thumbDir . $table->getSnapshot();

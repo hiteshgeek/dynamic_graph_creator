@@ -56,6 +56,7 @@ export default class ElementCreator {
 
         // Status tracking
         this.queryError = null;
+        this.queryTested = !!options.elementId; // True when editing existing element
         this.placeholderWarnings = [];
         this.savedState = null;
 
@@ -109,6 +110,7 @@ export default class ElementCreator {
             this.dataMapper.setColumns(columns);
         }
         this.clearQueryError();
+        this.queryTested = true; // Mark query as successfully tested
         Toast.success(`Query valid. Found ${columns.length} columns.`);
         this.updatePreview();
     }
@@ -120,6 +122,7 @@ export default class ElementCreator {
             this.dataMapper.setColumns([]);
         }
         this.setQueryError(error);
+        this.queryTested = false; // Mark query as failed/not tested
         Toast.error(error);
     }
 
@@ -173,6 +176,10 @@ export default class ElementCreator {
                 onChange: () => {
                     this.checkForChanges();
                     this.updatePlaceholderSettings();
+                    // Reset queryTested when query changes (requires re-testing)
+                    if (!this.initialLoad) {
+                        this.queryTested = false;
+                    }
                 },
                 getFilterValues: () => this.getSidebarFilterValues(),
                 getPlaceholderSettings: () => this.getPlaceholderSettingsForQuery()
@@ -1011,12 +1018,28 @@ export default class ElementCreator {
             errors.push('SQL query is required');
         }
 
+        // Check if query has been tested successfully
+        if (query.trim() && !this.queryTested) {
+            errors.push('Query must be tested before saving - click "Test Query" button');
+        }
+
         if (this.mandatoryFilterValidator && query.trim()) {
             const mandatoryValidation = this.mandatoryFilterValidator.validateQuery(query);
             if (!mandatoryValidation.valid) {
                 const errorMsg = this.mandatoryFilterValidator.getErrorMessage(mandatoryValidation.missing);
                 errors.push(errorMsg);
             }
+        }
+
+        // Check for query errors (syntax errors from test)
+        if (this.queryError) {
+            errors.push('Query has errors - please fix the query before saving');
+        }
+
+        // Check for unmatched placeholders (placeholders without assigned filters)
+        if (this.placeholderWarnings && this.placeholderWarnings.length > 0) {
+            const unmatchedList = this.placeholderWarnings.join(', ');
+            errors.push(`Placeholders without assigned filters: ${unmatchedList}`);
         }
 
         const mapping = this.dataMapper ? this.dataMapper.getMapping() : {};

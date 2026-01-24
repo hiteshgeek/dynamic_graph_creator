@@ -5,7 +5,7 @@
 
     // Get counter config
     $config = $counter->getConfigArray();
-    $defaultConfig = Counter::getDefaultConfig();
+    $defaultConfig = WidgetCounter::getDefaultConfig();
     $icon = isset($config['icon']) && $config['icon'] ? $config['icon'] : $defaultConfig['icon'];
     $color = isset($config['color']) && $config['color'] ? $config['color'] : $defaultConfig['color'];
     $format = isset($config['format']) && $config['format'] ? $config['format'] : $defaultConfig['format'];
