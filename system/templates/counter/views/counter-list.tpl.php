@@ -34,17 +34,11 @@ echo DGCHelper::renderPageHeader([
         <?php else: ?>
         <div class="item-card-grid">
             <?php foreach ($counters as $c): ?>
-            <?php
-            $config = $c->getConfigArray();
-            $defaultConfig = Counter::getDefaultConfig();
-            $icon = isset($config['icon']) && $config['icon'] ? $config['icon'] : $defaultConfig['icon'];
-            $color = isset($config['color']) && $config['color'] ? $config['color'] : $defaultConfig['color'];
-            ?>
-            <div class="item-card counter-card" data-counter-id="<?php echo $c->getId(); ?>">
+            <div class="item-card" data-counter-id="<?php echo $c->getId(); ?>">
                 <div class="item-card-content">
                     <div class="item-card-header">
-                        <span class="counter-type-badge" style="background-color: <?php echo htmlspecialchars($color); ?>;">
-                            <span class="material-icons"><?php echo htmlspecialchars($icon); ?></span>
+                        <span class="counter-type-badge">
+                            <i class="fas fa-hashtag"></i>
                             Counter
                         </span>
                         <?php if (!empty($counterCategories[$c->getId()])): ?>

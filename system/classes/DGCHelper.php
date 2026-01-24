@@ -732,7 +732,7 @@ class DGCHelper
         $items = array(
             array('slug' => 'graph', 'label' => 'Graphs', 'icon' => 'fa-chart-bar', 'url' => '?urlq=widget-graph'),
             array('slug' => 'table', 'label' => 'Tables', 'icon' => 'fa-table', 'url' => '?urlq=widget-table'),
-            array('slug' => 'list', 'label' => 'Lists', 'icon' => 'fa-list', 'url' => '?urlq=widget-list'),
+            // array('slug' => 'list', 'label' => 'Lists', 'icon' => 'fa-list', 'url' => '?urlq=widget-list'),
             array('slug' => 'counter', 'label' => 'Counters', 'icon' => 'fa-hashtag', 'url' => '?urlq=widget-counter'),
         );
 

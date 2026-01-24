@@ -28,6 +28,7 @@ function getDgcTableConstants()
     return [
         'DB_TBL_GRAPH' => 'graph',
         'DB_TBL_COUNTER' => 'counter',
+        'DB_TBL_TABLE' => 'dgc_table',
         'DB_TBL_DATA_FILTER' => 'data_filter',
         'DB_TBL_DASHBOARD_TEMPLATE_CATEGORY' => 'dashboard_template_category',
         'DB_TBL_DASHBOARD_TEMPLATE' => 'dashboard_template',
@@ -36,6 +37,7 @@ function getDgcTableConstants()
         'DB_TBL_WIDGET_CATEGORY' => 'widget_category',
         'DB_TBL_GRAPH_WIDGET_CATEGORY_MAPPING' => 'graph_widget_category_mapping',
         'DB_TBL_COUNTER_WIDGET_CATEGORY_MAPPING' => 'counter_widget_category_mapping',
+        'DB_TBL_TABLE_WIDGET_CATEGORY_MAPPING' => 'table_widget_category_mapping',
         'DB_TBL_WIDGET_TYPE' => 'widget_type',
         'DB_TBL_FILTER_WIDGET_TYPE_MANDATORY' => 'filter_widget_type_mandatory',
     ];
@@ -707,7 +709,7 @@ function getMigrationSteps()
     return [
         1 => [
             'title' => 'Copy PHP Classes',
-            'description' => 'Copies PHP class files to handle graphs, counters, data filters, dashboards, templates, system placeholders, widget categories/types, and UI components.',
+            'description' => 'Copies PHP class files to handle graphs, counters, tables, data filters, dashboards, templates, system placeholders, widget categories/types, and UI components.',
             'files' => [
                 'system/classes/DGCHelper.php',
                 'system/classes/Graph.php',
@@ -716,6 +718,10 @@ function getMigrationSteps()
                 'system/classes/CounterManager.php',
                 'system/classes/CounterWidgetCategoryMapping.php',
                 'system/classes/CounterWidgetCategoryMappingManager.php',
+                'system/classes/Table.php',
+                'system/classes/TableManager.php',
+                'system/classes/TableWidgetCategoryMapping.php',
+                'system/classes/TableWidgetCategoryMappingManager.php',
                 'system/classes/DataFilter.php',
                 'system/classes/DataFilterManager.php',
                 'system/classes/DataFilterSet.php',
@@ -733,6 +739,8 @@ function getMigrationSteps()
                 'system/classes/WidgetType.php',
                 'system/classes/WidgetTypeManager.php',
                 'system/classes/FilterWidgetTypeMandatoryManager.php',
+                'system/classes/element/Element.php',
+                'system/classes/element/ElementManager.php',
             ],
             'type' => 'copy'
         ],
@@ -757,6 +765,16 @@ function getMigrationSteps()
             'type' => 'copy'
         ],
         4 => [
+            'title' => 'Copy Table Templates',
+            'description' => 'Copies template files for the Table widget module (views and forms).',
+            'files' => [
+                'system/templates/table/views/table-list.tpl.php',
+                'system/templates/table/views/table-view.tpl.php',
+                'system/templates/table/forms/table-creator.tpl.php',
+            ],
+            'type' => 'copy'
+        ],
+        5 => [
             'title' => 'Copy Data Filter Templates',
             'description' => 'Copies template files for the Data Filter module (views and forms).',
             'files' => [
@@ -765,7 +783,7 @@ function getMigrationSteps()
             ],
             'type' => 'copy'
         ],
-        5 => [
+        6 => [
             'title' => 'Copy Dashboard Templates',
             'description' => 'Copies template files for the Dashboard module (views and forms).',
             'files' => [
@@ -779,26 +797,27 @@ function getMigrationSteps()
             ],
             'type' => 'copy'
         ],
-        6 => [
+        7 => [
             'title' => 'Copy Include Files',
             'description' => 'Copies include files with transforms. Page scripts now come from dist/per_page/. Include files are transformed: LocalUtility::addModule*() and addPageScript() -> $theme->addCss()/addScript().',
-            'files' => [], // Page scripts now come from dist/per_page/ via Step 7
+            'files' => [], // Page scripts now come from dist/per_page/ via Step 8
             'include_files' => [
                 'system/includes/graph/graph.inc.php',
                 'system/includes/counter/counter.inc.php',
+                'system/includes/table/table.inc.php',
                 'system/includes/data-filter/data-filter.inc.php',
                 'system/includes/dashboard/dashboard.inc.php',
                 'system/includes/dashboard/template-preview-component.php',
             ],
             'type' => 'copy_scripts_and_includes'
         ],
-        7 => [
+        8 => [
             'title' => 'Copy Compiled Assets (dist/)',
             'description' => 'Copies compiled CSS/JS bundles to module-specific folders and removes hashes (e.g., common.abc123.css -> system/styles/common/common.css).',
             'folder' => 'dist',
             'type' => 'copy_dist_renamed'
         ],
-        8 => [
+        9 => [
             'title' => 'Copy Theme Libraries',
             'description' => 'Copies JavaScript/CSS libraries to the target project.',
             'libraries' => [
@@ -814,12 +833,12 @@ function getMigrationSteps()
             ],
             'type' => 'copy_libraries_versioned'
         ],
-        9 => [
+        10 => [
             'title' => 'Run Database Setup',
             'description' => 'Shows the SQL that needs to be executed to create tables and insert system data.',
             'type' => 'sql_preview'
         ],
-        10 => [
+        11 => [
             'title' => 'Code Modifications Required',
             'description' => 'Manual changes needed: add routes to system.inc.php and update asset loading in include files.',
             'type' => 'code_modifications'

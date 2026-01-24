@@ -1136,6 +1136,12 @@
 // Graph table (status in gsid column: 1=active, 3=deleted)
 const DB_TBL_GRAPH = "graph";
 
+// Counter table (status in csid column: 1=active, 3=deleted)
+const DB_TBL_COUNTER = "counter";
+
+// Table widget table (status in tsid column: 1=active, 3=deleted)
+const DB_TBL_TABLE = "dgc_table";
+
 // Data filter table (status in dfsid column: 1=active, 3=deleted)
 const DB_TBL_DATA_FILTER = "data_filter";
 
@@ -1156,6 +1162,12 @@ const DB_TBL_WIDGET_CATEGORY = "widget_category";
 
 // Graph-Widget category mapping table
 const DB_TBL_GRAPH_WIDGET_CATEGORY_MAPPING = "graph_widget_category_mapping";
+
+// Counter-Widget category mapping table
+const DB_TBL_COUNTER_WIDGET_CATEGORY_MAPPING = "counter_widget_category_mapping";
+
+// Table-Widget category mapping table
+const DB_TBL_TABLE_WIDGET_CATEGORY_MAPPING = "table_widget_category_mapping";
 
 // Widget type table (graph, link, table, list, counter)
 const DB_TBL_WIDGET_TYPE = "widget_type";
@@ -1187,6 +1199,14 @@ const DB_TBL_FILTER_WIDGET_TYPE_MANDATORY = "filter_widget_type_mandatory";</cod
     include_once 'graph/graph.inc.php';
     break;
 
+case "counter":
+    include_once 'counter/counter.inc.php';
+    break;
+
+case "widget-table":
+    include_once 'table/table.inc.php';
+    break;
+
 case "data-filter":
     include_once 'data-filter/data-filter.inc.php';
     break;
@@ -1205,6 +1225,10 @@ case "dashboard":
                                     </p>
                                     <div class="code-block mb-3"><pre><code class="language-php">LocalUtility::addModuleCss('graph') → $theme->addCss(SystemConfig::stylesUrl() . 'graph/graph.css')
 LocalUtility::addModuleJs('graph') → $theme->addScript(SystemConfig::scriptsUrl() . 'graph/graph.js')
+LocalUtility::addModuleCss('counter') → $theme->addCss(SystemConfig::stylesUrl() . 'counter/counter.css')
+LocalUtility::addModuleJs('counter') → $theme->addScript(SystemConfig::scriptsUrl() . 'counter/counter.js')
+LocalUtility::addModuleCss('table') → $theme->addCss(SystemConfig::stylesUrl() . 'table/table.css')
+LocalUtility::addModuleJs('table') → $theme->addScript(SystemConfig::scriptsUrl() . 'table/table.js')
 LocalUtility::addModuleCss('data-filter') → $theme->addCss(SystemConfig::stylesUrl() . 'data-filter/data-filter.css')
 LocalUtility::addModuleJs('data-filter') → $theme->addScript(SystemConfig::scriptsUrl() . 'data-filter/data-filter.js')
 LocalUtility::addModuleCss('dashboard') → $theme->addCss(SystemConfig::stylesUrl() . 'dashboard/dashboard.css')

@@ -13,21 +13,21 @@
   padding: $spacing-lg 0;
 }
 
-// Counter card specific styling in list
-.counter-card {
-  .counter-type-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-    color: #fff;
+// Counter type badge (matches graph-type-badge style)
+.counter-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: rgba($teal, 0.1);
+  color: $teal;
 
-    .material-icons {
-      font-size: 16px;
-    }
+  i {
+    font-size: 0.75rem;
+    line-height: 1;
   }
 }
 

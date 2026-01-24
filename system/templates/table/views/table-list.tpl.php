@@ -34,12 +34,7 @@ echo DGCHelper::renderPageHeader([
         <?php else: ?>
         <div class="item-card-grid">
             <?php foreach ($tables as $t): ?>
-            <?php
-            $config = $t->getConfigArray();
-            $defaultConfig = Table::getDefaultConfig();
-            $style = isset($config['style']) ? $config['style'] : $defaultConfig['style'];
-            ?>
-            <div class="item-card table-card" data-table-id="<?php echo $t->getId(); ?>">
+            <div class="item-card" data-table-id="<?php echo $t->getId(); ?>">
                 <div class="item-card-content">
                     <div class="item-card-header">
                         <span class="table-type-badge">
