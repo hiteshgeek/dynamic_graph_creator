@@ -1678,7 +1678,7 @@ export default class DataFilterFormPage {
      * Render date range default value input with mode selection
      */
     renderDateRangeDefaultInput(parsedValue, showPresets = false) {
-        const mode = parsedValue?.mode || 'selected';
+        const mode = parsedValue?.mode || 'select_all';
         const preset = parsedValue?.preset || 'Last 7 Days';
         const fromDate = parsedValue?.from || '';
         const toDate = parsedValue?.to || '';
@@ -1690,13 +1690,6 @@ export default class DataFilterFormPage {
                     <label class="form-check-label" for="mode-select-all">
                         <strong>Select All</strong>
                         <small class="d-block text-muted">No date filter will be applied by default</small>
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input default-mode-radio" type="radio" name="default-mode" value="selected" id="mode-selected" ${mode === 'selected' ? 'checked' : ''}>
-                    <label class="form-check-label" for="mode-selected">
-                        <strong>Remember Selection</strong>
-                        <small class="d-block text-muted">Use last selected value from session</small>
                     </label>
                 </div>
         `;
@@ -1953,6 +1946,12 @@ export default class DataFilterFormPage {
                 if (specificDates) {
                     specificDates.style.display = mode === 'specific' ? '' : 'none';
                 }
+
+                // When switching to preset mode, sync the preset to datepicker preview
+                if (mode === 'preset') {
+                    const preset = document.getElementById('default-preset')?.value || 'Last 7 Days';
+                    setTimeout(() => this.syncPresetToDatepickerPreview(preset), 50);
+                }
             });
         });
 
@@ -2005,9 +2004,26 @@ export default class DataFilterFormPage {
             DatePickerInit.init(section);
         }
 
+        // Bind preset dropdown to sync with datepicker preview
+        const presetDropdown = document.getElementById('default-preset');
+        if (presetDropdown) {
+            presetDropdown.addEventListener('change', () => {
+                this.syncPresetToDatepickerPreview(presetDropdown.value);
+            });
+        }
+
         // Sync default values to preview (for pre-existing values)
         // Use setTimeout to ensure preview is rendered before sync
         setTimeout(() => this.syncDefaultToPreview(), 50);
+
+        // Also sync preset to datepicker preview if preset mode is selected
+        setTimeout(() => {
+            const selectedMode = document.querySelector('input[name="default-mode"]:checked')?.value;
+            if (selectedMode === 'preset') {
+                const preset = document.getElementById('default-preset')?.value || 'Last 7 Days';
+                this.syncPresetToDatepickerPreview(preset);
+            }
+        }, 100);
     }
 
     /**
@@ -2189,6 +2205,115 @@ export default class DataFilterFormPage {
     }
 
     /**
+     * Sync preset selection to datepicker preview
+     * @param {string} preset - Preset name (e.g., 'Last 7 Days')
+     */
+    syncPresetToDatepickerPreview(preset) {
+        const previewSection = document.getElementById('filter-preview-section');
+        if (!previewSection) return;
+
+        // Find the datepicker in preview
+        const datepicker = previewSection.querySelector('.dgc-datepicker[data-picker-type="range"], .dgc-datepicker[data-picker-type="main"]');
+        if (!datepicker) return;
+
+        // Update the datepicker using jQuery/daterangepicker if available
+        if (typeof $ !== 'undefined' && typeof moment !== 'undefined') {
+            const $picker = $(datepicker);
+            const pickerInstance = $picker.data('daterangepicker');
+            if (pickerInstance) {
+                const rangesList = pickerInstance.container.find('.ranges li');
+                let rangeClicked = false;
+
+                // Find and click the matching range item to properly select it
+                rangesList.each(function() {
+                    const rangeText = $(this).text().trim();
+                    const rangeKey = $(this).attr('data-range-key');
+                    if (rangeKey === preset || rangeText === preset) {
+                        // Trigger click to properly select the range
+                        $(this).trigger('click');
+                        rangeClicked = true;
+                        return false; // break the loop
+                    }
+                });
+
+                // If range was clicked, update the input value and data attributes
+                if (rangeClicked) {
+                    const fromMoment = pickerInstance.startDate;
+                    const toMoment = pickerInstance.endDate;
+
+                    // Update display
+                    $picker.val(fromMoment.format('DD-MM-YYYY') + ' - ' + toMoment.format('DD-MM-YYYY'));
+
+                    // Update data attributes
+                    datepicker.dataset.from = fromMoment.format('YYYY-MM-DD');
+                    datepicker.dataset.to = toMoment.format('YYYY-MM-DD');
+                }
+            }
+        }
+    }
+
+    /**
+     * Resolve preset name to date range
+     * @param {string} preset - Preset name
+     * @returns {Object} { from: 'YYYY-MM-DD', to: 'YYYY-MM-DD' }
+     */
+    resolvePresetToDateRange(preset) {
+        const today = new Date();
+        const formatDate = (d) => d.toISOString().split('T')[0];
+        let from = new Date(today);
+        let to = new Date(today);
+
+        switch (preset) {
+            case 'Today':
+                break;
+            case 'Yesterday':
+                from.setDate(from.getDate() - 1);
+                to = new Date(from);
+                break;
+            case 'Last 7 Days':
+                from.setDate(from.getDate() - 6);
+                break;
+            case 'Last 30 Days':
+                from.setDate(from.getDate() - 29);
+                break;
+            case 'This Month':
+                from = new Date(today.getFullYear(), today.getMonth(), 1);
+                to = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                break;
+            case 'Last Month':
+                from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                to = new Date(today.getFullYear(), today.getMonth(), 0);
+                break;
+            case 'Year to Date':
+                from = new Date(today.getFullYear(), 0, 1);
+                break;
+            case 'This Financial Year':
+                // Financial year: April to March (India)
+                if (today.getMonth() >= 3) {
+                    from = new Date(today.getFullYear(), 3, 1);
+                    to = new Date(today.getFullYear() + 1, 2, 31);
+                } else {
+                    from = new Date(today.getFullYear() - 1, 3, 1);
+                    to = new Date(today.getFullYear(), 2, 31);
+                }
+                break;
+            case 'Last Financial Year':
+                if (today.getMonth() >= 3) {
+                    from = new Date(today.getFullYear() - 1, 3, 1);
+                    to = new Date(today.getFullYear(), 2, 31);
+                } else {
+                    from = new Date(today.getFullYear() - 2, 3, 1);
+                    to = new Date(today.getFullYear() - 1, 2, 31);
+                }
+                break;
+            default:
+                from.setDate(from.getDate() - 6);
+        }
+
+        return { from: formatDate(from), to: formatDate(to) };
+    }
+
+    /**
      * Get default value as JSON for saving
      * Returns value whether required or not (default value is always optional unless required)
      */
@@ -2299,7 +2424,7 @@ export default class DataFilterFormPage {
             }
 
             // Date range modes (except 'block') are valid if set
-            if (parsed.mode === 'select_all' || parsed.mode === 'selected') {
+            if (parsed.mode === 'select_all') {
                 return true;
             }
 

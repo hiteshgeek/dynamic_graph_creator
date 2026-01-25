@@ -228,6 +228,9 @@ class DatePickerInit {
             delete this.dataset.to;
             this.dispatchEvent(new Event('change', { bubbles: true }));
         });
+
+        // Apply default preset/dates if configured
+        DatePickerInit.applyDefaultValues($input);
     }
 
     /**
@@ -286,6 +289,88 @@ class DatePickerInit {
             delete this.dataset.to;
             this.dispatchEvent(new Event('change', { bubbles: true }));
         });
+
+        // Apply default preset/dates if configured
+        DatePickerInit.applyDefaultValues($input);
+    }
+
+    /**
+     * Apply default values from data attributes to an initialized picker
+     * Handles both preset names and specific dates
+     * @param {jQuery} $input - jQuery wrapped input with daterangepicker initialized
+     */
+    static applyDefaultValues($input) {
+        const input = $input[0];
+        const pickerInstance = $input.data('daterangepicker');
+        if (!pickerInstance) return;
+
+        const defaultPreset = input.dataset.defaultPreset;
+        const defaultFrom = input.dataset.defaultFrom;
+        const defaultTo = input.dataset.defaultTo;
+
+        // If no default is configured, clear any active range selection
+        // (prevents the initialization default from showing as selected)
+        if (!defaultPreset && !defaultFrom && !defaultTo) {
+            const rangesList = pickerInstance.container.find('.ranges li');
+            rangesList.removeClass('active');
+            pickerInstance.chosenLabel = '';
+            return;
+        }
+
+        // If preset is specified, click the range to properly select it
+        if (defaultPreset) {
+            const rangesList = pickerInstance.container.find('.ranges li');
+            let rangeClicked = false;
+
+            // Find and click the matching range item
+            rangesList.each(function() {
+                const rangeText = $(this).text().trim();
+                const rangeKey = $(this).attr('data-range-key');
+                if (rangeKey === defaultPreset || rangeText === defaultPreset) {
+                    // Trigger click to properly select the range
+                    $(this).trigger('click');
+                    rangeClicked = true;
+                    return false; // break the loop
+                }
+            });
+
+            // If range was clicked, update the input value and data attributes
+            if (rangeClicked) {
+                const fromMoment = pickerInstance.startDate;
+                const toMoment = pickerInstance.endDate;
+
+                // Update display
+                $input.val(fromMoment.format(DatePickerInit.DISPLAY_FORMAT) + ' - ' + toMoment.format(DatePickerInit.DISPLAY_FORMAT));
+
+                // Update data attributes
+                input.dataset.from = fromMoment.format(DatePickerInit.DATA_FORMAT);
+                input.dataset.to = toMoment.format(DatePickerInit.DATA_FORMAT);
+                $input.data('from', input.dataset.from);
+                $input.data('to', input.dataset.to);
+            }
+        }
+        // If specific dates are specified
+        else if (defaultFrom && defaultTo) {
+            const fromMoment = moment(defaultFrom, DatePickerInit.DATA_FORMAT);
+            const toMoment = moment(defaultTo, DatePickerInit.DATA_FORMAT);
+
+            if (fromMoment.isValid() && toMoment.isValid()) {
+                pickerInstance.setStartDate(fromMoment);
+                pickerInstance.setEndDate(toMoment);
+
+                // Update the calendars to reflect the new dates
+                pickerInstance.updateCalendars();
+
+                // Update display
+                $input.val(fromMoment.format(DatePickerInit.DISPLAY_FORMAT) + ' - ' + toMoment.format(DatePickerInit.DISPLAY_FORMAT));
+
+                // Update data attributes
+                input.dataset.from = defaultFrom;
+                input.dataset.to = defaultTo;
+                $input.data('from', defaultFrom);
+                $input.data('to', defaultTo);
+            }
+        }
     }
 
     /**

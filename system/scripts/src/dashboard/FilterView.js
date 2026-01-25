@@ -240,10 +240,10 @@ export class FilterView {
      * Apply date range default value
      */
     applyDateRangeDefault(item, filterKey, defaultValue) {
-        const mode = defaultValue.mode || 'selected';
+        const mode = defaultValue.mode || 'select_all';
 
-        // Skip if mode is 'selected' (use last selection) or 'block'
-        if (mode === 'selected' || mode === 'block') {
+        // Skip if mode is 'block' (require user selection)
+        if (mode === 'block') {
             return;
         }
 
@@ -277,23 +277,20 @@ export class FilterView {
     resolvePresetToDateRange(preset) {
         const today = new Date();
         const formatDate = (d) => d.toISOString().split('T')[0];
-        let from = today;
-        let to = today;
+        let from = new Date(today);
+        let to = new Date(today);
 
         switch (preset) {
             case 'Today':
                 break;
             case 'Yesterday':
-                from = new Date(today);
                 from.setDate(from.getDate() - 1);
                 to = new Date(from);
                 break;
             case 'Last 7 Days':
-                from = new Date(today);
                 from.setDate(from.getDate() - 6);
                 break;
             case 'Last 30 Days':
-                from = new Date(today);
                 from.setDate(from.getDate() - 29);
                 break;
             case 'This Month':
@@ -307,8 +304,26 @@ export class FilterView {
             case 'Year to Date':
                 from = new Date(today.getFullYear(), 0, 1);
                 break;
+            case 'This Financial Year':
+                // Financial year: April to March (India)
+                if (today.getMonth() >= 3) {
+                    from = new Date(today.getFullYear(), 3, 1);
+                    to = new Date(today.getFullYear() + 1, 2, 31);
+                } else {
+                    from = new Date(today.getFullYear() - 1, 3, 1);
+                    to = new Date(today.getFullYear(), 2, 31);
+                }
+                break;
+            case 'Last Financial Year':
+                if (today.getMonth() >= 3) {
+                    from = new Date(today.getFullYear() - 1, 3, 1);
+                    to = new Date(today.getFullYear(), 2, 31);
+                } else {
+                    from = new Date(today.getFullYear() - 2, 3, 1);
+                    to = new Date(today.getFullYear() - 1, 2, 31);
+                }
+                break;
             default:
-                from = new Date(today);
                 from.setDate(from.getDate() - 6);
         }
 

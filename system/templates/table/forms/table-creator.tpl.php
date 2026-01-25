@@ -245,7 +245,23 @@ echo DGCHelper::renderPageHeader([
                                             $filterKey = $filter['filter_key'];
                                             $filterKeyClean = ltrim($filterKey, ':');
                                             $filterKeyDisplay = '::' . $filterKeyClean;
-                                            $defaultValue = isset($filter['default_value']) ? $filter['default_value'] : '';
+                                            $defaultValueRaw = isset($filter['default_value']) ? $filter['default_value'] : '';
+                                            // Parse JSON default value if applicable
+                                            $defaultValueDecoded = $defaultValueRaw ? json_decode($defaultValueRaw, true) : null;
+                                            // Extract actual value(s) from JSON structure
+                                            $defaultValue = '';
+                                            $defaultValues = array();
+                                            if (is_array($defaultValueDecoded)) {
+                                                if (isset($defaultValueDecoded['value'])) {
+                                                    $defaultValue = $defaultValueDecoded['value'];
+                                                }
+                                                if (isset($defaultValueDecoded['values']) && is_array($defaultValueDecoded['values'])) {
+                                                    $defaultValues = $defaultValueDecoded['values'];
+                                                }
+                                            } elseif ($defaultValueRaw && json_last_error() !== JSON_ERROR_NONE) {
+                                                // Not JSON, use as-is (legacy support)
+                                                $defaultValue = $defaultValueRaw;
+                                            }
                                             $filterConfig = isset($filter['filter_config']) ? $filter['filter_config'] : '';
                                             $filterConfigArr = $filterConfig ? json_decode($filterConfig, true) : array();
                                             $isInline = isset($filterConfigArr['inline']) && $filterConfigArr['inline'];
@@ -316,10 +332,40 @@ echo DGCHelper::renderPageHeader([
                                                     <input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($defaultValue); ?>" data-picker-type="single" placeholder="Select date" autocomplete="off">
 
                                                 <?php elseif ($filterType === 'date_range'): ?>
-                                                    <input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="<?php echo htmlspecialchars($filterKeyClean); ?>" data-picker-type="range" placeholder="Select date range" autocomplete="off">
+                                                    <?php
+                                                    $dateRangeAttrs = '';
+                                                    if (is_array($defaultValueDecoded) && isset($defaultValueDecoded['mode'])) {
+                                                        if ($defaultValueDecoded['mode'] === 'preset' && !empty($defaultValueDecoded['preset'])) {
+                                                            $dateRangeAttrs = ' data-default-preset="' . htmlspecialchars($defaultValueDecoded['preset']) . '"';
+                                                        } elseif ($defaultValueDecoded['mode'] === 'specific') {
+                                                            if (!empty($defaultValueDecoded['from'])) {
+                                                                $dateRangeAttrs .= ' data-default-from="' . htmlspecialchars($defaultValueDecoded['from']) . '"';
+                                                            }
+                                                            if (!empty($defaultValueDecoded['to'])) {
+                                                                $dateRangeAttrs .= ' data-default-to="' . htmlspecialchars($defaultValueDecoded['to']) . '"';
+                                                            }
+                                                        }
+                                                    }
+                                                    ?>
+                                                    <input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="<?php echo htmlspecialchars($filterKeyClean); ?>" data-picker-type="range" placeholder="Select date range" autocomplete="off"<?php echo $dateRangeAttrs; ?>>
 
                                                 <?php elseif ($filterType === 'main_datepicker'): ?>
-                                                    <input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="<?php echo htmlspecialchars($filterKeyClean); ?>" data-picker-type="main" placeholder="Select date range" autocomplete="off">
+                                                    <?php
+                                                    $mainDateAttrs = '';
+                                                    if (is_array($defaultValueDecoded) && isset($defaultValueDecoded['mode'])) {
+                                                        if ($defaultValueDecoded['mode'] === 'preset' && !empty($defaultValueDecoded['preset'])) {
+                                                            $mainDateAttrs = ' data-default-preset="' . htmlspecialchars($defaultValueDecoded['preset']) . '"';
+                                                        } elseif ($defaultValueDecoded['mode'] === 'specific') {
+                                                            if (!empty($defaultValueDecoded['from'])) {
+                                                                $mainDateAttrs .= ' data-default-from="' . htmlspecialchars($defaultValueDecoded['from']) . '"';
+                                                            }
+                                                            if (!empty($defaultValueDecoded['to'])) {
+                                                                $mainDateAttrs .= ' data-default-to="' . htmlspecialchars($defaultValueDecoded['to']) . '"';
+                                                            }
+                                                        }
+                                                    }
+                                                    ?>
+                                                    <input type="text" class="form-control form-control-sm filter-input dgc-datepicker" name="<?php echo htmlspecialchars($filterKeyClean); ?>" data-picker-type="main" placeholder="Select date range" autocomplete="off"<?php echo $mainDateAttrs; ?>>
 
                                                 <?php elseif ($filterType === 'number'): ?>
                                                     <input type="number" class="form-control form-control-sm filter-input" name="<?php echo htmlspecialchars($filterKeyClean); ?>" value="<?php echo htmlspecialchars($defaultValue); ?>" placeholder="Enter number">

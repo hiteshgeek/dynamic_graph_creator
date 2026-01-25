@@ -36,7 +36,7 @@ export default class PlaceholderSettings {
         // Initialize settings for new placeholders
         placeholders.forEach(placeholder => {
             const filter = matchedFilters[placeholder];
-            const isRequired = filter && (filter.is_required === 1 || filter.is_required === '1');
+            const isRequired = filter && (filter.is_required === 1 || filter.is_required === '1' || filter.is_required === true);
 
             if (!this.settings[placeholder]) {
                 // For required filters, default allowEmpty to false
@@ -83,7 +83,7 @@ export default class PlaceholderSettings {
         this.placeholders.forEach(placeholder => {
             const filter = matchedFilters[placeholder];
             const isRequired = this.settings[placeholder]?.isRequired ||
-                              (filter && (filter.is_required === 1 || filter.is_required === '1'));
+                              (filter && (filter.is_required === 1 || filter.is_required === '1' || filter.is_required === true));
             const isAllowEmpty = this.settings[placeholder]?.allowEmpty !== false;
             const checkboxId = `allow-empty-${placeholder.replace(/::/g, '')}`;
 
