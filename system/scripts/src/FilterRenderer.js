@@ -74,9 +74,12 @@ class FilterRenderer {
         const keyClean = key.replace(/^::/, '');
         const label = filter.filter_label || keyClean;
         const filterType = filter.filter_type || 'text';
-        const defaultValue = filter.default_value || '';
+        const rawDefaultValue = filter.default_value || '';
         const inputId = `filter-input-${keyClean}`;
         const isRequired = filter.is_required === 1 || filter.is_required === '1';
+
+        // Parse JSON default value for required filters
+        const defaultValue = FilterRenderer.resolveDefaultValue(rawDefaultValue, filterType);
 
         // Get options for select/checkbox/radio types
         const filterOptions = FilterRenderer.parseOptions(filter);
@@ -820,6 +823,53 @@ class FilterRenderer {
             return JSON.parse(configStr);
         } catch (e) {
             return {};
+        }
+    }
+
+    /**
+     * Resolve default value from JSON structure
+     * @param {string} rawDefaultValue - Raw default value (may be JSON or plain string)
+     * @param {string} filterType - Filter type
+     * @returns {string|Array} Resolved default value for use in input
+     */
+    static resolveDefaultValue(rawDefaultValue, filterType) {
+        if (!rawDefaultValue) return '';
+
+        // Try to parse as JSON
+        let parsed = null;
+        try {
+            parsed = JSON.parse(rawDefaultValue);
+        } catch (e) {
+            // Not JSON, return as-is (legacy plain string)
+            return rawDefaultValue;
+        }
+
+        if (!parsed || typeof parsed !== 'object') {
+            return rawDefaultValue;
+        }
+
+        // Extract value based on filter type
+        switch (filterType) {
+            case 'date_range':
+            case 'main_datepicker':
+                // For date range, return empty (DatePickerInit will handle from data attributes)
+                // The actual default should be applied via FilterView or separately
+                return '';
+
+            case 'multi_select':
+            case 'checkbox':
+            case 'tokeninput':
+                // Return array of values
+                return parsed.values || [];
+
+            case 'text':
+            case 'number':
+            case 'date':
+            case 'select':
+            case 'radio':
+            default:
+                // Return single value
+                return parsed.value || '';
         }
     }
 

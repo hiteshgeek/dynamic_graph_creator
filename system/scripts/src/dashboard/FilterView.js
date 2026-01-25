@@ -34,6 +34,9 @@ export class FilterView {
         this.viewType = null;
         this.filtersLoadedPromise = null;
 
+        // Required filter tracking
+        this.requiredFilters = {};  // { filterKey: { default_value, filter_type, filter_label } }
+
         // Constants
         this.COLLAPSE_KEY = 'dgc_dashboard_filters_collapsed';
     }
@@ -93,6 +96,9 @@ export class FilterView {
         // Skip if no filters container
         if (!this.filtersContainer) return;
 
+        // Detect and store required filters
+        this.detectRequiredFilters();
+
         // Use FilterRenderer for comprehensive initialization (datepickers, dropdowns, etc.)
         if (typeof window.FilterRenderer !== 'undefined') {
             window.FilterRenderer.init(this.filtersContainer);
@@ -102,6 +108,291 @@ export class FilterView {
         } else {
             console.warn(`${this.options.logPrefix} FilterRenderer and DatePickerInit not available`);
         }
+    }
+
+    /**
+     * Detect required filters and store their metadata
+     */
+    detectRequiredFilters() {
+        if (!this.filtersContainer) return;
+
+        this.requiredFilters = {};
+        const filterItems = this.filtersContainer.querySelectorAll('.filter-input-item[data-is-required="1"]');
+
+        filterItems.forEach(item => {
+            const filterKey = item.dataset.filterKey;
+            const filterType = item.dataset.filterType;
+            const filterLabel = item.querySelector('.filter-input-label')?.textContent || filterKey;
+            const defaultValueRaw = item.dataset.defaultValue || '';
+
+            if (filterKey) {
+                let defaultValue = null;
+                try {
+                    defaultValue = defaultValueRaw ? JSON.parse(defaultValueRaw) : null;
+                } catch (e) {
+                    // Legacy plain string
+                    defaultValue = defaultValueRaw ? { value: defaultValueRaw } : null;
+                }
+
+                this.requiredFilters[filterKey] = {
+                    filter_key: filterKey,
+                    filter_type: filterType,
+                    filter_label: filterLabel,
+                    default_value: defaultValue
+                };
+            }
+        });
+    }
+
+    /**
+     * Check if a filter is required
+     */
+    isFilterRequired(filterKey) {
+        return !!this.requiredFilters[filterKey];
+    }
+
+    /**
+     * Get default value for a required filter
+     */
+    getFilterDefaultValue(filterKey) {
+        const filter = this.requiredFilters[filterKey];
+        if (!filter || !filter.default_value) return null;
+        return filter.default_value;
+    }
+
+    /**
+     * Apply default values for required filters that are empty
+     */
+    applyRequiredFilterDefaults() {
+        if (!this.filtersContainer) return;
+
+        Object.keys(this.requiredFilters).forEach(filterKey => {
+            const filter = this.requiredFilters[filterKey];
+            const item = this.filtersContainer.querySelector(`.filter-input-item[data-filter-key="${filterKey}"]`);
+            if (!item || !filter.default_value) return;
+
+            // Check if filter currently has a value
+            const currentValue = this.getFilterItemValue(item, filterKey);
+            if (currentValue && Object.keys(currentValue).some(k => currentValue[k])) {
+                return; // Already has a value
+            }
+
+            // Apply default value
+            this.applyDefaultToFilter(item, filter);
+        });
+    }
+
+    /**
+     * Apply default value to a single filter
+     */
+    applyDefaultToFilter(item, filter) {
+        const filterKey = filter.filter_key;
+        const defaultValue = filter.default_value;
+        if (!defaultValue) return;
+
+        const filterType = filter.filter_type;
+
+        switch (filterType) {
+            case 'date_range':
+            case 'main_datepicker':
+                this.applyDateRangeDefault(item, filterKey, defaultValue);
+                break;
+
+            case 'select':
+            case 'radio':
+                if (defaultValue.value) {
+                    const filterValues = {};
+                    filterValues['::' + filterKey] = defaultValue.value;
+                    this.applyFilterValuesToItem(item, filterKey, filterValues);
+                }
+                break;
+
+            case 'multi_select':
+            case 'checkbox':
+                if (defaultValue.values && defaultValue.values.length > 0) {
+                    const filterValues = {};
+                    filterValues['::' + filterKey] = defaultValue.values;
+                    this.applyFilterValuesToItem(item, filterKey, filterValues);
+                }
+                break;
+
+            case 'text':
+            case 'number':
+            case 'date':
+                if (defaultValue.value) {
+                    const filterValues = {};
+                    filterValues['::' + filterKey] = defaultValue.value;
+                    this.applyFilterValuesToItem(item, filterKey, filterValues);
+                }
+                break;
+
+            case 'tokeninput':
+                if (defaultValue.values && defaultValue.values.length > 0) {
+                    const filterValues = {};
+                    filterValues['::' + filterKey] = defaultValue.values.join(',');
+                    this.applyFilterValuesToItem(item, filterKey, filterValues);
+                }
+                break;
+        }
+    }
+
+    /**
+     * Apply date range default value
+     */
+    applyDateRangeDefault(item, filterKey, defaultValue) {
+        const mode = defaultValue.mode || 'selected';
+
+        // Skip if mode is 'selected' (use last selection) or 'block'
+        if (mode === 'selected' || mode === 'block') {
+            return;
+        }
+
+        let fromDate = '';
+        let toDate = '';
+
+        if (mode === 'select_all') {
+            // No filter applied - leave empty
+            return;
+        } else if (mode === 'specific') {
+            fromDate = defaultValue.from || '';
+            toDate = defaultValue.to || '';
+        } else if (mode === 'preset') {
+            // Resolve preset to actual dates
+            const resolved = this.resolvePresetToDateRange(defaultValue.preset || 'Last 7 Days');
+            fromDate = resolved.from;
+            toDate = resolved.to;
+        }
+
+        if (fromDate && toDate) {
+            const filterValues = {};
+            filterValues['::' + filterKey + '_from'] = fromDate;
+            filterValues['::' + filterKey + '_to'] = toDate;
+            this.applyFilterValuesToItem(item, filterKey, filterValues);
+        }
+    }
+
+    /**
+     * Resolve preset name to date range
+     */
+    resolvePresetToDateRange(preset) {
+        const today = new Date();
+        const formatDate = (d) => d.toISOString().split('T')[0];
+        let from = today;
+        let to = today;
+
+        switch (preset) {
+            case 'Today':
+                break;
+            case 'Yesterday':
+                from = new Date(today);
+                from.setDate(from.getDate() - 1);
+                to = new Date(from);
+                break;
+            case 'Last 7 Days':
+                from = new Date(today);
+                from.setDate(from.getDate() - 6);
+                break;
+            case 'Last 30 Days':
+                from = new Date(today);
+                from.setDate(from.getDate() - 29);
+                break;
+            case 'This Month':
+                from = new Date(today.getFullYear(), today.getMonth(), 1);
+                to = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                break;
+            case 'Last Month':
+                from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                to = new Date(today.getFullYear(), today.getMonth(), 0);
+                break;
+            case 'Year to Date':
+                from = new Date(today.getFullYear(), 0, 1);
+                break;
+            default:
+                from = new Date(today);
+                from.setDate(from.getDate() - 6);
+        }
+
+        return { from: formatDate(from), to: formatDate(to) };
+    }
+
+    /**
+     * Apply filter values to a specific item
+     */
+    applyFilterValuesToItem(item, filterKey, filterValues) {
+        // Re-use the existing applyFilterValues logic but for a single item
+        const tempContainer = document.createElement('div');
+        tempContainer.appendChild(item.cloneNode(true));
+
+        // Apply to the actual item
+        const filterKeyWithPrefix = '::' + filterKey;
+        const fromKey = filterKeyWithPrefix + '_from';
+        const toKey = filterKeyWithPrefix + '_to';
+
+        // Date range picker
+        const dateRangePicker = item.querySelector('.dgc-datepicker[data-picker-type="range"], .dgc-datepicker[data-picker-type="main"]');
+        if (dateRangePicker && filterValues[fromKey] && filterValues[toKey]) {
+            dateRangePicker.dataset.from = filterValues[fromKey];
+            dateRangePicker.dataset.to = filterValues[toKey];
+
+            if (typeof $ !== 'undefined' && typeof moment !== 'undefined') {
+                const $picker = $(dateRangePicker);
+                const pickerInstance = $picker.data('daterangepicker');
+                if (pickerInstance) {
+                    const fromMoment = moment(filterValues[fromKey], 'YYYY-MM-DD');
+                    const toMoment = moment(filterValues[toKey], 'YYYY-MM-DD');
+                    if (fromMoment.isValid() && toMoment.isValid()) {
+                        pickerInstance.setStartDate(fromMoment);
+                        pickerInstance.setEndDate(toMoment);
+                        $picker.val(fromMoment.format('DD-MM-YYYY') + ' - ' + toMoment.format('DD-MM-YYYY'));
+                    }
+                }
+            }
+            return;
+        }
+
+        // Other filter types - delegate to applyFilterValues
+        const singleItemValues = {};
+        Object.keys(filterValues).forEach(key => {
+            singleItemValues[key] = filterValues[key];
+        });
+        this.applyFilterValues(singleItemValues, false);
+    }
+
+    /**
+     * Validate required filters have values
+     * @returns {Object} { valid: boolean, missing: string[] }
+     */
+    validateRequiredFilters() {
+        const missing = [];
+        const filterValues = this.getFilterValues();
+
+        Object.keys(this.requiredFilters).forEach(filterKey => {
+            const filter = this.requiredFilters[filterKey];
+            const filterType = filter.filter_type;
+
+            // Check for date range
+            if (filterType === 'date_range' || filterType === 'main_datepicker') {
+                const fromKey = '::' + filterKey + '_from';
+                const toKey = '::' + filterKey + '_to';
+
+                // Check if mode is 'block' - require user selection
+                const defaultValue = filter.default_value;
+                if (defaultValue && defaultValue.mode === 'block') {
+                    if (!filterValues[fromKey] || !filterValues[toKey]) {
+                        missing.push(filter.filter_label);
+                    }
+                }
+            } else {
+                const key = '::' + filterKey;
+                const value = filterValues[key];
+
+                if (!value || (Array.isArray(value) && value.length === 0)) {
+                    missing.push(filter.filter_label);
+                }
+            }
+        });
+
+        return { valid: missing.length === 0, missing };
     }
 
     /**
@@ -247,6 +538,23 @@ export class FilterView {
      */
     applyFilters() {
         if (this.options.onFilterChange) {
+            // Validate required filters
+            const validation = this.validateRequiredFilters();
+            if (!validation.valid) {
+                // Try to apply defaults for missing required filters
+                this.applyRequiredFilterDefaults();
+
+                // Re-validate after applying defaults
+                const revalidation = this.validateRequiredFilters();
+                if (!revalidation.valid) {
+                    // Still invalid - show error
+                    if (window.Toast) {
+                        window.Toast.error(`Required filter(s) missing: ${revalidation.missing.join(', ')}`);
+                    }
+                    return;
+                }
+            }
+
             const filterValues = this.getFilterValues();
             this.options.onFilterChange(filterValues);
 
@@ -395,10 +703,13 @@ export class FilterView {
      */
     async loadFiltersFromSession() {
         if (!this.options.dashboardId) {
+            // Even without session, apply required filter defaults
+            this.applyRequiredFilterDefaults();
             return;
         }
 
         if (typeof window.Ajax === 'undefined') {
+            this.applyRequiredFilterDefaults();
             return;
         }
 
@@ -424,11 +735,18 @@ export class FilterView {
                     if (this.autoApplyEnabled && this.options.onFilterChange) {
                         this.options.onFilterChange(filters);
                     }
+                } else {
+                    // No session values - apply defaults for required filters
+                    this.applyRequiredFilterDefaults();
                 }
             } else {
+                // No session data - apply defaults for required filters
+                this.applyRequiredFilterDefaults();
             }
         } catch (error) {
             console.warn(`${this.options.logPrefix} Failed to load filters:`, error);
+            // On error, still apply required filter defaults
+            this.applyRequiredFilterDefaults();
         }
     }
 

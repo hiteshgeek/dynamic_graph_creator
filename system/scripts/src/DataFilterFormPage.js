@@ -124,12 +124,26 @@ export default class DataFilterFormPage {
      * Bind all event listeners
      */
     bindEvents() {
+        // Filter type custom dropdown
+        this.initFilterTypeDropdown();
+
         // Filter type change - show/hide options section and select config
         const filterType = document.getElementById('filter-type');
         if (filterType) {
-            filterType.addEventListener('change', () => this.onFilterTypeChange());
+            filterType.addEventListener('change', () => {
+                this.onFilterTypeChange();
+                this.updateDefaultValueSection();
+            });
             // Initialize date range info on page load
             this.onFilterTypeChange();
+        }
+
+        // Required checkbox change - show/hide default value section
+        const requiredCheckbox = document.getElementById('filter-required');
+        if (requiredCheckbox) {
+            requiredCheckbox.addEventListener('change', () => this.updateDefaultValueSection());
+            // Initialize default value section on page load
+            setTimeout(() => this.updateDefaultValueSection(), 100);
         }
 
         // Filter key change - update date range placeholder examples
@@ -157,12 +171,13 @@ export default class DataFilterFormPage {
                     const row = e.target.closest('.filter-option-item');
                     if (document.querySelectorAll('.filter-option-item').length > 1) {
                         row.remove();
-                        this.updateStaticPreview();
+                        // Immediate update for remove action (bypass debounce)
+                        this.updateStaticPreviewImmediate();
                     }
                 }
             });
 
-            // Auto-update preview when typing in option fields
+            // Auto-update preview when typing in option fields (debounced)
             optionsList.addEventListener('input', () => this.updateStaticPreview());
         }
 
@@ -177,7 +192,10 @@ export default class DataFilterFormPage {
         // Multiple selection checkbox - update preview when changed
         const multipleCheckbox = document.getElementById('filter-multiple');
         if (multipleCheckbox) {
-            multipleCheckbox.addEventListener('change', () => this.updatePreview());
+            multipleCheckbox.addEventListener('change', () => {
+                this.updatePreview();
+                this.updateDefaultValueSection(); // Also update default value section
+            });
         }
 
         // Filter label input - update preview when changed
@@ -208,6 +226,65 @@ export default class DataFilterFormPage {
 
         // Initialize Bootstrap tooltips for system placeholders
         this.initSystemPlaceholderTooltips();
+    }
+
+    /**
+     * Initialize custom filter type dropdown
+     */
+    initFilterTypeDropdown() {
+        const dropdown = document.querySelector('.filter-type-dropdown');
+        if (!dropdown) return;
+
+        const hiddenInput = dropdown.querySelector('#filter-type');
+        const placeholder = dropdown.querySelector('.filter-select-placeholder');
+        const options = dropdown.querySelectorAll('.filter-select-option');
+        const searchInput = dropdown.querySelector('.select-search');
+
+        // Handle option selection
+        options.forEach(option => {
+            const radio = option.querySelector('input[type="radio"]');
+            const label = option.querySelector('.form-check-label');
+
+            // Click on option selects radio and updates display
+            option.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    e.preventDefault();
+                    if (radio) radio.checked = true;
+                }
+
+                const value = option.dataset.value;
+                const labelText = label ? label.textContent.trim() : '';
+                const iconEl = label ? label.querySelector('i') : null;
+                const iconHtml = iconEl ? iconEl.outerHTML : '';
+
+                // Update hidden input
+                hiddenInput.value = value;
+
+                // Update placeholder display
+                placeholder.innerHTML = iconHtml + this.escapeHtml(labelText);
+                placeholder.classList.add('has-selection');
+
+                // Close dropdown
+                const bsDropdown = bootstrap.Dropdown.getInstance(dropdown.querySelector('.dropdown-toggle'));
+                if (bsDropdown) bsDropdown.hide();
+
+                // Trigger change event on hidden input
+                hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        });
+
+        // Search functionality
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                options.forEach(option => {
+                    const label = option.querySelector('.form-check-label')?.textContent.toLowerCase() || '';
+                    option.style.display = (searchTerm === '' || label.includes(searchTerm)) ? '' : 'none';
+                });
+            });
+
+            searchInput.addEventListener('click', (e) => e.stopPropagation());
+        }
     }
 
     /**
@@ -425,6 +502,9 @@ export default class DataFilterFormPage {
 
         // Update filter preview based on data source
         this.updatePreviewOnSourceChange(source);
+
+        // Update default value section based on new data source options
+        this.updateDefaultValueSection();
     }
 
     /**
@@ -470,7 +550,8 @@ export default class DataFilterFormPage {
             </button>
         `;
         optionsList.appendChild(row);
-        this.updateStaticPreview();
+        // Immediate update for add action
+        this.updateStaticPreviewImmediate();
     }
 
     /**
@@ -488,20 +569,41 @@ export default class DataFilterFormPage {
     }
 
     /**
-     * Auto-update static options preview
+     * Auto-update static options preview (debounced for typing)
      */
     updateStaticPreview() {
+        const dataSource = document.getElementById('data-source').value;
+        if (dataSource !== 'static') return;
+
+        // Debounce to prevent excessive updates while typing
+        if (this.staticPreviewDebounce) {
+            clearTimeout(this.staticPreviewDebounce);
+        }
+
+        this.staticPreviewDebounce = setTimeout(() => {
+            this.updateStaticPreviewImmediate();
+        }, 150);
+    }
+
+    /**
+     * Immediate static preview update (no debounce)
+     */
+    updateStaticPreviewImmediate() {
         const dataSource = document.getElementById('data-source').value;
         if (dataSource !== 'static') return;
 
         const options = this.getStaticOptions();
         if (options.length > 0) {
             this.showFilterPreview(options);
+            // Refresh default value section with updated options
+            this.updateDefaultValueSection();
         } else {
-            const section = document.getElementById('filter-preview-section');
-            if (section) {
-                section.style.display = 'none';
+            const previewSection = document.getElementById('filter-preview-section');
+            if (previewSection) {
+                previewSection.style.display = 'none';
             }
+            // Still update default value section to show "no options" message
+            this.updateDefaultValueSection();
         }
     }
 
@@ -631,6 +733,8 @@ export default class DataFilterFormPage {
                         // Show filter preview in dedicated container (only on first page)
                         if (page === 1) {
                             this.showFilterPreview(options);
+                            // Refresh default value section now that options are loaded
+                            this.updateDefaultValueSection();
                         }
 
                         // Store data for pagination
@@ -795,6 +899,16 @@ export default class DataFilterFormPage {
             mandatoryWidgetTypes.push(parseInt(checkbox.value));
         });
 
+        // Get default value (JSON for required filters)
+        const isRequired = document.getElementById('filter-required').checked ? 1 : 0;
+        const defaultValue = this.getDefaultValueJson();
+
+        // Validate required filter has meaningful default value
+        if (isRequired && !this.hasValidDefaultValue(defaultValue)) {
+            Toast.error('Default value is required when filter is marked as required');
+            return;
+        }
+
         const data = {
             filter_id: document.getElementById('filter-id').value,
             filter_key: filterKey,
@@ -804,8 +918,8 @@ export default class DataFilterFormPage {
             data_query: '',
             static_options: '',
             filter_config: JSON.stringify(filterConfig),
-            default_value: document.getElementById('filter-default').value,
-            is_required: document.getElementById('filter-required').checked ? 1 : 0,
+            default_value: defaultValue,
+            is_required: isRequired,
             is_system: document.getElementById('filter-is-system')?.checked ? 1 : 0,
             mandatory_widget_types: JSON.stringify(mandatoryWidgetTypes)
         };
@@ -1222,7 +1336,7 @@ export default class DataFilterFormPage {
             filterLabel: document.getElementById('filter-label')?.value || '',
             filterType: document.getElementById('filter-type')?.value || '',
             dataSource: document.getElementById('data-source')?.value || '',
-            defaultValue: document.getElementById('filter-default')?.value || '',
+            defaultValue: this.getDefaultValueJson() || '',
             isRequired: document.getElementById('filter-required')?.checked || false,
             isSystem: document.getElementById('filter-is-system')?.checked || false,
             mandatoryWidgetTypes: mandatoryWidgetTypes.sort().join(','),
@@ -1426,5 +1540,780 @@ export default class DataFilterFormPage {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    // =============================================
+    // Default Value Section for Required Filters
+    // =============================================
+
+    /**
+     * Update default value section visibility and content
+     * Section is always visible, but default value is mandatory when filter is required
+     */
+    updateDefaultValueSection() {
+        const section = document.getElementById('default-value-section');
+        const content = document.getElementById('default-value-content');
+        const isRequired = document.getElementById('filter-required')?.checked;
+        const label = section?.querySelector('.form-label');
+
+        if (!section || !content) {
+            return;
+        }
+
+        // Update label to show required indicator when filter is required
+        if (label) {
+            const requiredSpan = label.querySelector('.required');
+            if (isRequired && !requiredSpan) {
+                label.innerHTML = 'Default Value <span class="required">*</span>';
+            } else if (!isRequired && requiredSpan) {
+                label.innerHTML = 'Default Value';
+            }
+        }
+        const filterType = document.getElementById('filter-type')?.value || 'text';
+        this.renderDefaultValueInput(filterType, content);
+    }
+
+    /**
+     * Render appropriate default value input based on filter type
+     */
+    renderDefaultValueInput(filterType, container) {
+        const section = document.getElementById('default-value-section');
+
+        // Try to get current value from UI first (user may have made changes)
+        // Fall back to stored existing value
+        let existingValue = '';
+        try {
+            const currentValue = this.getDefaultValueJson();
+            const parsed = JSON.parse(currentValue);
+            // Only use current value if it has meaningful content
+            if (this.hasValidDefaultValue(currentValue)) {
+                existingValue = currentValue;
+            } else {
+                existingValue = section?.dataset.existingValue || '';
+            }
+        } catch (e) {
+            existingValue = section?.dataset.existingValue || '';
+        }
+
+        let parsedValue = null;
+        try {
+            parsedValue = existingValue ? JSON.parse(existingValue) : null;
+        } catch (e) {
+            // Legacy plain string value
+            parsedValue = existingValue ? { value: existingValue } : null;
+        }
+
+        let html = '';
+
+        // Check if select type has "Allow multiple selection" checked
+        const isMultipleSelect = filterType === 'select' && document.getElementById('filter-multiple')?.checked;
+
+        switch (filterType) {
+            case 'text':
+                html = this.renderTextDefaultInput(parsedValue);
+                break;
+            case 'number':
+                html = this.renderNumberDefaultInput(parsedValue);
+                break;
+            case 'date':
+                html = this.renderDateDefaultInput(parsedValue);
+                break;
+            case 'date_range':
+                html = this.renderDateRangeDefaultInput(parsedValue, false);
+                break;
+            case 'main_datepicker':
+                html = this.renderDateRangeDefaultInput(parsedValue, true);
+                break;
+            case 'select':
+                // Use multi-select input if "Allow multiple selection" is checked
+                if (isMultipleSelect) {
+                    html = this.renderMultiSelectDefaultInput(parsedValue);
+                } else {
+                    html = this.renderSelectDefaultInput(parsedValue);
+                }
+                break;
+            case 'radio':
+                html = this.renderSelectDefaultInput(parsedValue);
+                break;
+            case 'multi_select':
+            case 'checkbox':
+                html = this.renderMultiSelectDefaultInput(parsedValue);
+                break;
+            case 'tokeninput':
+                html = this.renderTokenInputDefault(parsedValue);
+                break;
+            default:
+                html = this.renderTextDefaultInput(parsedValue);
+        }
+
+        container.innerHTML = html;
+        this.initDefaultValueInputs();
+    }
+
+    /**
+     * Render text default value input
+     */
+    renderTextDefaultInput(parsedValue) {
+        const value = parsedValue?.value || '';
+        return `<input type="text" class="form-control" id="default-value-text" placeholder="Enter default text value" value="${this.escapeHtml(value)}">`;
+    }
+
+    /**
+     * Render number default value input
+     */
+    renderNumberDefaultInput(parsedValue) {
+        const value = parsedValue?.value || '';
+        return `<input type="number" class="form-control" id="default-value-number" placeholder="Enter default number" value="${this.escapeHtml(value)}">`;
+    }
+
+    /**
+     * Render date default value input
+     */
+    renderDateDefaultInput(parsedValue) {
+        const value = parsedValue?.value || '';
+        return `<input type="text" class="form-control dgc-datepicker" data-picker-type="single" id="default-value-date" placeholder="Select default date" autocomplete="off" value="${this.escapeHtml(value)}">`;
+    }
+
+    /**
+     * Render date range default value input with mode selection
+     */
+    renderDateRangeDefaultInput(parsedValue, showPresets = false) {
+        const mode = parsedValue?.mode || 'selected';
+        const preset = parsedValue?.preset || 'Last 7 Days';
+        const fromDate = parsedValue?.from || '';
+        const toDate = parsedValue?.to || '';
+
+        let html = `
+            <div class="default-value-mode-options">
+                <div class="form-check">
+                    <input class="form-check-input default-mode-radio" type="radio" name="default-mode" value="select_all" id="mode-select-all" ${mode === 'select_all' ? 'checked' : ''}>
+                    <label class="form-check-label" for="mode-select-all">
+                        <strong>Select All</strong>
+                        <small class="d-block text-muted">No date filter will be applied by default</small>
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input default-mode-radio" type="radio" name="default-mode" value="selected" id="mode-selected" ${mode === 'selected' ? 'checked' : ''}>
+                    <label class="form-check-label" for="mode-selected">
+                        <strong>Remember Selection</strong>
+                        <small class="d-block text-muted">Use last selected value from session</small>
+                    </label>
+                </div>
+        `;
+
+        if (showPresets) {
+            html += `
+                <div class="form-check">
+                    <input class="form-check-input default-mode-radio" type="radio" name="default-mode" value="preset" id="mode-preset" ${mode === 'preset' ? 'checked' : ''}>
+                    <label class="form-check-label" for="mode-preset">
+                        <strong>Preset Range</strong>
+                        <small class="d-block text-muted">Use a predefined date range</small>
+                    </label>
+                </div>
+                <div class="default-preset-options ms-4 mt-2" id="preset-options" style="${mode === 'preset' ? '' : 'display:none;'}">
+                    <select class="form-select form-select-sm" id="default-preset">
+                        <option value="Today" ${preset === 'Today' ? 'selected' : ''}>Today</option>
+                        <option value="Yesterday" ${preset === 'Yesterday' ? 'selected' : ''}>Yesterday</option>
+                        <option value="Last 7 Days" ${preset === 'Last 7 Days' ? 'selected' : ''}>Last 7 Days</option>
+                        <option value="Last 30 Days" ${preset === 'Last 30 Days' ? 'selected' : ''}>Last 30 Days</option>
+                        <option value="This Month" ${preset === 'This Month' ? 'selected' : ''}>This Month</option>
+                        <option value="Last Month" ${preset === 'Last Month' ? 'selected' : ''}>Last Month</option>
+                        <option value="Year to Date" ${preset === 'Year to Date' ? 'selected' : ''}>Year to Date</option>
+                        <option value="This Financial Year" ${preset === 'This Financial Year' ? 'selected' : ''}>This Financial Year</option>
+                        <option value="Last Financial Year" ${preset === 'Last Financial Year' ? 'selected' : ''}>Last Financial Year</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        html += `
+                <div class="form-check">
+                    <input class="form-check-input default-mode-radio" type="radio" name="default-mode" value="specific" id="mode-specific" ${mode === 'specific' ? 'checked' : ''}>
+                    <label class="form-check-label" for="mode-specific">
+                        <strong>Specific Dates</strong>
+                        <small class="d-block text-muted">Set fixed default date range</small>
+                    </label>
+                </div>
+                <div class="default-specific-dates ms-4 mt-2" id="specific-dates" style="${mode === 'specific' ? '' : 'display:none;'}">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label small">From</label>
+                            <input type="text" class="form-control form-control-sm dgc-datepicker" data-picker-type="single" id="default-date-from" placeholder="Start date" value="${this.escapeHtml(fromDate)}">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small">To</label>
+                            <input type="text" class="form-control form-control-sm dgc-datepicker" data-picker-type="single" id="default-date-to" placeholder="End date" value="${this.escapeHtml(toDate)}">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input default-mode-radio" type="radio" name="default-mode" value="block" id="mode-block" ${mode === 'block' ? 'checked' : ''}>
+                    <label class="form-check-label" for="mode-block">
+                        <strong>Block Until Selected</strong>
+                        <small class="d-block text-muted">Query won't run until user selects a date range</small>
+                    </label>
+                </div>
+            </div>
+        `;
+
+        return html;
+    }
+
+    /**
+     * Render select/radio default value input
+     */
+    renderSelectDefaultInput(parsedValue) {
+        const selectedValue = parsedValue?.value || '';
+        const mode = parsedValue?.mode || 'value';
+        const options = this.getCurrentOptions();
+
+        // Find selected option for display
+        const selectedOption = options.find(opt => opt.value === selectedValue);
+        const selectedLabel = selectedOption ? selectedOption.label : '-- Select --';
+
+        let html = `
+            <div class="default-value-mode-options">
+                <div class="form-check">
+                    <input class="form-check-input default-select-mode-radio" type="radio" name="default-select-mode" value="value" id="select-mode-value" ${mode === 'value' ? 'checked' : ''}>
+                    <label class="form-check-label" for="select-mode-value">
+                        <strong>Default Value</strong>
+                        <small class="d-block text-muted">Pre-select a specific option</small>
+                    </label>
+                </div>
+                <div class="default-select-value-wrapper ms-4 mt-2" id="select-value-wrapper" style="${mode === 'value' ? '' : 'display:none;'}">
+        `;
+
+        if (options.length === 0) {
+            html += `<div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle"></i>
+                Configure filter options first (static or query), then return here to set default.
+            </div>`;
+        } else {
+            // Use custom dropdown matching filter preview
+            html += `
+                <div class="dropdown filter-select-dropdown default-select-dropdown" data-filter-name="default_select">
+                    <button class="btn btn-outline-secondary dropdown-toggle filter-select-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                        <span class="filter-select-placeholder${selectedOption ? ' has-selection' : ''}">${this.escapeHtml(selectedLabel)}</span>
+                    </button>
+                    <div class="dropdown-menu filter-select-options">
+                        <div class="filter-select-header">
+                            <input type="text" class="form-control form-control-sm select-search" placeholder="Search...">
+                        </div>
+                        <div class="dropdown-item filter-select-option" data-value="">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="default_select" value="" id="default-select-none" ${!selectedOption ? 'checked' : ''}>
+                                <label class="form-check-label" for="default-select-none">-- Select --</label>
+                            </div>
+                        </div>
+                        ${options.map((opt, index) => `
+                            <div class="dropdown-item filter-select-option" data-value="${this.escapeHtml(opt.value)}">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="default_select" value="${this.escapeHtml(opt.value)}" id="default-select-${index}" ${opt.value === selectedValue ? 'checked' : ''}>
+                                    <label class="form-check-label" for="default-select-${index}">${this.escapeHtml(opt.label)}</label>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <input type="hidden" class="filter-input" id="default-value-select" name="default_select" data-filter-key="default_select" value="${selectedOption ? this.escapeHtml(selectedValue) : ''}">
+                </div>
+            `;
+        }
+
+        html += `
+                </div>
+                <div class="form-check mt-2">
+                    <input class="form-check-input default-select-mode-radio" type="radio" name="default-select-mode" value="block" id="select-mode-block" ${mode === 'block' ? 'checked' : ''}>
+                    <label class="form-check-label" for="select-mode-block">
+                        <strong>Block Until Selected</strong>
+                        <small class="d-block text-muted">Query won't run until user selects an option</small>
+                    </label>
+                </div>
+            </div>
+        `;
+
+        return html;
+    }
+
+    /**
+     * Render multi-select/checkbox default value input
+     */
+    renderMultiSelectDefaultInput(parsedValue) {
+        const selectedValues = parsedValue?.values || [];
+        const mode = parsedValue?.mode || 'values';
+        const options = this.getCurrentOptions();
+
+        // Calculate placeholder text
+        const checkedCount = selectedValues.length;
+        const placeholderText = checkedCount > 0 ? `${checkedCount} selected` : '-- Select multiple --';
+
+        let html = `
+            <div class="default-value-mode-options">
+                <div class="form-check">
+                    <input class="form-check-input default-multi-mode-radio" type="radio" name="default-multi-mode" value="values" id="multi-mode-values" ${mode === 'values' ? 'checked' : ''}>
+                    <label class="form-check-label" for="multi-mode-values">
+                        <strong>Default Values</strong>
+                        <small class="d-block text-muted">Pre-select specific options</small>
+                    </label>
+                </div>
+                <div class="default-multi-value-wrapper ms-4 mt-2" id="multi-value-wrapper" style="${mode === 'values' ? '' : 'display:none;'}">
+        `;
+
+        if (options.length === 0) {
+            html += `<div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle"></i>
+                Configure filter options first (static or query), then return here to set default.
+            </div>`;
+        } else {
+            // Use same dropdown structure as filter preview
+            html += `
+                <div class="dropdown filter-multiselect-dropdown default-multiselect-dropdown" data-filter-name="default_multi">
+                    <button class="btn btn-outline-secondary dropdown-toggle filter-multiselect-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                        <span class="filter-multiselect-placeholder${checkedCount > 0 ? ' has-selection' : ''}">${placeholderText}</span>
+                    </button>
+                    <div class="dropdown-menu filter-multiselect-options">
+                        <div class="filter-multiselect-header">
+                            <div class="filter-multiselect-actions">
+                                <button type="button" class="btn btn-link btn-sm multiselect-select-all">All</button>
+                                <span class="filter-multiselect-divider">|</span>
+                                <button type="button" class="btn btn-link btn-sm multiselect-select-none">None</button>
+                            </div>
+                            <input type="text" class="form-control form-control-sm multiselect-search" placeholder="Search...">
+                        </div>
+                        ${options.map((opt, index) => `
+                            <div class="dropdown-item filter-multiselect-option">
+                                <div class="form-check">
+                                    <input class="form-check-input default-multi-checkbox" type="checkbox" value="${this.escapeHtml(opt.value)}" id="default-cb-${index}" ${selectedValues.includes(opt.value) ? 'checked' : ''}>
+                                    <label class="form-check-label" for="default-cb-${index}">${this.escapeHtml(opt.label)}</label>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        html += `
+                </div>
+                <div class="form-check mt-2">
+                    <input class="form-check-input default-multi-mode-radio" type="radio" name="default-multi-mode" value="block" id="multi-mode-block" ${mode === 'block' ? 'checked' : ''}>
+                    <label class="form-check-label" for="multi-mode-block">
+                        <strong>Block Until Selected</strong>
+                        <small class="d-block text-muted">Query won't run until user selects at least one option</small>
+                    </label>
+                </div>
+            </div>
+        `;
+
+        return html;
+    }
+
+    /**
+     * Render token input default value
+     */
+    renderTokenInputDefault(parsedValue) {
+        const values = parsedValue?.values || [];
+        return `
+            <input type="text" class="form-control" id="default-value-tokens"
+                   placeholder="Enter comma-separated default values"
+                   value="${this.escapeHtml(values.join(', '))}">
+            <small class="form-hint d-block mt-1">Enter values separated by commas</small>
+        `;
+    }
+
+    /**
+     * Get current filter options from static or query results
+     */
+    getCurrentOptions() {
+        const dataSource = document.getElementById('data-source')?.value || 'static';
+
+        if (dataSource === 'static') {
+            return this.getStaticOptions();
+        } else if (this.lastQueryOptions && this.lastQueryOptions.length > 0) {
+            return this.lastQueryOptions;
+        }
+
+        return [];
+    }
+
+    /**
+     * Initialize event handlers for default value inputs
+     */
+    initDefaultValueInputs() {
+        // Mode radio buttons for date range
+        const modeRadios = document.querySelectorAll('.default-mode-radio');
+        modeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                const mode = radio.value;
+                const presetOptions = document.getElementById('preset-options');
+                const specificDates = document.getElementById('specific-dates');
+
+                if (presetOptions) {
+                    presetOptions.style.display = mode === 'preset' ? '' : 'none';
+                }
+                if (specificDates) {
+                    specificDates.style.display = mode === 'specific' ? '' : 'none';
+                }
+            });
+        });
+
+        // Mode radio buttons for select (single)
+        const selectModeRadios = document.querySelectorAll('.default-select-mode-radio');
+        selectModeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                const mode = radio.value;
+                const valueWrapper = document.getElementById('select-value-wrapper');
+                if (valueWrapper) {
+                    valueWrapper.style.display = mode === 'value' ? '' : 'none';
+                }
+            });
+        });
+
+        // Mode radio buttons for multi-select
+        const multiModeRadios = document.querySelectorAll('.default-multi-mode-radio');
+        multiModeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                const mode = radio.value;
+                const valueWrapper = document.getElementById('multi-value-wrapper');
+                if (valueWrapper) {
+                    valueWrapper.style.display = mode === 'values' ? '' : 'none';
+                }
+            });
+        });
+
+        const section = document.getElementById('default-value-section');
+        if (!section) return;
+
+        // Initialize single select custom dropdown with FilterRenderer
+        if (typeof FilterRenderer !== 'undefined') {
+            FilterRenderer.init(section);
+        }
+
+        // Bind single select dropdown to sync with preview
+        const singleSelectDropdown = section.querySelector('.default-select-dropdown');
+        if (singleSelectDropdown) {
+            this.bindDefaultSelectDropdown(singleSelectDropdown);
+        }
+
+        // Initialize multiselect dropdown
+        const multiselectDropdown = section.querySelector('.default-multiselect-dropdown');
+        if (multiselectDropdown) {
+            this.bindDefaultMultiselectDropdown(multiselectDropdown);
+        }
+
+        // Initialize date pickers if present
+        if (typeof DatePickerInit !== 'undefined') {
+            DatePickerInit.init(section);
+        }
+
+        // Sync default values to preview (for pre-existing values)
+        // Use setTimeout to ensure preview is rendered before sync
+        setTimeout(() => this.syncDefaultToPreview(), 50);
+    }
+
+    /**
+     * Bind events for default value single select dropdown
+     */
+    bindDefaultSelectDropdown(dropdown) {
+        const options = dropdown.querySelectorAll('.filter-select-option');
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                // Wait for FilterRenderer to update the trigger, then sync to preview
+                setTimeout(() => this.syncDefaultToPreview(), 10);
+            });
+        });
+    }
+
+    /**
+     * Bind events for default value multiselect dropdown
+     */
+    bindDefaultMultiselectDropdown(dropdown) {
+        const placeholder = dropdown.querySelector('.filter-multiselect-placeholder');
+        const optionItems = dropdown.querySelectorAll('.filter-multiselect-option');
+        const selectAllBtn = dropdown.querySelector('.multiselect-select-all');
+        const selectNoneBtn = dropdown.querySelector('.multiselect-select-none');
+        const searchInput = dropdown.querySelector('.multiselect-search');
+
+        // Update placeholder text based on selection
+        const updatePlaceholder = () => {
+            const checkboxes = dropdown.querySelectorAll('.default-multi-checkbox');
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+
+            if (checkedCount === 0) {
+                placeholder.textContent = '-- Select multiple --';
+                placeholder.classList.remove('has-selection');
+            } else {
+                placeholder.textContent = `${checkedCount} selected`;
+                placeholder.classList.add('has-selection');
+            }
+        };
+
+        // Bind checkbox changes
+        optionItems.forEach(item => {
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.addEventListener('change', () => {
+                    updatePlaceholder();
+                    this.syncDefaultToPreview();
+                });
+            }
+        });
+
+        // Select All button
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                optionItems.forEach(item => {
+                    if (item.style.display !== 'none') {
+                        const cb = item.querySelector('input[type="checkbox"]');
+                        if (cb) cb.checked = true;
+                    }
+                });
+                updatePlaceholder();
+                this.syncDefaultToPreview();
+            });
+        }
+
+        // Select None button
+        if (selectNoneBtn) {
+            selectNoneBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                optionItems.forEach(item => {
+                    if (item.style.display !== 'none') {
+                        const cb = item.querySelector('input[type="checkbox"]');
+                        if (cb) cb.checked = false;
+                    }
+                });
+                updatePlaceholder();
+                this.syncDefaultToPreview();
+            });
+        }
+
+        // Search functionality
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                optionItems.forEach(item => {
+                    const label = item.querySelector('.form-check-label')?.textContent.toLowerCase() || '';
+                    item.style.display = (searchTerm === '' || label.includes(searchTerm)) ? '' : 'none';
+                });
+            });
+
+            searchInput.addEventListener('click', (e) => e.stopPropagation());
+        }
+
+        // Update placeholder on init
+        updatePlaceholder();
+    }
+
+    /**
+     * Sync default value selections to filter preview
+     */
+    syncDefaultToPreview() {
+        const filterType = document.getElementById('filter-type')?.value;
+        const isMultiple = document.getElementById('filter-multiple')?.checked;
+        const previewSection = document.getElementById('filter-preview-section');
+        const defaultSection = document.getElementById('default-value-section');
+
+        if (!previewSection || !defaultSection || !filterType) return;
+
+        // Check if this filter type supports options
+        const optionTypes = ['select', 'checkbox', 'radio', 'tokeninput', 'multi_select'];
+        if (!optionTypes.includes(filterType)) return;
+
+        // Determine if multiselect
+        const isMultiSelect = isMultiple || filterType === 'multi_select' || filterType === 'checkbox' || filterType === 'tokeninput';
+
+        if (isMultiSelect) {
+            // Multiselect: sync checked values
+            const defaultCheckboxes = defaultSection.querySelectorAll('.default-multi-checkbox');
+            const selectedValues = Array.from(defaultCheckboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            // Apply to preview multiselect - find the preview dropdown specifically
+            const previewDropdown = previewSection.querySelector('.filter-multiselect-dropdown');
+            if (previewDropdown) {
+                const previewCheckboxes = previewDropdown.querySelectorAll('.filter-multiselect-option input[type="checkbox"]');
+                previewCheckboxes.forEach(cb => {
+                    cb.checked = selectedValues.includes(cb.value);
+                });
+
+                // Update preview placeholder
+                const placeholder = previewDropdown.querySelector('.filter-multiselect-placeholder');
+                if (placeholder) {
+                    const checkedCount = selectedValues.length;
+                    if (checkedCount === 0) {
+                        placeholder.textContent = '-- Select multiple --';
+                        placeholder.classList.remove('has-selection');
+                    } else {
+                        placeholder.textContent = `${checkedCount} selected`;
+                        placeholder.classList.add('has-selection');
+                    }
+                }
+            }
+        } else {
+            // Single select: sync selected value
+            const defaultDropdown = defaultSection.querySelector('.default-select-dropdown');
+            const selectedValue = defaultDropdown?.querySelector('.filter-select-trigger')?.dataset.value || '';
+
+            // Apply to preview single select
+            const previewDropdown = previewSection.querySelector('.filter-select-dropdown');
+            if (previewDropdown) {
+                const trigger = previewDropdown.querySelector('.filter-select-trigger');
+                const options = previewDropdown.querySelectorAll('.filter-select-option');
+
+                options.forEach(opt => {
+                    opt.classList.remove('selected');
+                    const radio = opt.querySelector('input[type="radio"]');
+
+                    if (opt.dataset.value === selectedValue) {
+                        opt.classList.add('selected');
+                        if (radio) radio.checked = true;
+                        if (trigger) {
+                            trigger.dataset.value = selectedValue;
+                            const triggerText = trigger.querySelector('.filter-select-placeholder');
+                            if (triggerText) {
+                                const optLabel = opt.querySelector('.form-check-label')?.textContent.trim() || opt.textContent.trim();
+                                triggerText.textContent = optLabel || '-- Select --';
+                                triggerText.classList.toggle('has-selection', selectedValue !== '');
+                            }
+                        }
+                    } else {
+                        if (radio) radio.checked = false;
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * Get default value as JSON for saving
+     * Returns value whether required or not (default value is always optional unless required)
+     */
+    getDefaultValueJson() {
+        const filterType = document.getElementById('filter-type')?.value || 'text';
+        const isMultipleSelect = filterType === 'select' && document.getElementById('filter-multiple')?.checked;
+        let defaultValue = {};
+
+        switch (filterType) {
+            case 'text':
+                defaultValue = { value: document.getElementById('default-value-text')?.value || '' };
+                break;
+
+            case 'number':
+                defaultValue = { value: document.getElementById('default-value-number')?.value || '' };
+                break;
+
+            case 'date':
+                defaultValue = { value: document.getElementById('default-value-date')?.value || '' };
+                break;
+
+            case 'date_range':
+            case 'main_datepicker':
+                const mode = document.querySelector('input[name="default-mode"]:checked')?.value || 'selected';
+                defaultValue = { mode };
+
+                if (mode === 'preset') {
+                    defaultValue.preset = document.getElementById('default-preset')?.value || 'Last 7 Days';
+                } else if (mode === 'specific') {
+                    defaultValue.from = document.getElementById('default-date-from')?.value || '';
+                    defaultValue.to = document.getElementById('default-date-to')?.value || '';
+                }
+                break;
+
+            case 'select':
+                // Check if "Allow multiple selection" is checked
+                if (isMultipleSelect) {
+                    const multiMode = document.querySelector('input[name="default-multi-mode"]:checked')?.value || 'values';
+                    if (multiMode === 'block') {
+                        defaultValue = { mode: 'block' };
+                    } else {
+                        const checkboxes = document.querySelectorAll('.default-multi-checkbox:checked');
+                        defaultValue = { mode: 'values', values: Array.from(checkboxes).map(cb => cb.value) };
+                    }
+                } else {
+                    const selectMode = document.querySelector('input[name="default-select-mode"]:checked')?.value || 'value';
+                    if (selectMode === 'block') {
+                        defaultValue = { mode: 'block' };
+                    } else {
+                        defaultValue = { mode: 'value', value: document.getElementById('default-value-select')?.value || '' };
+                    }
+                }
+                break;
+
+            case 'radio':
+                const radioMode = document.querySelector('input[name="default-select-mode"]:checked')?.value || 'value';
+                if (radioMode === 'block') {
+                    defaultValue = { mode: 'block' };
+                } else {
+                    defaultValue = { mode: 'value', value: document.getElementById('default-value-select')?.value || '' };
+                }
+                break;
+
+            case 'multi_select':
+            case 'checkbox':
+                const cbMode = document.querySelector('input[name="default-multi-mode"]:checked')?.value || 'values';
+                if (cbMode === 'block') {
+                    defaultValue = { mode: 'block' };
+                } else {
+                    const checkboxes = document.querySelectorAll('.default-multi-checkbox:checked');
+                    defaultValue = { mode: 'values', values: Array.from(checkboxes).map(cb => cb.value) };
+                }
+                break;
+
+            case 'tokeninput':
+                const tokensInput = document.getElementById('default-value-tokens')?.value || '';
+                const tokens = tokensInput.split(',').map(t => t.trim()).filter(t => t);
+                defaultValue = { values: tokens };
+                break;
+
+            default:
+                defaultValue = { value: '' };
+        }
+
+        return JSON.stringify(defaultValue);
+    }
+
+    /**
+     * Check if default value has meaningful content
+     */
+    hasValidDefaultValue(defaultValueJson) {
+        if (!defaultValueJson) return false;
+
+        try {
+            const parsed = JSON.parse(defaultValueJson);
+
+            // Block mode is always valid
+            if (parsed.mode === 'block') return true;
+
+            // Check for value-based defaults
+            if (parsed.value !== undefined) {
+                return parsed.value !== '';
+            }
+
+            // Check for values array
+            if (parsed.values !== undefined) {
+                return Array.isArray(parsed.values) && parsed.values.length > 0;
+            }
+
+            // Date range modes (except 'block') are valid if set
+            if (parsed.mode === 'select_all' || parsed.mode === 'selected') {
+                return true;
+            }
+
+            if (parsed.mode === 'preset' && parsed.preset) {
+                return true;
+            }
+
+            if (parsed.mode === 'specific' && (parsed.from || parsed.to)) {
+                return true;
+            }
+
+            return false;
+        } catch (e) {
+            return false;
+        }
     }
 }

@@ -33,10 +33,24 @@ export default class PlaceholderSettings {
     setPlaceholders(placeholders, matchedFilters = {}) {
         this.placeholders = placeholders;
 
-        // Initialize settings for new placeholders (default: allow empty = true)
+        // Initialize settings for new placeholders
         placeholders.forEach(placeholder => {
+            const filter = matchedFilters[placeholder];
+            const isRequired = filter && (filter.is_required === 1 || filter.is_required === '1');
+
             if (!this.settings[placeholder]) {
-                this.settings[placeholder] = { allowEmpty: true };
+                // For required filters, default allowEmpty to false
+                this.settings[placeholder] = {
+                    allowEmpty: !isRequired,
+                    isRequired: isRequired
+                };
+            } else if (isRequired) {
+                // Enforce allowEmpty: false for required filters
+                this.settings[placeholder].allowEmpty = false;
+                this.settings[placeholder].isRequired = true;
+            } else {
+                // Non-required filter - keep user's setting but mark as not required
+                this.settings[placeholder].isRequired = false;
             }
         });
 
@@ -68,6 +82,8 @@ export default class PlaceholderSettings {
         let html = '';
         this.placeholders.forEach(placeholder => {
             const filter = matchedFilters[placeholder];
+            const isRequired = this.settings[placeholder]?.isRequired ||
+                              (filter && (filter.is_required === 1 || filter.is_required === '1'));
             const isAllowEmpty = this.settings[placeholder]?.allowEmpty !== false;
             const checkboxId = `allow-empty-${placeholder.replace(/::/g, '')}`;
 
@@ -84,6 +100,10 @@ export default class PlaceholderSettings {
                     rowWarningClass = ' class="placeholder-row-info"';
                 } else {
                     filterCell = this.escapeHtml(filter.filter_label);
+                    // Add required badge if filter is required
+                    if (isRequired) {
+                        filterCell += ' <span class="badge bg-warning text-dark">Required</span>';
+                    }
                 }
             } else {
                 filterCell = `<span class="placeholder-filter-warning">
@@ -93,21 +113,36 @@ export default class PlaceholderSettings {
                 rowWarningClass = ' class="placeholder-row-warning"';
             }
 
+            // Build the allow empty cell based on whether filter is required
+            let allowEmptyCell;
+            if (isRequired) {
+                // For required filters, show locked state - user cannot change this
+                allowEmptyCell = `
+                    <span class="placeholder-required-locked text-muted">
+                        <i class="fas fa-lock"></i> No
+                        <small class="d-block text-muted">(filter is required)</small>
+                    </span>
+                `;
+            } else {
+                // Normal checkbox for non-required filters
+                allowEmptyCell = `
+                    <div class="form-check">
+                        <input class="form-check-input allow-empty-checkbox" type="checkbox"
+                               id="${checkboxId}"
+                               data-placeholder="${this.escapeHtml(placeholder)}"
+                               ${isAllowEmpty ? 'checked' : ''}>
+                        <label class="form-check-label" for="${checkboxId}">
+                            ${isAllowEmpty ? 'Yes' : 'No'}
+                        </label>
+                    </div>
+                `;
+            }
+
             html += `
                 <tr data-placeholder="${this.escapeHtml(placeholder)}"${rowWarningClass}>
                     <td><code>${this.escapeHtml(placeholder)}</code></td>
                     <td>${filterCell}</td>
-                    <td>
-                        <div class="form-check">
-                            <input class="form-check-input allow-empty-checkbox" type="checkbox"
-                                   id="${checkboxId}"
-                                   data-placeholder="${this.escapeHtml(placeholder)}"
-                                   ${isAllowEmpty ? 'checked' : ''}>
-                            <label class="form-check-label" for="${checkboxId}">
-                                ${isAllowEmpty ? 'Yes' : 'No'}
-                            </label>
-                        </div>
-                    </td>
+                    <td>${allowEmptyCell}</td>
                 </tr>
             `;
         });

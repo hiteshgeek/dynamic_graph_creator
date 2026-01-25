@@ -831,15 +831,28 @@ class DGCHelper
         $filterLabel = $filter['filter_label'];
         $defaultValue = isset($filter['default_value']) ? $filter['default_value'] : '';
         $options = isset($filter['options']) ? $filter['options'] : array();
+        $isRequired = isset($filter['is_required']) && $filter['is_required'] ? '1' : '0';
 
         // Get filter config for inline display
         $filterConfig = isset($filter['filter_config']) ? $filter['filter_config'] : '';
         $filterConfigArr = $filterConfig ? json_decode($filterConfig, true) : array();
         $isInline = isset($filterConfigArr['inline']) && $filterConfigArr['inline'];
 
-        $html = '<div class="filter-input-item" data-filter-key="' . htmlspecialchars($filterKeyClean) . '">';
+        // Build data attributes
+        $dataAttrs = 'data-filter-key="' . htmlspecialchars($filterKeyClean) . '"';
+        $dataAttrs .= ' data-filter-type="' . htmlspecialchars($filterType) . '"';
+        $dataAttrs .= ' data-is-required="' . $isRequired . '"';
+        if ($isRequired === '1' && !empty($defaultValue)) {
+            $dataAttrs .= ' data-default-value="' . htmlspecialchars($defaultValue) . '"';
+        }
+
+        $html = '<div class="filter-input-item" ' . $dataAttrs . '>';
         $html .= '<div class="filter-input-header">';
-        $html .= '<label class="filter-input-label">' . htmlspecialchars($filterLabel) . '</label>';
+        $html .= '<label class="filter-input-label">' . htmlspecialchars($filterLabel);
+        if ($isRequired === '1') {
+            $html .= ' <span class="required-indicator" title="Required">*</span>';
+        }
+        $html .= '</label>';
         $html .= '</div>';
 
         // Render input based on type

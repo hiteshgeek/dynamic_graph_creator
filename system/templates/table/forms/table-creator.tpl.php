@@ -251,8 +251,9 @@ echo DGCHelper::renderPageHeader([
                                             $isInline = isset($filterConfigArr['inline']) && $filterConfigArr['inline'];
                                             $isMandatoryFilter = isset($mandatoryFilterKeys) && in_array($filterKeyClean, $mandatoryFilterKeys);
                                             $isDateRange = in_array($filterType, array('date_range', 'main_datepicker'));
+                                            $isRequired = isset($filter['is_required']) && $filter['is_required'];
                                             ?>
-                                            <div class="filter-input-item<?php echo $isMandatoryFilter ? ' mandatory' : ''; ?>" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" data-filter-type="<?php echo htmlspecialchars($filterType); ?>" data-mandatory="<?php echo $isMandatoryFilter ? '1' : '0'; ?>" style="display: none;">
+                                            <div class="filter-input-item<?php echo $isMandatoryFilter ? ' mandatory' : ''; ?>" data-filter-key="<?php echo htmlspecialchars($filterKeyClean); ?>" data-filter-type="<?php echo htmlspecialchars($filterType); ?>" data-mandatory="<?php echo $isMandatoryFilter ? '1' : '0'; ?>" data-is-required="<?php echo $isRequired ? '1' : '0'; ?>" style="display: none;">
                                                 <div class="filter-input-header">
                                                     <label class="filter-input-label"><?php echo htmlspecialchars($filter['filter_label']); ?></label>
                                                     <?php if ($isMandatoryFilter): ?>

@@ -123,3 +123,11 @@ CREATE TABLE IF NOT EXISTS table_widget_category_mapping (
     FOREIGN KEY (tid) REFERENCES dgc_table(tid) ON DELETE CASCADE,
     FOREIGN KEY (wcid) REFERENCES widget_category(wcid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Maps tables to widget categories';
+
+-- =============================================================================
+-- Data Filter is_required feature (2026-01-25)
+-- =============================================================================
+
+-- Change default_value column from VARCHAR(255) to TEXT to support JSON-encoded
+-- default values for complex filter types (date_range, multi_select, etc.)
+ALTER TABLE data_filter MODIFY COLUMN default_value TEXT COMMENT 'JSON encoded default value based on filter type';

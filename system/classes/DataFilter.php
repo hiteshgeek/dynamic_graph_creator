@@ -365,6 +365,213 @@ class DataFilter implements DatabaseObject
     public function getDefaultValue() { return $this->default_value; }
     public function setDefaultValue($value) { $this->default_value = $value; }
 
+    /**
+     * Get decoded default value from JSON
+     * Returns parsed array or null if empty/invalid
+     * @return array|null
+     */
+    public function getDefaultValueDecoded()
+    {
+        if (empty($this->default_value)) {
+            return null;
+        }
+        $decoded = json_decode($this->default_value, true);
+        // If valid JSON object/array, return it
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+        // Legacy: plain string value - wrap it
+        return array('value' => $this->default_value);
+    }
+
+    /**
+     * Validate that a required filter has a proper default value
+     * @return bool True if valid, false if required filter missing default
+     */
+    public function validateRequiredDefault()
+    {
+        if (!$this->is_required) {
+            return true; // Not required, no validation needed
+        }
+
+        $defaultValue = $this->getDefaultValueDecoded();
+        if (empty($defaultValue)) {
+            return false;
+        }
+
+        // Type-specific validation
+        switch ($this->filter_type) {
+            case 'date_range':
+            case 'main_datepicker':
+                // Must have a mode set
+                return !empty($defaultValue['mode']);
+
+            case 'multi_select':
+            case 'checkbox':
+            case 'tokeninput':
+                // Must have values array with at least one item (unless mode is select_all)
+                if (isset($defaultValue['mode']) && $defaultValue['mode'] === 'select_all') {
+                    return true;
+                }
+                return !empty($defaultValue['values']) && is_array($defaultValue['values']);
+
+            default:
+                // text, number, date, select, radio - must have a value
+                return isset($defaultValue['value']) && $defaultValue['value'] !== '';
+        }
+    }
+
+    /**
+     * Resolve default value to actual runtime values
+     * For example: preset "Last 7 Days" -> actual date range
+     * @return array|string|null Resolved default value ready for use
+     */
+    public function resolveDefaultValue()
+    {
+        $defaultValue = $this->getDefaultValueDecoded();
+        if (empty($defaultValue)) {
+            return null;
+        }
+
+        switch ($this->filter_type) {
+            case 'date_range':
+            case 'main_datepicker':
+                return $this->resolveDateRangeDefault($defaultValue);
+
+            case 'multi_select':
+            case 'checkbox':
+            case 'tokeninput':
+                return isset($defaultValue['values']) ? $defaultValue['values'] : array();
+
+            case 'select':
+            case 'radio':
+            case 'text':
+            case 'number':
+            case 'date':
+            default:
+                return isset($defaultValue['value']) ? $defaultValue['value'] : null;
+        }
+    }
+
+    /**
+     * Resolve date range default value based on mode
+     * @param array $defaultValue The decoded default value
+     * @return array Resolved date range with 'from' and 'to' keys, or mode indicator
+     */
+    private function resolveDateRangeDefault($defaultValue)
+    {
+        $mode = isset($defaultValue['mode']) ? $defaultValue['mode'] : 'selected';
+
+        switch ($mode) {
+            case 'select_all':
+                // No date filter - return indicator
+                return array('mode' => 'select_all');
+
+            case 'block':
+                // Block query until user selects - return indicator
+                return array('mode' => 'block');
+
+            case 'selected':
+                // Use last selected value (from session) - return indicator
+                return array('mode' => 'selected');
+
+            case 'specific':
+                // Use specific dates
+                return array(
+                    'mode' => 'specific',
+                    'from' => isset($defaultValue['from']) ? $defaultValue['from'] : '',
+                    'to' => isset($defaultValue['to']) ? $defaultValue['to'] : ''
+                );
+
+            case 'preset':
+                // Resolve preset to actual dates
+                $preset = isset($defaultValue['preset']) ? $defaultValue['preset'] : 'Last 7 Days';
+                return $this->resolvePresetToDateRange($preset);
+
+            default:
+                return array('mode' => 'selected');
+        }
+    }
+
+    /**
+     * Resolve a preset name to actual date range
+     * @param string $preset Preset name like "Last 7 Days", "Today", etc.
+     * @return array Array with 'mode', 'from', 'to', and 'preset' keys
+     */
+    private function resolvePresetToDateRange($preset)
+    {
+        $today = date('Y-m-d');
+        $from = $today;
+        $to = $today;
+
+        switch ($preset) {
+            case 'Today':
+                // from and to are both today
+                break;
+
+            case 'Yesterday':
+                $from = date('Y-m-d', strtotime('-1 day'));
+                $to = $from;
+                break;
+
+            case 'Last 7 Days':
+                $from = date('Y-m-d', strtotime('-6 days'));
+                break;
+
+            case 'Last 30 Days':
+                $from = date('Y-m-d', strtotime('-29 days'));
+                break;
+
+            case 'This Month':
+                $from = date('Y-m-01');
+                $to = date('Y-m-t');
+                break;
+
+            case 'Last Month':
+                $from = date('Y-m-01', strtotime('first day of last month'));
+                $to = date('Y-m-t', strtotime('last day of last month'));
+                break;
+
+            case 'Year to Date':
+                $from = date('Y-01-01');
+                break;
+
+            case 'This Financial Year':
+                // Assuming April to March financial year
+                $currentMonth = (int)date('m');
+                if ($currentMonth >= 4) {
+                    $from = date('Y-04-01');
+                    $to = date('Y-03-31', strtotime('+1 year'));
+                } else {
+                    $from = date('Y-04-01', strtotime('-1 year'));
+                    $to = date('Y-03-31');
+                }
+                break;
+
+            case 'Last Financial Year':
+                $currentMonth = (int)date('m');
+                if ($currentMonth >= 4) {
+                    $from = date('Y-04-01', strtotime('-1 year'));
+                    $to = date('Y-03-31');
+                } else {
+                    $from = date('Y-04-01', strtotime('-2 years'));
+                    $to = date('Y-03-31', strtotime('-1 year'));
+                }
+                break;
+
+            default:
+                // Default to last 7 days
+                $from = date('Y-m-d', strtotime('-6 days'));
+        }
+
+        return array(
+            'mode' => 'preset',
+            'preset' => $preset,
+            'from' => $from,
+            'to' => $to
+        );
+    }
+
     public function getIsRequired() { return $this->is_required; }
     public function setIsRequired($value) { $this->is_required = $value ? 1 : 0; }
 

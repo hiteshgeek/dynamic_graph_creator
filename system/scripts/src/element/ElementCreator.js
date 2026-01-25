@@ -257,12 +257,14 @@ export default class ElementCreator {
             const filterKey = item.dataset.filterKey;
             const filterType = item.dataset.filterType;
             const filterLabel = item.querySelector('.filter-input-label')?.textContent || filterKey;
+            const isRequired = item.dataset.isRequired === '1';
 
             if (filterKey && this.selectedFilters && this.selectedFilters.includes(filterKey)) {
                 matchedFilters['::' + filterKey] = {
                     filter_key: filterKey,
                     filter_label: filterLabel,
-                    filter_type: filterType
+                    filter_type: filterType,
+                    is_required: isRequired
                 };
 
                 if (dateRangeTypes.includes(filterType)) {
@@ -271,14 +273,16 @@ export default class ElementCreator {
                         filter_label: filterLabel + ' (From)',
                         filter_type: filterType,
                         is_derived: true,
-                        parent_key: filterKey
+                        parent_key: filterKey,
+                        is_required: isRequired
                     };
                     matchedFilters['::' + filterKey + '_to'] = {
                         filter_key: filterKey,
                         filter_label: filterLabel + ' (To)',
                         filter_type: filterType,
                         is_derived: true,
-                        parent_key: filterKey
+                        parent_key: filterKey,
+                        is_required: isRequired
                     };
                 }
             }

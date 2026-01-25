@@ -65,6 +65,277 @@ function getTablesFromInstallSql($sqlFile)
 }
 
 /**
+ * Parse install.sql to extract table definitions with column details
+ * Returns array of table_name => [columns => [...], indexes => [...]]
+ */
+function getTableDefinitionsFromInstallSql($sqlFile)
+{
+    $definitions = [];
+    if (!file_exists($sqlFile)) {
+        return ['error' => 'install.sql not found'];
+    }
+
+    $content = file_get_contents($sqlFile);
+
+    // Match each CREATE TABLE block
+    preg_match_all('/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[`]?(\w+)[`]?\s*\((.*?)\)\s*(?:ENGINE|;)/is', $content, $tableMatches, PREG_SET_ORDER);
+
+    foreach ($tableMatches as $tableMatch) {
+        $tableName = $tableMatch[1];
+        $tableBody = $tableMatch[2];
+
+        $columns = [];
+        $indexes = [];
+
+        // Split by lines and process each
+        $lines = preg_split('/,\s*\n/', $tableBody);
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (empty($line)) continue;
+
+            // Skip index definitions
+            if (preg_match('/^(PRIMARY\s+KEY|INDEX|KEY|UNIQUE|FOREIGN\s+KEY|CONSTRAINT)/i', $line)) {
+                $indexes[] = $line;
+                continue;
+            }
+
+            // Parse column definition
+            // Format: column_name TYPE(size) [UNSIGNED] [NOT NULL] [DEFAULT value] [AUTO_INCREMENT] [COMMENT 'text']
+            if (preg_match('/^[`]?(\w+)[`]?\s+(.+)$/i', $line, $colMatch)) {
+                $colName = $colMatch[1];
+                $colDef = trim($colMatch[2]);
+
+                // Extract type (with size if present)
+                $type = '';
+                $nullable = true;
+                $default = null;
+                $autoIncrement = false;
+                $comment = '';
+
+                // Get type (first word, possibly with parentheses)
+                if (preg_match('/^(\w+(?:\([^)]+\))?)/i', $colDef, $typeMatch)) {
+                    $type = strtoupper($typeMatch[1]);
+                }
+
+                // Check for UNSIGNED
+                if (preg_match('/\bUNSIGNED\b/i', $colDef)) {
+                    $type .= ' UNSIGNED';
+                }
+
+                // Check for NOT NULL
+                if (preg_match('/\bNOT\s+NULL\b/i', $colDef)) {
+                    $nullable = false;
+                }
+
+                // Check for AUTO_INCREMENT
+                if (preg_match('/\bAUTO_INCREMENT\b/i', $colDef)) {
+                    $autoIncrement = true;
+                }
+
+                // Check for DEFAULT
+                if (preg_match("/\bDEFAULT\s+(?:'([^']*)'|\"([^\"]*)\"|(\S+))/i", $colDef, $defMatch)) {
+                    $default = isset($defMatch[3]) ? $defMatch[3] : (isset($defMatch[1]) ? $defMatch[1] : $defMatch[2]);
+                    // Handle special defaults
+                    if (strtoupper($default) === 'NULL') {
+                        $default = null;
+                    } elseif (strtoupper($default) === 'CURRENT_TIMESTAMP') {
+                        $default = 'CURRENT_TIMESTAMP';
+                    }
+                }
+
+                // Check for COMMENT
+                if (preg_match("/\bCOMMENT\s+'([^']*)'/i", $colDef, $commentMatch)) {
+                    $comment = $commentMatch[1];
+                }
+
+                $columns[$colName] = [
+                    'name' => $colName,
+                    'type' => $type,
+                    'nullable' => $nullable,
+                    'default' => $default,
+                    'auto_increment' => $autoIncrement,
+                    'comment' => $comment,
+                    'raw_definition' => $colDef
+                ];
+            }
+        }
+
+        $definitions[$tableName] = [
+            'columns' => $columns,
+            'indexes' => $indexes
+        ];
+    }
+
+    return $definitions;
+}
+
+/**
+ * Get column definitions from database table
+ * @return array Column definitions or error
+ */
+function getTableColumnsFromDatabase($pdo, $tableName)
+{
+    $columns = [];
+
+    try {
+        $stmt = $pdo->query("SHOW FULL COLUMNS FROM `{$tableName}`");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $type = strtoupper($row['Type']);
+
+            // Normalize type for comparison
+            $normalizedType = normalizeColumnType($type);
+
+            $columns[$row['Field']] = [
+                'name' => $row['Field'],
+                'type' => $normalizedType,
+                'type_raw' => $type,
+                'nullable' => ($row['Null'] === 'YES'),
+                'default' => $row['Default'],
+                'auto_increment' => (strpos($row['Extra'], 'auto_increment') !== false),
+                'comment' => isset($row['Comment']) ? $row['Comment'] : ''
+            ];
+        }
+    } catch (PDOException $e) {
+        return ['error' => $e->getMessage()];
+    }
+
+    return $columns;
+}
+
+/**
+ * Normalize column type for comparison
+ * E.g., INT(11) and INT are essentially the same in modern MySQL
+ */
+function normalizeColumnType($type)
+{
+    $type = strtoupper(trim($type));
+
+    // Normalize INT types (remove display width as it's deprecated in MySQL 8)
+    $type = preg_replace('/\bINT\(\d+\)/', 'INT', $type);
+    $type = preg_replace('/\bTINYINT\(\d+\)/', 'TINYINT', $type);
+    $type = preg_replace('/\bSMALLINT\(\d+\)/', 'SMALLINT', $type);
+    $type = preg_replace('/\bMEDIUMINT\(\d+\)/', 'MEDIUMINT', $type);
+    $type = preg_replace('/\bBIGINT\(\d+\)/', 'BIGINT', $type);
+
+    // Normalize ENUM/SET types - remove spaces after commas for consistent comparison
+    // ENUM('A', 'B', 'C') and ENUM('A','B','C') should be treated as equal
+    if (preg_match('/^(ENUM|SET)\s*\((.+)\)$/i', $type, $matches)) {
+        $enumType = strtoupper($matches[1]);
+        $values = $matches[2];
+        // Remove spaces around commas and quotes
+        $values = preg_replace('/\'\s*,\s*\'/', "','", $values);
+        $type = $enumType . '(' . $values . ')';
+    }
+
+    return $type;
+}
+
+/**
+ * Compare expected columns (from install.sql) with actual columns (from database)
+ * @return array Comparison results with matches and mismatches
+ */
+function compareTableColumns($expectedColumns, $actualColumns)
+{
+    $result = [
+        'match' => true,
+        'missing' => [],      // Columns in install.sql but not in DB
+        'extra' => [],        // Columns in DB but not in install.sql
+        'type_mismatch' => [], // Columns with different types
+        'nullable_mismatch' => [], // Columns with different nullable settings
+        'matched' => []       // Columns that match
+    ];
+
+    // Check for missing and mismatched columns
+    foreach ($expectedColumns as $colName => $expected) {
+        if (!isset($actualColumns[$colName])) {
+            $result['missing'][] = [
+                'name' => $colName,
+                'expected' => $expected
+            ];
+            $result['match'] = false;
+        } else {
+            $actual = $actualColumns[$colName];
+            $hasIssue = false;
+
+            // Compare types (normalized)
+            $expectedType = normalizeColumnType($expected['type']);
+            $actualType = normalizeColumnType($actual['type']);
+
+            if ($expectedType !== $actualType) {
+                $result['type_mismatch'][] = [
+                    'name' => $colName,
+                    'expected_type' => $expected['type'],
+                    'actual_type' => $actual['type_raw']
+                ];
+                $result['match'] = false;
+                $hasIssue = true;
+            }
+
+            // Compare nullable (only if explicitly NOT NULL in install.sql)
+            if (!$expected['nullable'] && $actual['nullable']) {
+                $result['nullable_mismatch'][] = [
+                    'name' => $colName,
+                    'expected' => 'NOT NULL',
+                    'actual' => 'NULL'
+                ];
+                $result['match'] = false;
+                $hasIssue = true;
+            }
+
+            if (!$hasIssue) {
+                $result['matched'][] = $colName;
+            }
+        }
+    }
+
+    // Check for extra columns in database
+    foreach ($actualColumns as $colName => $actual) {
+        if (!isset($expectedColumns[$colName])) {
+            $result['extra'][] = [
+                'name' => $colName,
+                'actual' => $actual
+            ];
+            // Extra columns don't necessarily mean a mismatch (could be custom additions)
+        }
+    }
+
+    return $result;
+}
+
+/**
+ * Get detailed column comparison for a table in a database
+ */
+function getTableColumnComparison($tableName, $expectedColumns, $host, $user, $pass, $dbName)
+{
+    try {
+        $pdo = new PDO(
+            'mysql:host=' . $host . ';dbname=' . $dbName,
+            $user,
+            $pass,
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        );
+
+        // First check if table exists
+        $stmt = $pdo->prepare("SHOW TABLES LIKE ?");
+        $stmt->execute([$tableName]);
+        if ($stmt->rowCount() === 0) {
+            return ['error' => 'Table does not exist'];
+        }
+
+        $actualColumns = getTableColumnsFromDatabase($pdo, $tableName);
+        if (isset($actualColumns['error'])) {
+            return $actualColumns;
+        }
+
+        return compareTableColumns($expectedColumns, $actualColumns);
+
+    } catch (PDOException $e) {
+        return ['error' => 'Connection failed: ' . $e->getMessage()];
+    }
+}
+
+/**
  * Get live database credentials from .developer_db.env
  */
 function getLiveDbCredentials()
@@ -145,7 +416,7 @@ function checkDatabaseTablesWithCredentials($tables, $host, $user, $pass, $dbNam
 
 /**
  * Perform full database validation for both local and live databases
- * Returns combined table data for easy comparison
+ * Returns combined table data for easy comparison, including column validation
  */
 function validateDatabaseSetup($sourceDir)
 {
@@ -155,7 +426,8 @@ function validateDatabaseSetup($sourceDir)
         'live_info' => null,      // Live DB connection info
         'local_error' => null,
         'live_error' => null,
-        'all_passed' => true
+        'all_passed' => true,
+        'column_issues' => false  // Flag if any column issues exist
     ];
 
     // 1. Get tables from install.sql
@@ -163,6 +435,15 @@ function validateDatabaseSetup($sourceDir)
     if (isset($installSqlTables['error'])) {
         $result['local_error'] = $installSqlTables['error'];
         $result['live_error'] = $installSqlTables['error'];
+        $result['all_passed'] = false;
+        return $result;
+    }
+
+    // 1b. Get table definitions with column details from install.sql
+    $tableDefinitions = getTableDefinitionsFromInstallSql($sourceDir . '/sql/install.sql');
+    if (isset($tableDefinitions['error'])) {
+        $result['local_error'] = $tableDefinitions['error'];
+        $result['live_error'] = $tableDefinitions['error'];
         $result['all_passed'] = false;
         return $result;
     }
@@ -193,6 +474,7 @@ function validateDatabaseSetup($sourceDir)
     // 4. Check LIVE database
     $liveCredentials = getLiveDbCredentials();
     $liveDbCheck = [];
+    $liveDbName = null;
 
     if (isset($liveCredentials['error'])) {
         $result['live_error'] = $liveCredentials['error'];
@@ -222,7 +504,7 @@ function validateDatabaseSetup($sourceDir)
         }
     }
 
-    // 5. Build combined table data
+    // 5. Build combined table data with column validation
     foreach ($installSqlTables as $table) {
         $constantName = array_search($table, $dgcConstants);
 
@@ -240,15 +522,55 @@ function validateDatabaseSetup($sourceDir)
             $dataMatch = ($localCount === $liveCount);
         }
 
+        // Column validation
+        $localColumnComparison = null;
+        $liveColumnComparison = null;
+        $expectedColumns = isset($tableDefinitions[$table]) ? $tableDefinitions[$table]['columns'] : [];
+
+        // Compare columns for LOCAL database
+        if ($localExists && !empty($expectedColumns) && !isset($localDbCheck['error'])) {
+            $localColumnComparison = getTableColumnComparison(
+                $table,
+                $expectedColumns,
+                LocalProjectConfig::getDbHost(),
+                LocalProjectConfig::getDbUser(),
+                LocalProjectConfig::getDbPass(),
+                LocalProjectConfig::getDbName()
+            );
+
+            if (!isset($localColumnComparison['error']) && !$localColumnComparison['match']) {
+                $result['column_issues'] = true;
+            }
+        }
+
+        // Compare columns for LIVE database
+        if ($liveExists && !empty($expectedColumns) && $liveDbName && !isset($liveCredentials['error'])) {
+            $liveColumnComparison = getTableColumnComparison(
+                $table,
+                $expectedColumns,
+                $liveCredentials['DB_HOST'],
+                $liveCredentials['DB_USER'],
+                $liveCredentials['DB_PASS'],
+                $liveDbName
+            );
+
+            if (!isset($liveColumnComparison['error']) && !$liveColumnComparison['match']) {
+                $result['column_issues'] = true;
+            }
+        }
+
         $result['tables'][] = [
             'name' => $table,
             'in_install_sql' => true,
             'constant' => $constantName !== false ? $constantName : null,
             'local_exists' => $localExists,
             'local_count' => $localCount,
+            'local_columns' => $localColumnComparison,
             'live_exists' => $liveExists,
             'live_count' => $liveCount,
-            'data_match' => $dataMatch
+            'live_columns' => $liveColumnComparison,
+            'data_match' => $dataMatch,
+            'expected_column_count' => count($expectedColumns)
         ];
 
         // Check for issues

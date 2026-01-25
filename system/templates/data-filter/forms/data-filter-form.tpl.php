@@ -122,25 +122,48 @@ echo DGCHelper::renderPageHeader([
                                     <div class="filter-key-hint highlighted"><code>::</code> prefix will be added automatically.</div>
                                 </div>
 
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label class="form-label" for="filter-type">Filter Type <span class="required">*</span></label>
-                                        <select id="filter-type" class="form-select">
-                                            <option value="text" <?php echo ($filter && $filter->getFilterType() === 'text') ? 'selected' : ''; ?>>Text Input</option>
-                                            <option value="number" <?php echo ($filter && $filter->getFilterType() === 'number') ? 'selected' : ''; ?>>Number Input</option>
-                                            <option value="date" <?php echo ($filter && $filter->getFilterType() === 'date') ? 'selected' : ''; ?>>Date Picker</option>
-                                            <option value="date_range" <?php echo ($filter && $filter->getFilterType() === 'date_range') ? 'selected' : ''; ?>>Date Range</option>
-                                            <option value="main_datepicker" <?php echo ($filter && $filter->getFilterType() === 'main_datepicker') ? 'selected' : ''; ?>>Main Datepicker (with presets)</option>
-                                            <option value="select" <?php echo ($filter && in_array($filter->getFilterType(), array('select', 'multi_select'))) ? 'selected' : ''; ?>>Select</option>
-                                            <option value="checkbox" <?php echo ($filter && $filter->getFilterType() === 'checkbox') ? 'selected' : ''; ?>>Checkbox</option>
-                                            <option value="radio" <?php echo ($filter && $filter->getFilterType() === 'radio') ? 'selected' : ''; ?>>Radio Buttons</option>
-                                            <option value="tokeninput" <?php echo ($filter && $filter->getFilterType() === 'tokeninput') ? 'selected' : ''; ?>>Token Input</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label class="form-label" for="filter-default">Default Value</label>
-                                        <input type="text" id="filter-default" class="form-control" placeholder="Optional" value="<?php echo $filter ? htmlspecialchars($filter->getDefaultValue()) : ''; ?>">
+                                <div class="form-group">
+                                    <label class="form-label">Filter Type <span class="required">*</span></label>
+                                    <?php
+                                    $filterTypes = array(
+                                        'text' => array('label' => 'Text Input', 'icon' => 'font'),
+                                        'number' => array('label' => 'Number Input', 'icon' => 'hashtag'),
+                                        'date' => array('label' => 'Date Picker', 'icon' => 'calendar'),
+                                        'date_range' => array('label' => 'Date Range', 'icon' => 'calendar-week'),
+                                        'main_datepicker' => array('label' => 'Main Datepicker (with presets)', 'icon' => 'calendar-alt'),
+                                        'select' => array('label' => 'Select', 'icon' => 'list'),
+                                        'checkbox' => array('label' => 'Checkbox', 'icon' => 'check-square'),
+                                        'radio' => array('label' => 'Radio Buttons', 'icon' => 'circle-dot'),
+                                        'tokeninput' => array('label' => 'Token Input', 'icon' => 'tags')
+                                    );
+                                    $currentType = $filter ? $filter->getFilterType() : 'text';
+                                    // Map multi_select back to select for display
+                                    if ($currentType === 'multi_select') $currentType = 'select';
+                                    $currentLabel = isset($filterTypes[$currentType]) ? $filterTypes[$currentType]['label'] : 'Text Input';
+                                    $currentIcon = isset($filterTypes[$currentType]) ? $filterTypes[$currentType]['icon'] : 'font';
+                                    ?>
+                                    <div class="dropdown filter-select-dropdown filter-type-dropdown" data-filter-name="filter_type">
+                                        <button class="btn btn-outline-secondary dropdown-toggle filter-select-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                            <span class="filter-select-placeholder has-selection">
+                                                <i class="fas fa-<?php echo $currentIcon; ?> me-2"></i><?php echo htmlspecialchars($currentLabel); ?>
+                                            </span>
+                                        </button>
+                                        <div class="dropdown-menu filter-select-options">
+                                            <div class="filter-select-header">
+                                                <input type="text" class="form-control form-control-sm select-search" placeholder="Search...">
+                                            </div>
+                                            <?php foreach ($filterTypes as $value => $typeInfo): ?>
+                                                <div class="dropdown-item filter-select-option" data-value="<?php echo $value; ?>">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="radio" name="filter_type" value="<?php echo $value; ?>" id="filter-type-<?php echo $value; ?>" <?php echo ($value === $currentType) ? 'checked' : ''; ?>>
+                                                        <label class="form-check-label" for="filter-type-<?php echo $value; ?>">
+                                                            <i class="fas fa-<?php echo $typeInfo['icon']; ?> me-2 text-muted"></i><?php echo htmlspecialchars($typeInfo['label']); ?>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <input type="hidden" class="filter-input" id="filter-type" name="filter_type" data-filter-key="filter_type" value="<?php echo htmlspecialchars($currentType); ?>">
                                     </div>
                                 </div>
 
@@ -181,6 +204,21 @@ echo DGCHelper::renderPageHeader([
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" id="filter-required" <?php echo ($filter && $filter->getIsRequired()) ? 'checked' : ''; ?>>
                                         <label class="form-check-label" for="filter-required">Required field</label>
+                                    </div>
+                                    <small class="form-hint d-block mt-1">Required filters must have a default value and cannot be emptied by users</small>
+                                </div>
+
+                                <!-- Default Value Section (always visible, required indicator shown when is_required is checked) -->
+                                <?php
+                                $isFilterRequired = $filter && $filter->getIsRequired();
+                                $existingDefaultValue = $filter ? $filter->getDefaultValue() : '';
+                                $decodedDefault = $existingDefaultValue ? json_decode($existingDefaultValue, true) : null;
+                                ?>
+                                <div id="default-value-section" class="form-group default-value-section"
+                                     data-existing-value="<?php echo htmlspecialchars($existingDefaultValue); ?>">
+                                    <label class="form-label">Default Value<?php if ($isFilterRequired): ?> <span class="required">*</span><?php endif; ?></label>
+                                    <div id="default-value-content">
+                                        <!-- Content populated by JavaScript based on filter type -->
                                     </div>
                                 </div>
 

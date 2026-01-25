@@ -369,8 +369,10 @@
                 <h6 class="mb-0">
                     <i class="fas fa-database me-2"></i>Database Validation
                 </h6>
-                <?php if ($dbValidation['all_passed']): ?>
+                <?php if ($dbValidation['all_passed'] && !$dbValidation['column_issues']): ?>
                     <span class="badge bg-success"><i class="fas fa-check me-1"></i>All Checks Passed</span>
+                <?php elseif ($dbValidation['column_issues']): ?>
+                    <span class="badge bg-warning text-dark"><i class="fas fa-columns me-1"></i>Column Issues Found</span>
                 <?php else: ?>
                     <span class="badge bg-danger"><i class="fas fa-times me-1"></i>Issues Found</span>
                 <?php endif; ?>
@@ -404,15 +406,17 @@
                                 <th rowspan="2" class="align-middle" style="border-bottom: 2px solid #dee2e6; padding-left: 1rem;">Table Name</th>
                                 <th rowspan="2" class="align-middle text-center" style="border-bottom: 2px solid #dee2e6;">install.sql</th>
                                 <th rowspan="2" class="align-middle" style="border-bottom: 2px solid #dee2e6;">Constant</th>
-                                <th colspan="2" class="text-center" style="background: #e3f2fd; border-bottom: 1px solid #bbdefb;"><i class="fas fa-laptop me-1"></i>Local DB</th>
-                                <th colspan="2" class="text-center" style="background: #fff3e0; border-bottom: 1px solid #ffe0b2;"><i class="fas fa-cloud me-1"></i>Live DB</th>
+                                <th colspan="3" class="text-center" style="background: #e3f2fd; border-bottom: 1px solid #bbdefb;"><i class="fas fa-laptop me-1"></i>Local DB</th>
+                                <th colspan="3" class="text-center" style="background: #fff3e0; border-bottom: 1px solid #ffe0b2;"><i class="fas fa-cloud me-1"></i>Live DB</th>
                                 <th rowspan="2" class="align-middle text-center" style="border-bottom: 2px solid #dee2e6;">Data Match</th>
                             </tr>
                             <tr>
                                 <th class="text-center" style="background: #e3f2fd; border-bottom: 2px solid #bbdefb;">Exists</th>
                                 <th class="text-center" style="background: #e3f2fd; border-bottom: 2px solid #bbdefb;">Rows</th>
+                                <th class="text-center" style="background: #e3f2fd; border-bottom: 2px solid #bbdefb;">Columns</th>
                                 <th class="text-center" style="background: #fff3e0; border-bottom: 2px solid #ffe0b2;">Exists</th>
                                 <th class="text-center" style="background: #fff3e0; border-bottom: 2px solid #ffe0b2;">Rows</th>
+                                <th class="text-center" style="background: #fff3e0; border-bottom: 2px solid #ffe0b2;">Columns</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -453,6 +457,33 @@
                                             <span class="text-muted">-</span>
                                         <?php endif; ?>
                                     </td>
+                                    <!-- Local Columns -->
+                                    <td class="text-center" style="background: #f8fbff;">
+                                        <?php
+                                        $localCols = $tableData['local_columns'] ?? null;
+                                        $expectedColCount = $tableData['expected_column_count'] ?? 0;
+                                        if ($localCols === null || isset($localCols['error'])):
+                                        ?>
+                                            <span class="text-muted">-</span>
+                                        <?php elseif ($localCols['match']): ?>
+                                            <span class="badge bg-success" title="All <?php echo $expectedColCount; ?> columns match"><i class="fas fa-check"></i> <?php echo $expectedColCount; ?></span>
+                                        <?php else:
+                                            $issues = [];
+                                            if (!empty($localCols['missing'])) $issues[] = count($localCols['missing']) . ' missing';
+                                            if (!empty($localCols['type_mismatch'])) $issues[] = count($localCols['type_mismatch']) . ' type mismatch';
+                                            if (!empty($localCols['extra'])) $issues[] = count($localCols['extra']) . ' extra';
+                                            $issueText = implode(', ', $issues);
+                                        ?>
+                                            <span class="badge bg-warning text-dark column-issues-badge"
+                                                  data-table="<?php echo htmlspecialchars($tableData['name']); ?>"
+                                                  data-db="local"
+                                                  data-issues="<?php echo htmlspecialchars(json_encode($localCols)); ?>"
+                                                  style="cursor: pointer;"
+                                                  title="<?php echo htmlspecialchars($issueText); ?>">
+                                                <i class="fas fa-exclamation-triangle"></i> <?php echo count($localCols['matched']); ?>/<?php echo $expectedColCount; ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
                                     <!-- Live Exists -->
                                     <td class="text-center" style="background: #fffbf5;">
                                         <?php if ($tableData['live_exists'] === null): ?>
@@ -469,6 +500,32 @@
                                             <span class="badge bg-light text-dark"><?php echo number_format($tableData['live_count']); ?></span>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <!-- Live Columns -->
+                                    <td class="text-center" style="background: #fffbf5;">
+                                        <?php
+                                        $liveCols = $tableData['live_columns'] ?? null;
+                                        if ($liveCols === null || isset($liveCols['error'])):
+                                        ?>
+                                            <span class="text-muted">-</span>
+                                        <?php elseif ($liveCols['match']): ?>
+                                            <span class="badge bg-success" title="All <?php echo $expectedColCount; ?> columns match"><i class="fas fa-check"></i> <?php echo $expectedColCount; ?></span>
+                                        <?php else:
+                                            $liveIssues = [];
+                                            if (!empty($liveCols['missing'])) $liveIssues[] = count($liveCols['missing']) . ' missing';
+                                            if (!empty($liveCols['type_mismatch'])) $liveIssues[] = count($liveCols['type_mismatch']) . ' type mismatch';
+                                            if (!empty($liveCols['extra'])) $liveIssues[] = count($liveCols['extra']) . ' extra';
+                                            $liveIssueText = implode(', ', $liveIssues);
+                                        ?>
+                                            <span class="badge bg-warning text-dark column-issues-badge"
+                                                  data-table="<?php echo htmlspecialchars($tableData['name']); ?>"
+                                                  data-db="live"
+                                                  data-issues="<?php echo htmlspecialchars(json_encode($liveCols)); ?>"
+                                                  style="cursor: pointer;"
+                                                  title="<?php echo htmlspecialchars($liveIssueText); ?>">
+                                                <i class="fas fa-exclamation-triangle"></i> <?php echo count($liveCols['matched']); ?>/<?php echo $expectedColCount; ?>
+                                            </span>
                                         <?php endif; ?>
                                     </td>
                                     <!-- Data Match -->
@@ -1531,6 +1588,27 @@ LocalUtility::addModuleJs('dashboard') → $theme->addScript(SystemConfig::scrip
         </div>
     </div>
 
+    <!-- Column Issues Modal -->
+    <div class="modal fade" id="columnIssuesModal" tabindex="-1" aria-labelledby="columnIssuesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="columnIssuesModalLabel">
+                        <i class="fas fa-columns me-2"></i>Column Issues: <span id="columnIssuesTable"></span>
+                        <span class="badge bg-secondary ms-2" id="columnIssuesDb"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="columnIssuesBody" style="max-height: 60vh; overflow-y: auto;">
+                    <!-- Populated by JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Toast utility (matches common.js pattern)
@@ -1987,6 +2065,98 @@ LocalUtility::addModuleJs('dashboard') → $theme->addScript(SystemConfig::scrip
 
         // Initialize execution badges on page load
         updateAllExecBadges();
+
+        // Column issues modal handler
+        document.querySelectorAll('.column-issues-badge').forEach(badge => {
+            badge.addEventListener('click', function() {
+                const tableName = this.dataset.table;
+                const dbType = this.dataset.db;
+                const issues = JSON.parse(this.dataset.issues);
+
+                document.getElementById('columnIssuesTable').textContent = tableName;
+                document.getElementById('columnIssuesDb').textContent = dbType.toUpperCase();
+                document.getElementById('columnIssuesDb').className = 'badge ms-2 ' + (dbType === 'local' ? 'bg-primary' : 'bg-warning text-dark');
+
+                let html = '';
+
+                // Missing columns
+                if (issues.missing && issues.missing.length > 0) {
+                    html += '<div class="mb-3">';
+                    html += '<h6 class="text-danger"><i class="fas fa-minus-circle me-1"></i>Missing Columns (' + issues.missing.length + ')</h6>';
+                    html += '<div class="table-responsive"><table class="table table-sm table-bordered">';
+                    html += '<thead class="table-light"><tr><th>Column</th><th>Expected Type</th><th>Nullable</th></tr></thead><tbody>';
+                    issues.missing.forEach(col => {
+                        html += '<tr>';
+                        html += '<td><code>' + col.name + '</code></td>';
+                        html += '<td><code>' + col.expected.type + '</code></td>';
+                        html += '<td>' + (col.expected.nullable ? 'YES' : 'NOT NULL') + '</td>';
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table></div></div>';
+                }
+
+                // Type mismatches
+                if (issues.type_mismatch && issues.type_mismatch.length > 0) {
+                    html += '<div class="mb-3">';
+                    html += '<h6 class="text-warning"><i class="fas fa-exchange-alt me-1"></i>Type Mismatches (' + issues.type_mismatch.length + ')</h6>';
+                    html += '<div class="table-responsive"><table class="table table-sm table-bordered">';
+                    html += '<thead class="table-light"><tr><th>Column</th><th>Expected</th><th>Actual</th></tr></thead><tbody>';
+                    issues.type_mismatch.forEach(col => {
+                        html += '<tr>';
+                        html += '<td><code>' + col.name + '</code></td>';
+                        html += '<td><code class="text-success">' + col.expected_type + '</code></td>';
+                        html += '<td><code class="text-danger">' + col.actual_type + '</code></td>';
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table></div></div>';
+                }
+
+                // Nullable mismatches
+                if (issues.nullable_mismatch && issues.nullable_mismatch.length > 0) {
+                    html += '<div class="mb-3">';
+                    html += '<h6 class="text-info"><i class="fas fa-question-circle me-1"></i>Nullable Mismatches (' + issues.nullable_mismatch.length + ')</h6>';
+                    html += '<div class="table-responsive"><table class="table table-sm table-bordered">';
+                    html += '<thead class="table-light"><tr><th>Column</th><th>Expected</th><th>Actual</th></tr></thead><tbody>';
+                    issues.nullable_mismatch.forEach(col => {
+                        html += '<tr>';
+                        html += '<td><code>' + col.name + '</code></td>';
+                        html += '<td><span class="badge bg-success">' + col.expected + '</span></td>';
+                        html += '<td><span class="badge bg-warning text-dark">' + col.actual + '</span></td>';
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table></div></div>';
+                }
+
+                // Extra columns (info, not necessarily an issue)
+                if (issues.extra && issues.extra.length > 0) {
+                    html += '<div class="mb-3">';
+                    html += '<h6 class="text-secondary"><i class="fas fa-plus-circle me-1"></i>Extra Columns in DB (' + issues.extra.length + ')</h6>';
+                    html += '<p class="text-muted small">These columns exist in the database but not in install.sql (may be custom additions)</p>';
+                    html += '<div class="table-responsive"><table class="table table-sm table-bordered">';
+                    html += '<thead class="table-light"><tr><th>Column</th><th>Type</th></tr></thead><tbody>';
+                    issues.extra.forEach(col => {
+                        html += '<tr>';
+                        html += '<td><code>' + col.name + '</code></td>';
+                        html += '<td><code>' + col.actual.type_raw + '</code></td>';
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table></div></div>';
+                }
+
+                // Matched columns count
+                if (issues.matched && issues.matched.length > 0) {
+                    html += '<div class="mb-0">';
+                    html += '<h6 class="text-success"><i class="fas fa-check-circle me-1"></i>Matched Columns (' + issues.matched.length + ')</h6>';
+                    html += '<p class="text-muted small mb-0">' + issues.matched.join(', ') + '</p>';
+                    html += '</div>';
+                }
+
+                document.getElementById('columnIssuesBody').innerHTML = html || '<p class="text-muted">No issues to display</p>';
+
+                const modal = new bootstrap.Modal(document.getElementById('columnIssuesModal'));
+                modal.show();
+            });
+        });
     </script>
 </body>
 

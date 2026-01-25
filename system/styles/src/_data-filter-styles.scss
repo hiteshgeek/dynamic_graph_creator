@@ -1611,6 +1611,220 @@
   }
 }
 
+// Default Value Section (for required filters)
+#default-value-section {
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 1px solid var(--dgc-border-color);
+
+  .form-label {
+    font-weight: $font-weight-medium;
+    color: var(--dgc-text-primary);
+    margin-bottom: $spacing-sm;
+  }
+}
+
+.default-value-mode-options {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+
+  .form-check {
+    padding: $spacing-sm $spacing-md;
+    background: var(--dgc-bg-elevated);
+    border: 1px solid var(--dgc-border-color);
+    border-radius: $border-radius;
+    margin: 0;
+    transition: all $transition-fast;
+
+    &:hover {
+      border-color: var(--dgc-primary-light);
+    }
+
+    &:has(.form-check-input:checked) {
+      border-color: var(--dgc-primary);
+      background: rgba($primary, 0.05);
+    }
+
+    .form-check-input {
+      margin-top: 0.15rem;
+    }
+
+    .form-check-label {
+      cursor: pointer;
+
+      strong {
+        display: block;
+        color: var(--dgc-text-primary);
+        font-weight: $font-weight-medium;
+        margin-bottom: 2px;
+      }
+
+      small {
+        font-size: 0.75rem;
+      }
+    }
+  }
+}
+
+.default-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: $spacing-sm;
+  background: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
+  border-radius: $border-radius;
+
+  .form-check {
+    margin: 0;
+    padding: $spacing-xs;
+    border-radius: $border-radius;
+    transition: background $transition-fast;
+
+    &:hover {
+      background: var(--dgc-bg-hover);
+    }
+  }
+}
+
+.default-preset-options,
+.default-specific-dates,
+.default-select-value-wrapper,
+.default-multi-value-wrapper {
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Checkbox actions (All/None buttons)
+.default-checkbox-actions {
+  display: flex;
+  align-items: center;
+  font-size: $font-size-sm;
+
+  .btn-link {
+    text-decoration: none;
+    color: var(--dgc-primary);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Default multiselect dropdown - uses same styling as filter preview
+.default-multiselect-dropdown,
+.default-select-dropdown {
+  width: 100%;
+
+  .filter-multiselect-trigger,
+  .filter-select-trigger {
+    width: 100%;
+  }
+
+  // Override parent .default-value-mode-options .form-check styles
+  .dropdown-menu .form-check {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    margin: 0 !important;
+
+    &:hover {
+      border-color: transparent !important;
+    }
+
+    &:has(.form-check-input:checked) {
+      background: transparent !important;
+      border-color: transparent !important;
+    }
+
+    .form-check-label {
+      strong {
+        display: inline;
+        font-weight: normal;
+        margin-bottom: 0;
+      }
+      small {
+        display: none;
+      }
+    }
+  }
+}
+
+// Filter Type Custom Dropdown
+.filter-type-dropdown {
+  max-width: 100%;
+
+  .filter-select-trigger {
+    width: 100%;
+    justify-content: flex-start;
+
+    .filter-select-placeholder {
+      display: flex;
+      align-items: center;
+
+      i {
+        width: 18px;
+        text-align: center;
+        color: var(--dgc-primary);
+      }
+    }
+
+    &::after {
+      margin-left: auto;
+    }
+  }
+
+  .filter-select-options {
+    width: 100%;
+    padding: $spacing-xs 0;
+  }
+
+  .filter-type-option {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover {
+      background: var(--dgc-bg-hover);
+    }
+
+    &.active {
+      background: rgba($primary, 0.1);
+      color: var(--dgc-primary);
+
+      .filter-type-option-icon {
+        color: var(--dgc-primary);
+      }
+    }
+
+    .filter-type-option-icon {
+      width: 20px;
+      text-align: center;
+      color: var(--dgc-text-hint);
+    }
+
+    span {
+      flex: 1;
+    }
+  }
+}
+
 // Save Indicator (matches btn-sm sizing)
 .save-indicator {
   display: flex;

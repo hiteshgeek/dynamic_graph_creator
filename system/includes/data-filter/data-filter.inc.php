@@ -158,6 +158,30 @@ function saveDataFilter($data)
         }
     }
 
+    // Get is_required and default_value
+    $isRequired = isset($data['is_required']) ? intval($data['is_required']) : 0;
+    $defaultValue = isset($data['default_value']) ? $data['default_value'] : '';
+
+    // Validate: if is_required is true, default_value must be provided
+    if ($isRequired && empty($defaultValue)) {
+        DGCHelper::ajaxResponseFalse('Default value is required when filter is marked as required');
+    }
+
+    // Validate default value JSON format for complex types
+    if ($isRequired && !empty($defaultValue)) {
+        $decoded = json_decode($defaultValue, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            DGCHelper::ajaxResponseFalse('Invalid default value format');
+        }
+        // Validate based on filter type
+        $filter->setFilterType($filterType);
+        $filter->setDefaultValue($defaultValue);
+        $filter->setIsRequired($isRequired);
+        if (!$filter->validateRequiredDefault()) {
+            DGCHelper::ajaxResponseFalse('Please provide a valid default value for this required filter');
+        }
+    }
+
     $filter->setFilterKey($filterKey);
     $filter->setFilterLabel($filterLabel);
     $filter->setFilterType($filterType);
@@ -165,8 +189,8 @@ function saveDataFilter($data)
     $filter->setDataQuery($dataQuery);
     $filter->setStaticOptions(isset($data['static_options']) ? $data['static_options'] : '');
     $filter->setFilterConfig(isset($data['filter_config']) ? $data['filter_config'] : '');
-    $filter->setDefaultValue(isset($data['default_value']) ? $data['default_value'] : '');
-    $filter->setIsRequired(isset($data['is_required']) ? intval($data['is_required']) : 0);
+    $filter->setDefaultValue($defaultValue);
+    $filter->setIsRequired($isRequired);
     $filter->setIsSystem(isset($data['is_system']) ? intval($data['is_system']) : 0);
 
     if ($filterId) {
