@@ -409,14 +409,32 @@ class DataFilter implements DatabaseObject
             case 'multi_select':
             case 'checkbox':
             case 'tokeninput':
-                // Must have values array with at least one item (unless mode is select_all)
-                if (isset($defaultValue['mode']) && $defaultValue['mode'] === 'select_all') {
+                // Must have values array with at least one item (unless mode is 'all' - select all options)
+                if (isset($defaultValue['mode']) && $defaultValue['mode'] === 'all') {
+                    return true;
+                }
+                // Also support block mode (require user selection)
+                if (isset($defaultValue['mode']) && $defaultValue['mode'] === 'block') {
                     return true;
                 }
                 return !empty($defaultValue['values']) && is_array($defaultValue['values']);
 
+            case 'select':
+            case 'radio':
+                // Check if it's multi-select mode (select with "Allow multiple selection")
+                if (isset($defaultValue['mode'])) {
+                    if ($defaultValue['mode'] === 'all' || $defaultValue['mode'] === 'block') {
+                        return true;
+                    }
+                    if ($defaultValue['mode'] === 'values') {
+                        return !empty($defaultValue['values']) && is_array($defaultValue['values']);
+                    }
+                }
+                // Single select - must have a value
+                return isset($defaultValue['value']) && $defaultValue['value'] !== '';
+
             default:
-                // text, number, date, select, radio - must have a value
+                // text, number, date - must have a value
                 return isset($defaultValue['value']) && $defaultValue['value'] !== '';
         }
     }

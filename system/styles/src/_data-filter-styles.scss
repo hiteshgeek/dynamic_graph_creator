@@ -1858,3 +1858,129 @@
     }
   }
 }
+
+// Filter Settings Info Section (Required vs Mandatory)
+.filter-settings-info {
+  margin-top: $spacing-md;
+  border: 1px solid var(--dgc-border-color);
+  border-radius: $border-radius;
+  background: var(--dgc-bg-elevated);
+
+  .info-header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    cursor: pointer;
+    user-select: none;
+    transition: background $transition-fast;
+
+    &:hover {
+      background: var(--dgc-bg-hover);
+    }
+
+    span {
+      flex: 1;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: var(--dgc-text-secondary);
+    }
+
+    .info-toggle-icon {
+      font-size: 0.7rem;
+      color: var(--dgc-text-hint);
+      transition: transform $transition-fast;
+    }
+
+    &[aria-expanded="true"] .info-toggle-icon {
+      transform: rotate(180deg);
+    }
+  }
+
+  .info-content {
+    padding: $spacing-sm $spacing-md $spacing-md;
+    border-top: 1px solid var(--dgc-border-color);
+    font-size: $font-size-sm;
+  }
+
+  .info-item {
+    margin-bottom: $spacing-sm;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    strong {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      color: var(--dgc-text-primary);
+      font-size: 0.8rem;
+      margin-bottom: 2px;
+
+      i {
+        font-size: 0.65rem;
+      }
+    }
+
+    p {
+      margin: 0;
+      padding-left: 1rem;
+      color: var(--dgc-text-secondary);
+      line-height: 1.4;
+
+      em {
+        color: var(--dgc-primary);
+        font-style: normal;
+        font-weight: $font-weight-medium;
+      }
+    }
+  }
+}
+
+// Checkbox Default Value - Inline checkboxes (not dropdown)
+.default-checkbox-inline {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: $spacing-sm;
+  background: var(--dgc-bg-card);
+  border: 1px solid var(--dgc-border-color);
+  border-radius: $border-radius;
+
+  .form-check {
+    margin: 0;
+    padding: $spacing-xs $spacing-sm;
+    border-radius: $border-radius;
+    transition: background $transition-fast;
+
+    &:hover {
+      background: var(--dgc-bg-hover);
+    }
+  }
+}
+
+.default-checkbox-actions {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-xs;
+  padding-bottom: $spacing-xs;
+  border-bottom: 1px solid var(--dgc-border-color);
+
+  .btn-link {
+    padding: 0;
+    font-size: $font-size-sm;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .divider {
+    color: var(--dgc-text-hint);
+  }
+}

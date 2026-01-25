@@ -251,12 +251,17 @@ echo DGCHelper::renderPageHeader([
                                             // Extract actual value(s) from JSON structure
                                             $defaultValue = '';
                                             $defaultValues = array();
+                                            $defaultModeAll = false; // For multi-select: select all options
                                             if (is_array($defaultValueDecoded)) {
                                                 if (isset($defaultValueDecoded['value'])) {
                                                     $defaultValue = $defaultValueDecoded['value'];
                                                 }
                                                 if (isset($defaultValueDecoded['values']) && is_array($defaultValueDecoded['values'])) {
                                                     $defaultValues = $defaultValueDecoded['values'];
+                                                }
+                                                // Check for "all" mode (select all options)
+                                                if (isset($defaultValueDecoded['mode']) && $defaultValueDecoded['mode'] === 'all') {
+                                                    $defaultModeAll = true;
                                                 }
                                             } elseif ($defaultValueRaw && json_last_error() !== JSON_ERROR_NONE) {
                                                 // Not JSON, use as-is (legacy support)

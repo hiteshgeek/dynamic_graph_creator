@@ -245,13 +245,15 @@ class FilterRenderer {
      * Render multi-select input (dropdown with checkboxes)
      */
     static renderMultiSelectInput(keyClean, inputId, options, defaultValue, compact) {
-        const defaultValues = Array.isArray(defaultValue) ? defaultValue :
-            (defaultValue ? defaultValue.split(',') : []);
+        // Handle '__all__' mode - select all options
+        const selectAll = defaultValue === '__all__';
+        const defaultValues = selectAll ? [] : (Array.isArray(defaultValue) ? defaultValue :
+            (defaultValue ? defaultValue.split(',') : []));
 
         const optionsHtml = options.map((opt, index) => {
             const value = opt.value !== undefined ? opt.value : opt;
             const label = opt.label !== undefined ? opt.label : value;
-            const isSelected = opt.is_selected || defaultValues.includes(String(value));
+            const isSelected = selectAll || opt.is_selected || defaultValues.includes(String(value));
             const optId = `multiselect-${keyClean}-${index}`;
 
             return `
@@ -268,11 +270,14 @@ class FilterRenderer {
             `;
         }).join('');
 
+        // Placeholder text based on selection
+        const placeholderText = selectAll ? 'All selected' : '-- Select multiple --';
+
         return `
             <div class="dropdown filter-multiselect-dropdown" data-filter-name="${keyClean}">
                 <button class="btn btn-outline-secondary dropdown-toggle filter-multiselect-trigger ${compact ? 'btn-sm' : ''}"
                     type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                    <span class="filter-multiselect-placeholder">-- Select multiple --</span>
+                    <span class="filter-multiselect-placeholder${selectAll ? ' has-selection' : ''}">${placeholderText}</span>
                 </button>
                 <div class="dropdown-menu filter-multiselect-options">
                     <div class="filter-multiselect-header">
@@ -293,13 +298,15 @@ class FilterRenderer {
      * Render checkbox group
      */
     static renderCheckboxInput(keyClean, options, defaultValue, isInline) {
-        const defaultValues = Array.isArray(defaultValue) ? defaultValue :
-            (defaultValue ? defaultValue.split(',') : []);
+        // Handle '__all__' mode - select all options
+        const selectAll = defaultValue === '__all__';
+        const defaultValues = selectAll ? [] : (Array.isArray(defaultValue) ? defaultValue :
+            (defaultValue ? defaultValue.split(',') : []));
 
         const optionsHtml = options.map((opt, index) => {
             const value = opt.value !== undefined ? opt.value : opt;
             const label = opt.label !== undefined ? opt.label : value;
-            const isSelected = opt.is_selected || defaultValues.includes(String(value));
+            const isSelected = selectAll || opt.is_selected || defaultValues.includes(String(value));
             const optId = `checkbox-${keyClean}-${index}`;
 
             return `
@@ -563,14 +570,21 @@ class FilterRenderer {
 
             // Update placeholder text
             const updatePlaceholder = () => {
+                const allCheckboxes = dropdown.querySelectorAll('.form-check-input');
                 const checked = dropdown.querySelectorAll('.form-check-input:checked');
                 const placeholder = trigger.querySelector('.filter-multiselect-placeholder');
                 if (checked.length === 0) {
                     placeholder.textContent = '-- Select multiple --';
+                    placeholder.classList.remove('has-selection');
+                } else if (checked.length === allCheckboxes.length) {
+                    placeholder.textContent = 'All selected';
+                    placeholder.classList.add('has-selection');
                 } else if (checked.length === 1) {
                     placeholder.textContent = checked[0].nextElementSibling.textContent;
+                    placeholder.classList.add('has-selection');
                 } else {
                     placeholder.textContent = `${checked.length} selected`;
+                    placeholder.classList.add('has-selection');
                 }
             };
 
@@ -848,6 +862,11 @@ class FilterRenderer {
             return rawDefaultValue;
         }
 
+        // Check for "none" mode - return empty value (no default selected)
+        if (parsed.mode === 'none') {
+            return (filterType === 'multi_select' || filterType === 'checkbox' || filterType === 'tokeninput') ? [] : '';
+        }
+
         // Extract value based on filter type
         switch (filterType) {
             case 'date_range':
@@ -859,6 +878,10 @@ class FilterRenderer {
             case 'multi_select':
             case 'checkbox':
             case 'tokeninput':
+                // Check for "all" mode - return special marker
+                if (parsed.mode === 'all') {
+                    return '__all__';
+                }
                 // Return array of values
                 return parsed.values || [];
 

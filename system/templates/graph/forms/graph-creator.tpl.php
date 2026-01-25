@@ -209,12 +209,17 @@ echo DGCHelper::renderPageHeader([
                                             // Extract actual value(s) from JSON structure
                                             $defaultValue = '';
                                             $defaultValues = array();
+                                            $defaultModeAll = false; // For multi-select: select all options
                                             if (is_array($defaultValueDecoded)) {
                                                 if (isset($defaultValueDecoded['value'])) {
                                                     $defaultValue = $defaultValueDecoded['value'];
                                                 }
                                                 if (isset($defaultValueDecoded['values']) && is_array($defaultValueDecoded['values'])) {
                                                     $defaultValues = $defaultValueDecoded['values'];
+                                                }
+                                                // Check for "all" mode (select all options)
+                                                if (isset($defaultValueDecoded['mode']) && $defaultValueDecoded['mode'] === 'all') {
+                                                    $defaultModeAll = true;
                                                 }
                                             } elseif ($defaultValueRaw && json_last_error() !== JSON_ERROR_NONE) {
                                                 // Not JSON, use as-is (legacy support)
@@ -291,10 +296,10 @@ echo DGCHelper::renderPageHeader([
                                                     </div>
 
                                                 <?php elseif ($filterType === 'multi_select'): ?>
-                                                    <?php $defaultCount = count($defaultValues); ?>
+                                                    <?php $defaultCount = $defaultModeAll ? count($options) : count($defaultValues); ?>
                                                     <div class="dropdown filter-multiselect-dropdown" data-filter-name="<?php echo htmlspecialchars($filterKeyClean); ?>">
                                                         <button class="btn btn-outline-secondary dropdown-toggle filter-multiselect-trigger" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                                                            <span class="filter-multiselect-placeholder"><?php echo $defaultCount > 0 ? $defaultCount . ' selected' : '-- Select multiple --'; ?></span>
+                                                            <span class="filter-multiselect-placeholder<?php echo $defaultCount > 0 ? ' has-selection' : ''; ?>"><?php echo $defaultModeAll ? 'All selected' : ($defaultCount > 0 ? $defaultCount . ' selected' : '-- Select multiple --'); ?></span>
                                                         </button>
                                                         <div class="dropdown-menu filter-multiselect-options">
                                                             <div class="filter-multiselect-header">
@@ -308,7 +313,7 @@ echo DGCHelper::renderPageHeader([
                                                             <?php foreach ($options as $index => $opt):
                                                                 $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                                                 $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
-                                                                $isSelected = (is_array($opt) && isset($opt['is_selected']) && $opt['is_selected']) || in_array($value, $defaultValues);
+                                                                $isSelected = $defaultModeAll || (is_array($opt) && isset($opt['is_selected']) && $opt['is_selected']) || in_array($value, $defaultValues);
                                                                 $optId = 'multiselect-' . $filterKeyClean . '-' . $index;
                                                             ?>
                                                                 <div class="dropdown-item filter-multiselect-option">
@@ -326,7 +331,7 @@ echo DGCHelper::renderPageHeader([
                                                         <?php foreach ($options as $index => $opt):
                                                             $value = is_array($opt) ? (isset($opt['value']) ? $opt['value'] : $opt[0]) : $opt;
                                                             $label = is_array($opt) ? (isset($opt['label']) ? $opt['label'] : (isset($opt[1]) ? $opt[1] : $value)) : $opt;
-                                                            $isSelected = (is_array($opt) && isset($opt['is_selected']) && $opt['is_selected']) || in_array($value, $defaultValues);
+                                                            $isSelected = $defaultModeAll || (is_array($opt) && isset($opt['is_selected']) && $opt['is_selected']) || in_array($value, $defaultValues);
                                                             $optId = 'checkbox-' . $filterKeyClean . '-' . $index;
                                                         ?>
                                                             <div class="form-check">

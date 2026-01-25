@@ -254,6 +254,27 @@ echo DGCHelper::renderPageHeader([
                                     </div>
                                 <?php endif; ?>
 
+                                <!-- Info: Required vs Mandatory -->
+                                <div class="filter-settings-info">
+                                    <div class="info-header" data-bs-toggle="collapse" data-bs-target="#required-vs-mandatory-info">
+                                        <i class="fas fa-info-circle text-info"></i>
+                                        <span>Required vs Mandatory</span>
+                                        <i class="fas fa-chevron-down info-toggle-icon"></i>
+                                    </div>
+                                    <div class="collapse" id="required-vs-mandatory-info">
+                                        <div class="info-content">
+                                            <div class="info-item">
+                                                <strong><i class="fas fa-asterisk text-danger"></i> Required Field</strong>
+                                                <p>Controls behavior at <em>runtime</em>. Users cannot leave this filter empty - if cleared, it reverts to the default value.</p>
+                                            </div>
+                                            <div class="info-item">
+                                                <strong><i class="fas fa-lock text-warning"></i> Mandatory for Widget Types</strong>
+                                                <p>Controls behavior at <em>design time</em>. The filter placeholder must be included in the widget's SQL query.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <?php
                                 $dataSource = $filter ? $filter->getDataSource() : 'static';
                                 $typesWithOptions = array('select', 'checkbox', 'radio', 'tokeninput');

@@ -143,7 +143,12 @@ export default class DataFilterFormPage {
         if (requiredCheckbox) {
             requiredCheckbox.addEventListener('change', () => this.updateDefaultValueSection());
             // Initialize default value section on page load
-            setTimeout(() => this.updateDefaultValueSection(), 100);
+            // Then re-initialize change tracking AFTER default value UI is rendered
+            setTimeout(() => {
+                this.updateDefaultValueSection();
+                // Re-save initial state now that default value UI is rendered
+                this.savedState = this.getCurrentState();
+            }, 100);
         }
 
         // Filter key change - update date range placeholder examples
@@ -909,6 +914,13 @@ export default class DataFilterFormPage {
             return;
         }
 
+        // Validate specific values mode has at least one value selected
+        const defaultValueError = this.validateDefaultValue(defaultValue);
+        if (defaultValueError) {
+            Toast.error(defaultValueError);
+            return;
+        }
+
         const data = {
             filter_id: document.getElementById('filter-id').value,
             filter_key: filterKey,
@@ -1270,8 +1282,9 @@ export default class DataFilterFormPage {
      * Initialize change tracking
      */
     initChangeTracking() {
-        // Save initial state
-        this.savedState = this.getCurrentState();
+        // Save initial state using original stored default value
+        // (not the dynamically generated one which may differ)
+        this.savedState = this.getCurrentState(true);
 
         // Track changes on form inputs
         const form = document.getElementById('filter-form');
@@ -1323,20 +1336,30 @@ export default class DataFilterFormPage {
 
     /**
      * Get current form state for comparison
+     * @param {boolean} useOriginalDefault - If true, use the original stored default value instead of generating
      */
-    getCurrentState() {
+    getCurrentState(useOriginalDefault = false) {
         // Get mandatory widget types
         const mandatoryWidgetTypes = [];
         document.querySelectorAll('.mandatory-widget-type:checked').forEach(checkbox => {
             mandatoryWidgetTypes.push(parseInt(checkbox.value));
         });
 
+        // For initial state, use the original stored value to avoid false positives
+        let defaultValue;
+        if (useOriginalDefault) {
+            const section = document.getElementById('default-value-section');
+            defaultValue = section?.dataset.existingValue || '';
+        } else {
+            defaultValue = this.getDefaultValueJson() || '';
+        }
+
         return {
             filterKey: document.getElementById('filter-key')?.value || '',
             filterLabel: document.getElementById('filter-label')?.value || '',
             filterType: document.getElementById('filter-type')?.value || '',
             dataSource: document.getElementById('data-source')?.value || '',
-            defaultValue: this.getDefaultValueJson() || '',
+            defaultValue: defaultValue,
             isRequired: document.getElementById('filter-required')?.checked || false,
             isSystem: document.getElementById('filter-is-system')?.checked || false,
             mandatoryWidgetTypes: mandatoryWidgetTypes.sort().join(','),
@@ -1607,6 +1630,8 @@ export default class DataFilterFormPage {
 
         // Check if select type has "Allow multiple selection" checked
         const isMultipleSelect = filterType === 'select' && document.getElementById('filter-multiple')?.checked;
+        // Check if filter is required (to show/hide "Block Until Selected" option)
+        const isRequired = document.getElementById('filter-required')?.checked || false;
 
         switch (filterType) {
             case 'text':
@@ -1619,25 +1644,27 @@ export default class DataFilterFormPage {
                 html = this.renderDateDefaultInput(parsedValue);
                 break;
             case 'date_range':
-                html = this.renderDateRangeDefaultInput(parsedValue, false);
+                html = this.renderDateRangeDefaultInput(parsedValue, false, isRequired);
                 break;
             case 'main_datepicker':
-                html = this.renderDateRangeDefaultInput(parsedValue, true);
+                html = this.renderDateRangeDefaultInput(parsedValue, true, isRequired);
                 break;
             case 'select':
                 // Use multi-select input if "Allow multiple selection" is checked
                 if (isMultipleSelect) {
-                    html = this.renderMultiSelectDefaultInput(parsedValue);
+                    html = this.renderMultiSelectDefaultInput(parsedValue, isRequired);
                 } else {
-                    html = this.renderSelectDefaultInput(parsedValue);
+                    html = this.renderSelectDefaultInput(parsedValue, isRequired);
                 }
                 break;
             case 'radio':
-                html = this.renderSelectDefaultInput(parsedValue);
+                html = this.renderSelectDefaultInput(parsedValue, isRequired);
                 break;
             case 'multi_select':
+                html = this.renderMultiSelectDefaultInput(parsedValue, isRequired);
+                break;
             case 'checkbox':
-                html = this.renderMultiSelectDefaultInput(parsedValue);
+                html = this.renderCheckboxDefaultInput(parsedValue, isRequired);
                 break;
             case 'tokeninput':
                 html = this.renderTokenInputDefault(parsedValue);
@@ -1677,7 +1704,7 @@ export default class DataFilterFormPage {
     /**
      * Render date range default value input with mode selection
      */
-    renderDateRangeDefaultInput(parsedValue, showPresets = false) {
+    renderDateRangeDefaultInput(parsedValue, showPresets = false, isRequired = false) {
         const mode = parsedValue?.mode || 'select_all';
         const preset = parsedValue?.preset || 'Last 7 Days';
         const fromDate = parsedValue?.from || '';
@@ -1739,6 +1766,11 @@ export default class DataFilterFormPage {
                         </div>
                     </div>
                 </div>
+        `;
+
+        // Only show "Block Until Selected" when filter is required
+        if (isRequired) {
+            html += `
                 <div class="form-check">
                     <input class="form-check-input default-mode-radio" type="radio" name="default-mode" value="block" id="mode-block" ${mode === 'block' ? 'checked' : ''}>
                     <label class="form-check-label" for="mode-block">
@@ -1746,8 +1778,10 @@ export default class DataFilterFormPage {
                         <small class="d-block text-muted">Query won't run until user selects a date range</small>
                     </label>
                 </div>
-            </div>
-        `;
+            `;
+        }
+
+        html += `</div>`;
 
         return html;
     }
@@ -1755,9 +1789,9 @@ export default class DataFilterFormPage {
     /**
      * Render select/radio default value input
      */
-    renderSelectDefaultInput(parsedValue) {
+    renderSelectDefaultInput(parsedValue, isRequired = false) {
         const selectedValue = parsedValue?.value || '';
-        const mode = parsedValue?.mode || 'value';
+        const mode = parsedValue?.mode || (isRequired ? 'value' : 'none');
         const options = this.getCurrentOptions();
 
         // Find selected option for display
@@ -1766,6 +1800,22 @@ export default class DataFilterFormPage {
 
         let html = `
             <div class="default-value-mode-options">
+        `;
+
+        // Show "No Default" option only when filter is NOT required
+        if (!isRequired) {
+            html += `
+                <div class="form-check">
+                    <input class="form-check-input default-select-mode-radio" type="radio" name="default-select-mode" value="none" id="select-mode-none" ${mode === 'none' ? 'checked' : ''}>
+                    <label class="form-check-label" for="select-mode-none">
+                        <strong>No Default</strong>
+                        <small class="d-block text-muted">No option will be pre-selected by default</small>
+                    </label>
+                </div>
+            `;
+        }
+
+        html += `
                 <div class="form-check">
                     <input class="form-check-input default-select-mode-radio" type="radio" name="default-select-mode" value="value" id="select-mode-value" ${mode === 'value' ? 'checked' : ''}>
                     <label class="form-check-label" for="select-mode-value">
@@ -1812,8 +1862,11 @@ export default class DataFilterFormPage {
             `;
         }
 
-        html += `
-                </div>
+        html += `</div>`;
+
+        // Only show "Block Until Selected" when filter is required
+        if (isRequired) {
+            html += `
                 <div class="form-check mt-2">
                     <input class="form-check-input default-select-mode-radio" type="radio" name="default-select-mode" value="block" id="select-mode-block" ${mode === 'block' ? 'checked' : ''}>
                     <label class="form-check-label" for="select-mode-block">
@@ -1821,18 +1874,20 @@ export default class DataFilterFormPage {
                         <small class="d-block text-muted">Query won't run until user selects an option</small>
                     </label>
                 </div>
-            </div>
-        `;
+            `;
+        }
+
+        html += `</div>`;
 
         return html;
     }
 
     /**
-     * Render multi-select/checkbox default value input
+     * Render multi-select default value input (dropdown style)
      */
-    renderMultiSelectDefaultInput(parsedValue) {
+    renderMultiSelectDefaultInput(parsedValue, isRequired = false) {
         const selectedValues = parsedValue?.values || [];
-        const mode = parsedValue?.mode || 'values';
+        const mode = parsedValue?.mode || (isRequired ? 'values' : 'none');
         const options = this.getCurrentOptions();
 
         // Calculate placeholder text
@@ -1841,10 +1896,33 @@ export default class DataFilterFormPage {
 
         let html = `
             <div class="default-value-mode-options">
+        `;
+
+        // Show "None Selected" option only when filter is NOT required
+        if (!isRequired) {
+            html += `
+                <div class="form-check">
+                    <input class="form-check-input default-multi-mode-radio" type="radio" name="default-multi-mode" value="none" id="multi-mode-none" ${mode === 'none' ? 'checked' : ''}>
+                    <label class="form-check-label" for="multi-mode-none">
+                        <strong>None Selected</strong>
+                        <small class="d-block text-muted">No options will be pre-selected by default</small>
+                    </label>
+                </div>
+            `;
+        }
+
+        html += `
+                <div class="form-check">
+                    <input class="form-check-input default-multi-mode-radio" type="radio" name="default-multi-mode" value="all" id="multi-mode-all" ${mode === 'all' ? 'checked' : ''}>
+                    <label class="form-check-label" for="multi-mode-all">
+                        <strong>Select All</strong>
+                        <small class="d-block text-muted">All options will be pre-selected (includes future additions)</small>
+                    </label>
+                </div>
                 <div class="form-check">
                     <input class="form-check-input default-multi-mode-radio" type="radio" name="default-multi-mode" value="values" id="multi-mode-values" ${mode === 'values' ? 'checked' : ''}>
                     <label class="form-check-label" for="multi-mode-values">
-                        <strong>Default Values</strong>
+                        <strong>Specific Values</strong>
                         <small class="d-block text-muted">Pre-select specific options</small>
                     </label>
                 </div>
@@ -1885,8 +1963,11 @@ export default class DataFilterFormPage {
             `;
         }
 
-        html += `
-                </div>
+        html += `</div>`;
+
+        // Only show "Block Until Selected" when filter is required
+        if (isRequired) {
+            html += `
                 <div class="form-check mt-2">
                     <input class="form-check-input default-multi-mode-radio" type="radio" name="default-multi-mode" value="block" id="multi-mode-block" ${mode === 'block' ? 'checked' : ''}>
                     <label class="form-check-label" for="multi-mode-block">
@@ -1894,8 +1975,97 @@ export default class DataFilterFormPage {
                         <small class="d-block text-muted">Query won't run until user selects at least one option</small>
                     </label>
                 </div>
-            </div>
+            `;
+        }
+
+        html += `</div>`;
+
+        return html;
+    }
+
+    /**
+     * Render checkbox default value input (inline checkboxes, not dropdown)
+     */
+    renderCheckboxDefaultInput(parsedValue, isRequired = false) {
+        const selectedValues = parsedValue?.values || [];
+        const mode = parsedValue?.mode || (isRequired ? 'values' : 'none');
+        const options = this.getCurrentOptions();
+
+        let html = `
+            <div class="default-value-mode-options">
         `;
+
+        // Show "None Selected" option only when filter is NOT required
+        if (!isRequired) {
+            html += `
+                <div class="form-check">
+                    <input class="form-check-input default-multi-mode-radio" type="radio" name="default-multi-mode" value="none" id="multi-mode-none" ${mode === 'none' ? 'checked' : ''}>
+                    <label class="form-check-label" for="multi-mode-none">
+                        <strong>None Selected</strong>
+                        <small class="d-block text-muted">No options will be pre-selected by default</small>
+                    </label>
+                </div>
+            `;
+        }
+
+        html += `
+                <div class="form-check">
+                    <input class="form-check-input default-multi-mode-radio" type="radio" name="default-multi-mode" value="all" id="multi-mode-all" ${mode === 'all' ? 'checked' : ''}>
+                    <label class="form-check-label" for="multi-mode-all">
+                        <strong>Select All</strong>
+                        <small class="d-block text-muted">All options will be pre-selected (includes future additions)</small>
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input default-multi-mode-radio" type="radio" name="default-multi-mode" value="values" id="multi-mode-values" ${mode === 'values' ? 'checked' : ''}>
+                    <label class="form-check-label" for="multi-mode-values">
+                        <strong>Specific Values</strong>
+                        <small class="d-block text-muted">Pre-select specific options</small>
+                    </label>
+                </div>
+                <div class="default-multi-value-wrapper ms-4 mt-2" id="multi-value-wrapper" style="${mode === 'values' ? '' : 'display:none;'}">
+        `;
+
+        if (options.length === 0) {
+            html += `<div class="alert alert-info mb-0">
+                <i class="fas fa-info-circle"></i>
+                Configure filter options first (static or query), then return here to set default.
+            </div>`;
+        } else {
+            // Inline checkboxes (not dropdown)
+            html += `
+                <div class="default-checkbox-inline">
+                    <div class="default-checkbox-actions">
+                        <button type="button" class="btn btn-link btn-sm p-0 default-cb-select-all">All</button>
+                        <span class="divider">|</span>
+                        <button type="button" class="btn btn-link btn-sm p-0 default-cb-select-none">None</button>
+                    </div>
+                    ${options.map((opt, index) => `
+                        <div class="form-check">
+                            <input class="form-check-input default-multi-checkbox" type="checkbox" value="${this.escapeHtml(opt.value)}" id="default-cb-${index}" ${selectedValues.includes(opt.value) ? 'checked' : ''}>
+                            <label class="form-check-label" for="default-cb-${index}">${this.escapeHtml(opt.label)}</label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        html += `</div>`;
+
+        // Only show "Block Until Selected" when filter is required
+        if (isRequired) {
+            html += `
+                <div class="form-check mt-2">
+                    <input class="form-check-input default-multi-mode-radio" type="radio" name="default-multi-mode" value="block" id="multi-mode-block" ${mode === 'block' ? 'checked' : ''}>
+                    <label class="form-check-label" for="multi-mode-block">
+                        <strong>Block Until Selected</strong>
+                        <small class="d-block text-muted">Query won't run until user selects at least one option</small>
+                    </label>
+                </div>
+            `;
+        }
+
+        html += `</div>`;
 
         return html;
     }
@@ -1964,6 +2134,8 @@ export default class DataFilterFormPage {
                 if (valueWrapper) {
                     valueWrapper.style.display = mode === 'value' ? '' : 'none';
                 }
+                // Sync preview when mode changes (for "none" mode)
+                this.syncDefaultToPreview();
             });
         });
 
@@ -1976,6 +2148,8 @@ export default class DataFilterFormPage {
                 if (valueWrapper) {
                     valueWrapper.style.display = mode === 'values' ? '' : 'none';
                 }
+                // Sync preview when mode changes (for "all" mode)
+                this.syncDefaultToPreview();
             });
         });
 
@@ -1997,6 +2171,12 @@ export default class DataFilterFormPage {
         const multiselectDropdown = section.querySelector('.default-multiselect-dropdown');
         if (multiselectDropdown) {
             this.bindDefaultMultiselectDropdown(multiselectDropdown);
+        }
+
+        // Initialize inline checkbox All/None buttons (for checkbox filter type)
+        const inlineCheckboxContainer = section.querySelector('.default-checkbox-inline');
+        if (inlineCheckboxContainer) {
+            this.bindInlineCheckboxActions(inlineCheckboxContainer);
         }
 
         // Initialize date pickers if present
@@ -2124,6 +2304,40 @@ export default class DataFilterFormPage {
     }
 
     /**
+     * Bind event handlers for inline checkbox All/None buttons (checkbox filter type)
+     */
+    bindInlineCheckboxActions(container) {
+        const selectAllBtn = container.querySelector('.default-cb-select-all');
+        const selectNoneBtn = container.querySelector('.default-cb-select-none');
+        const checkboxes = container.querySelectorAll('.default-multi-checkbox');
+
+        // Bind checkbox changes
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                this.syncDefaultToPreview();
+            });
+        });
+
+        // Select All button
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                checkboxes.forEach(cb => cb.checked = true);
+                this.syncDefaultToPreview();
+            });
+        }
+
+        // Select None button
+        if (selectNoneBtn) {
+            selectNoneBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                checkboxes.forEach(cb => cb.checked = false);
+                this.syncDefaultToPreview();
+            });
+        }
+    }
+
+    /**
      * Sync default value selections to filter preview
      */
     syncDefaultToPreview() {
@@ -2142,37 +2356,75 @@ export default class DataFilterFormPage {
         const isMultiSelect = isMultiple || filterType === 'multi_select' || filterType === 'checkbox' || filterType === 'tokeninput';
 
         if (isMultiSelect) {
-            // Multiselect: sync checked values
+            // Check mode selection
+            const multiMode = document.querySelector('input[name="default-multi-mode"]:checked')?.value || 'values';
+            const isAllMode = multiMode === 'all';
+            const isNoneMode = multiMode === 'none';
+
+            // Get selected values from default section (only when in 'values' mode)
             const defaultCheckboxes = defaultSection.querySelectorAll('.default-multi-checkbox');
-            const selectedValues = Array.from(defaultCheckboxes)
+            const selectedValues = isNoneMode ? [] : Array.from(defaultCheckboxes)
                 .filter(cb => cb.checked)
                 .map(cb => cb.value);
 
-            // Apply to preview multiselect - find the preview dropdown specifically
+            // Apply to preview multiselect dropdown (for multi_select filter type)
             const previewDropdown = previewSection.querySelector('.filter-multiselect-dropdown');
             if (previewDropdown) {
                 const previewCheckboxes = previewDropdown.querySelectorAll('.filter-multiselect-option input[type="checkbox"]');
-                previewCheckboxes.forEach(cb => {
-                    cb.checked = selectedValues.includes(cb.value);
-                });
+
+                if (isAllMode) {
+                    // Select all checkboxes in preview
+                    previewCheckboxes.forEach(cb => {
+                        cb.checked = true;
+                    });
+                } else {
+                    previewCheckboxes.forEach(cb => {
+                        cb.checked = selectedValues.includes(cb.value);
+                    });
+                }
 
                 // Update preview placeholder
                 const placeholder = previewDropdown.querySelector('.filter-multiselect-placeholder');
                 if (placeholder) {
-                    const checkedCount = selectedValues.length;
+                    const checkedCount = Array.from(previewCheckboxes).filter(cb => cb.checked).length;
                     if (checkedCount === 0) {
                         placeholder.textContent = '-- Select multiple --';
                         placeholder.classList.remove('has-selection');
+                    } else if (isAllMode) {
+                        placeholder.textContent = 'All selected';
+                        placeholder.classList.add('has-selection');
                     } else {
                         placeholder.textContent = `${checkedCount} selected`;
                         placeholder.classList.add('has-selection');
                     }
                 }
             }
+
+            // Apply to preview checkbox group (for checkbox filter type)
+            // Preview uses .filter-preview-checkboxes, dashboard uses .filter-checkbox-group
+            const previewCheckboxGroup = previewSection.querySelector('.filter-preview-checkboxes, .filter-checkbox-group');
+            if (previewCheckboxGroup) {
+                const previewCheckboxes = previewCheckboxGroup.querySelectorAll('input[type="checkbox"]');
+
+                if (isAllMode) {
+                    // Select all checkboxes in preview
+                    previewCheckboxes.forEach(cb => {
+                        cb.checked = true;
+                    });
+                } else {
+                    previewCheckboxes.forEach(cb => {
+                        cb.checked = selectedValues.includes(cb.value);
+                    });
+                }
+            }
         } else {
-            // Single select: sync selected value
+            // Single select: check mode first
+            const selectMode = document.querySelector('input[name="default-select-mode"]:checked')?.value || 'value';
+            const isNoneMode = selectMode === 'none';
+
+            // Get selected value from default section (empty if none mode)
             const defaultDropdown = defaultSection.querySelector('.default-select-dropdown');
-            const selectedValue = defaultDropdown?.querySelector('.filter-select-trigger')?.dataset.value || '';
+            const selectedValue = isNoneMode ? '' : (defaultDropdown?.querySelector('.filter-select-trigger')?.dataset.value || '');
 
             // Apply to preview single select
             const previewDropdown = previewSection.querySelector('.filter-select-dropdown');
@@ -2352,15 +2604,21 @@ export default class DataFilterFormPage {
                 // Check if "Allow multiple selection" is checked
                 if (isMultipleSelect) {
                     const multiMode = document.querySelector('input[name="default-multi-mode"]:checked')?.value || 'values';
-                    if (multiMode === 'block') {
+                    if (multiMode === 'none') {
+                        defaultValue = { mode: 'none' };
+                    } else if (multiMode === 'block') {
                         defaultValue = { mode: 'block' };
+                    } else if (multiMode === 'all') {
+                        defaultValue = { mode: 'all' };
                     } else {
                         const checkboxes = document.querySelectorAll('.default-multi-checkbox:checked');
                         defaultValue = { mode: 'values', values: Array.from(checkboxes).map(cb => cb.value) };
                     }
                 } else {
                     const selectMode = document.querySelector('input[name="default-select-mode"]:checked')?.value || 'value';
-                    if (selectMode === 'block') {
+                    if (selectMode === 'none') {
+                        defaultValue = { mode: 'none' };
+                    } else if (selectMode === 'block') {
                         defaultValue = { mode: 'block' };
                     } else {
                         defaultValue = { mode: 'value', value: document.getElementById('default-value-select')?.value || '' };
@@ -2370,7 +2628,9 @@ export default class DataFilterFormPage {
 
             case 'radio':
                 const radioMode = document.querySelector('input[name="default-select-mode"]:checked')?.value || 'value';
-                if (radioMode === 'block') {
+                if (radioMode === 'none') {
+                    defaultValue = { mode: 'none' };
+                } else if (radioMode === 'block') {
                     defaultValue = { mode: 'block' };
                 } else {
                     defaultValue = { mode: 'value', value: document.getElementById('default-value-select')?.value || '' };
@@ -2380,8 +2640,12 @@ export default class DataFilterFormPage {
             case 'multi_select':
             case 'checkbox':
                 const cbMode = document.querySelector('input[name="default-multi-mode"]:checked')?.value || 'values';
-                if (cbMode === 'block') {
+                if (cbMode === 'none') {
+                    defaultValue = { mode: 'none' };
+                } else if (cbMode === 'block') {
                     defaultValue = { mode: 'block' };
+                } else if (cbMode === 'all') {
+                    defaultValue = { mode: 'all' };
                 } else {
                     const checkboxes = document.querySelectorAll('.default-multi-checkbox:checked');
                     defaultValue = { mode: 'values', values: Array.from(checkboxes).map(cb => cb.value) };
@@ -2410,15 +2674,21 @@ export default class DataFilterFormPage {
         try {
             const parsed = JSON.parse(defaultValueJson);
 
+            // None mode (no default) is valid for non-required filters
+            if (parsed.mode === 'none') return true;
+
             // Block mode is always valid
             if (parsed.mode === 'block') return true;
+
+            // All mode (select all) is always valid
+            if (parsed.mode === 'all') return true;
 
             // Check for value-based defaults
             if (parsed.value !== undefined) {
                 return parsed.value !== '';
             }
 
-            // Check for values array
+            // Check for values array (mode === 'values' must have at least one value)
             if (parsed.values !== undefined) {
                 return Array.isArray(parsed.values) && parsed.values.length > 0;
             }
@@ -2439,6 +2709,36 @@ export default class DataFilterFormPage {
             return false;
         } catch (e) {
             return false;
+        }
+    }
+
+    /**
+     * Validate default value and return specific error message if invalid
+     * @returns {string|null} Error message or null if valid
+     */
+    validateDefaultValue(defaultValueJson) {
+        if (!defaultValueJson) return null;
+
+        try {
+            const parsed = JSON.parse(defaultValueJson);
+
+            // Check if "Specific Values" mode is selected but no values are chosen
+            if (parsed.mode === 'values') {
+                if (!parsed.values || !Array.isArray(parsed.values) || parsed.values.length === 0) {
+                    return 'Please select at least one value when using "Specific Values" mode';
+                }
+            }
+
+            // Check if "Default Value" mode for single select but no value is chosen
+            if (parsed.mode === 'value') {
+                if (!parsed.value || parsed.value === '') {
+                    return 'Please select a default value';
+                }
+            }
+
+            return null;
+        } catch (e) {
+            return null;
         }
     }
 }

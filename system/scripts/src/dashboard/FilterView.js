@@ -209,7 +209,15 @@ export class FilterView {
 
             case 'multi_select':
             case 'checkbox':
-                if (defaultValue.values && defaultValue.values.length > 0) {
+                if (defaultValue.mode === 'all') {
+                    // Select all available options
+                    const allValues = this.getAllOptionsForFilter(item);
+                    if (allValues.length > 0) {
+                        const filterValues = {};
+                        filterValues['::' + filterKey] = allValues;
+                        this.applyFilterValuesToItem(item, filterKey, filterValues);
+                    }
+                } else if (defaultValue.values && defaultValue.values.length > 0) {
                     const filterValues = {};
                     filterValues['::' + filterKey] = defaultValue.values;
                     this.applyFilterValuesToItem(item, filterKey, filterValues);
@@ -693,6 +701,35 @@ export class FilterView {
         }
 
         return null;
+    }
+
+    /**
+     * Get all available option values for a multi-select filter
+     * @param {HTMLElement} item - Filter item element
+     * @returns {Array} Array of all option values
+     */
+    getAllOptionsForFilter(item) {
+        const values = [];
+
+        // Multi-select dropdown (checkboxes)
+        const multiSelectOptions = item.querySelectorAll('.filter-multiselect-options input[type="checkbox"]');
+        if (multiSelectOptions.length > 0) {
+            multiSelectOptions.forEach(cb => {
+                if (cb.value) values.push(cb.value);
+            });
+            return values;
+        }
+
+        // Checkbox group
+        const checkboxOptions = item.querySelectorAll('.filter-checkbox-group input[type="checkbox"]');
+        if (checkboxOptions.length > 0) {
+            checkboxOptions.forEach(cb => {
+                if (cb.value) values.push(cb.value);
+            });
+            return values;
+        }
+
+        return values;
     }
 
     /**
